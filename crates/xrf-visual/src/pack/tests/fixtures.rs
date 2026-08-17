@@ -6,8 +6,8 @@
 
 use xrf_db::{
   OgfBonesChunk, OgfBox, OgfChildrenChunk, OgfDescriptionChunk, OgfFile, OgfGeometry, OgfHeaderChunk,
-  OgfKinematicsChunk, OgfMotion, OgfSlideWindow, OgfSphere, OgfSwiDataChunk, OgfTextureChunk, OgfVertex,
-  OgfVertexLink, OmfMotionsChunk, Vector3d,
+  OgfKinematicsChunk, OgfMotion, OgfSlideWindow, OgfSphere, OgfSwiDataChunk, OgfTextureChunk, OgfVertex, OgfVertexLink,
+  OmfMotionsChunk, Vector3d,
 };
 
 pub(crate) const MODEL_TYPE_SKELETON_ANIM: u8 = 3;

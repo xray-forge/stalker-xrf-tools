@@ -44,7 +44,10 @@ fn draws_the_whole_index_buffer_of_a_static_submesh() {
   assert_eq!(geometry.vertex_count, 3);
   assert_eq!(geometry.index_count, 3);
   assert_eq!(geometry.draw_range, VisualDrawRange { start: 0, count: 3 });
-  assert!(geometry.windows.is_empty(), "expect a static submesh to carry no detail table");
+  assert!(
+    geometry.windows.is_empty(),
+    "expect a static submesh to carry no detail table"
+  );
 }
 
 #[test]
@@ -108,7 +111,11 @@ fn winds_each_triangle_in_place_so_detail_offsets_stay_valid() {
   let start: usize = geometry.draw_range.start as usize;
   let drawn: &[u16] = &indices[start..start + geometry.draw_range.count as usize];
 
-  assert_eq!(drawn, &[0, 4, 1, 1, 5, 2], "expect the fine triangles, wound the other way");
+  assert_eq!(
+    drawn,
+    &[0, 4, 1, 1, 5, 2],
+    "expect the fine triangles, wound the other way"
+  );
   assert_eq!(
     &indices[0..6],
     &[0, 2, 1, 0, 3, 2],
@@ -129,8 +136,14 @@ fn mirrors_z_on_positions_and_normals() {
   let package: VisualPackage = VisualPacker::pack(&skeleton(vec![child]));
   let geometry: &VisualGeometry = only_geometry(&package);
 
-  assert_eq!(read_f32_section(&package.buffer, geometry.positions), vec![1.0, 2.0, -3.0]);
-  assert_eq!(read_f32_section(&package.buffer, geometry.normals), vec![0.0, 0.0, -1.0]);
+  assert_eq!(
+    read_f32_section(&package.buffer, geometry.positions),
+    vec![1.0, 2.0, -3.0]
+  );
+  assert_eq!(
+    read_f32_section(&package.buffer, geometry.normals),
+    vec![0.0, 0.0, -1.0]
+  );
 }
 
 #[test]
@@ -246,10 +259,8 @@ fn has_no_computed_bounds_when_nothing_packed() {
 #[test]
 fn keeps_packing_after_a_skipped_child() {
   // One broken piece must not hide the rest of a model, which is the reason a failure is a value here.
-  let package: VisualPackage = VisualPacker::pack(&skeleton(vec![
-    visual(MODEL_TYPE_GEOMDEF_ST),
-    static_triangle_child(),
-  ]));
+  let package: VisualPackage =
+    VisualPacker::pack(&skeleton(vec![visual(MODEL_TYPE_GEOMDEF_ST), static_triangle_child()]));
 
   assert_eq!(package.description.submeshes.len(), 2);
   assert!(package.description.submeshes[0].skipped_reason().is_some());
@@ -382,10 +393,7 @@ fn skips_a_child_whose_vertex_format_has_no_known_layout() {
     ..visual(MODEL_TYPE_GEOMDEF_ST)
   };
 
-  assert_eq!(
-    skipped_reason(child),
-    "Vertex format 0xdeadbeef has no known layout"
-  );
+  assert_eq!(skipped_reason(child), "Vertex format 0xdeadbeef has no known layout");
 }
 
 #[test]
@@ -427,7 +435,10 @@ fn skips_a_child_whose_index_count_is_not_whole_triangles() {
     ..visual(MODEL_TYPE_GEOMDEF_ST)
   };
 
-  assert_eq!(skipped_reason(child), "Index count 4 is not a whole number of triangles");
+  assert_eq!(
+    skipped_reason(child),
+    "Index count 4 is not a whole number of triangles"
+  );
 }
 
 #[test]
@@ -485,14 +496,7 @@ fn ignores_an_out_of_range_index_outside_the_drawn_range() {
   let child: OgfFile = OgfFile {
     geometry: Some(geometry(
       (0..6)
-        .map(|index| {
-          vertex(
-            vector(index as f32, 0.0, 0.0),
-            vector(0.0, 0.0, 1.0),
-            0.0,
-            0.0,
-          )
-        })
+        .map(|index| vertex(vector(index as f32, 0.0, 0.0), vector(0.0, 0.0, 1.0), 0.0, 0.0))
         .collect(),
       vec![99, 98, 97, 0, 2, 3, 0, 1, 4, 1, 2, 5],
     )),

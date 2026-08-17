@@ -23,7 +23,7 @@ impl VisualBufferBuilder {
   }
 
   pub fn push_f32_section(&mut self, values: &[f32]) -> VisualSection {
-    self.push_section(values.len() * size_of::<f32>(), |buffer| {
+    self.push_section(size_of_val(values), |buffer| {
       for value in values {
         buffer.extend_from_slice(&value.to_le_bytes());
       }
@@ -31,7 +31,7 @@ impl VisualBufferBuilder {
   }
 
   pub fn push_u16_section(&mut self, values: &[u16]) -> VisualSection {
-    self.push_section(values.len() * size_of::<u16>(), |buffer| {
+    self.push_section(size_of_val(values), |buffer| {
       for value in values {
         buffer.extend_from_slice(&value.to_le_bytes());
       }

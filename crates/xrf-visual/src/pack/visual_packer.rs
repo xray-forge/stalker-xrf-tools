@@ -164,7 +164,7 @@ impl VisualPacker {
       return Err(VisualSkip::malformed("Index chunk is empty"));
     }
 
-    if indices.len() % 3 != 0 {
+    if !indices.len().is_multiple_of(3) {
       return Err(VisualSkip::malformed(format!(
         "Index count {} is not a whole number of triangles",
         indices.len()

@@ -42,8 +42,14 @@ fn aligns_every_section_to_four_bytes() {
 
   let trailing: VisualSection = builder.push_f32_section(&[2.0]);
 
-  assert_eq!(positions.byte_offset, 8, "expect the six byte section to be padded to eight");
-  assert_eq!(trailing.byte_offset, 16, "expect the two byte section to be padded to four");
+  assert_eq!(
+    positions.byte_offset, 8,
+    "expect the six byte section to be padded to eight"
+  );
+  assert_eq!(
+    trailing.byte_offset, 16,
+    "expect the two byte section to be padded to four"
+  );
   assert_eq!(positions.byte_offset % 4, 0);
   assert_eq!(trailing.byte_offset % 4, 0);
 }
