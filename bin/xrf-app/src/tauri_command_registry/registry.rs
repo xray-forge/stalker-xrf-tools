@@ -66,6 +66,7 @@ macro_rules! for_each_tauri_command_domain {
       // the Specta collection.
       @raw {
         read_geometry(source: "VisualSource") => crate::visuals::commands::read_geometry::visuals_read_geometry,
+        read_texture(source: "VisualSource", reference: "string", fallbackRoot: "string | null") => crate::visuals::commands::read_texture::visuals_read_texture,
       }
       translations => "translations" {
         close_project => crate::translations::commands::close_project::translations_close_project,

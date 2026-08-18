@@ -1,7 +1,11 @@
+use std::path::Path;
 use std::sync::Mutex;
 
 use serde::Serialize;
 use xrf_visual::{VisualDescription, VisualPackage};
+
+use crate::visuals::textures::submesh_texture::SubmeshTexture;
+use crate::visuals::textures::texture_resolver::VisualTextureResolver;
 
 /// The visual the viewer currently points at, and its packed bytes.
 ///
@@ -9,14 +13,19 @@ use xrf_visual::{VisualDescription, VisualPackage};
 /// without it the viewer would come back empty while the window still says a model is open. Loading
 /// itself is not stateful - both commands take the source they act on - so this only ever answers what
 /// was selected, never gates what can be read.
+///
+/// The resolver sits beside the selection rather than inside it because its value is the index cache it
+/// accumulates, which outlives any one model.
 pub struct VisualState {
   pub selected: Mutex<Option<SelectedVisual>>,
+  pub textures: Mutex<VisualTextureResolver>,
 }
 
 impl VisualState {
   pub fn new() -> Self {
     Self {
       selected: Mutex::new(None),
+      textures: Mutex::new(VisualTextureResolver::new()),
     }
   }
 }
@@ -24,6 +33,8 @@ impl VisualState {
 pub struct SelectedVisual {
   pub source: VisualSource,
   pub package: VisualPackage,
+  /// Resolution outcome per submesh, decided at open so `read_texture` is a lookup rather than a search.
+  pub textures: Vec<SubmeshTexture>,
 }
 
 /// Where a visual is read from.
@@ -45,6 +56,15 @@ impl VisualSource {
       Self::File { path } => path,
     }
   }
+
+  /// Where this visual sits on disk, when it sits on disk at all.
+  ///
+  /// An archived visual will answer `None`, which is exactly the case the root chain's ambient link exists for.
+  pub fn physical_path(&self) -> Option<&Path> {
+    match self {
+      Self::File { path } => Some(Path::new(path)),
+    }
+  }
 }
 
 /// What the viewer is showing, paired with where it came from.
@@ -57,4 +77,5 @@ impl VisualSource {
 pub struct SelectedVisualDescription {
   pub source: VisualSource,
   pub description: VisualDescription,
+  pub textures: Vec<SubmeshTexture>,
 }

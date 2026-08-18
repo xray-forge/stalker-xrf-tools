@@ -6811,6 +6811,7 @@ dependencies = [
  "tauri-plugin-shell",
  "tauri-specta",
  "xrf-archive",
+ "xrf-assets",
  "xrf-db",
  "xrf-dds",
  "xrf-error",
@@ -6849,8 +6850,11 @@ name = "xrf-assets"
 version = "0.1.0"
 dependencies = [
  "log",
+ "serde",
+ "specta",
  "walkdir",
  "xrf-error",
+ "xrf-test-utils",
 ]
 
 [[package]]
@@ -6877,6 +6881,7 @@ dependencies = [
  "tokio",
  "walkdir",
  "xrf-archive",
+ "xrf-assets",
  "xrf-db",
  "xrf-dds",
  "xrf-error",

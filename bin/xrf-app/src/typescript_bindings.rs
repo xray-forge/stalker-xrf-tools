@@ -105,6 +105,17 @@ fn export_types(path: &Path, types: &Types) {
   normalize_generated_bindings(path).unwrap_or_else(|error| panic!("Failed to normalize {}: {error}", path.display()));
 }
 
+/// Generated type names inside a declared argument type, which are the only ones worth importing.
+///
+/// An argument type is written as TypeScript rather than as a name, so it may be a primitive, a union, or an array. Only
+/// the PascalCase identifiers in it come from the generated module; `string`, `number` and `null` are the language's own
+/// and importing them produces a file that does not parse.
+fn imported_types(argument_type: &str) -> impl Iterator<Item = &str> {
+  argument_type
+    .split(|character: char| !character.is_ascii_alphanumeric() && character != '_')
+    .filter(|token| token.starts_with(|character: char| character.is_ascii_uppercase()))
+}
+
 /// Write the wrappers for one domain's raw commands.
 ///
 /// Specta cannot collect a command returning `tauri::ipc::Response`, so these are generated from the registry instead of
@@ -117,7 +128,11 @@ fn export_raw_commands(path: &Path, plugin_name: &str, commands: &[(&str, &[(&st
 
   let referenced: BTreeSet<&str> = commands
     .iter()
-    .flat_map(|(_, arguments)| arguments.iter().map(|(_, argument_type)| *argument_type))
+    .flat_map(|(_, arguments)| {
+      arguments
+        .iter()
+        .flat_map(|(_, argument_type)| imported_types(argument_type))
+    })
     .collect();
 
   let mut contents: String = String::from(GENERATED_HEADER);
@@ -166,6 +181,7 @@ mod tests {
     let output = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../xrf-ui/src/core/bindings");
 
     export_types(&output.join("xrf-archive.ts"), &xrf_archive::typescript_bindings());
+    export_types(&output.join("xrf-assets.ts"), &xrf_assets::typescript_bindings());
     export_types(&output.join("xrf-db.ts"), &xrf_db::typescript_bindings());
     export_types(&output.join("xrf-error.ts"), &xrf_error::typescript_bindings());
     export_types(&output.join("xrf-export.ts"), &xrf_export::typescript_bindings());
