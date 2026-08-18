@@ -1,4 +1,4 @@
-import { SelectedVisualDescription } from "@/core/bindings/xrf-app-visuals";
+import { SelectedVisualDescription, SubmeshTexture } from "@/core/bindings/xrf-app-visuals";
 import {
   VisualBounds,
   VisualDescription,
@@ -178,6 +178,29 @@ export function mockSelectedVisual(overrides: Partial<SelectedVisualDescription>
   return {
     source: { kind: "file", path: "C:\\gamedata\\meshes\\wpn_ak74.ogf" },
     description: mockVisualDescription(),
+    textures: [],
+    ...overrides,
+  };
+}
+
+/**
+ * Creates a resolved submesh texture fixture.
+ *
+ * @param overrides - Field values to override.
+ * @returns A submesh texture fixture that resolved to a file.
+ */
+export function mockSubmeshTexture(overrides: Partial<SubmeshTexture> = {}): SubmeshTexture {
+  return {
+    reference: "wpn\\wpn_ak74",
+    resolution: {
+      kind: "resolved",
+      location: {
+        logicalPath: "textures\\wpn\\wpn_ak74.dds",
+        relativePath: "textures\\wpn\\wpn_ak74.dds",
+        root: "C:\\gamedata",
+      },
+    },
+    submeshIndex: 0,
     ...overrides,
   };
 }

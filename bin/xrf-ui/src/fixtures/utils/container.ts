@@ -1,6 +1,7 @@
 import { Binding, Container, EventsPlugin, ServiceToken } from "@wirestate/core";
 
 import { AssetService } from "@/core/assets/services";
+import { ProjectService } from "@/core/settings/services/project";
 
 export interface IInjectedServiceMockDescriptor<T> {
   service: T;
@@ -23,7 +24,7 @@ export function mockInjectedService<T>(
   bindings: Array<Binding> = []
 ): IInjectedServiceMockDescriptor<T> {
   const container: Container = new Container({
-    bindings: [AssetService, ...bindings, token as Binding],
+    bindings: [AssetService, ProjectService, ...bindings, token as Binding],
     plugins: [new EventsPlugin()],
   });
 

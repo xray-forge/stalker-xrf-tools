@@ -16,6 +16,7 @@ export const commands = {
     __TAURI_INVOKE<{
       source: VisualSource;
       description: VisualDescription;
+      textures: Array<SubmeshTexture>;
     } | null>("plugin:visuals|get_model"),
   /**
    * Select a visual and return what it contains.
@@ -23,9 +24,13 @@ export const commands = {
    * Geometry is packed here and parked, so the `read_geometry` that follows serves the same parse rather
    * than repeating it. The bytes are not returned: a typed command cannot carry them, which is why they
    * are read separately.
+   *
+   * Texture references are resolved here too, so the frontend learns in one round trip which submeshes
+   * have a texture to fetch and which do not. `fallback_root` is the configured project's gamedata path,
+   * which only the frontend knows; it is used only when the visual's own tree does not answer.
    */
-  openModel: (source: VisualSource) =>
-    __TAURI_INVOKE<SelectedVisualDescription>("plugin:visuals|open_model", { source }),
+  openModel: (source: VisualSource, fallbackRoot: string | null) =>
+    __TAURI_INVOKE<SelectedVisualDescription>("plugin:visuals|open_model", { source, fallbackRoot }),
 };
 
 /* Types */
@@ -34,11 +39,55 @@ export const commands = {
  *
  * The source travels back so a frontend that reloaded knows what to ask geometry for, without having
  * to remember anything of its own across the reload.
+ *
+ * Texture resolution rides here rather than on `VisualDescription` because it is a fact about this
+ * machine's filesystem, while a description is a fact about the file - which is also why `xrf-visual`
+ * has no filesystem surface to resolve with.
  */
 export type SelectedVisualDescription = {
   source: VisualSource;
   description: VisualDescription;
+  textures: Array<SubmeshTexture>;
 };
+
+/**
+ * One submesh's texture reference paired with what became of it.
+ *
+ * The reference stays outside the outcome because it is what `read_texture` is addressed by, and it is the same string
+ * whether resolution succeeded, substituted or failed.
+ */
+export type SubmeshTexture = {
+  /** Index of the submesh this belongs to, so a consumer pairs them without relying on order. */
+  submeshIndex: number;
+  /** X-Ray logical path the submesh declares, absent when it declares none. */
+  reference: string | null;
+  resolution: SubmeshTextureResolution;
+};
+
+/**
+ * What resolving one submesh's texture reference produced.
+ *
+ * A tagged enum rather than a struct of options, so the impossible combinations - a resolved texture with no
+ * location, a root-less lookup that still found a file - cannot be constructed or arrive on the wire.
+ *
+ * The located variants carry an [`XrayAssetLocation`] rather than their own path fields, so they gain archive-backed
+ * assets when that type does.
+ */
+export type SubmeshTextureResolution =
+  /** The submesh declares no texture at all, which is normal for a skeleton's own record. */
+  | { kind: "none" }
+  /**
+   * Nothing above the visual looks like an X-Ray root and no project root was offered, so no lookup was attempted.
+   *
+   * Distinct from `Missing` on purpose: it says the question could not be asked, not that the answer was no.
+   */
+  | { kind: "noRoot" }
+  /** The reference resolved inside a root. */
+  | { kind: "resolved"; location: XrayAssetLocation }
+  /** The reference resolved nowhere, so the engine's dummy stands in - as it does in game. */
+  | { kind: "substituted"; location: XrayAssetLocation }
+  /** Neither the reference nor the dummy resolved, so there is nothing to show. */
+  | { kind: "missing"; root: string };
 
 export type Vector3d<T = number | null> = {
   x: T;
@@ -221,3 +270,24 @@ export type VisualSubmesh = {
 export type VisualSubmeshContent =
   | { kind: "packed"; geometry: VisualGeometry }
   | { kind: "skipped"; cause: VisualSkipCause; reason: string };
+
+/**
+ * Where an asset was found, detached from the index that found it.
+ *
+ * [`XrayAsset`] borrows from its index, so it cannot be parked in state, sent over IPC or kept past the lookup. This is
+ * the same three facts owned: which root answered, which file inside it, and the engine identity it answers to.
+ *
+ * Root and relative path stay separate rather than joined, because "which root did this come from" is the question an
+ * overlay tree makes interesting, and joining them throws it away.
+ *
+ * When archive-backed assets arrive this is the type that gains a container, so a consumer reading a located asset does
+ * not change shape when the bytes start coming out of a `.db`.
+ */
+export type XrayAssetLocation = {
+  /** Indexed root this resolved against. */
+  root: string;
+  /** Physical path inside that root. */
+  relativePath: string;
+  /** Lower-case, backslash-separated engine identity. */
+  logicalPath: string;
+};
