@@ -11,7 +11,7 @@ mod xray_asset_index;
 mod xray_asset_location;
 mod xray_asset_source;
 mod xray_asset_type;
-mod xray_asset_utils;
+pub(crate) mod xray_asset_utils;
 mod xray_directory_source;
 mod xray_mount;
 pub mod xray_path;

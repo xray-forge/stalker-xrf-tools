@@ -23,6 +23,7 @@ pub use crate::pack::archive_pack_config::{
 };
 pub use crate::pack::archive_pack_result::ArchivePackResult;
 pub use crate::pack::archive_packer::ArchivePacker;
+pub use crate::project::archive_asset_source::ArchiveAssetSource;
 pub use crate::project::archive_project::ArchiveProject;
 pub use crate::project::archive_project_read_policy::ArchiveProjectReadPolicy;
 pub use crate::project::archive_project_read_result::ProjectReadResult;
