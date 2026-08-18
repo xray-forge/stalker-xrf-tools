@@ -1,13 +1,28 @@
 import { EventBus, inject, Injectable, OnDeactivation, OnProvision } from "@wirestate/core";
 import { BoundAction, Computed, makeObservable, Observable, runInAction } from "@wirestate/mobx";
+import { Texture } from "three";
 
-import { SelectedVisualDescription, commands as visualsCommands, VisualSource } from "@/core/bindings/xrf-app-visuals";
+import {
+  SelectedVisualDescription,
+  SubmeshTexture,
+  commands as visualsCommands,
+  VisualSource,
+} from "@/core/bindings/xrf-app-visuals";
 import { commands as visualsRawCommands } from "@/core/bindings/xrf-app-visuals-raw";
 import { transformError } from "@/core/error/lib";
 import { releaseEditorProject } from "@/core/ipc/release";
 import { emitNotification, ENotificationSeverity } from "@/core/notifications/lib";
 import { EApplicationId } from "@/core/routing/application";
+import { getProjectGamedataPath } from "@/core/settings/lib/path/project";
+import { ProjectService } from "@/core/settings/services/project/project.service";
 import { describeVisualSource } from "@/core/visuals/lib/visual-source";
+import {
+  createDdsTexture,
+  EVisualTextureState,
+  IVisualTextureStatus,
+  toInitialTextureState,
+  toLoadableTextures,
+} from "@/core/visuals/lib/visual-texture";
 import { createVisualViews, IVisualModelViews } from "@/core/visuals/lib/visual-views";
 import { createLoadable, Loadable } from "@/lib/loadable";
 import { Logger } from "@/lib/logging";
@@ -41,6 +56,19 @@ export class VisualsService {
   public visual: Loadable<Nullable<IOpenVisual>> = createLoadable(null);
 
   /**
+   * Uploaded textures by submesh index, for the viewport to apply.
+   *
+   * Textures reach the scene through state rather than by handing the service a scene reference: the scene is owned by
+   * the component that mounts it, and a store that reached into webgl would have two owners for one context.
+   */
+  @Observable()
+  public textures: ReadonlyMap<number, Texture> = new Map();
+
+  /** What became of each submesh's texture, so a panel can report it rather than leaving a submesh unexplained. */
+  @Observable()
+  public textureStatuses: ReadonlyMap<number, IVisualTextureStatus> = new Map();
+
+  /**
    * @returns The path or entry the open visual was read from, or null when nothing is open.
    */
   @Computed()
@@ -50,7 +78,10 @@ export class VisualsService {
     return source ? describeVisualSource(source) : null;
   }
 
-  public constructor(private readonly eventBus: EventBus = inject(EventBus)) {
+  public constructor(
+    private readonly eventBus: EventBus = inject(EventBus),
+    private readonly projectService: ProjectService = inject(ProjectService)
+  ) {
     makeObservable(this);
   }
 
@@ -99,6 +130,8 @@ export class VisualsService {
     runInAction(() => {
       this.requestId += 1;
       this.visual = createLoadable(null);
+      this.releaseTextures();
+      this.textureStatuses = new Map();
     });
 
     try {
@@ -122,7 +155,7 @@ export class VisualsService {
         return this.requestId;
       });
 
-      const selected: SelectedVisualDescription = await visualsCommands.openModel(source);
+      const selected: SelectedVisualDescription = await visualsCommands.openModel(source, await this.getFallbackRoot());
 
       await this.loadGeometry(selected, request);
     } catch (error: unknown) {
@@ -165,6 +198,110 @@ export class VisualsService {
 
     runInAction(() => {
       this.visual = this.visual.asReady({ selected, views });
+      this.releaseTextures();
+      this.textureStatuses = new Map(
+        selected.textures.map((texture) => [
+          texture.submeshIndex,
+          { reason: null, state: toInitialTextureState(texture), submeshIndex: texture.submeshIndex },
+        ])
+      );
     });
+
+    void this.loadTextures(selected, request);
+  }
+
+  /**
+   * Fetch each located texture and apply it as it lands.
+   */
+  private async loadTextures(selected: SelectedVisualDescription, request: number): Promise<void> {
+    const loadable: Array<SubmeshTexture & { reference: string }> = toLoadableTextures(selected.textures);
+
+    if (!loadable.length) {
+      return;
+    }
+
+    this.log.info(`Loading ${loadable.length} textures for:`, describeVisualSource(selected.source));
+
+    const fallbackRoot: Nullable<string> = await this.getFallbackRoot();
+
+    await Promise.all(loadable.map((texture) => this.loadTexture(selected.source, texture, fallbackRoot, request)));
+  }
+
+  /**
+   * One texture, from bytes to an uploaded texture or to a stated reason it is not one.
+   */
+  private async loadTexture(
+    source: VisualSource,
+    texture: SubmeshTexture & { reference: string },
+    fallbackRoot: Nullable<string>,
+    request: number
+  ): Promise<void> {
+    try {
+      const bytes: ArrayBuffer = await visualsRawCommands.readTexture(source, texture.reference, fallbackRoot);
+
+      if (request !== this.requestId) {
+        return;
+      }
+
+      const uploaded: Nullable<Texture> = createDdsTexture(bytes);
+
+      runInAction(() => {
+        if (uploaded) {
+          this.textures = new Map(this.textures).set(texture.submeshIndex, uploaded);
+        }
+
+        this.setTextureStatus(texture.submeshIndex, {
+          reason: null,
+          state: uploaded ? EVisualTextureState.APPLIED : EVisualTextureState.UNSUPPORTED_FORMAT,
+          submeshIndex: texture.submeshIndex,
+        });
+      });
+    } catch (error: unknown) {
+      const transformed: Error = transformError(error);
+
+      this.log.error(`Failed to load texture '${texture.reference}':`, transformed);
+
+      if (request !== this.requestId) {
+        return;
+      }
+
+      runInAction(() => {
+        this.setTextureStatus(texture.submeshIndex, {
+          reason: transformed.message,
+          state: EVisualTextureState.FAILED,
+          submeshIndex: texture.submeshIndex,
+        });
+      });
+    }
+  }
+
+  private setTextureStatus(submeshIndex: number, status: IVisualTextureStatus): void {
+    this.textureStatuses = new Map(this.textureStatuses).set(submeshIndex, status);
+  }
+
+  /**
+   * Free the uploaded textures of a model being replaced.
+   *
+   * The scene disposes what it was handed when its model changes, and this disposes what the store still holds, so a
+   * texture is freed by whichever side outlives the other.
+   */
+  private releaseTextures(): void {
+    for (const texture of this.textures.values()) {
+      texture.dispose();
+    }
+
+    this.textures = new Map();
+  }
+
+  /**
+   * The root to fall back to when a visual's own tree does not answer.
+   *
+   * Only the frontend knows which project is configured, which is why the backend takes it as an argument rather than
+   * deriving it: it can derive the per-visual root, but not an ambient one.
+   */
+  private async getFallbackRoot(): Promise<Nullable<string>> {
+    const projectPath: Nullable<string> = this.projectService.xrfProjectPath;
+
+    return projectPath ? getProjectGamedataPath(projectPath) : null;
   }
 }

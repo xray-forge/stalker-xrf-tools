@@ -1,6 +1,7 @@
 import {
   AmbientLight,
   AxesHelper,
+  BufferGeometry,
   Color,
   DataTexture,
   DirectionalLight,
@@ -9,6 +10,7 @@ import {
   MeshStandardMaterial,
   PerspectiveCamera,
   Scene,
+  Texture,
   WebGLRenderer,
 } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
@@ -42,6 +44,14 @@ export interface IVisualPreviewViewOptions {
 }
 
 /**
+ * One drawn submesh: its mesh, its own material, and the texture applied to it.
+ */
+interface IVisualSubmeshMesh {
+  mesh: Mesh<BufferGeometry, MeshStandardMaterial>;
+  texture: Nullable<Texture>;
+}
+
+/**
  * Owns the three.js scene imperatively, outside of react state.
  *
  * An editor scene graph is long lived and mutated by direct manipulation, so it is deliberately not expressed as react
@@ -54,13 +64,20 @@ export class VisualPreviewScene {
   private readonly camera: PerspectiveCamera;
   private readonly renderer: WebGLRenderer;
   private readonly controls: OrbitControls;
-  private readonly material: MeshStandardMaterial;
   private readonly checker: DataTexture;
   private readonly grid: GridHelper;
   private readonly axes: AxesHelper;
   private readonly resizeObserver: ResizeObserver;
 
-  private meshes: Array<Mesh> = [];
+  /**
+   * Meshes keyed by the submesh index they were built from.
+   *
+   * Keyed rather than ordered because textures arrive addressed by that index, out of order and after the fact, so a
+   * position in an array would be the wrong thing to trust.
+   */
+  private meshes: Map<number, IVisualSubmeshMesh> = new Map();
+  /** The last options applied, so a texture landing later knows whether the checker is currently covering it. */
+  private viewOptions: Nullable<IVisualPreviewViewOptions> = null;
   private model: Nullable<IVisualModelViews> = null;
   private container: Nullable<HTMLElement> = null;
   private frameHandle: number = 0;
@@ -87,7 +104,6 @@ export class VisualPreviewScene {
     this.controls.enableDamping = true;
 
     this.checker = createCheckerTexture(config);
-    this.material = new MeshStandardMaterial({ color: config.meshColor, metalness: 0.05, roughness: 0.75 });
     this.grid = new GridHelper(10, 10, config.gridColor, config.gridColor);
     this.axes = new AxesHelper(1);
 
@@ -112,32 +128,75 @@ export class VisualPreviewScene {
    * rebuilds the webgl context nor loses the current orbit.
    */
   public setModel(model: Nullable<IVisualModelViews>): void {
-    for (const mesh of this.meshes) {
-      this.scene.remove(mesh);
-      mesh.geometry.dispose();
-    }
+    this.clearModel();
 
     this.model = model;
-    this.meshes = (model?.submeshes ?? []).map((submesh) => {
-      const mesh: Mesh = new Mesh(createSubmeshGeometry(submesh), this.material);
+
+    for (const submesh of model?.submeshes ?? []) {
+      const mesh: Mesh<BufferGeometry, MeshStandardMaterial> = new Mesh(
+        createSubmeshGeometry(submesh),
+        new MeshStandardMaterial({ color: this.config.meshColor, metalness: 0.05, roughness: 0.75 })
+      );
 
       mesh.name = submesh.label;
 
-      return mesh;
-    });
-
-    for (const mesh of this.meshes) {
+      this.meshes.set(submesh.index, { mesh, texture: null });
       this.scene.add(mesh);
+    }
+
+    if (this.viewOptions) {
+      this.applyViewOptions(this.viewOptions);
     }
 
     this.applyScale();
     this.resetCamera();
   }
 
+  /**
+   * Put a loaded texture on one submesh.
+   *
+   * Applied per submesh rather than per model because a visual's children each declare their own reference and they
+   * arrive one at a time, so a model shows its first texture without waiting for its last.
+   *
+   * A texture for a submesh this model does not have is disposed rather than kept: it belongs to a model the user has
+   * already moved past, and holding it would leak the upload.
+   *
+   * @param submeshIndex - Index the submesh reports, which is what the backend resolved against.
+   * @param texture - Uploaded texture the scene takes ownership of.
+   */
+  public applyTexture(submeshIndex: number, texture: Texture): void {
+    const drawn: Nullable<IVisualSubmeshMesh> = this.meshes.get(submeshIndex) ?? null;
+
+    if (!drawn) {
+      texture.dispose();
+
+      return;
+    }
+
+    // Idempotent because the caller is a react effect that re-runs whenever any texture lands, so it re-offers the ones
+    // already applied. Without this the previous line would dispose the texture still in use.
+    if (drawn.texture === texture) {
+      return;
+    }
+
+    drawn.texture?.dispose();
+    drawn.texture = texture;
+
+    if (!this.viewOptions?.isCheckerVisible) {
+      drawn.mesh.material.map = texture;
+      drawn.mesh.material.needsUpdate = true;
+    }
+  }
+
   public applyViewOptions(options: IVisualPreviewViewOptions): void {
-    this.material.wireframe = options.isWireframe;
-    this.material.map = options.isCheckerVisible ? this.checker : null;
-    this.material.needsUpdate = true;
+    this.viewOptions = options;
+
+    for (const { mesh, texture } of this.meshes.values()) {
+      mesh.material.wireframe = options.isWireframe;
+      mesh.material.map = options.isCheckerVisible ? this.checker : texture;
+      mesh.material.needsUpdate = true;
+    }
+
     this.grid.visible = options.isGridVisible;
     this.axes.visible = options.isAxesVisible;
   }
@@ -183,19 +242,30 @@ export class VisualPreviewScene {
 
     this.resizeObserver.disconnect();
     this.controls.dispose();
-
-    for (const mesh of this.meshes) {
-      mesh.geometry.dispose();
-    }
-
-    this.meshes = [];
+    this.clearModel();
 
     this.checker.dispose();
-    this.material.dispose();
     this.renderer.dispose();
     this.renderer.domElement.remove();
 
     this.container = null;
+  }
+
+  /**
+   * Take the current model off the scene and free everything it owns.
+   *
+   * Materials and textures are per submesh now, so they are the model's to free rather than the scene's: leaving them
+   * behind would leak one upload per submesh every time the user opens another visual.
+   */
+  private clearModel(): void {
+    for (const { mesh, texture } of this.meshes.values()) {
+      this.scene.remove(mesh);
+      mesh.geometry.dispose();
+      mesh.material.dispose();
+      texture?.dispose();
+    }
+
+    this.meshes = new Map();
   }
 
   /** Size the helpers to the model, so the grid reads as ground rather than as a backdrop. */

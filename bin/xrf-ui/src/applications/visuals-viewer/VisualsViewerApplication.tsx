@@ -34,6 +34,7 @@ export function VisualsViewerApplication(): ReactElement {
       model={visual.views}
       subtitle={visualsService.sourceLabel ?? undefined}
       panels={VISUAL_VIEWER_PANELS}
+      textures={visualsService.textures}
       onOpen={onOpen}
     />
   );

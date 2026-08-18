@@ -1,5 +1,6 @@
 import { default as AccountTreeIcon } from "@mui/icons-material/AccountTree";
 import { ReactElement, ReactNode, useCallback, useMemo, useState } from "react";
+import { Texture } from "three";
 
 import { EditorLayout } from "@/core/shell/editor/EditorLayout";
 import { useEditorStatus } from "@/core/shell/EditorStatusContext";
@@ -27,6 +28,8 @@ export interface IVisualPreviewLayoutProps {
   tree?: ReactNode;
   /** Data panels the owning application contributes to the right stripe. */
   panels?: Array<IEditorPanel>;
+  /** Loaded textures by submesh index, passed straight through to the viewport. */
+  textures?: ReadonlyMap<number, Texture>;
   /** Reopens the picker. Absent while an application has no way to choose a different visual. */
   onOpen?: () => void;
 }
@@ -42,6 +45,7 @@ export function VisualPreviewLayout({
   subtitle,
   tree,
   panels,
+  textures,
   onOpen,
 }: IVisualPreviewLayoutProps): ReactElement {
   const [options, setOptions] = useState<IVisualPreviewViewOptions>(DEFAULT_VIEW_OPTIONS);
@@ -91,7 +95,12 @@ export function VisualPreviewLayout({
       }
       footer={<VisualPreviewAnimationBar />}
     >
-      <VisualPreviewViewport model={model} options={options} cameraResetToken={cameraResetToken} />
+      <VisualPreviewViewport
+        model={model}
+        options={options}
+        cameraResetToken={cameraResetToken}
+        textures={textures}
+      />
     </EditorLayout>
   );
 }

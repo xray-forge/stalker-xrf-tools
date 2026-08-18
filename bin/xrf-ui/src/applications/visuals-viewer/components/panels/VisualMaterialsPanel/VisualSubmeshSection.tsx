@@ -1,14 +1,22 @@
 import { Box, Chip } from "@mui/material";
 import { ReactElement } from "react";
 
+import { VisualSubmeshTexture } from "@/applications/visuals-viewer/components/panels/VisualMaterialsPanel/VisualSubmeshTexture";
 import { VisualPanelRow } from "@/applications/visuals-viewer/components/panels/VisualPanelRow";
 import { VisualPanelSection } from "@/applications/visuals-viewer/components/panels/VisualPanelSection";
+import { SubmeshTexture } from "@/core/bindings/xrf-app-visuals";
 import { VisualSubmesh } from "@/core/bindings/xrf-visual";
+import { IVisualTextureStatus } from "@/core/visuals/lib/visual-texture";
 import { ABSENT_VALUE } from "@/lib/format/number";
+import { Nullable } from "@/lib/types/general";
 
 export interface IVisualSubmeshSectionProps {
   submesh: VisualSubmesh;
   isFirst: boolean;
+  /** What the backend resolved this submesh's reference to, absent when the model reports no textures at all. */
+  texture?: Nullable<SubmeshTexture>;
+  /** What the frontend then did with it. */
+  status?: Nullable<IVisualTextureStatus>;
 }
 
 /**
@@ -18,7 +26,12 @@ export interface IVisualSubmeshSectionProps {
  * piece says what happened to it. The texture reference is the heading, since that is what identifies a submesh to
  * someone looking for the piece that is wrong.
  */
-export function VisualSubmeshSection({ submesh, isFirst }: IVisualSubmeshSectionProps): ReactElement {
+export function VisualSubmeshSection({
+  submesh,
+  isFirst,
+  texture = null,
+  status = null,
+}: IVisualSubmeshSectionProps): ReactElement {
   const { content } = submesh;
 
   return (
@@ -38,6 +51,8 @@ export function VisualSubmeshSection({ submesh, isFirst }: IVisualSubmeshSection
     >
       <VisualPanelRow label={"Shader"} value={submesh.shaderName ?? ABSENT_VALUE} />
       <VisualPanelRow label={"Type"} value={submesh.modelTypeLabel} />
+
+      <VisualSubmeshTexture texture={texture} status={status} />
 
       {content.kind === "packed" ? (
         <>

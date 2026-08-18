@@ -1,5 +1,6 @@
 import { Box } from "@mui/material";
 import { ReactElement, useEffect, useRef } from "react";
+import { Texture } from "three";
 
 import { IVisualPreviewViewOptions, VisualPreviewScene } from "@/core/visuals";
 import { IVisualModelViews } from "@/core/visuals/lib/visual-views";
@@ -9,6 +10,8 @@ interface IVisualPreviewViewportProps {
   model: Nullable<IVisualModelViews>;
   options: IVisualPreviewViewOptions;
   cameraResetToken: number;
+  /** Loaded textures by submesh index, applied as they arrive. */
+  textures?: ReadonlyMap<number, Texture>;
 }
 
 /**
@@ -21,7 +24,12 @@ interface IVisualPreviewViewportProps {
  * A new model replaces the geometry in place rather than recreating the scene, so opening one visual
  * after another keeps the webgl context and the renderer alive.
  */
-export function VisualPreviewViewport({ model, options, cameraResetToken }: IVisualPreviewViewportProps): ReactElement {
+export function VisualPreviewViewport({
+  model,
+  options,
+  cameraResetToken,
+  textures,
+}: IVisualPreviewViewportProps): ReactElement {
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<Nullable<VisualPreviewScene>>(null);
   const optionsRef = useRef<IVisualPreviewViewOptions>(options);
@@ -56,6 +64,19 @@ export function VisualPreviewViewport({ model, options, cameraResetToken }: IVis
     optionsRef.current = options;
     sceneRef.current?.applyViewOptions(options);
   }, [options]);
+
+  /**
+   * Offers every loaded texture on each change rather than only the newest one.
+   */
+  useEffect(() => {
+    if (!textures) {
+      return;
+    }
+
+    for (const [submeshIndex, texture] of textures) {
+      sceneRef.current?.applyTexture(submeshIndex, texture);
+    }
+  }, [textures, model]);
 
   useEffect(() => {
     sceneRef.current?.resetCamera();
