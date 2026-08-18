@@ -27,6 +27,7 @@ pub use crate::project::archive_asset_source::ArchiveAssetSource;
 pub use crate::project::archive_project::ArchiveProject;
 pub use crate::project::archive_project_read_policy::ArchiveProjectReadPolicy;
 pub use crate::project::archive_project_read_result::ProjectReadResult;
+pub use crate::project::plan_mount::mount_plan;
 #[cfg(feature = "typescript-bindings")]
 pub use crate::typescript_bindings::typescript_bindings;
 pub use crate::unpack::archive_extract_result::{ArchiveExtractDirectoryResult, ArchiveExtractResult};

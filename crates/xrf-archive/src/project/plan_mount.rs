@@ -1,0 +1,34 @@
+use xrf_assets::{XrayDirectorySource, XrayMountId, XrayMountKind, XrayMountPlan, XrayPlannedMount, XrayVfs};
+use xrf_error::XrfResult;
+
+use crate::project::archive_asset_source::ArchiveAssetSource;
+
+/// Mounts each planned source that can be opened, in plan order.
+///
+/// `xrf-assets` decides what to mount without depending on archive support; this function constructs the planned directory
+/// and archive sources.
+///
+/// Sources that fail to open or mount are logged and omitted. The returned mount IDs preserve plan order.
+pub fn mount_plan(vfs: &mut XrayVfs, plan: &XrayMountPlan) -> XrfResult<Vec<XrayMountId>> {
+  let mut mounted: Vec<XrayMountId> = Vec::with_capacity(plan.len());
+
+  for planned in plan.mounts() {
+    match mount_one(vfs, planned) {
+      Ok(id) => mounted.push(id),
+      Err(error) => log::warn!(
+        "Skipping planned mount {} at {}: {error}",
+        planned.origin,
+        planned.path.display()
+      ),
+    }
+  }
+
+  Ok(mounted)
+}
+
+fn mount_one(vfs: &mut XrayVfs, planned: &XrayPlannedMount) -> XrfResult<XrayMountId> {
+  match planned.kind {
+    XrayMountKind::Archive => vfs.mount(&planned.base, Box::new(ArchiveAssetSource::read(&planned.path)?)),
+    XrayMountKind::Directory => vfs.mount(&planned.base, Box::new(XrayDirectorySource::read(&planned.path)?)),
+  }
+}

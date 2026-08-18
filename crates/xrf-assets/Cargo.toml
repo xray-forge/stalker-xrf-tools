@@ -8,6 +8,7 @@ rust-version.workspace = true
 [dependencies]
 log = { workspace = true }
 serde = { workspace = true }
+xrf-utils = { workspace = true }
 specta = { workspace = true, optional = true }
 walkdir = { workspace = true }
 xrf-error = { workspace = true }
