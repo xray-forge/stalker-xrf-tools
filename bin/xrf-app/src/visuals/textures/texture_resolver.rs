@@ -1,14 +1,12 @@
 use std::path::{Path, PathBuf};
 
-use xrf_assets::{XrayVfs, implied_asset_root};
+use xrf_assets::{XrayMountId, XrayScope, XrayVfs, implied_asset_root};
 use xrf_visual::VisualSubmesh;
 
+use crate::types::TauriResult;
 use crate::visuals::textures::submesh_texture::{MISSING_TEXTURE_REFERENCE, SubmeshTexture, SubmeshTextureResolution};
 
-/// Resolves a visual's texture references against the sources the engine would search.
-///
-/// Owns the VFS, so a user clicking through models in one tree mounts it once. Lives on plugin state for that reason
-/// alone - the mounts are the value, not the resolver.
+/// Resolves visual textures while retaining mounted asset sources between requests.
 #[derive(Default)]
 pub struct VisualTextureResolver {
   vfs: XrayVfs,
@@ -19,16 +17,16 @@ impl VisualTextureResolver {
     Self::default()
   }
 
-  /// Every submesh's texture reference, resolved.
+  /// Resolves each submesh texture against the visual's implied root and optional fallback root.
   ///
-  /// `fallback_root` is the configured project's gamedata path, which only the frontend knows.
+  /// The implied root has priority over `fallback_root`.
   pub fn resolve_submeshes(
     &mut self,
     visual: Option<&Path>,
     fallback_root: Option<&Path>,
     submeshes: &[VisualSubmesh],
   ) -> Vec<SubmeshTexture> {
-    let order: Vec<PathBuf> = Self::mount_order(visual, fallback_root);
+    let scope: XrayScope = self.scope_for(visual, fallback_root);
 
     submeshes
       .iter()
@@ -37,46 +35,84 @@ impl VisualTextureResolver {
         reference: submesh.texture_name.clone(),
         resolution: match &submesh.texture_name {
           None => SubmeshTextureResolution::None,
-          Some(reference) => self.resolve(&order, reference),
+          Some(reference) => self.resolve(&scope, reference),
         },
       })
       .collect()
   }
 
-  /// One reference, following the engine's substitution when it resolves nowhere.
-  pub fn resolve(&mut self, order: &[PathBuf], reference: &str) -> SubmeshTextureResolution {
-    let Some(root) = order.first() else {
+  /// Resolves one reference and applies the engine's missing-texture substitution.
+  pub fn resolve(&self, scope: &XrayScope, reference: &str) -> SubmeshTextureResolution {
+    if self.mounts_in(scope) == 0 {
       return SubmeshTextureResolution::NoRoot;
-    };
+    }
 
-    if let Some(location) = self.vfs.dds_texture(order, reference) {
+    if let Some(location) = self.lookup(scope, reference) {
       return SubmeshTextureResolution::Resolved { location };
     }
 
-    match self.vfs.dds_texture(order, MISSING_TEXTURE_REFERENCE) {
+    match self.lookup(scope, MISSING_TEXTURE_REFERENCE) {
       Some(location) => SubmeshTextureResolution::Substituted { location },
-      None => SubmeshTextureResolution::Missing { root: root.clone() },
+      None => SubmeshTextureResolution::Missing {
+        roots: self.described_mounts(scope),
+      },
     }
   }
 
-  /// Sources to search for a visual's textures, nearest first.
+  /// Reads a texture from the winning mount.
   ///
-  /// The tree holding the visual answers first, since that is the tree its references were authored against. The ambient
-  /// project root answers only behind it - for a visual sitting outside any tree, an archived one, or a file dragged in
-  /// from anywhere. Nothing is invented when neither applies, which is what an empty order means.
-  pub fn mount_order(visual: Option<&Path>, fallback_root: Option<&Path>) -> Vec<PathBuf> {
+  /// Reading through the VFS supports both loose and archived textures.
+  pub fn read(&self, scope: &XrayScope, reference: &str) -> TauriResult<Vec<u8>> {
+    let logical_path: String = xrf_assets::texture::dds_logical_path(reference);
+
+    self
+      .vfs
+      .read(scope, &format!("textures\\{logical_path}"))
+      .map_err(|error| format!("Failed to read texture '{reference}': {error}"))
+  }
+
+  /// Mounts the available texture roots and returns their search scope.
+  ///
+  /// The visual's implied root is searched before the fallback root. Non-directory fallbacks and roots that fail to mount
+  /// are omitted; an empty scope means no lookup can be attempted.
+  pub fn scope_for(&mut self, visual: Option<&Path>, fallback_root: Option<&Path>) -> XrayScope {
     let implied: Option<PathBuf> = visual.and_then(implied_asset_root);
     let fallback: Option<PathBuf> = fallback_root.filter(|root| root.is_dir()).map(Path::to_path_buf);
 
-    implied
+    let mounts: Vec<XrayMountId> = implied
       .into_iter()
       .chain(fallback)
-      .fold(Vec::with_capacity(2), |mut order, root| {
-        if !order.contains(&root) {
-          order.push(root);
-        }
-
-        order
+      .filter_map(|root| {
+        self
+          .vfs
+          .mount_directory("", &root)
+          .inspect_err(|error| log::warn!("Failed to mount root {}: {error}", root.display()))
+          .ok()
       })
+      .collect();
+
+    XrayScope::only(mounts)
+  }
+
+  fn lookup(&self, scope: &XrayScope, reference: &str) -> Option<xrf_assets::XrayAssetLocation> {
+    self
+      .vfs
+      .dds_texture(scope, reference)
+      .inspect_err(|error| log::warn!("Rejected texture reference '{reference}': {error}"))
+      .ok()
+      .flatten()
+  }
+
+  fn mounts_in(&self, scope: &XrayScope) -> usize {
+    self.vfs.scoped(scope).count()
+  }
+
+  /// Describes every mount searched by a failed lookup.
+  fn described_mounts(&self, scope: &XrayScope) -> Vec<String> {
+    self
+      .vfs
+      .scoped(scope)
+      .map(|mount| mount.source().root_path().display().to_string())
+      .collect()
   }
 }

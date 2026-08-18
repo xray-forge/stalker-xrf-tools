@@ -18,9 +18,12 @@ describe("isLoadableResolution", () => {
   it("counts a substituted reference as loadable", () => {
     // The engine's dummy is a real file and rendering it is what the game does, so it is fetched like any other.
     const location: XrayAssetLocation = {
+      container: {
+        kind: "directory",
+        relativePath: "textures\\ed\\ed_not_existing_texture.dds",
+        root: "C:\\gamedata",
+      },
       logicalPath: "textures\\ed\\ed_not_existing_texture.dds",
-      relativePath: "textures\\ed\\ed_not_existing_texture.dds",
-      root: "C:\\gamedata",
     };
 
     expect(isLoadableResolution({ kind: "resolved", location })).toBe(true);
@@ -30,7 +33,7 @@ describe("isLoadableResolution", () => {
   it("counts every outcome without a file as not loadable", () => {
     expect(isLoadableResolution({ kind: "none" })).toBe(false);
     expect(isLoadableResolution({ kind: "noRoot" })).toBe(false);
-    expect(isLoadableResolution({ kind: "missing", root: "C:\\gamedata" })).toBe(false);
+    expect(isLoadableResolution({ kind: "missing", roots: ["C:\\gamedata"] })).toBe(false);
   });
 });
 
@@ -39,7 +42,7 @@ describe("toLoadableTextures", () => {
     const textures: Array<SubmeshTexture> = [
       mockSubmeshTexture({ submeshIndex: 0 }),
       mockSubmeshTexture({ reference: null, resolution: { kind: "none" }, submeshIndex: 1 }),
-      mockSubmeshTexture({ resolution: { kind: "missing", root: "C:\\gamedata" }, submeshIndex: 2 }),
+      mockSubmeshTexture({ resolution: { kind: "missing", roots: ["C:\\gamedata"] }, submeshIndex: 2 }),
       mockSubmeshTexture({ resolution: { kind: "noRoot" }, submeshIndex: 3 }),
     ];
 

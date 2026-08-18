@@ -195,9 +195,12 @@ export function mockSubmeshTexture(overrides: Partial<SubmeshTexture> = {}): Sub
     resolution: {
       kind: "resolved",
       location: {
+        container: {
+          kind: "directory",
+          relativePath: "textures\\wpn\\wpn_ak74.dds",
+          root: "C:\\gamedata",
+        },
         logicalPath: "textures\\wpn\\wpn_ak74.dds",
-        relativePath: "textures\\wpn\\wpn_ak74.dds",
-        root: "C:\\gamedata",
       },
     },
     submeshIndex: 0,

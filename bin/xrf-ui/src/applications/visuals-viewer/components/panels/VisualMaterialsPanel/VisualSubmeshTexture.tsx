@@ -6,6 +6,7 @@ import {
   describeTextureState,
   IVisualTextureStateDescriptor,
 } from "@/applications/visuals-viewer/components/panels/VisualMaterialsPanel/VisualSubmeshTexture.utils";
+import { VisualSubmeshTextureSource } from "@/applications/visuals-viewer/components/panels/VisualMaterialsPanel/VisualSubmeshTextureSource";
 import { VisualPanelRow } from "@/applications/visuals-viewer/components/panels/VisualPanelRow";
 import { SubmeshTexture } from "@/core/bindings/xrf-app-visuals";
 import { EVisualTextureState, IVisualTextureStatus } from "@/core/visuals/lib/visual-texture";
@@ -40,13 +41,12 @@ export function VisualSubmeshTexture({ texture, status }: IVisualSubmeshTextureP
       <VisualPanelRow label={"Resolution"} value={describeResolution(resolution)} />
 
       {resolution.kind === "resolved" || resolution.kind === "substituted" ? (
-        <>
-          <VisualPanelRow label={"Root"} value={resolution.location.root} />
-          <VisualPanelRow label={"File"} value={resolution.location.relativePath} />
-        </>
+        <VisualSubmeshTextureSource container={resolution.location.container} />
       ) : null}
 
-      {resolution.kind === "missing" ? <VisualPanelRow label={"Root"} value={resolution.root} /> : null}
+      {resolution.kind === "missing"
+        ? resolution.roots.map((root) => <VisualPanelRow key={root} label={"Searched"} value={root} />)
+        : null}
 
       {status?.reason ? <VisualPanelRow label={"Texture error"} value={status.reason} /> : null}
     </>

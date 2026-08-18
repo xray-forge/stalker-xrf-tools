@@ -1,37 +1,33 @@
-//! Resolves a visual's texture references the way the engine would, and reports what the files are.
+//! Resolves and inspects textures referenced by OGF visuals.
 //!
-//! Answers the question the texture phase rests on: for every submesh reference across the reference trees, does it
-//! resolve against the root its visual implies, and to a format a renderer can upload.
+//! Each reference is resolved against the visual's implied X-Ray root. Successful DDS headers are cached for the
+//! verification report.
 
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
-use xrf_assets::{XrayVfs, implied_asset_root};
+use xrf_assets::{XrayScope, XrayVfs, implied_asset_root};
 use xrf_dds::{DdsFile, DdsFormat, DdsMetadata};
 
-/// What resolving one reference produced.
+/// The outcome of resolving and reading one texture reference.
 pub enum TextureResolution {
   /// The visual sits under no directory that looks like an X-Ray root.
   NoRoot,
-  /// The root exists but holds no such texture, which is what the engine answers with its dummy.
+  /// The implied root contains no matching texture.
   Missing { root: PathBuf },
-  /// Resolved, and its header read.
+  /// The texture resolved and its DDS header was read.
   Resolved {
     path: PathBuf,
     format: String,
     metadata: DdsMetadata,
   },
-  /// Resolved, but the header would not parse.
+  /// The texture resolved, but its DDS header could not be parsed.
   Unreadable { path: PathBuf, reason: String },
 }
 
-/// Caches every expensive step, because a sweep asks the same questions repeatedly.
+/// Caches mounted roots and parsed DDS headers across a verification sweep.
 ///
-/// Roots are mounted by the VFS, and headers are read once per texture file here, since a reference repeats across
-/// submeshes and models while a header is only interesting to verification.
-///
-/// Verification deliberately searches the visual's own tree alone rather than a chain: the question it answers is whether
-/// a tree is internally complete, which a fallback root would mask.
+/// Repeated references reuse the header cached for their resolved texture path.
 #[derive(Default)]
 pub struct OgfTextureResolver {
   vfs: XrayVfs,
@@ -44,9 +40,25 @@ impl OgfTextureResolver {
       return TextureResolution::NoRoot;
     };
 
-    let order: [PathBuf; 1] = [root.clone()];
+    let Ok(mount) = self
+      .vfs
+      .mount_directory("", &root)
+      .inspect_err(|error| log::warn!("Failed to mount root {}: {error}", root.display()))
+    else {
+      return TextureResolution::Missing { root };
+    };
 
-    let Some(path) = self.vfs.dds_texture(&order, reference).map(|it| it.absolute_path()) else {
+    // Search only the visual's tree; a fallback mount would hide gaps that verification must report.
+    let scope: XrayScope = XrayScope::only([mount]);
+
+    let located: Option<PathBuf> = self
+      .vfs
+      .dds_texture(&scope, reference)
+      .ok()
+      .flatten()
+      .and_then(|location| location.physical_path());
+
+    let Some(path) = located else {
       return TextureResolution::Missing { root };
     };
 
@@ -56,10 +68,9 @@ impl OgfTextureResolver {
     }
   }
 
-  /// Header facts for a texture file, read once and handed over by value.
+  /// Returns cached DDS header facts by value.
   ///
-  /// Cloned rather than borrowed because the caller keeps resolving against the same cache, and a borrow would hold it
-  /// for the rest of the sweep. A header is a few dozen bytes of scalars.
+  /// The owned result does not hold a borrow across subsequent resolver calls.
   fn header(&mut self, path: &Path) -> Result<(String, DdsMetadata), String> {
     self
       .headers
@@ -72,13 +83,13 @@ impl OgfTextureResolver {
       .clone()
   }
 
-  /// Distinct texture files a sweep touched, which is the population the format counts describe.
+  /// Returns the number of distinct texture files inspected by the sweep.
   pub fn distinct_textures(&self) -> usize {
     self.headers.len()
   }
 }
 
-/// Format identity as a label, keeping an unknown one's fourCC visible rather than collapsing every unknown into one.
+/// Formats a DDS format name while preserving an unknown format's FourCC.
 fn format_label(metadata: &DdsMetadata) -> String {
   match metadata.format {
     DdsFormat::D3d(format) => format!("{format:?}"),
