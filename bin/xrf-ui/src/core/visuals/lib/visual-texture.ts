@@ -1,4 +1,4 @@
-import { CompressedPixelFormat, CompressedTexture, LinearFilter } from "three";
+import { CompressedPixelFormat, CompressedTexture, LinearFilter, RepeatWrapping } from "three";
 import { DDS, DDSLoader } from "three/examples/jsm/loaders/DDSLoader.js";
 
 import { SubmeshTexture, SubmeshTextureResolution } from "@/core/bindings/xrf-app-visuals";
@@ -103,6 +103,12 @@ export function createDdsTexture(bytes: ArrayBuffer): Nullable<CompressedTexture
     // three's own `CompressedTextureLoader` assigns exactly that to a `CompressedTexture`.
     parsed.format as CompressedPixelFormat
   );
+
+  // X-Ray samples base diffuse with wrap addressing: `r_Sampler` defaults to `D3DTADDRESS_WRAP`
+  // (`Layers/xrRender/Blender_Recorder.h`) and the model blender overrides nothing. three.js defaults to clamp, which
+  // smears the edge texel across every face whose uv leaves [0,1].
+  texture.wrapS = RepeatWrapping;
+  texture.wrapT = RepeatWrapping;
 
   if (parsed.mipmapCount === 1) {
     texture.minFilter = LinearFilter;

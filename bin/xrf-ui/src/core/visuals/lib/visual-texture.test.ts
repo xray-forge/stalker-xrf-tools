@@ -1,5 +1,11 @@
 import { describe, expect, it } from "@jest/globals";
-import { CompressedTexture, LinearFilter, RGB_S3TC_DXT1_Format, RGBA_S3TC_DXT5_Format } from "three";
+import {
+  CompressedTexture,
+  LinearFilter,
+  RepeatWrapping,
+  RGB_S3TC_DXT1_Format,
+  RGBA_S3TC_DXT5_Format,
+} from "three";
 
 import { SubmeshTexture } from "@/core/bindings/xrf-app-visuals";
 import { XrayAssetLocation } from "@/core/bindings/xrf-assets";
@@ -83,6 +89,15 @@ describe("createDdsTexture", () => {
 
     expect(withoutMips!.minFilter).toBe(LinearFilter);
     expect(withMips!.minFilter).not.toBe(LinearFilter);
+  });
+
+  it("samples with wrap addressing, as the engine does", () => {
+    // `r_Sampler` defaults to `D3DTADDRESS_WRAP` and the model blender does not override it. three.js defaults to
+    // clamp, which smears the edge texel over every face whose uv leaves [0,1] - `wpn_colt1911` reaches u = -0.997.
+    const texture: Nullable<CompressedTexture> = createDdsTexture(mockDdsFile());
+
+    expect(texture!.wrapS).toBe(RepeatWrapping);
+    expect(texture!.wrapT).toBe(RepeatWrapping);
   });
 
   it("uploads a dxt5 file", () => {
