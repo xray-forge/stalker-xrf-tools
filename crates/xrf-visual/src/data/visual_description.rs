@@ -18,8 +18,8 @@ pub struct VisualBone {
 /// Everything about a packed visual except the bytes themselves.
 ///
 /// The counterpart of the geometry buffer: a consumer reads this first, then asks for the buffer and
-/// builds views from the byte ranges each submesh carries. `buffer_length` is the length that buffer
-/// must have, so a mismatched pair is detectable rather than rendering as garbage.
+/// builds views from the byte ranges each submesh carries. The reported total buffer length makes a
+/// mismatched description and buffer detectable.
 #[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
 #[derive(Clone, Debug, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -30,7 +30,7 @@ pub struct VisualDescription {
   pub shader_id: u16,
   /// Source object the OGF was built from, when the file records one.
   pub source_file: Option<String>,
-  /// Extent the header declares, converted into three.js space so it compares to `computed_bounds`.
+  /// Extent the header declares, converted into three.js space for comparison with the computed extent.
   pub declared_bounds: VisualBounds,
   /// Extent the packed geometry actually spans, absent when no submesh produced any.
   pub computed_bounds: Option<VisualBounds>,

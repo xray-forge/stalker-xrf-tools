@@ -22,6 +22,7 @@ pub struct XrayVfs {
 }
 
 impl XrayVfs {
+  /// Creates an empty VFS with no searchable mounts.
   pub fn new() -> Self {
     Self::default()
   }
@@ -38,6 +39,12 @@ impl XrayVfs {
   }
 
   /// Mounts a directory once, reusing the existing mount for the same root.
+  ///
+  /// The first mount's base and priority are retained when a root is reused.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when the base is invalid or the directory cannot be indexed.
   pub fn mount_directory(&mut self, base: &str, root: impl AsRef<Path>) -> XrfResult<XrayMountId> {
     let root: &Path = root.as_ref();
 
@@ -57,14 +64,17 @@ impl XrayVfs {
       .map(XrayMount::id)
   }
 
+  /// Returns mounts in search priority order.
   pub fn mounts(&self) -> &[XrayMount] {
     &self.mounts
   }
 
+  /// Returns the number of mounts, including mounts that contain no matching entry for a scope.
   pub fn mount_count(&self) -> usize {
     self.mounts.len()
   }
 
+  /// Returns whether no source has been mounted.
   pub fn is_empty(&self) -> bool {
     self.mounts.is_empty()
   }
@@ -206,15 +216,29 @@ impl XrayVfs {
     )))
   }
 
-  /// Resolves a texture reference after appending `.dds` or replacing its authoring extension.
+  /// Resolves a texture reference under the `textures` namespace after appending `.dds` or replacing its authoring extension.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when the reference cannot be normalized as an X-Ray path.
   pub fn dds_texture(&self, scope: &XrayScope, reference: &str) -> XrfResult<Option<XrayAssetLocation>> {
     self.find_in(scope, "textures", &crate::texture::dds_logical_path(reference))
   }
 
+  /// Resolves an OGF reference under the `meshes` namespace.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when the reference cannot be normalized as an X-Ray path.
   pub fn ogf(&self, scope: &XrayScope, reference: &str) -> XrfResult<Option<XrayAssetLocation>> {
     self.find_in(scope, "meshes", &crate::xray_path::with_extension(reference, ".ogf"))
   }
 
+  /// Resolves an OMF reference under the `meshes` namespace.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when the reference cannot be normalized as an X-Ray path.
   pub fn omf(&self, scope: &XrayScope, reference: &str) -> XrfResult<Option<XrayAssetLocation>> {
     self.find_in(scope, "meshes", &crate::xray_path::with_extension(reference, ".omf"))
   }

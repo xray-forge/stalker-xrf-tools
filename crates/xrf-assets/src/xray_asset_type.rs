@@ -1,3 +1,4 @@
+/// Asset category inferred from an X-Ray logical path's extension or recognized suffix.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum XrayAssetType {
   Ai,

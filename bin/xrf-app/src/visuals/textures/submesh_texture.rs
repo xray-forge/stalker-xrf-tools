@@ -10,7 +10,7 @@ pub const MISSING_TEXTURE_REFERENCE: &str = "ed\\ed_not_existing_texture";
 /// The outcome of resolving one submesh texture reference.
 ///
 /// Separate variants distinguish an omitted reference, an unavailable search root, a missing texture, and a located
-/// asset. Located assets use `XrayAssetLocation` so the same response supports directories and archives.
+/// asset. Located assets use `XrayAssetLocation` to describe either a directory or archive container.
 #[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
 #[derive(Clone, Debug, PartialEq, Eq, Serialize)]
 #[serde(tag = "kind", rename_all = "camelCase")]
@@ -41,7 +41,7 @@ impl SubmeshTextureResolution {
 
 /// One submesh texture reference and its resolution outcome.
 ///
-/// The reference remains available for `read_texture` regardless of whether resolution succeeded, substituted, or failed.
+/// When present, the reference is retained for `read_texture` regardless of the resolution outcome.
 #[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
 #[derive(Clone, Debug, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]

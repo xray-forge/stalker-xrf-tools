@@ -9,6 +9,7 @@ pub struct InMemoryChunkDataSource {
 }
 
 impl InMemoryChunkDataSource {
+  /// Copies `buf` into a seekable in-memory source.
   pub fn from_buffer(buf: &[u8]) -> Self {
     Self {
       cursor: Cursor::new(buf.to_vec()),

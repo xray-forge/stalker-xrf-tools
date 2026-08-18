@@ -45,7 +45,7 @@ export type SelectedVisualDescription = {
 /**
  * One submesh texture reference and its resolution outcome.
  *
- * The reference remains available for `read_texture` regardless of whether resolution succeeded, substituted, or failed.
+ * When present, the reference is retained for `read_texture` regardless of the resolution outcome.
  */
 export type SubmeshTexture = {
   /** Submesh index used to pair this outcome without relying on response order. */
@@ -59,7 +59,7 @@ export type SubmeshTexture = {
  * The outcome of resolving one submesh texture reference.
  *
  * Separate variants distinguish an omitted reference, an unavailable search root, a missing texture, and a located
- * asset. Located assets use `XrayAssetLocation` so the same response supports directories and archives.
+ * asset. Located assets use `XrayAssetLocation` to describe either a directory or archive container.
  */
 export type SubmeshTextureResolution =
   /** The submesh declares no texture, as is normal for a skeleton root record. */
@@ -120,8 +120,8 @@ export type VisualBox = {
  * Everything about a packed visual except the bytes themselves.
  *
  * The counterpart of the geometry buffer: a consumer reads this first, then asks for the buffer and
- * builds views from the byte ranges each submesh carries. `buffer_length` is the length that buffer
- * must have, so a mismatched pair is detectable rather than rendering as garbage.
+ * builds views from the byte ranges each submesh carries. The reported total buffer length makes a
+ * mismatched description and buffer detectable.
  */
 export type VisualDescription = {
   version: number;
@@ -130,7 +130,7 @@ export type VisualDescription = {
   shaderId: number;
   /** Source object the OGF was built from, when the file records one. */
   sourceFile: string | null;
-  /** Extent the header declares, converted into three.js space so it compares to `computed_bounds`. */
+  /** Extent the header declares, converted into three.js space for comparison with the computed extent. */
   declaredBounds: VisualBounds;
   /** Extent the packed geometry actually spans, absent when no submesh produced any. */
   computedBounds: VisualBounds | null;
@@ -158,7 +158,7 @@ export type VisualDrawRange = {
  *
  * Every section is a byte range into the one buffer the model ships as, so a consumer builds views
  * over it without copying. `indices` covers the whole index buffer, including the coarser detail
- * levels a progressive submesh carries; `draw_range` is the slice that renders the model at full
+ * levels a progressive submesh carries; the resolved draw range renders the model at full
  * detail, already resolved so a consumer never has to pick.
  */
 export type VisualGeometry = {
@@ -172,7 +172,7 @@ export type VisualGeometry = {
   /**
    * Detail levels of a progressive submesh, empty for a static one.
    *
-   * Indices outside `draw_range` are validated only when a consumer decides to draw them, so a
+   * Indices outside the resolved draw range are validated only when a consumer decides to draw them, so a
    * detail level other than the first must be range checked before use.
    */
   windows: Array<VisualSlideWindow>;
@@ -183,8 +183,8 @@ export type VisualGeometry = {
  * Byte range of one packed attribute inside a visual's geometry buffer.
  *
  * Both values are byte counts rather than element counts, so a consumer builds a typed array view
- * directly from them. `byte_offset` is always a multiple of four, which `Float32Array` and
- * `Uint16Array` views both require; see [`crate::VisualBufferBuilder`].
+ * directly from them. The packer aligns every offset to four bytes for `Float32Array` and
+ * `Uint16Array` views.
  */
 export type VisualSection = {
   byteOffset: number;
@@ -218,13 +218,7 @@ export type VisualSlideWindow = {
   vertexCount: number;
 };
 
-/**
- * Where a visual is read from.
- *
- * An enum from the start because reading a visual out of an opened archive is the next source, and it
- * differs only in how bytes are obtained. Keeping the shape means that arrives as a variant rather
- * than as a second pair of commands.
- */
+/** Where a visual is read from. */
 export type VisualSource =
   /** A loose `.ogf` file on disk. */
   { kind: "file"; path: string };

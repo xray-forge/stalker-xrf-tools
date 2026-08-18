@@ -10,6 +10,12 @@ export function getLocalStorageValue(key: string): Nullable<string> {
   return window.localStorage ? window.localStorage.getItem(key) : null;
 }
 
+/**
+ * Stores a raw value, or removes the key when the value is `null`.
+ *
+ * @param key - Storage key to write.
+ * @param value - Value to persist, or `null` to clear the key.
+ */
 export function setLocalStorageValue(key: string, value: Nullable<string>): void {
   if (!window.localStorage) {
     return;
@@ -24,6 +30,8 @@ export function setLocalStorageValue(key: string, value: Nullable<string>): void
 
 /**
  * Parses a JSON value from local storage.
+ *
+ * Invalid JSON propagates the `SyntaxError` thrown by `JSON.parse`.
  *
  * @param key - Storage key to read.
  * @returns The parsed value, or `null` when storage is unavailable or the key is absent.

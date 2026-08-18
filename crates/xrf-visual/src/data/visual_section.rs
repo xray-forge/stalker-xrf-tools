@@ -3,8 +3,8 @@ use serde::Serialize;
 /// Byte range of one packed attribute inside a visual's geometry buffer.
 ///
 /// Both values are byte counts rather than element counts, so a consumer builds a typed array view
-/// directly from them. `byte_offset` is always a multiple of four, which `Float32Array` and
-/// `Uint16Array` views both require; see [`crate::VisualBufferBuilder`].
+/// directly from them. The packer aligns every offset to four bytes for `Float32Array` and
+/// `Uint16Array` views.
 #[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]

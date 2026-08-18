@@ -61,7 +61,7 @@ impl VisualTextureResolver {
 
   /// Reads a texture from the winning mount.
   ///
-  /// Reading through the VFS supports both loose and archived textures.
+  /// Reading through the VFS avoids exposing the winning mount's physical path to the caller.
   pub fn read(&self, scope: &XrayScope, reference: &str) -> TauriResult<Vec<u8>> {
     let logical_path: String = xrf_assets::texture::dds_logical_path(reference);
 

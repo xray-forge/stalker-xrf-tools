@@ -104,7 +104,7 @@ impl InventorySpriteDescriptor {
     }
   }
 
-  /// Smallest [`DDS_BLOCK_ALIGNMENT`] aligned canvas that holds every icon claiming a grid slot.
+  /// Smallest `DDS_BLOCK_ALIGNMENT`-aligned canvas that holds every icon claiming a grid slot.
   ///
   /// A grid square is 50 pixels, so a slot boundary lands on a whole block only every other column and
   /// row, and the rounding adds at most two pixels per axis. An already aligned canvas is returned

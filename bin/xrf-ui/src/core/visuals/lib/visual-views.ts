@@ -45,6 +45,9 @@ const FALLBACK_FIT_RADIUS: number = 1;
  * Rust `f32` crosses as `number | null` because a non-finite float serialises to null, and such values
  * do occur: two visuals in the reference trees declare bounds of `f32::MAX`. Treating null as zero would
  * quietly place a model at the origin, so it is treated as no value at all.
+ *
+ * @param vector - Coordinate triple received from the backend.
+ * @returns Finite coordinates, or `null` when any component is absent or non-finite.
  */
 function toFiniteTriple(vector: Vector3d): Nullable<[number, number, number]> {
   const { x, y, z } = vector;
@@ -62,6 +65,10 @@ function toFiniteTriple(vector: Vector3d): Nullable<[number, number, number]> {
  * Views rather than copies: the whole point of transferring one buffer is that the attributes are used
  * where they landed. Byte offsets are aligned by the packer, which is what makes these constructors
  * legal at all.
+ *
+ * @param buffer - Packed geometry buffer.
+ * @param section - Byte range containing `f32` values.
+ * @returns A view over the section without copying its bytes.
  */
 function toFloatView(buffer: ArrayBuffer, section: VisualSection): Float32Array {
   return new Float32Array(buffer, section.byteOffset, section.byteLength / Float32Array.BYTES_PER_ELEMENT);
@@ -76,6 +83,9 @@ function toIndexView(buffer: ArrayBuffer, section: VisualSection): Uint16Array {
  *
  * Measured bounds are the honest ones. Declared bounds are the fallback for a model that produced no
  * geometry, so an empty viewport still frames where the model says it is.
+ *
+ * @param description - Packed visual description containing declared and computed bounds.
+ * @returns Finite camera framing with a non-zero fallback radius.
  */
 export function createVisualCameraFit(description: VisualDescription): IVisualCameraFit {
   const bounds: Nullable<VisualBounds> = description.computedBounds ?? description.declaredBounds ?? null;

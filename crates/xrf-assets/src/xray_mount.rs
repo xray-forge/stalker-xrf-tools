@@ -44,22 +44,27 @@ impl XrayMount {
     self.id
   }
 
+  /// Returns the normalized logical base assigned to this mount.
   pub fn base(&self) -> &str {
     &self.base
   }
 
+  /// Returns whether the mount stores loose files or archive entries.
   pub fn kind(&self) -> XrayMountKind {
     self.source.kind()
   }
 
+  /// Returns whether writes through this mount can update existing entries.
   pub fn is_writable(&self) -> bool {
     self.source.is_writable()
   }
 
+  /// Returns the source label used in diagnostics.
   pub fn label(&self) -> &str {
     self.source.label()
   }
 
+  /// Borrows the mounted source for source-specific inspection.
   pub fn source(&self) -> &dyn XrayAssetSource {
     self.source.as_ref()
   }

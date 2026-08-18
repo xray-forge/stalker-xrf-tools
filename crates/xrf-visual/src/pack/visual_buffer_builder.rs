@@ -22,6 +22,10 @@ impl VisualBufferBuilder {
     Self::default()
   }
 
+  /// Appends `f32` values as little-endian bytes and returns their aligned byte range.
+  ///
+  /// The returned offset is suitable for a `Float32Array` view; padding before the section is
+  /// included in the buffer but not in its range.
   pub fn push_f32_section(&mut self, values: &[f32]) -> VisualSection {
     self.push_section(size_of_val(values), |buffer| {
       for value in values {
@@ -30,6 +34,10 @@ impl VisualBufferBuilder {
     })
   }
 
+  /// Appends `u16` values as little-endian bytes and returns their aligned byte range.
+  ///
+  /// The returned offset is suitable for a `Uint16Array` view; padding before the section is
+  /// included in the buffer but not in its range.
   pub fn push_u16_section(&mut self, values: &[u16]) -> VisualSection {
     self.push_section(size_of_val(values), |buffer| {
       for value in values {
@@ -38,10 +46,12 @@ impl VisualBufferBuilder {
     })
   }
 
+  /// Returns the total packed buffer length, including alignment padding.
   pub fn length(&self) -> u32 {
     Self::usize_to_u32(self.buffer.len())
   }
 
+  /// Returns the packed bytes, including alignment padding between sections.
   pub fn into_buffer(self) -> Vec<u8> {
     self.buffer
   }

@@ -1,7 +1,7 @@
 //! Resolves and inspects textures referenced by OGF visuals.
 //!
-//! Each reference is resolved against the visual's implied X-Ray root. Successful DDS headers are cached for the
-//! verification report.
+//! Each reference is resolved against the visual's implied X-Ray root. DDS header results, including failures, are
+//! cached by resolved texture path.
 
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
@@ -13,7 +13,7 @@ use xrf_dds::{DdsFile, DdsFormat, DdsMetadata};
 pub enum TextureResolution {
   /// The visual sits under no directory that looks like an X-Ray root.
   NoRoot,
-  /// The implied root contains no matching texture.
+  /// The implied root could not be mounted or produced no readable physical texture path.
   Missing { root: PathBuf },
   /// The texture resolved and its DDS header was read.
   Resolved {
@@ -21,13 +21,13 @@ pub enum TextureResolution {
     format: String,
     metadata: DdsMetadata,
   },
-  /// The texture resolved, but its DDS header could not be parsed.
+  /// The texture resolved, but its DDS header could not be read or parsed.
   Unreadable { path: PathBuf, reason: String },
 }
 
-/// Caches mounted roots and parsed DDS headers across a verification sweep.
+/// Caches mounted roots and DDS header results across a verification sweep.
 ///
-/// Repeated references reuse the header cached for their resolved texture path.
+/// Repeated references reuse the success or failure cached for their resolved texture path.
 #[derive(Default)]
 pub struct OgfTextureResolver {
   vfs: XrayVfs,

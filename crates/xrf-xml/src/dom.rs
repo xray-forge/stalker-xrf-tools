@@ -43,10 +43,14 @@ impl XmlDocument {
     Self::parse(&decode_xml_bytes(input)?, options)
   }
 
+  /// Returns the document element.
   pub fn root(&self) -> &XmlElement {
     &self.root
   }
 
+  /// Iterates over the root and all descendants whose tag name equals `name`.
+  ///
+  /// Matching is case-sensitive and follows document order.
   pub fn elements_named<'a>(&'a self, name: &'a str) -> impl Iterator<Item = &'a XmlElement> + 'a {
     std::iter::once(&self.root)
       .chain(self.root.descendants())
@@ -87,10 +91,12 @@ impl XmlElement {
     }
   }
 
+  /// Returns the element's unqualified tag name.
   pub fn name(&self) -> &str {
     &self.name
   }
 
+  /// Returns the value of the first attribute with the exact name, if present.
   pub fn attribute(&self, name: &str) -> Option<&str> {
     self
       .attributes
@@ -99,6 +105,7 @@ impl XmlElement {
       .map(|attribute| attribute.value.as_str())
   }
 
+  /// Iterates over `(name, value)` pairs in source order.
   pub fn attributes(&self) -> impl Iterator<Item = (&str, &str)> {
     self
       .attributes
@@ -106,20 +113,26 @@ impl XmlElement {
       .map(|attribute| (attribute.name.as_str(), attribute.value.as_str()))
   }
 
+  /// Iterates over direct child elements with the exact tag name.
   pub fn children_named<'a>(&'a self, name: &'a str) -> impl Iterator<Item = &'a Self> + 'a {
     self.children.iter().filter(move |child| child.name == name)
   }
 
+  /// Iterates over descendants in document order, excluding this element.
   pub fn descendants(&self) -> impl Iterator<Item = &Self> {
     XmlDescendants {
       stack: self.children.iter().rev().collect(),
     }
   }
 
+  /// Iterates over descendants with the exact tag name, excluding this element.
   pub fn descendants_named<'a>(&'a self, name: &'a str) -> impl Iterator<Item = &'a Self> + 'a {
     self.descendants().filter(move |element| element.name == name)
   }
 
+  /// Returns concatenated text from this element's direct text children.
+  ///
+  /// Text nested inside child elements is not included.
   pub fn text(&self) -> &str {
     &self.text
   }

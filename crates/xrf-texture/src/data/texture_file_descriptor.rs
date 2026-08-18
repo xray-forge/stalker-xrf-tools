@@ -23,7 +23,7 @@ impl TextureFileDescriptor {
     self.sprites.push(texture);
   }
 
-  /// Smallest [`DDS_BLOCK_ALIGNMENT`] aligned canvas that holds every described sprite.
+  /// Smallest `DDS_BLOCK_ALIGNMENT`-aligned canvas that holds every described sprite.
   ///
   /// The rounding only ever adds what alignment needs, at most three pixels per axis. A canvas that is
   /// already aligned is returned untouched.

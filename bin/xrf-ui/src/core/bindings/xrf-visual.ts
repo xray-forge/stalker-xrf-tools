@@ -43,8 +43,8 @@ export type VisualBox = {
  * Everything about a packed visual except the bytes themselves.
  *
  * The counterpart of the geometry buffer: a consumer reads this first, then asks for the buffer and
- * builds views from the byte ranges each submesh carries. `buffer_length` is the length that buffer
- * must have, so a mismatched pair is detectable rather than rendering as garbage.
+ * builds views from the byte ranges each submesh carries. The reported total buffer length makes a
+ * mismatched description and buffer detectable.
  */
 export type VisualDescription = {
   version: number;
@@ -53,7 +53,7 @@ export type VisualDescription = {
   shaderId: number;
   /** Source object the OGF was built from, when the file records one. */
   sourceFile: string | null;
-  /** Extent the header declares, converted into three.js space so it compares to `computed_bounds`. */
+  /** Extent the header declares, converted into three.js space for comparison with the computed extent. */
   declaredBounds: VisualBounds;
   /** Extent the packed geometry actually spans, absent when no submesh produced any. */
   computedBounds: VisualBounds | null;
@@ -81,7 +81,7 @@ export type VisualDrawRange = {
  *
  * Every section is a byte range into the one buffer the model ships as, so a consumer builds views
  * over it without copying. `indices` covers the whole index buffer, including the coarser detail
- * levels a progressive submesh carries; `draw_range` is the slice that renders the model at full
+ * levels a progressive submesh carries; the resolved draw range renders the model at full
  * detail, already resolved so a consumer never has to pick.
  */
 export type VisualGeometry = {
@@ -95,7 +95,7 @@ export type VisualGeometry = {
   /**
    * Detail levels of a progressive submesh, empty for a static one.
    *
-   * Indices outside `draw_range` are validated only when a consumer decides to draw them, so a
+   * Indices outside the resolved draw range are validated only when a consumer decides to draw them, so a
    * detail level other than the first must be range checked before use.
    */
   windows: Array<VisualSlideWindow>;
@@ -106,8 +106,8 @@ export type VisualGeometry = {
  * Byte range of one packed attribute inside a visual's geometry buffer.
  *
  * Both values are byte counts rather than element counts, so a consumer builds a typed array view
- * directly from them. `byte_offset` is always a multiple of four, which `Float32Array` and
- * `Uint16Array` views both require; see [`crate::VisualBufferBuilder`].
+ * directly from them. The packer aligns every offset to four bytes for `Float32Array` and
+ * `Uint16Array` views.
  */
 export type VisualSection = {
   byteOffset: number;

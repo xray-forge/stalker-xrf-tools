@@ -18,12 +18,20 @@ pub struct ChunkReader<T: ChunkDataSource = FileSlice> {
 }
 
 impl ChunkReader<FileSlice> {
-  /// Create chunk based on whole file.
+  /// Creates a reader spanning the whole file.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when the file is empty.
   pub fn from_file(file: File) -> XrfResult<Self> {
     Self::from_slice(FileSlice::new(file))
   }
 
-  /// Create chunk based on file slice boundaries.
+  /// Creates a reader over the supplied file-slice boundaries.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when the slice is empty.
   pub fn from_slice(slice: FileSlice) -> XrfResult<Self> {
     if slice.is_empty() {
       return Err(XrfError::new_invalid_error("Failed to create chunk from empty source"));
@@ -39,12 +47,12 @@ impl ChunkReader<FileSlice> {
 }
 
 impl ChunkReader<InMemoryChunkDataSource> {
-  /// Create chunk based on whole file.
+  /// Creates a reader over a copied in-memory byte buffer.
   pub fn from_bytes(buf: &[u8]) -> XrfResult<Self> {
     Self::from_source(InMemoryChunkDataSource::from_buffer(buf))
   }
 
-  /// Create chunk based on source.
+  /// Creates a reader over an in-memory chunk data source.
   pub fn from_source(source: InMemoryChunkDataSource) -> XrfResult<Self> {
     Ok(Self {
       id: 0,
@@ -56,42 +64,49 @@ impl ChunkReader<InMemoryChunkDataSource> {
 }
 
 impl<T: ChunkDataSource> ChunkReader<T> {
-  /// Get current position of the chunk seek.
+  /// Returns the absolute cursor position within the underlying source.
   pub fn cursor_pos(&self) -> u64 {
     self.data.cursor_pos()
   }
 
-  /// Get end position of the chunk seek.
+  /// Returns the absolute end position of the underlying source.
   pub fn end_pos(&self) -> u64 {
     self.data.end_pos()
   }
 
-  /// Whether chunk is ended and contains no more data to read.
+  /// Returns whether the cursor has reached the end of this chunk.
   pub fn is_ended(&self) -> bool {
     self.data.cursor_pos() == self.data.end_pos()
   }
 
-  /// Whether chunk contains data to read.
+  /// Returns whether at least one byte remains before the end of this chunk.
   pub fn has_data(&self) -> bool {
     self.data.cursor_pos() < self.data.end_pos()
   }
 
-  /// Get summary of bytes read from chunk based on current seek position.
+  /// Returns the number of bytes consumed from this chunk.
   pub fn read_bytes_len(&self) -> u64 {
     self.data.cursor_pos().saturating_sub(self.data.start_pos())
   }
 
-  /// Get summary of bytes remaining based on current seek position.
+  /// Returns the number of bytes remaining from the current cursor.
   pub fn read_bytes_remain(&self) -> u64 {
     self.data.end_pos().saturating_sub(self.data.cursor_pos())
   }
 
-  /// Reset seek position in chunk file.
+  /// Resets the cursor to the beginning of this chunk.
   pub fn reset_pos(&mut self) -> XrfResult<u64> {
     Ok(self.data.set_seek(SeekFrom::Start(0))?)
   }
 
-  /// Navigates to chunk with index and constructs chunk representation.
+  /// Reads the zero-based child at `id` after resetting and scanning this reader.
+  ///
+  /// The parent cursor is left after the last scanned child; the returned child owns a slice of
+  /// the original source.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when child iteration fails or no child has that index.
   pub fn read_child_by_index(&mut self, id: u32) -> XrfResult<Self> {
     for (iteration, chunk) in ChunkIterator::from_start(self)?.enumerate() {
       let chunk: ChunkReader<T> = chunk?;
@@ -107,17 +122,21 @@ impl<T: ChunkDataSource> ChunkReader<T> {
     )))
   }
 
-  /// Get list of all child samples in current chunk, do not mutate current chunk.
+  /// Returns all children without changing this reader's cursor.
   pub fn get_children_cloned(&self) -> XrfResult<Vec<Self>> {
     ChunkIterator::from_start(&mut self.clone())?.collect()
   }
 
-  /// Read list of all child samples in current chunk and advance further.
+  /// Returns all children and advances this reader through the child sequence.
   pub fn read_children(&mut self) -> XrfResult<Vec<Self>> {
     ChunkIterator::<T>::from_start(self)?.collect()
   }
 
-  /// Assert data in chink is read and nothing remains to read.
+  /// Verifies that the cursor consumed the entire chunk.
+  ///
+  /// # Errors
+  ///
+  /// Returns a chunk-not-ended error containing the number of unread bytes.
   #[inline]
   pub fn assert_read(&self, message: &str) -> XrfResult {
     if self.is_ended() {

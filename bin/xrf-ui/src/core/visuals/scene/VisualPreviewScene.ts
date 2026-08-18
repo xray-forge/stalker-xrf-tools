@@ -124,8 +124,9 @@ export class VisualPreviewScene {
   /**
    * Replace whatever is on screen with a different model, or with nothing.
    *
-   * Geometry is rebuilt while the renderer, camera and controls survive, so opening one visual after another neither
-   * rebuilds the webgl context nor loses the current orbit.
+   * Geometry is rebuilt while the renderer and controls survive. The camera is refitted to the replacement model.
+   *
+   * @param model - Model views to display, or `null` to clear the scene.
    */
   public setModel(model: Nullable<IVisualModelViews>): void {
     this.clearModel();
@@ -188,6 +189,11 @@ export class VisualPreviewScene {
     }
   }
 
+  /**
+   * Applies toolbar view toggles to every mesh and helper in the scene.
+   *
+   * @param options - Wireframe, checkerboard, grid, and axes visibility to retain for later texture arrivals.
+   */
   public applyViewOptions(options: IVisualPreviewViewOptions): void {
     this.viewOptions = options;
 
@@ -228,6 +234,11 @@ export class VisualPreviewScene {
     this.controls.update();
   }
 
+  /**
+   * Attaches the renderer to a viewport and starts its render loop.
+   *
+   * @param container - Element whose dimensions drive the renderer and camera aspect ratio.
+   */
   public mount(container: HTMLElement): void {
     this.container = container;
     container.appendChild(this.renderer.domElement);
@@ -237,6 +248,7 @@ export class VisualPreviewScene {
     this.renderFrame();
   }
 
+  /** Stops rendering, detaches the canvas, and releases the scene's WebGL resources. */
   public dispose(): void {
     cancelAnimationFrame(this.frameHandle);
 

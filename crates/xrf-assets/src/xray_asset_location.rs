@@ -33,6 +33,10 @@ pub struct XrayAssetLocation {
 }
 
 impl XrayAssetLocation {
+  /// Creates a location for a loose file.
+  ///
+  /// `relative_path` is joined to `root` only when [`Self::physical_path`] is requested; the
+  /// logical path remains the normalized X-Ray identity used for lookups and IPC.
   pub fn new_directory(logical_path: String, root: PathBuf, relative_path: PathBuf) -> Self {
     Self {
       container: XrayAssetContainer::Directory { relative_path, root },
@@ -40,6 +44,9 @@ impl XrayAssetLocation {
     }
   }
 
+  /// Creates a location for an entry in an archive volume set.
+  ///
+  /// The path identifies the archive container, not a filesystem path for the entry itself.
   pub fn new_archive(logical_path: String, path: PathBuf) -> Self {
     Self {
       container: XrayAssetContainer::Archive { path },
@@ -48,6 +55,8 @@ impl XrayAssetLocation {
   }
 
   /// Creates a location from an engine path and a source-reported container.
+  ///
+  /// The caller is responsible for passing the normalized logical path returned by the VFS.
   pub fn new(logical_path: String, container: XrayAssetContainer) -> Self {
     Self {
       container,
@@ -55,10 +64,12 @@ impl XrayAssetLocation {
     }
   }
 
+  /// Returns the normalized X-Ray path, including any mount base.
   pub fn logical_path(&self) -> &str {
     &self.logical_path
   }
 
+  /// Returns the physical container that supplied this location.
   pub fn container(&self) -> &XrayAssetContainer {
     &self.container
   }

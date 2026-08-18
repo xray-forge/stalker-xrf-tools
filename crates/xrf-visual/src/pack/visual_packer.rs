@@ -43,6 +43,10 @@ impl VisualSkip {
 pub struct VisualPacker {}
 
 impl VisualPacker {
+  /// Converts an OGF visual into a description and one interleaved byte buffer.
+  ///
+  /// Submeshes retain source order. Unsupported or malformed geometry is represented in the
+  /// description as `Skipped`, while drawable submeshes reference aligned ranges in the returned buffer.
   pub fn pack(file: &OgfFile) -> VisualPackage {
     let mut builder: VisualBufferBuilder = VisualBufferBuilder::new();
 

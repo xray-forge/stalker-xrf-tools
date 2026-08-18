@@ -14,6 +14,14 @@ pub struct XrayAssetIndex {
 }
 
 impl XrayAssetIndex {
+  /// Builds a strict logical-path index over a directory index.
+  ///
+  /// `ignored` contains logical prefixes to omit. Paths are normalized before comparison, and two
+  /// remaining files that normalize to one X-Ray path are rejected.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when an ignored prefix or asset path is invalid, or when normalized paths collide.
   pub fn new(directory: DirectoryAssetIndex, ignored: &[String]) -> XrfResult<Self> {
     let ignored: Vec<String> = ignored.iter().map(|path| normalize(path)).collect::<XrfResult<_>>()?;
 
@@ -37,18 +45,27 @@ impl XrayAssetIndex {
 
     Ok(Self { directory, assets })
   }
+
+  /// Returns the physical directory index used as the source of this logical index.
   pub fn directory(&self) -> &DirectoryAssetIndex {
     &self.directory
   }
 
+  /// Returns the root containing the indexed files.
   pub fn root(&self) -> &Path {
     self.directory.root()
   }
 
+  /// Iterates over indexed assets in normalized logical-path order.
   pub fn assets(&self) -> impl Iterator<Item = XrayAsset<'_>> {
     self.assets.iter().map(|(path, index)| self.asset(path, *index))
   }
 
+  /// Finds an asset by a path normalized to the engine's lower-case backslash form.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when `path` contains invalid or ambiguous components.
   pub fn find(&self, path: &str) -> XrfResult<Option<XrayAsset<'_>>> {
     let path = normalize(path)?;
 
@@ -60,14 +77,17 @@ impl XrayAssetIndex {
     )
   }
 
+  /// Finds an asset below a logical prefix, joining and normalizing both components.
   pub fn find_in(&self, prefix: &str, path: &str) -> XrfResult<Option<XrayAsset<'_>>> {
     self.find(&join(prefix, path)?)
   }
 
+  /// Returns the physical path for a logical asset, if it exists.
   pub fn absolute_path(&self, path: &str) -> XrfResult<Option<PathBuf>> {
     Ok(self.find(path)?.map(|asset| asset.absolute_path()))
   }
 
+  /// Returns the physical path for an asset below a logical prefix, if it exists.
   pub fn absolute_path_in(&self, prefix: &str, path: &str) -> XrfResult<Option<PathBuf>> {
     Ok(self.find_in(prefix, path)?.map(|asset| asset.absolute_path()))
   }
@@ -77,14 +97,17 @@ impl XrayAssetIndex {
     Ok(self.root().join(normalize(path)?))
   }
 
+  /// Finds an OGF reference below `meshes`.
   pub fn ogf(&self, reference: &str) -> XrfResult<Option<XrayAsset<'_>>> {
     self.find_in("meshes", &crate::xray_path::with_extension(reference, ".ogf"))
   }
 
+  /// Finds an OMF reference below `meshes`.
   pub fn omf(&self, reference: &str) -> XrfResult<Option<XrayAsset<'_>>> {
     self.find_in("meshes", &crate::xray_path::with_extension(reference, ".omf"))
   }
 
+  /// Finds one OMF or all OMF files matching a trailing `*.omf` mask.
   pub fn omfs(&self, reference: &str) -> XrfResult<Vec<XrayAsset<'_>>> {
     if reference.ends_with("*.omf") {
       Ok(self.with_mask_in("meshes", reference)?.collect())
@@ -93,10 +116,12 @@ impl XrayAssetIndex {
     }
   }
 
+  /// Finds a texture reference below `textures`, resolving its authoring extension to `.dds`.
   pub fn dds_texture(&self, reference: &str) -> XrfResult<Option<XrayAsset<'_>>> {
     self.find_in("textures", &crate::texture::dds_logical_path(reference))
   }
 
+  /// Iterates over assets in a normalized logical subtree.
   pub fn with_prefix(&self, prefix: &str) -> XrfResult<impl Iterator<Item = XrayAsset<'_>>> {
     let prefix = normalize(prefix)?;
 
@@ -109,6 +134,7 @@ impl XrayAssetIndex {
     )
   }
 
+  /// Iterates over assets with the requested extension-derived type.
   pub fn with_type(&self, asset_type: XrayAssetType) -> impl Iterator<Item = XrayAsset<'_>> {
     self
       .assets
@@ -117,6 +143,7 @@ impl XrayAssetIndex {
       .map(|(path, index)| self.asset(path, *index))
   }
 
+  /// Iterates over normalized paths ending with `suffix`.
   pub fn with_suffix(&self, suffix: &str) -> XrfResult<impl Iterator<Item = XrayAsset<'_>>> {
     let suffix = normalize(suffix)?;
 
@@ -129,6 +156,11 @@ impl XrayAssetIndex {
     )
   }
 
+  /// Iterates over paths matching one normalized `prefix*suffix` mask.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error unless `mask` contains exactly one `*` and has valid path components.
   pub fn with_mask(&self, mask: &str) -> XrfResult<impl Iterator<Item = XrayAsset<'_>>> {
     let mask = normalize(mask)?;
 
@@ -156,6 +188,11 @@ impl XrayAssetIndex {
     )
   }
 
+  /// Iterates over assets below `prefix` matching one normalized `prefix*suffix` mask.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error unless the joined mask contains exactly one `*` and has valid path components.
   pub fn with_mask_in(&self, prefix: &str, mask: &str) -> XrfResult<impl Iterator<Item = XrayAsset<'_>>> {
     let mask: String = join(prefix, mask)?;
 

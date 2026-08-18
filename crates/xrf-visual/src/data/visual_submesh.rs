@@ -7,7 +7,7 @@ use crate::data::visual_section::{VisualDrawRange, VisualSection, VisualSlideWin
 ///
 /// Every section is a byte range into the one buffer the model ships as, so a consumer builds views
 /// over it without copying. `indices` covers the whole index buffer, including the coarser detail
-/// levels a progressive submesh carries; `draw_range` is the slice that renders the model at full
+/// levels a progressive submesh carries; the resolved draw range renders the model at full
 /// detail, already resolved so a consumer never has to pick.
 #[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
 #[derive(Clone, Debug, PartialEq, Serialize)]
@@ -22,7 +22,7 @@ pub struct VisualGeometry {
   pub draw_range: VisualDrawRange,
   /// Detail levels of a progressive submesh, empty for a static one.
   ///
-  /// Indices outside `draw_range` are validated only when a consumer decides to draw them, so a
+  /// Indices outside the resolved draw range are validated only when a consumer decides to draw them, so a
   /// detail level other than the first must be range checked before use.
   pub windows: Vec<VisualSlideWindow>,
   pub bounds: VisualBounds,

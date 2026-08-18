@@ -17,7 +17,7 @@ pub const TEXTURES_DIRECTORY: &str = "textures";
 /// textures one directory per texture under names that do not match their reference. Callers that need a resolvable root
 /// must therefore fall through on a failed lookup rather than on a failed derivation.
 ///
-/// @returns The implied root, or `None` when no ancestor looks like one.
+/// Returns the nearest implied root, or `None` when no ancestor looks like one.
 pub fn implied_asset_root(path: &Path) -> Option<PathBuf> {
   path
     .ancestors()

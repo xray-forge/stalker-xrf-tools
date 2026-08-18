@@ -10,11 +10,18 @@ pub struct ChunkWriter {
 }
 
 impl ChunkWriter {
+  /// Creates an empty chunk payload buffer.
   pub fn new() -> Self {
     Self::default()
   }
 
-  /// Flush all the written data as chunk into the writable object.
+  /// Writes the buffered payload as an X-Ray chunk to `destination` without clearing the buffer.
+  ///
+  /// The header contains `id` and the payload length in the selected byte order.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when the payload exceeds the format's `u32` length limit or the destination rejects a write.
   pub fn flush_chunk_into<T: ByteOrder>(&mut self, destination: &mut dyn Write, id: u32) -> XrfResult<usize> {
     let payload_size: u32 = u32::try_from(self.buffer.len())
       .map_err(|_| XrfError::new_invalid_error("Chunk payload exceeds the u32 format limit"))?;
@@ -26,12 +33,16 @@ impl ChunkWriter {
     Ok(self.buffer.len())
   }
 
-  /// Flush all the written data as raw buffer into writable.
+  /// Writes the buffered payload without a chunk header, leaving the buffer unchanged.
   pub fn flush_raw_into(&mut self, file: &mut dyn Write) -> XrfResult {
     Ok(file.write_all(&self.buffer)?)
   }
 
-  /// Flush all the written data as chunk into the file.
+  /// Returns the buffered payload framed as an X-Ray chunk, without clearing the buffer.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when the framed size exceeds platform capacity or the payload exceeds the format's `u32` limit.
   pub fn flush_chunk_into_buffer<T: ByteOrder>(&mut self, id: u32) -> XrfResult<Vec<u8>> {
     let capacity: usize = self
       .buffer
@@ -51,7 +62,7 @@ impl ChunkWriter {
     Ok(buffer)
   }
 
-  /// Flush all the written data as chunk into the file.
+  /// Returns a copy of the buffered payload without a chunk header.
   pub fn flush_raw_into_buffer(&mut self) -> XrfResult<Vec<u8>> {
     let mut buffer: Vec<u8> = Vec::with_capacity(self.buffer.len());
 
@@ -60,7 +71,7 @@ impl ChunkWriter {
     Ok(buffer)
   }
 
-  /// Get count of bytes written into internal buffer.
+  /// Returns the current payload length in bytes.
   pub fn bytes_written(&self) -> usize {
     self.buffer.len()
   }

@@ -38,10 +38,6 @@ pub struct SelectedVisual {
 }
 
 /// Where a visual is read from.
-///
-/// An enum from the start because reading a visual out of an opened archive is the next source, and it
-/// differs only in how bytes are obtained. Keeping the shape means that arrives as a variant rather
-/// than as a second pair of commands.
 #[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, serde::Deserialize)]
 #[serde(tag = "kind", rename_all = "camelCase")]
@@ -57,9 +53,7 @@ impl VisualSource {
     }
   }
 
-  /// Where this visual sits on disk, when it sits on disk at all.
-  ///
-  /// An archived visual will answer `None`, which is exactly the case the root chain's ambient link exists for.
+  /// Returns the visual's filesystem path when its source provides one.
   pub fn physical_path(&self) -> Option<&Path> {
     match self {
       Self::File { path } => Some(Path::new(path)),

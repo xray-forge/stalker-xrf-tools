@@ -15,6 +15,7 @@ pub enum ExternFormat {
 }
 
 impl ExternFormat {
+  /// Returns the repository default line ending for this output format.
   pub fn default_line_endings(self) -> LineEndings {
     match self {
       Self::Json => LineEndings::Crlf,
@@ -22,6 +23,11 @@ impl ExternFormat {
     }
   }
 
+  /// Infers a format from a `.json`, `.xml`, `.html`, or `.htm` extension.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when the path has no supported extension.
   pub fn from_extension(path: &std::path::Path) -> XrfResult<Self> {
     let extension: String = path
       .extension()
@@ -77,7 +83,13 @@ impl FromStr for LineEndings {
   }
 }
 
-/// Render an extern manifest using the selected stable public format.
+/// Renders an extern manifest and terminates it with the selected line ending.
+///
+/// When `line_endings` is `None`, JSON uses CRLF and XML/HTML use LF.
+///
+/// # Errors
+///
+/// Returns an error when JSON serialization fails.
 pub fn render_extern_manifest(
   manifest: &ExternManifest,
   format: ExternFormat,
@@ -93,7 +105,10 @@ pub fn render_extern_manifest(
   Ok(apply_line_endings(&format!("{content}\n"), ending))
 }
 
-/// Normalize line endings so XML/HTML check mode ignores host-specific EOLs.
+/// Converts CRLF and bare CR sequences to LF.
+///
+/// This is used when comparing generated XML or HTML without treating host-specific line endings
+/// as content changes.
 pub fn normalize_line_endings(content: &str) -> String {
   content.replace("\r\n", "\n").replace('\r', "\n")
 }

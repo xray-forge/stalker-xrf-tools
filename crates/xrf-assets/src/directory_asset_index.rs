@@ -13,6 +13,13 @@ pub struct DirectoryAssetIndex {
 }
 
 impl DirectoryAssetIndex {
+  /// Recursively indexes files below `root` in relative-path order.
+  ///
+  /// Directory paths and symbolic links to directories are not added as assets.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when the tree cannot be traversed or a file path cannot be made relative to `root`.
   pub fn read(root: impl AsRef<Path>) -> XrfResult<Self> {
     let root: &Path = root.as_ref();
 
@@ -46,18 +53,22 @@ impl DirectoryAssetIndex {
     })
   }
 
+  /// Returns the root from which relative paths are measured.
   pub fn root(&self) -> &Path {
     &self.root
   }
 
+  /// Iterates over all indexed files in relative-path order.
   pub fn assets(&self) -> impl Iterator<Item = &DirectoryAsset> {
     self.assets.iter()
   }
 
+  /// Finds an exact root-relative filesystem path.
   pub fn find(&self, relative_path: &Path) -> Option<&DirectoryAsset> {
     self.assets.iter().find(|asset| asset.relative_path() == relative_path)
   }
 
+  /// Iterates over assets below a root-relative path prefix.
   pub fn with_prefix(&self, prefix: &Path) -> impl Iterator<Item = &DirectoryAsset> {
     self
       .assets
@@ -65,6 +76,7 @@ impl DirectoryAssetIndex {
       .filter(move |asset| asset.relative_path().starts_with(prefix))
   }
 
+  /// Iterates over assets whose filesystem extension equals `extension`.
   pub fn with_extension(&self, extension: &OsStr) -> impl Iterator<Item = &DirectoryAsset> {
     self
       .assets

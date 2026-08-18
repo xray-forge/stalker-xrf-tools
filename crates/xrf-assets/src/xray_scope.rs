@@ -69,6 +69,7 @@ impl XrayScope {
     &self.selection
   }
 
+  /// Returns the normalized logical subtree restriction, if any.
   pub fn prefix(&self) -> Option<&str> {
     self.prefix.as_deref()
   }

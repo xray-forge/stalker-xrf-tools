@@ -6,8 +6,7 @@ use crate::data::visual_bounds::{VisualBounds, VisualBox, VisualSphere};
 ///
 /// X-Ray renders left handed and three.js is right handed, and negating Z is the mirror that
 /// reconciles them. A mirror reverses the orientation of every triangle, which is why geometry that
-/// goes through here must also have its winding swapped; see
-/// [`super::visual_packer::reverse_triangle_winding`].
+/// goes through here must also have its winding swapped by the packer's triangle-winding correction.
 pub fn convert_vector(vector: &Vector3d) -> Vector3d {
   Vector3d {
     x: vector.x,

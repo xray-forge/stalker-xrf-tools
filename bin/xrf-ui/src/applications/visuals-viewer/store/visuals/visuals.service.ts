@@ -143,6 +143,8 @@ export class VisualsService {
 
   /**
    * Load a visual and put it on screen.
+   *
+   * @param source - Visual source to open.
    */
   private async open(source: VisualSource): Promise<void> {
     this.log.info("Opening visual:", describeVisualSource(source));
@@ -181,6 +183,9 @@ export class VisualsService {
    *
    * Throws rather than reporting, so the caller that started the open owns the failure and there is one
    * place that turns it into state.
+   *
+   * @param selected - Typed description and source returned by the backend.
+   * @param request - Request identity used to discard stale geometry.
    */
   private async loadGeometry(selected: SelectedVisualDescription, request: number = ++this.requestId): Promise<void> {
     const buffer: ArrayBuffer = await visualsRawCommands.readGeometry(selected.source);
@@ -212,6 +217,9 @@ export class VisualsService {
 
   /**
    * Fetch each located texture and apply it as it lands.
+   *
+   * @param selected - Open visual whose textures should be loaded.
+   * @param request - Request identity used to discard stale textures.
    */
   private async loadTextures(selected: SelectedVisualDescription, request: number): Promise<void> {
     const loadable: Array<SubmeshTexture & { reference: string }> = toLoadableTextures(selected.textures);
@@ -229,6 +237,11 @@ export class VisualsService {
 
   /**
    * One texture, from bytes to an uploaded texture or to a stated reason it is not one.
+   *
+   * @param source - Visual source that declared the texture.
+   * @param texture - Loadable texture reference and submesh identity.
+   * @param fallbackRoot - Project gamedata root searched after the visual's own root.
+   * @param request - Request identity used to discard a late response.
    */
   private async loadTexture(
     source: VisualSource,

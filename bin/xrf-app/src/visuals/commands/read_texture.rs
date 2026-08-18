@@ -13,8 +13,8 @@ use crate::visuals::textures::texture_resolver::VisualTextureResolver;
 
 /// Returns the untouched DDS bytes for a declared submesh texture.
 ///
-/// The command validates the reference against the requested visual before reading through the VFS. VFS reads support
-/// both loose and archived textures, and preserving the DDS payload lets `DDSLoader` upload its compressed mip chain.
+/// The command validates the reference against the requested visual before reading it from the active texture scope.
+/// Preserving the DDS payload lets `DDSLoader` upload its compressed mip chain.
 #[tauri::command(rename = "read_texture")]
 pub async fn visuals_read_texture(
   source: VisualSource,
