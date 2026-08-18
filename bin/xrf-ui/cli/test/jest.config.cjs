@@ -29,8 +29,8 @@ module.exports = {
   transform: {
     "^.+\\.[jt]sx?$": path.resolve(__dirname, "./transformer.cjs"),
   },
-  // Every dependency here ships a CJS build; re-compiling them detaches runtimes from their peers.
-  transformIgnorePatterns: ["/node_modules/"],
+  // Every dependency here ships a CJS build and re-compiling them detaches runtimes from their peers
+  transformIgnorePatterns: ["^(?!.*/three/).*/node_modules/"],
   verbose: true,
   workerIdleMemoryLimit: "512MB",
 };
