@@ -8,6 +8,7 @@ use std::{env, process};
 use clap::Command;
 use commands::archive::pack_archive::PackArchiveCommand;
 use commands::archive::unpack_archive::UnpackArchiveCommand;
+use commands::assets::list_assets::ListAssetsCommand;
 use commands::externs::export_externs::ExportExternsCommand;
 use commands::ltx::verify_ltx::VerifyLtxCommand;
 use commands::ogf::info_ogf::InfoOgfCommand;
@@ -92,6 +93,8 @@ pub fn setup_subcommands() -> Vec<Box<dyn GenericCommand>> {
     // Archive:
     PackArchiveCommand::new_box(),
     UnpackArchiveCommand::new_box(),
+    // Assets:
+    ListAssetsCommand::new_box(),
     // Externs:
     ExportExternsCommand::new_box(),
     // Gamedata:

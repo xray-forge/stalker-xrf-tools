@@ -11,6 +11,9 @@ use crate::project::archive_project::ArchiveProject;
 
 /// Mounts an archive volume set as a read-only asset source.
 ///
+/// Directory paths are scanned nonrecursively, matching `recurs = false` archive aliases and avoiding duplicate
+/// subdirectory mounts.
+///
 /// [`ArchiveProject`] already merges a volume set into one name table with the later volume winning, which matches how the
 /// engine registers them, so this adds only the logical-path keying a VFS lookup needs.
 pub struct ArchiveAssetSource {
@@ -26,7 +29,7 @@ impl ArchiveAssetSource {
   /// Opens a volume set, or a single volume, at a path.
   pub fn read(path: impl AsRef<Path>) -> XrfResult<Self> {
     let path: &Path = path.as_ref();
-    let project: ArchiveProject = ArchiveProject::new(&path)?;
+    let project: ArchiveProject = ArchiveProject::new_shallow(&path)?;
 
     let entries: HashMap<String, String> = project
       .files
@@ -127,6 +130,14 @@ impl XrayAssetSource for ArchiveAssetSource {
   fn write(&self, path: &str, _bytes: &[u8]) -> XrfResult<()> {
     Err(XrfError::new_read_error(format!(
       "cannot write '{path}': archive '{}' is read only",
+      self.label
+    )))
+  }
+
+  /// Always fails. A volume cannot gain an entry; an override belongs in a loose mount in front of it.
+  fn create(&self, path: &str, _bytes: &[u8]) -> XrfResult<()> {
+    Err(XrfError::new_read_error(format!(
+      "cannot create '{path}': archive '{}' is read only",
       self.label
     )))
   }

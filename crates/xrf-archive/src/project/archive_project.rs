@@ -25,7 +25,28 @@ pub struct ArchiveProject {
 }
 
 impl ArchiveProject {
+  /// Reads one archive file or all archive volumes recursively under a directory.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when no archive volume is found or a volume cannot be read.
   pub fn new<P: AsRef<Path>>(path: &P) -> XrfResult<Self> {
+    Self::read_to_depth(path, usize::MAX)
+  }
+
+  /// Reads one archive file or archive volumes directly under a directory.
+  ///
+  /// Use this for nonrecursive `fsgame.ltx` archive aliases; recursive discovery would include subdirectories planned as
+  /// separate mounts.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when no archive volume is found or a volume cannot be read.
+  pub fn new_shallow<P: AsRef<Path>>(path: &P) -> XrfResult<Self> {
+    Self::read_to_depth(path, 1)
+  }
+
+  fn read_to_depth<P: AsRef<Path>>(path: &P, depth: usize) -> XrfResult<Self> {
     let mut archives: Vec<ArchiveDescriptor> = Vec::new();
     let mut files: HashMap<String, ArchiveFileDescriptor> = HashMap::new();
 
@@ -36,7 +57,7 @@ impl ArchiveProject {
     } else {
       log::info!("Reading archive directory: {}", path.as_ref().display());
 
-      for entry in WalkDir::new(path).into_iter().filter_map(Result::ok) {
+      for entry in WalkDir::new(path).max_depth(depth).into_iter().filter_map(Result::ok) {
         let path: &Path = entry.path();
 
         if ArchiveDescriptor::is_valid_db_path(&path) {

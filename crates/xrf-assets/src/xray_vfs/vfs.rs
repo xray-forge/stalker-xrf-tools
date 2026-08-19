@@ -1,5 +1,5 @@
 use std::collections::HashSet;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use xrf_error::{XrfError, XrfResult};
 
@@ -214,6 +214,77 @@ impl XrayVfs {
     Err(XrfError::new_asset_error(format!(
       "cannot write '{logical_path}': no mount in scope holds it"
     )))
+  }
+
+  /// Creates a loose override in the highest-priority writable mount in scope.
+  ///
+  /// Unlike [`Self::write`], this creates a new entry instead of modifying the current winner. The mount is rebuilt so the
+  /// override resolves immediately.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when the path is invalid or out of scope, no writable mount can contain it, the target is already
+  /// indexed there, creation or remounting fails, or the new entry does not resolve.
+  pub fn write_override(
+    &mut self,
+    scope: &XrayScope,
+    logical_path: &str,
+    bytes: &[u8],
+  ) -> XrfResult<XrayAssetLocation> {
+    let logical_path: String = normalize(logical_path)?;
+
+    if !Self::within_prefix(scope, &logical_path) {
+      return Err(XrfError::new_asset_error(format!(
+        "cannot override '{logical_path}': it falls outside the scope's subtree"
+      )));
+    }
+
+    let Some((id, source_path)) = self
+      .scoped(scope)
+      .find(|mount| mount.is_writable())
+      .map(|mount| (mount.id(), mount.to_source_path(&logical_path)))
+    else {
+      return Err(XrfError::new_asset_error(format!(
+        "cannot override '{logical_path}': no writable mount is in scope"
+      )));
+    };
+
+    let Some(source_path) = source_path else {
+      return Err(XrfError::new_asset_error(format!(
+        "cannot override '{logical_path}': it falls outside the writable mount's base"
+      )));
+    };
+
+    self.mounts[id.0].source().create(&source_path, bytes)?;
+    self.remount(id)?;
+
+    self.find(scope, &logical_path)?.ok_or_else(|| {
+      XrfError::new_asset_error(format!("override '{logical_path}' did not resolve after being written"))
+    })
+  }
+
+  /// Reindexes a directory mount so newly created files resolve.
+  ///
+  /// Non-directory mounts are left unchanged.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when the mount does not exist or its root can no longer be indexed.
+  pub fn remount(&mut self, id: XrayMountId) -> XrfResult<()> {
+    let Some(mount) = self.mounts.get(id.0) else {
+      return Err(XrfError::new_asset_error(format!("no mount {id:?} to remount")));
+    };
+
+    if mount.kind() != XrayMountKind::Directory {
+      return Ok(());
+    }
+
+    let base: String = mount.base().to_string();
+    let root: PathBuf = mount.source().root_path().to_path_buf();
+
+    self.mounts[id.0] = XrayMount::new(id, &base, Box::new(XrayDirectorySource::read(&root)?))?;
+
+    Ok(())
   }
 
   /// Resolves a texture reference under the `textures` namespace after appending `.dds` or replacing its authoring extension.

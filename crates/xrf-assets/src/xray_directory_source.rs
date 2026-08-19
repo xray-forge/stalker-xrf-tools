@@ -107,6 +107,32 @@ impl XrayAssetSource for XrayDirectorySource {
       .map_err(|error| XrfError::new_asset_error(format!("failed to write '{}': {error}", absolute.display())))
   }
 
+  /// Creates a loose file absent from the mount-time index, including any missing parent directories.
+  ///
+  /// The mount-time index is unchanged.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when the path is already indexed or its directories or file cannot be created.
+  fn create(&self, path: &str, bytes: &[u8]) -> XrfResult<()> {
+    if self.contains(path) {
+      return Err(XrfError::new_asset_error(format!(
+        "asset '{path}' already exists under root {}",
+        self.root().display()
+      )));
+    }
+
+    let absolute: PathBuf = self.root().join(path.replace('\\', "/"));
+
+    if let Some(parent) = absolute.parent() {
+      fs::create_dir_all(parent)
+        .map_err(|error| XrfError::new_asset_error(format!("failed to create '{}': {error}", parent.display())))?;
+    }
+
+    fs::write(&absolute, bytes)
+      .map_err(|error| XrfError::new_asset_error(format!("failed to create '{}': {error}", absolute.display())))
+  }
+
   fn entries<'a>(&'a self, prefix: Option<&'a str>) -> Box<dyn Iterator<Item = String> + 'a> {
     Box::new(
       self

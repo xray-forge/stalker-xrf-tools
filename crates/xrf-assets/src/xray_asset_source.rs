@@ -50,6 +50,11 @@ pub trait XrayAssetSource: Debug + Send + Sync {
   /// Overwrites an existing entry when [`Self::is_writable`] is true.
   fn write(&self, path: &str, bytes: &[u8]) -> XrfResult<()>;
 
+  /// Creates an entry the source does not currently expose, when writable.
+  ///
+  /// Implementations may leave mount-time indexes stale. [`crate::XrayVfs::write_override`] remounts after creation.
+  fn create(&self, path: &str, bytes: &[u8]) -> XrfResult<()>;
+
   /// Enumerates source-relative logical paths, optionally restricted to a component prefix.
   fn entries<'a>(&'a self, prefix: Option<&'a str>) -> Box<dyn Iterator<Item = String> + 'a>;
 }

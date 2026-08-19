@@ -1,4 +1,5 @@
 pub(crate) mod archive;
+pub(crate) mod assets;
 pub(crate) mod externs;
 pub(crate) mod gamedata;
 pub(crate) mod ltx;

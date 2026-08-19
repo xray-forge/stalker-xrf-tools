@@ -1,0 +1,153 @@
+use std::path::PathBuf;
+
+use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
+use xrf_output::OutputOptions;
+
+use crate::commands::assets::list_assets::asset_lister::{AssetLister, AssetListing};
+use crate::generic_command::{CommandResult, GenericCommand};
+use crate::output::TerminalOutput;
+
+/// Maximum entries printed per section before reporting the omitted count.
+const PRINT_LIMIT: usize = 40;
+
+#[derive(Default)]
+pub struct ListAssetsCommand;
+
+impl GenericCommand for ListAssetsCommand {
+  fn name(&self) -> &'static str {
+    "list-assets"
+  }
+
+  fn init(&self) -> Command {
+    Command::new(self.name())
+      .about("List assets resolved by an installation or gamedata tree")
+      .arg(
+        Arg::new("path")
+          .help("Path to a game installation or a gamedata tree")
+          .short('p')
+          .long("path")
+          .required(true)
+          .value_parser(value_parser!(PathBuf)),
+      )
+      .arg(
+        Arg::new("prefix")
+          .help("Limit to one logical subtree, such as configs or textures\\wpn")
+          .long("prefix")
+          .value_parser(value_parser!(String)),
+      )
+      .arg(
+        Arg::new("loose")
+          .help("List only loose files, ignoring archived entries")
+          .long("loose")
+          .action(ArgAction::SetTrue),
+      )
+      .arg(
+        Arg::new("shadowed")
+          .help("Also report entries hidden by a higher-priority mount")
+          .long("shadowed")
+          .action(ArgAction::SetTrue),
+      )
+      .arg(
+        Arg::new("silent")
+          .help("Disable any logging")
+          .short('s')
+          .long("silent")
+          .action(ArgAction::SetTrue),
+      )
+      .arg(
+        Arg::new("verbose")
+          .help("Turn on verbose logging")
+          .short('v')
+          .long("verbose")
+          .action(ArgAction::SetTrue),
+      )
+  }
+
+  /// Reports the assets a path resolves and their source mounts.
+  fn execute(&self, matches: &ArgMatches) -> CommandResult {
+    let path: &PathBuf = matches
+      .get_one::<_>("path")
+      .expect("Expected valid path to be provided");
+    let prefix: Option<&String> = matches.get_one::<_>("prefix");
+
+    let output: OutputOptions = TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
+
+    let listing: AssetListing = AssetLister::new(path)
+      .with_prefix(prefix.map(String::as_str))
+      .with_loose_only(matches.get_flag("loose"))
+      .with_shadowed(matches.get_flag("shadowed"))
+      .run()?;
+
+    xrf_output::info!(output, "Listing {}", listing.origin);
+
+    for mount in &listing.mounts {
+      xrf_output::info!(output, "  {mount}");
+    }
+
+    Self::print_entries(&output, &listing);
+
+    if matches.get_flag("shadowed") {
+      Self::print_shadowed(&output, &listing);
+    }
+
+    xrf_output::success!(
+      output,
+      "{} asset(s) across {} mount(s) in {}ms",
+      listing.entries.len(),
+      listing.mounts.len(),
+      listing.duration.as_millis()
+    );
+
+    Ok(())
+  }
+}
+
+impl ListAssetsCommand {
+  /// Prints winning entries up to [`PRINT_LIMIT`] and reports the omitted count.
+  fn print_entries(output: &OutputOptions, listing: &AssetListing) {
+    for location in listing.entries.iter().take(PRINT_LIMIT) {
+      xrf_output::info!(
+        output,
+        "  {} [{}]",
+        location.logical_path(),
+        location.describe_container()
+      );
+    }
+
+    if listing.entries.len() > PRINT_LIMIT {
+      xrf_output::info!(
+        output,
+        "  ... {} more not printed, narrow with --prefix",
+        listing.entries.len() - PRINT_LIMIT
+      );
+    }
+  }
+
+  /// Prints shadowed entries up to [`PRINT_LIMIT`] and reports the omitted count.
+  fn print_shadowed(output: &OutputOptions, listing: &AssetListing) {
+    if listing.shadowed.is_empty() {
+      xrf_output::info!(output, "Nothing is shadowed in this scope");
+
+      return;
+    }
+
+    xrf_output::warning!(output, "{} entry(ies) are shadowed:", listing.shadowed.len());
+
+    for location in listing.shadowed.iter().take(PRINT_LIMIT) {
+      xrf_output::warning!(
+        output,
+        "  {} hidden in [{}]",
+        location.logical_path(),
+        location.describe_container()
+      );
+    }
+
+    if listing.shadowed.len() > PRINT_LIMIT {
+      xrf_output::warning!(
+        output,
+        "  ... {} more not printed",
+        listing.shadowed.len() - PRINT_LIMIT
+      );
+    }
+  }
+}
