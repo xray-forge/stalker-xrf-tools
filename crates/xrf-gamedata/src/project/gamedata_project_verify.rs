@@ -52,14 +52,7 @@ mod tests {
         &[],
       )
       .expect("create test assets"),
-      ltx_project: LtxProject {
-        root: PathBuf::new(),
-        ltx_file_entries: Vec::new(),
-        ltx_files: Vec::new(),
-        ltx_scheme_files: Vec::new(),
-        ltx_scheme_file_entries: Vec::new(),
-        ltx_scheme_declarations: Default::default(),
-      },
+      ltx_project: LtxProject::empty(PathBuf::new()),
     }
   }
 

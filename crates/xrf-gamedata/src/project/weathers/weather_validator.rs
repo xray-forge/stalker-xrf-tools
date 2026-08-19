@@ -35,14 +35,14 @@ pub fn verify_weather_findings_with_definitions(
   definitions: &WeatherDefinitions,
   definition_load_errors: &mut BTreeSet<String>,
 ) -> XrfResult<Vec<Finding>> {
-  let ltx: Ltx = match Ltx::read_from_file_full(config_path) {
+  let ltx: Ltx = match project.ltx_project.read_full(config_path) {
     Ok(ltx) => ltx,
     Err(error) => {
       xrf_output::error!(options.output, "Could not open weather LTX: {}", error);
 
       return Ok(vec![GamedataFindingFactory::for_asset(
         GamedataVerificationRule::WeathersValidation,
-        config_path,
+        project.ltx_project.path_of(config_path),
         format!("Could not open weather LTX: {error}"),
       )]);
     }

@@ -1,0 +1,98 @@
+//! Assembles a project from a directory and works out its entry points.
+//!
+//! Paths are **logical**, relative to the project's mount, since the project reads through a VFS whether its configs are
+//! loose or archived.
+
+use std::fs;
+use std::path::PathBuf;
+
+use xrf_error::XrfResult;
+
+use crate::project::ltx_project::LtxProject;
+
+fn create_root(name: &str) -> XrfResult<PathBuf> {
+  let root: PathBuf = std::env::temp_dir().join(format!("xrf-ltx-project-{name}-{}", std::process::id()));
+
+  if root.exists() {
+    fs::remove_dir_all(&root)?;
+  }
+
+  fs::create_dir_all(&root)?;
+
+  Ok(root)
+}
+
+#[test]
+fn does_not_treat_wildcard_included_files_as_entries() -> XrfResult {
+  let root: PathBuf = create_root("wildcard")?;
+  let sections: PathBuf = root.join("sections");
+
+  fs::create_dir_all(&sections)?;
+  fs::write(root.join("root.ltx"), "#include \"sections\\section_*.ltx\"\n")?;
+  fs::write(sections.join("section_first.ltx"), "[first]\n")?;
+  fs::write(sections.join("section_second.ltx"), "[second]\n")?;
+
+  let project: LtxProject = LtxProject::open_at_path(&root)?;
+
+  assert_eq!(project.ltx_file_entries, vec![PathBuf::from("root.ltx")]);
+  assert_eq!(project.ltx_files.len(), 3, "every config is still listed");
+
+  fs::remove_dir_all(root)?;
+
+  Ok(())
+}
+
+#[test]
+fn does_not_treat_a_named_included_file_as_an_entry() -> XrfResult {
+  let root: PathBuf = create_root("named")?;
+
+  fs::write(root.join("root.ltx"), "#include \"included.ltx\"\n")?;
+  fs::write(root.join("included.ltx"), "[section]\n")?;
+
+  let project: LtxProject = LtxProject::open_at_path(&root)?;
+
+  assert_eq!(project.ltx_file_entries, vec![PathBuf::from("root.ltx")]);
+
+  fs::remove_dir_all(root)?;
+
+  Ok(())
+}
+
+#[test]
+fn renders_a_loose_path_for_a_person_and_reads_it_through_the_project() -> XrfResult {
+  // What keeps reports reading as they did before the project moved onto a VFS: a logical path is stored, an absolute one is
+  // shown, and only the project knows how to open it.
+  let root: PathBuf = create_root("paths")?;
+
+  fs::write(root.join("root.ltx"), "[section]\nvalue = 1\n")?;
+
+  let project: LtxProject = LtxProject::open_at_path(&root)?;
+  let entry: &PathBuf = project.ltx_file_entries.first().expect("one entry");
+
+  assert_eq!(entry, &PathBuf::from("root.ltx"));
+  assert_eq!(project.path_of(entry), root.join("root.ltx"));
+  assert_eq!(project.physical_path_of(entry), Some(root.join("root.ltx")));
+  assert_eq!(
+    project.read_full(entry)?.get_from("section", "value"),
+    Some("1"),
+    "the project reads its own files"
+  );
+
+  fs::remove_dir_all(root)?;
+
+  Ok(())
+}
+
+#[test]
+fn an_empty_project_holds_nothing_and_still_answers() -> XrfResult {
+  let project: LtxProject = LtxProject::empty(PathBuf::from("C:\\gamedata\\configs"));
+
+  assert!(project.ltx_files.is_empty());
+  assert!(project.ltx_file_entries.is_empty());
+  assert!(
+    project.physical_path_of(&PathBuf::from("system.ltx")).is_none(),
+    "nothing is mounted, so nothing resolves"
+  );
+
+  Ok(())
+}

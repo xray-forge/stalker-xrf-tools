@@ -1,4 +1,4 @@
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::time::Instant;
 
 use fxhash::FxBuildHasher;
@@ -22,6 +22,8 @@ impl LtxProject {
 
     // For each file entry in the project:
     for entry in &self.ltx_file_entries {
+      // Reported by the path a person can act on: the file on disk when it is loose, the logical path when it is archived.
+      let reported: PathBuf = self.path_of(entry);
       // Do not check scheme definitions for scheme files - makes no sense.
       if Self::is_ltx_scheme_path(entry) {
         continue;
@@ -29,7 +31,7 @@ impl LtxProject {
         result.total_files += 1;
       }
 
-      let ltx: Ltx = Ltx::read_from_file_full(entry)?;
+      let ltx: Ltx = self.read_full(entry)?;
 
       // For each section in file:
       for (section_name, section) in &ltx {
@@ -58,7 +60,7 @@ impl LtxProject {
                 xrf_output::verbose!(
                   options.output,
                   "Checking {} [{}] {}",
-                  entry.display(),
+                  reported.display(),
                   section_name,
                   field_name
                 );
@@ -74,7 +76,7 @@ impl LtxProject {
                         section_name,
                         field_name,
                         message,
-                        entry.to_str().unwrap(),
+                        reported.to_str().unwrap(),
                       ));
                     }
                     error => return Err(error),
@@ -87,7 +89,7 @@ impl LtxProject {
                   section_name,
                   field_name,
                   "Unexpected field, definition is required in strict mode",
-                  entry.to_str().unwrap(),
+                  reported.to_str().unwrap(),
                 ));
               }
             }
@@ -101,7 +103,7 @@ impl LtxProject {
                     section_name,
                     field_name,
                     "Required field was not provided",
-                    entry.to_str().unwrap(),
+                    reported.to_str().unwrap(),
                   ));
                 }
               }
@@ -113,7 +115,7 @@ impl LtxProject {
               section_name,
               "*",
               format!("Required schema '{scheme_name}' definition is not found"),
-              entry.to_str().unwrap(),
+              reported.to_str().unwrap(),
             ));
           }
 

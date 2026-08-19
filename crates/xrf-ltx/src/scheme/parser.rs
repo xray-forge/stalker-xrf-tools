@@ -1,6 +1,7 @@
 use std::path::PathBuf;
 
 use indexmap::map::Entry;
+use xrf_assets::{XrayScope, XrayVfs};
 use xrf_error::{XrfError, XrfResult};
 
 use crate::file::file_configuration::constants::{LTX_SCHEME_FIELD, LTX_SCHEME_STRICT_FIELD, LTX_SYMBOL_SCHEME};
@@ -16,12 +17,16 @@ use crate::scheme::section_scheme::LtxSectionScheme;
 pub struct LtxSchemeParser {}
 
 impl LtxSchemeParser {
-  /// Parse LTX sections scheme definitions from list of files.
-  pub fn parse_from_files(files: &[PathBuf]) -> XrfResult<LtxSectionSchemes> {
+  /// Parse LTX sections scheme definitions from a list of logical paths in a mounted VFS.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when a scheme cannot be read, or declares a section without the `$` prefix.
+  pub fn parse_from_vfs(vfs: &XrayVfs, scope: &XrayScope, files: &[PathBuf]) -> XrfResult<LtxSectionSchemes> {
     let mut schemes: LtxSectionSchemes = Default::default();
 
     for file in files {
-      let ltx: Ltx = Ltx::read_from_path(file)?.into_included()?.into_inherited()?;
+      let ltx: Ltx = Ltx::read_from_vfs_full(vfs, scope, &file.to_string_lossy().replace('/', "\\"))?;
 
       for (name, section) in &ltx {
         if !name.starts_with(LTX_SYMBOL_SCHEME) {
