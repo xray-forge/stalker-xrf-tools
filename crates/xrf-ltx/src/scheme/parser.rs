@@ -17,11 +17,11 @@ use crate::scheme::section_scheme::LtxSectionScheme;
 pub struct LtxSchemeParser {}
 
 impl LtxSchemeParser {
-  /// Parse LTX sections scheme definitions from a list of logical paths in a mounted VFS.
+  /// Parses LTX section schemes from logical paths in a mounted VFS.
   ///
   /// # Errors
   ///
-  /// Returns an error when a scheme cannot be read, or declares a section without the `$` prefix.
+  /// Returns an error when a scheme cannot be read or contains invalid, duplicate, or malformed declarations.
   pub fn parse_from_vfs(vfs: &XrayVfs, scope: &XrayScope, files: &[PathBuf]) -> XrfResult<LtxSectionSchemes> {
     let mut schemes: LtxSectionSchemes = Default::default();
 

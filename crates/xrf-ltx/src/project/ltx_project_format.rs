@@ -7,21 +7,25 @@ use crate::project::ltx_project_format_result::LtxProjectFormatResult;
 use crate::{LtxFormatOptions, LtxProject};
 
 impl LtxProject {
-  /// Format all LTX entries in current project.
+  /// Formats every project LTX file with explicit options.
+  ///
+  /// Returns an error instead of partially formatting a project when any config is archived.
   pub fn format_all_files_opt(&self, options: LtxFormatOptions) -> XrfResult<LtxProjectFormatResult> {
     LtxFilesFormatter::format_opt(&self.writable_files()?, options)
   }
 
-  /// Check format of all LTX entries in current project.
+  /// Checks every project LTX file with explicit options.
+  ///
+  /// Returns an error when any config is archived, matching [`Self::format_all_files_opt`].
   pub fn check_format_all_files_opt(&self, options: LtxFormatOptions) -> XrfResult<LtxProjectFormatResult> {
     LtxFilesFormatter::check_format_opt(&self.writable_files()?, options)
   }
 
-  /// The filesystem paths of this project's files, refusing when any of them has none.
+  /// Returns physical paths for every project file, refusing when one is not loose.
   ///
   /// Formatting rewrites a file in place, which an archived config cannot do. Refusing by name is deliberate: a project
   /// spanning an installation would otherwise format the loose handful and report success over thousands it never touched.
-  /// A caller that wants the loose subset should select it explicitly, as `xrf-cli format-ltx` does.
+  /// A caller that needs the loose subset must select it explicitly.
   fn writable_files(&self) -> XrfResult<Vec<PathBuf>> {
     let mut writable: Vec<PathBuf> = Vec::with_capacity(self.ltx_files.len());
 
@@ -40,12 +44,12 @@ impl LtxProject {
     Ok(writable)
   }
 
-  /// Format all LTX entries in current project.
+  /// Formats every project LTX file with default options.
   pub fn format_all_files(&self) -> XrfResult<LtxProjectFormatResult> {
     self.format_all_files_opt(LtxFormatOptions::default())
   }
 
-  /// Format all LTX entries in current project.
+  /// Checks every project LTX file with default options.
   pub fn check_format_all_files(&self) -> XrfResult<LtxProjectFormatResult> {
     self.check_format_all_files_opt(LtxFormatOptions::default())
   }

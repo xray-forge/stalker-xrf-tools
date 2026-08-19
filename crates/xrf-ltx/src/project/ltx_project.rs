@@ -11,37 +11,35 @@ use crate::file::types::LtxSectionSchemes;
 use crate::project::ltx_project_options::LtxProjectOptions;
 use crate::scheme::parser::LtxSchemeParser;
 
-/// Handler of LTX configs root.
-/// Iteration and filtering of de-duplicated ltx files.
-/// Parsing of validation schema and making sure LTX files are valid.
+/// An LTX project assembled from one VFS scope.
 ///
-/// Files are addressed by **logical** path, relative to the project's mount, so a project reads the same whether its configs
-/// are loose or inside archive volumes. Use [`Self::path_of`] to render one for a human and [`Self::read_full`] to read one;
-/// a logical path is not a filesystem path and must not be opened directly.
+/// Its files use the VFS's logical X-Ray paths, so callers do not depend on whether a config is loose or archived. Use
+/// [`Self::path_of`] for display and [`Self::read_full`] to read a file; a logical path is not a filesystem path.
 #[derive(Debug)]
 pub struct LtxProject {
-  /// Root path of the project.
+  /// Location shown in project output.
   pub root: PathBuf,
-  /// List of entry LTX files in the project, entry points that are not included in any file.
+  /// LTX entry points not included by another config in scope.
   pub ltx_file_entries: Vec<PathBuf>,
-  /// List of all LTX files in the project.
+  /// Every LTX logical path in scope.
   pub ltx_files: Vec<PathBuf>,
-  /// List of all LTX scheme files in the project.
+  /// Scheme-definition LTX paths in scope.
   pub ltx_scheme_files: Vec<PathBuf>,
-  /// List of all LTX scheme files in the project.
+  /// Scheme entry points not included by another config in scope.
   pub ltx_scheme_file_entries: Vec<PathBuf>,
-  /// Map of section schemes declared in the project.
+  /// Section schemes declared by scheme entry points.
   pub ltx_scheme_declarations: LtxSectionSchemes,
-  /// Sources the project reads through.
-  ///
-  /// A project opened at a path mounts that one directory, so there is one assembly rather than a filesystem variant beside
-  /// a VFS one.
+  /// Mounted sources that resolve project files.
   vfs: XrayVfs,
   scope: XrayScope,
 }
 
 impl LtxProject {
-  /// Initialize project on provided root.
+  /// Opens a project over one directory mounted at the logical root.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when the directory cannot be indexed or its project files cannot be assembled.
   pub fn open_at_path_opt<P: AsRef<Path>>(root: P, options: LtxProjectOptions) -> XrfResult<Self> {
     let root: &Path = root.as_ref();
     let mut vfs: XrayVfs = XrayVfs::new();
@@ -51,18 +49,18 @@ impl LtxProject {
     Self::assemble(root.to_path_buf(), vfs, XrayScope::all(), options)
   }
 
-  /// Initialize project on provided root with default options.
+  /// Opens a directory-backed project with default options.
   pub fn open_at_path<P: AsRef<Path>>(root: P) -> XrfResult<Self> {
     Self::open_at_path_opt(root, Default::default())
   }
 
-  /// Initialize project over already mounted sources, which is how an installation's configs are read.
+  /// Opens a project from an existing VFS scope.
   ///
-  /// @param root - What the project reports as its location; the mounts decide what it can actually see.
+  /// `root` is reported in user-facing output; the mounts and scope determine which files the project can read.
   ///
   /// # Errors
   ///
-  /// Returns an error when a config cannot be read, an include cannot be resolved, or a scheme will not parse.
+  /// Returns an error when a config cannot be read, an include cannot be resolved, or a scheme declaration is invalid.
   pub fn open_at_scope_opt(
     root: impl AsRef<Path>,
     vfs: XrayVfs,
@@ -72,7 +70,7 @@ impl LtxProject {
     Self::assemble(root.as_ref().to_path_buf(), vfs, scope, options)
   }
 
-  /// A project holding nothing, for a caller that needs the shape without a tree behind it.
+  /// Creates an empty project for callers that need the project shape without mounted files.
   pub fn empty(root: impl AsRef<Path>) -> Self {
     Self {
       ltx_file_entries: Vec::new(),
@@ -203,7 +201,7 @@ impl LtxProject {
       .is_some_and(|name| name == LTX_SCHEME_LTX_FILENAME || name.ends_with(LTX_SCHEME_EXTENSION))
   }
 
-  /// The sources this project reads through.
+  /// Returns the VFS that resolves this project's files.
   pub fn vfs(&self) -> &XrayVfs {
     &self.vfs
   }
@@ -212,10 +210,9 @@ impl LtxProject {
     &self.scope
   }
 
-  /// How one of this project's paths should be shown to a person.
+  /// Returns the user-facing path for one logical config.
   ///
-  /// A loose config answers with its filesystem path, so reports read exactly as they did before the project moved onto a
-  /// VFS. An archived one has no filesystem path and answers with its logical path, which is the only honest thing to print.
+  /// Loose configs use their filesystem path. Archived or missing configs use the supplied logical path.
   pub fn path_of(&self, logical_path: &Path) -> PathBuf {
     self
       .vfs
@@ -226,9 +223,9 @@ impl LtxProject {
       .unwrap_or_else(|| logical_path.to_path_buf())
   }
 
-  /// The filesystem path of one of this project's files, when it has one.
+  /// Returns a filesystem path when a loose config resolves.
   ///
-  /// Answers `None` for an archived config, which is what an operation that must rewrite a file in place has to check.
+  /// Returns `None` for archived or missing configs, so in-place operations can reject them.
   pub fn physical_path_of(&self, logical_path: &Path) -> Option<PathBuf> {
     self
       .vfs
@@ -238,7 +235,7 @@ impl LtxProject {
       .and_then(|location| location.physical_path())
   }
 
-  /// Reads one of this project's files with includes injected and inherited sections unwrapped.
+  /// Reads one project file with included files merged and inherited sections resolved.
   ///
   /// The project owns this rather than each caller reaching for `Ltx::read_from_file_full`, because only the project knows
   /// whether its files are loose or archived.
