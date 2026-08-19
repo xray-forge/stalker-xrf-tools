@@ -1,10 +1,10 @@
 use std::path::PathBuf;
 
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
-use xrf_assets::XrayScope;
 use xrf_error::XrfError;
 use xrf_ltx::{LtxProject, LtxProjectOptions, LtxProjectVerifyResult, LtxVerifyOptions};
 use xrf_output::OutputOptions;
+use xrf_vfs::XrayScope;
 
 use crate::commands::ltx::ltx_installation::mount_installation;
 use crate::generic_command::{CommandResult, GenericCommand};

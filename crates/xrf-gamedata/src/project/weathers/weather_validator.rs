@@ -1,10 +1,9 @@
 use std::collections::{BTreeSet, HashSet};
 use std::path::{Path, PathBuf};
 
-use xrf_assets::XrayPath;
-
 use xrf_error::XrfResult;
 use xrf_ltx::{Ltx, Section};
+use xrf_vfs::XrayPath;
 
 use super::weather_definitions::WeatherDefinitions;
 use super::weather_field_rules::{WEATHER_REQUIRED_FIELDS, is_valid_weather_field_value, parse_weather_time};

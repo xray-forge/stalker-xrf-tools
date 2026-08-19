@@ -11,7 +11,7 @@ use xrf_test_utils::utils::get_absolute_generated_test_resource_path;
 use crate::pack::archive_pack_config::{ArchivePackConfig, ArchivePackFolder, ArchivePackMode};
 use crate::pack::archive_pack_result::ArchivePackResult;
 use crate::pack::archive_packer::ArchivePacker;
-use crate::{ArchiveFileDescriptor, ArchiveProject};
+use xrf_vfs::{ArchiveFileDescriptor, ArchiveProject};
 
 /// A configuration fragment large enough that compressing it actually pays off.
 const CONFIG: &[u8] = b"[section]\nvalue = 1\nvalue = 1\nvalue = 1\nvalue = 1\nvalue = 1\nvalue = 1\nvalue = 1\n";

@@ -6811,7 +6811,6 @@ dependencies = [
  "tauri-plugin-shell",
  "tauri-specta",
  "xrf-archive",
- "xrf-assets",
  "xrf-db",
  "xrf-dds",
  "xrf-error",
@@ -6822,6 +6821,7 @@ dependencies = [
  "xrf-texture",
  "xrf-translation",
  "xrf-utils",
+ "xrf-vfs",
  "xrf-visual",
 ]
 
@@ -6838,25 +6838,12 @@ dependencies = [
  "serde",
  "specta",
  "walkdir",
- "xrf-assets",
  "xrf-error",
  "xrf-ltx",
  "xrf-lzhuf",
  "xrf-test-utils",
  "xrf-utils",
-]
-
-[[package]]
-name = "xrf-assets"
-version = "0.1.0"
-dependencies = [
- "log",
- "serde",
- "specta",
- "walkdir",
- "xrf-error",
- "xrf-test-utils",
- "xrf-utils",
+ "xrf-vfs",
 ]
 
 [[package]]
@@ -6883,7 +6870,6 @@ dependencies = [
  "tokio",
  "walkdir",
  "xrf-archive",
- "xrf-assets",
  "xrf-db",
  "xrf-dds",
  "xrf-error",
@@ -6894,6 +6880,7 @@ dependencies = [
  "xrf-report",
  "xrf-texture",
  "xrf-translation",
+ "xrf-vfs",
  "xrf-visual",
 ]
 
@@ -6973,7 +6960,6 @@ dependencies = [
  "rayon",
  "uuid",
  "walkdir",
- "xrf-assets",
  "xrf-chunk",
  "xrf-db",
  "xrf-dds",
@@ -6985,6 +6971,7 @@ dependencies = [
  "xrf-shaders",
  "xrf-sound",
  "xrf-utils",
+ "xrf-vfs",
  "xrf-xml",
 ]
 
@@ -6997,11 +6984,11 @@ dependencies = [
  "serde",
  "specta",
  "walkdir",
- "xrf-assets",
  "xrf-error",
  "xrf-output",
  "xrf-test-utils",
  "xrf-utils",
+ "xrf-vfs",
 ]
 
 [[package]]
@@ -7113,6 +7100,24 @@ dependencies = [
  "base64 0.23.1",
  "encoding_rs",
  "xrf-error",
+]
+
+[[package]]
+name = "xrf-vfs"
+version = "0.1.0"
+dependencies = [
+ "byteorder",
+ "crc32fast",
+ "log",
+ "lzokay",
+ "regex",
+ "serde",
+ "specta",
+ "walkdir",
+ "xrf-error",
+ "xrf-lzhuf",
+ "xrf-test-utils",
+ "xrf-utils",
 ]
 
 [[package]]

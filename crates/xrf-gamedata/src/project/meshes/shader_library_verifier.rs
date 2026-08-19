@@ -19,7 +19,7 @@ impl<'a> ShaderLibraryVerifier<'a> {
     let path: PathBuf = self
       .project
       .assets
-      .expected_absolute_path(xrf_assets::shader::SHADER_LIBRARY_LOGICAL_PATH)
+      .expected_absolute_path(xrf_vfs::shader::SHADER_LIBRARY_LOGICAL_PATH)
       .expect("fixed shader library path is valid");
 
     match ShaderLibraryFile::read_from_path(&path) {

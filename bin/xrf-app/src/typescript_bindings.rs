@@ -181,7 +181,7 @@ mod tests {
     let output = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../xrf-ui/src/core/bindings");
 
     export_types(&output.join("xrf-archive.ts"), &xrf_archive::typescript_bindings());
-    export_types(&output.join("xrf-assets.ts"), &xrf_assets::typescript_bindings());
+    export_types(&output.join("xrf-vfs.ts"), &xrf_vfs::typescript_bindings());
     export_types(&output.join("xrf-db.ts"), &xrf_db::typescript_bindings());
     export_types(&output.join("xrf-error.ts"), &xrf_error::typescript_bindings());
     export_types(&output.join("xrf-export.ts"), &xrf_export::typescript_bindings());

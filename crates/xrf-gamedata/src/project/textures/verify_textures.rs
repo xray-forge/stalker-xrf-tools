@@ -2,10 +2,10 @@ use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant};
 
 use rayon::prelude::*;
-use xrf_assets::XrayAssetType as AssetType;
 use xrf_db::{ThmFile, XRayByteOrder};
 use xrf_dds::DdsFile;
 use xrf_error::{XrfError, XrfResult};
+use xrf_vfs::XrayAssetType as AssetType;
 
 use crate::GamedataFindingFactory;
 use crate::project::textures::verify_textures_result::GamedataTexturesVerificationResult;

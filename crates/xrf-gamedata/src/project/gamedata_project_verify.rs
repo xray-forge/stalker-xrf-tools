@@ -39,8 +39,8 @@ impl GamedataProject {
 mod tests {
   use std::path::PathBuf;
 
-  use xrf_assets::{DirectoryAssetIndex, XrayAssetIndex};
   use xrf_ltx::LtxProject;
+  use xrf_vfs::{DirectoryAssetIndex, XrayAssetIndex};
 
   use super::GamedataProject;
   use crate::{GamedataProjectVerifyOptions, GamedataVerificationStatus, GamedataVerificationType};

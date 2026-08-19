@@ -1,7 +1,7 @@
 use std::time::Instant;
 
-use xrf_assets::XrayAssetType as AssetType;
 use xrf_error::XrfResult;
+use xrf_vfs::XrayAssetType as AssetType;
 
 use crate::project::sounds::sound_files_verifier::SoundFilesVerifier;
 use crate::project::sounds::sound_references_verifier::SoundReferencesVerifier;

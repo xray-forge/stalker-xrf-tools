@@ -3,7 +3,7 @@ use std::sync::MutexGuard;
 
 use tauri::State;
 use tauri::ipc::Response;
-use xrf_assets::XrayScope;
+use xrf_vfs::XrayScope;
 use xrf_visual::VisualPackage;
 
 use crate::types::TauriResult;

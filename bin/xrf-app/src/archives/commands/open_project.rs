@@ -1,7 +1,7 @@
 use std::path::Path;
 
 use tauri::State;
-use xrf_archive::ArchiveProject;
+use xrf_vfs::ArchiveProject;
 
 use crate::archives::state::ArchiveProjectState;
 use crate::types::TauriResult;

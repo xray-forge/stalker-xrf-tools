@@ -27,7 +27,7 @@ tauri-plugin-dialog = "2.7.2"
 tauri-plugin-fs = "2.5.1"
 tauri-plugin-shell = "2.3.5"
 xrf-archive = { workspace = true }
-xrf-assets = { workspace = true }
+xrf-vfs = { workspace = true }
 xrf-db = { workspace = true }
 xrf-dds = { workspace = true }
 xrf-error = { workspace = true }
@@ -51,7 +51,7 @@ typescript-bindings = [
     "specta-util",
     "tauri-specta",
     "xrf-archive/typescript-bindings",
-    "xrf-assets/typescript-bindings",
+    "xrf-vfs/typescript-bindings",
     "xrf-db/typescript-bindings",
     "xrf-error/typescript-bindings",
     "xrf-export/typescript-bindings",

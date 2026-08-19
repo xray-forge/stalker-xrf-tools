@@ -4,10 +4,11 @@ use std::io::Write;
 use std::path::{Path, PathBuf};
 
 use crc32fast::hash;
+use xrf_vfs::ArchiveFileDescriptor;
+use xrf_vfs::ArchiveProject;
+use xrf_vfs::ArchiveProjectReadPolicy;
 
-use crate::archive::archive_file_descriptor::ArchiveFileDescriptor;
-use crate::project::archive_project_read_policy::ArchiveProjectReadPolicy;
-use crate::{ArchiveExtractDirectoryResult, ArchiveProject, ArchiveUnpacker};
+use crate::{ArchiveExtractDirectoryResult, ArchiveUnpacker};
 
 struct Entry {
   name: &'static str,

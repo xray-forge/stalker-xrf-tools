@@ -1,5 +1,5 @@
 use serde::Serialize;
-use xrf_assets::XrayAssetLocation;
+use xrf_vfs::XrayAssetLocation;
 
 /// The texture the engine substitutes for an unresolved reference.
 ///

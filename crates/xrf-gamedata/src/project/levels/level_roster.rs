@@ -1,9 +1,9 @@
 use std::collections::BTreeSet;
 
 use uuid::Uuid;
-use xrf_assets::XrayAssetType as AssetType;
 use xrf_db::{GraphCrossTable, GraphLevel, SpawnFile, SpawnGraphsChunk, XRayByteOrder};
 use xrf_error::{XrfError, XrfResult};
+use xrf_vfs::XrayAssetType as AssetType;
 
 use crate::GamedataFindingFactory;
 use crate::project::levels::level_engine_constants::SPAWNS_DIRECTORY;

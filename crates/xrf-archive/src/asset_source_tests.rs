@@ -6,12 +6,12 @@
 use std::fs;
 use std::path::PathBuf;
 
-use xrf_assets::{XrayAssetContainer, XrayAssetSource, XrayMountKind, XrayScope, XrayVfs};
 use xrf_test_utils::utils::get_absolute_generated_test_resource_path;
+use xrf_vfs::ArchiveAssetSource;
+use xrf_vfs::{XrayAssetContainer, XrayAssetSource, XrayMountKind, XrayScope, XrayVfs};
 
 use crate::pack::archive_pack_config::{ArchivePackConfig, ArchivePackFolder};
 use crate::pack::archive_packer::ArchivePacker;
-use crate::project::archive_asset_source::ArchiveAssetSource;
 
 const TEXTURE: &[u8] = &[0x44, 0x44, 0x53, 0x20, 0x01, 0x02, 0x03, 0xfe];
 const CONFIG: &[u8] = b"[section]\nvalue = 1\n";

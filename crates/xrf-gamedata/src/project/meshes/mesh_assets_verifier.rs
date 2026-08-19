@@ -2,9 +2,9 @@ use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
 
 use rayon::prelude::*;
-use xrf_assets::XrayAssetType as AssetType;
 use xrf_db::{OgfFile, OmfFile, ShaderLibraryFile, XRayByteOrder};
 use xrf_error::{XrfError, XrfResult};
+use xrf_vfs::XrayAssetType as AssetType;
 
 use crate::GamedataFindingFactory;
 use crate::project::meshes::mesh_assets_verification_result::GamedataMeshAssetsVerificationResult;

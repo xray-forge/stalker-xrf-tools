@@ -2,9 +2,9 @@ use std::io;
 use std::io::ErrorKind;
 use std::path::{Path, PathBuf};
 
-use xrf_assets::{DirectoryAssetIndex, XrayAssetIndex};
 use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{LtxProject, LtxProjectOptions};
+use xrf_vfs::{DirectoryAssetIndex, XrayAssetIndex};
 
 use crate::project::gamedata_project_options::GamedataProjectReadOptions;
 

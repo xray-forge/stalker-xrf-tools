@@ -1,13 +1,12 @@
 use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant};
 
-use xrf_archive::mount_plan;
-use xrf_assets::{XrayAssetLocation, XrayMountKind, XrayMountPlan, XrayScope, XrayVfs, implied_install_root};
 use xrf_error::XrfResult;
+use xrf_vfs::{XrayAssetLocation, XrayMountKind, XrayMountMode, XrayScope, XrayVfs, open_vfs};
 
 /// Resolved assets and source metadata for one listing.
 pub struct AssetListing {
-  /// Description of whether the path was treated as an installation or a bare root.
+  /// How the path was interpreted when planning its mounts.
   pub origin: String,
   /// One line per mount, in search order.
   pub mounts: Vec<String>,
@@ -24,6 +23,7 @@ pub struct AssetListing {
 /// Entries identify their physical containers. Optional shadowed entries expose lower-priority copies of winning paths.
 pub struct AssetLister {
   path: PathBuf,
+  mode: XrayMountMode,
   prefix: Option<String>,
   is_loose_only: bool,
   is_shadowed_included: bool,
@@ -34,9 +34,19 @@ impl AssetLister {
     Self {
       is_loose_only: false,
       is_shadowed_included: false,
+      // A listing exists to show what resolves, so it looks for a containing installation by default; its archives are
+      // invisible to a directory walk and omitting them would answer with a fraction of the tree.
+      mode: XrayMountMode::ContainingInstallation,
       path: path.to_path_buf(),
       prefix: None,
     }
+  }
+
+  /// Sets how the path is interpreted when planning its mounts.
+  pub fn with_mode(mut self, mode: XrayMountMode) -> Self {
+    self.mode = mode;
+
+    self
   }
 
   /// Narrows the listing to one logical subtree, such as `configs` or `textures\wpn`.
@@ -68,12 +78,7 @@ impl AssetLister {
   /// a valid X-Ray logical path.
   pub fn run(&self) -> XrfResult<AssetListing> {
     let started: Instant = Instant::now();
-    let (origin, plan) = self.plan()?;
-
-    let mut vfs: XrayVfs = XrayVfs::new();
-
-    mount_plan(&mut vfs, &plan)?;
-
+    let vfs: XrayVfs = open_vfs(self.mode, &self.path)?;
     let scope: XrayScope = self.scope()?;
     let entries: Vec<XrayAssetLocation> = vfs.entries(&scope);
     let shadowed: Vec<XrayAssetLocation> = if self.is_shadowed_included {
@@ -96,33 +101,9 @@ impl AssetLister {
           )
         })
         .collect(),
-      origin,
+      origin: format!("{} {}", self.mode, self.path.display()),
       shadowed,
     })
-  }
-
-  /// Builds a mount plan and a description of its origin.
-  ///
-  /// A containing installation takes precedence over a bare root because its archives are not visible to a directory walk.
-  fn plan(&self) -> XrfResult<(String, XrayMountPlan)> {
-    if self.path.join(xrf_assets::FSGAME_FILE_NAME).is_file() {
-      return Ok((
-        format!("installation {}", self.path.display()),
-        XrayMountPlan::from_fsgame(&self.path)?,
-      ));
-    }
-
-    if let Some(install) = implied_install_root(&self.path) {
-      return Ok((
-        format!("installation {} around {}", install.display(), self.path.display()),
-        XrayMountPlan::from_fsgame(&install)?,
-      ));
-    }
-
-    Ok((
-      format!("root {}", self.path.display()),
-      XrayMountPlan::root(&self.path)?,
-    ))
   }
 
   fn scope(&self) -> XrfResult<XrayScope> {

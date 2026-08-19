@@ -1,6 +1,6 @@
 use indexmap::map::Entry;
-use xrf_assets::{XrayPath, XrayScope, XrayVfs};
 use xrf_error::{XrfError, XrfResult};
+use xrf_vfs::{XrayPath, XrayScope, XrayVfs};
 
 use crate::file::file_configuration::constants::{LTX_SCHEME_FIELD, LTX_SCHEME_STRICT_FIELD, LTX_SYMBOL_SCHEME};
 use crate::file::file_section::section::Section;

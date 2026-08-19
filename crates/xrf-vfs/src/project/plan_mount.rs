@@ -1,11 +1,11 @@
-use xrf_assets::{XrayDirectorySource, XrayMountId, XrayMountKind, XrayMountPlan, XrayPlannedMount, XrayVfs};
 use xrf_error::XrfResult;
 
 use crate::project::archive_asset_source::ArchiveAssetSource;
+use crate::{XrayDirectorySource, XrayMountId, XrayMountKind, XrayMountPlan, XrayPlannedMount, XrayVfs};
 
 /// Mounts each planned source that can be opened, in plan order.
 ///
-/// `xrf-assets` decides what to mount without depending on archive support; this function constructs the planned directory
+/// `xrf-vfs` decides what to mount without depending on archive support; this function constructs the planned directory
 /// and archive sources.
 ///
 /// Sources that fail to open or mount are logged and omitted. The returned mount IDs preserve plan order.

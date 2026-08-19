@@ -1,7 +1,8 @@
 use std::sync::MutexGuard;
 
 use tauri::State;
-use xrf_archive::{ArchiveExtractResult, ArchiveProject, ArchiveUnpacker};
+use xrf_archive::{ArchiveExtractResult, ArchiveUnpacker};
+use xrf_vfs::ArchiveProject;
 
 use crate::archives::state::ArchiveProjectState;
 use crate::types::TauriResult;

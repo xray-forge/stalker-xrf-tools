@@ -4,10 +4,10 @@ use std::time::{Duration, Instant};
 
 use rayon::iter::IntoParallelRefIterator;
 use rayon::prelude::*;
-use xrf_assets::XrayAssetType as AssetType;
 use xrf_error::{XrfError, XrfResult};
 use xrf_lua::verify_luajit_script;
 use xrf_utils::read_as_string_from_w1251_encoded;
+use xrf_vfs::XrayAssetType as AssetType;
 
 use crate::GamedataFindingFactory;
 use crate::project::scripts::runtime_script::is_runtime_script;

@@ -31,7 +31,7 @@ impl<'a> LevelReferencesVerifier<'a> {
   pub(crate) fn read_library(project: &GamedataProject) -> Option<ShaderLibraryFile> {
     project
       .assets
-      .expected_absolute_path(xrf_assets::shader::SHADER_LIBRARY_LOGICAL_PATH)
+      .expected_absolute_path(xrf_vfs::shader::SHADER_LIBRARY_LOGICAL_PATH)
       .ok()
       .and_then(|path| ShaderLibraryFile::read_from_path(&path).ok())
   }

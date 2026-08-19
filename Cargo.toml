@@ -4,7 +4,6 @@ members = [
   "bin/xrf-app",
   "bin/xrf-cli",
   "crates/xrf-archive",
-  "crates/xrf-assets",
   "crates/xrf-chunk",
   "crates/xrf-db",
   "crates/xrf-dds",
@@ -24,6 +23,7 @@ members = [
   "crates/xrf-typescript",
   "crates/xrf-translation",
   "crates/xrf-utils",
+  "crates/xrf-vfs",
   "crates/xrf-visual",
   "crates/xrf-xml",
 ]
@@ -54,7 +54,6 @@ tauri-specta = { version = "=2.0.0-rc.25", features = ["typescript"] }
 uuid = "1.24.0"
 walkdir = "2.5.0"
 xrf-archive = { path = "crates/xrf-archive" }
-xrf-assets = { path = "crates/xrf-assets" }
 xrf-chunk = { path = "crates/xrf-chunk" }
 xrf-db = { path = "crates/xrf-db" }
 xrf-dds = { path = "crates/xrf-dds" }
@@ -74,6 +73,7 @@ xrf-texture = { path = "crates/xrf-texture" }
 xrf-translation = { path = "crates/xrf-translation" }
 xrf-typescript = { path = "crates/xrf-typescript" }
 xrf-utils = { path = "crates/xrf-utils" }
+xrf-vfs = { path = "crates/xrf-vfs" }
 xrf-visual = { path = "crates/xrf-visual" }
 xrf-xml = { path = "crates/xrf-xml" }
 

@@ -3,11 +3,11 @@ use std::fmt;
 use std::fmt::{Debug, Formatter};
 use std::path::Path;
 
-use xrf_assets::xray_path::{is_component_prefix, normalize_logical};
-use xrf_assets::{XrayAssetContainer, XrayAssetSource, XrayMountKind};
 use xrf_error::{XrfError, XrfResult};
 
 use crate::project::archive_project::ArchiveProject;
+use crate::xray_path::{is_component_prefix, normalize_logical};
+use crate::{XrayAssetContainer, XrayAssetSource, XrayMountKind};
 
 /// Mounts an archive volume set as a read-only asset source.
 ///

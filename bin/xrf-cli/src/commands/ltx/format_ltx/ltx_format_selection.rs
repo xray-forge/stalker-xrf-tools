@@ -2,9 +2,9 @@ use std::collections::HashSet;
 use std::path::{Path, PathBuf};
 
 use walkdir::{DirEntry, WalkDir};
-use xrf_assets::{XrayAssetContainer, XrayAssetLocation, XrayScope, XrayVfs};
 use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::LTX_EXTENSION;
+use xrf_vfs::{XrayAssetContainer, XrayAssetLocation, XrayScope, XrayVfs};
 
 use crate::commands::ltx::ltx_installation::mount_installation;
 

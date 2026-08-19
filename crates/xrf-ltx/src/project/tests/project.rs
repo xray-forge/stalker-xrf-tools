@@ -6,8 +6,8 @@
 use std::fs;
 use std::path::PathBuf;
 
-use xrf_assets::XrayPath;
 use xrf_error::XrfResult;
+use xrf_vfs::XrayPath;
 
 use crate::project::ltx_project::LtxProject;
 

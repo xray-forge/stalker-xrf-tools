@@ -1,7 +1,7 @@
 use std::path::{Path, PathBuf};
 
-use xrf_assets::{XrayPath, XrayScope, XrayVfs};
 use xrf_error::{XrfError, XrfResult};
+use xrf_vfs::{XrayPath, XrayScope, XrayVfs};
 
 use crate::Ltx;
 use crate::file::file_configuration::constants::{

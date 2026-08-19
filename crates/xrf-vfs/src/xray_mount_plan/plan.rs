@@ -8,7 +8,7 @@ use crate::{FsgameFile, XrayMountKind, implied_asset_root, implied_install_root}
 
 /// One source to mount before it is opened or indexed.
 ///
-/// The plan remains plain data so `xrf-assets` can inspect an installation without depending on the crate that opens
+/// The plan remains plain data so `xrf-vfs` can inspect an installation without depending on the crate that opens
 /// archives.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct XrayPlannedMount {

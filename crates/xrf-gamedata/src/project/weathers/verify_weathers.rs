@@ -3,8 +3,8 @@
 use std::collections::BTreeSet;
 use std::time::Instant;
 
-use xrf_assets::XrayPath;
 use xrf_error::{XrfError, XrfResult};
+use xrf_vfs::XrayPath;
 
 use super::verify_weathers_result::GamedataWeathersVerificationResult;
 use super::weather_definitions::WeatherDefinitions;

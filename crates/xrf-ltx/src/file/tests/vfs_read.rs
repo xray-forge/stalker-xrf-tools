@@ -6,8 +6,8 @@
 use std::fs;
 use std::path::PathBuf;
 
-use xrf_assets::{XrayScope, XrayVfs};
 use xrf_test_utils::utils::get_absolute_generated_test_resource_path;
+use xrf_vfs::{XrayScope, XrayVfs};
 
 use crate::Ltx;
 

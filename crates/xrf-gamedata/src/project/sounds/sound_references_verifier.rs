@@ -1,9 +1,9 @@
 use std::collections::HashSet;
 use std::path::{Path, PathBuf};
 
-use xrf_assets::sound::sound_reference_name;
 use xrf_error::XrfResult;
 use xrf_ltx::{Ltx, LtxProject};
+use xrf_vfs::sound::sound_reference_name;
 use xrf_xml::{XmlDocument, XmlParseOptions};
 
 use crate::GamedataFindingFactory;

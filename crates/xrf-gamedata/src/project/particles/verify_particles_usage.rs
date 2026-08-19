@@ -2,10 +2,10 @@ use std::collections::HashSet;
 use std::path::{Path, PathBuf};
 use std::time::Instant;
 
-use xrf_assets::XrayAssetType as AssetType;
 use xrf_db::{ParticlesFile, SpawnFile, XRayByteOrder};
 use xrf_error::XrfResult;
 use xrf_ltx::{Ltx, LtxProject};
+use xrf_vfs::XrayAssetType as AssetType;
 
 use crate::GamedataFindingFactory;
 use crate::project::particles::verify_particles_usage_result::GamedataParticlesUsageVerificationResult;

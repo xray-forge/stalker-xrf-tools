@@ -2,9 +2,9 @@ use std::fs::File;
 use std::io::Read;
 use std::path::{Path, PathBuf};
 
-use xrf_assets::{XrayScope, XrayVfs};
 use xrf_error::XrfResult;
 use xrf_utils::{decode_bytes_to_string, get_windows1251_encoder, read_as_string_from_w1251_encoded};
+use xrf_vfs::{XrayScope, XrayVfs};
 
 use crate::Ltx;
 use crate::file::include::LtxIncludeConvertor;

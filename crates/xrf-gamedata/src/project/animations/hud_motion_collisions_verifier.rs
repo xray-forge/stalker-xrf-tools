@@ -2,10 +2,10 @@ use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
 use rayon::prelude::*;
-use xrf_assets::XrayAssetType as AssetType;
 use xrf_db::{OgfFile, OmfFile, XRayByteOrder};
 use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{Ltx, Section};
+use xrf_vfs::XrayAssetType as AssetType;
 
 use crate::GamedataFindingFactory;
 use crate::project::animations::hud_motion_collisions_verification_result::GamedataHudMotionCollisionsVerificationResult;

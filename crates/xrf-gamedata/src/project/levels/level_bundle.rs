@@ -62,7 +62,7 @@ impl<'a> LevelBundle<'a> {
   /// atlases shipped inside the bundle resolve even though they are absent from the shared texture
   /// tree. `$game_saves$` is probed in between, but it is not part of gamedata.
   pub(crate) fn resolves_texture(&self, reference: &str) -> bool {
-    let logical: String = xrf_assets::texture::dds_logical_path(reference);
+    let logical: String = xrf_vfs::texture::dds_logical_path(reference);
 
     let in_bundle: bool = self
       .project

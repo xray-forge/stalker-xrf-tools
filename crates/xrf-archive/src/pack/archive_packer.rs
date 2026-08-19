@@ -9,8 +9,8 @@ use lzokay::compress::Dict;
 use xrf_error::{XrfError, XrfResult};
 use xrf_lzhuf::compress;
 use xrf_utils::encode_string_to_w1251_bytes;
+use xrf_vfs::CHUNK_ID_COMPRESSED_MASK;
 
-use crate::archive::archive_constants::CHUNK_ID_COMPRESSED_MASK;
 use crate::pack::archive_pack_config::{ArchivePackConfig, ArchivePackMode};
 use crate::pack::archive_pack_result::ArchivePackResult;
 use crate::pack::archive_pack_source::{ArchivePackEntry, ArchivePackSource};

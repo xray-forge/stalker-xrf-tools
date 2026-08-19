@@ -2,6 +2,7 @@ use std::path::PathBuf;
 
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use xrf_output::OutputOptions;
+use xrf_vfs::XrayMountMode;
 
 use crate::commands::assets::list_assets::asset_lister::{AssetLister, AssetListing};
 use crate::generic_command::{CommandResult, GenericCommand};
@@ -28,6 +29,16 @@ impl GenericCommand for ListAssetsCommand {
           .long("path")
           .required(true)
           .value_parser(value_parser!(PathBuf)),
+      )
+      .arg(
+        Arg::new("source")
+          .help(
+            "How to read the path: auto treats it as an installation only when it declares one, directory ignores any \
+             declaration, installation requires one, containing-installation searches parent directories for one",
+          )
+          .long("source")
+          .default_value("containing-installation")
+          .value_parser(["auto", "directory", "installation", "containing-installation"]),
       )
       .arg(
         Arg::new("prefix")
@@ -72,7 +83,15 @@ impl GenericCommand for ListAssetsCommand {
 
     let output: OutputOptions = TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
 
+    let mode: XrayMountMode = XrayMountMode::try_from(
+      matches
+        .get_one::<String>("source")
+        .expect("Expected source mode to default")
+        .as_str(),
+    )?;
+
     let listing: AssetListing = AssetLister::new(path)
+      .with_mode(mode)
       .with_prefix(prefix.map(String::as_str))
       .with_loose_only(matches.get_flag("loose"))
       .with_shadowed(matches.get_flag("shadowed"))

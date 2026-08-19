@@ -3,7 +3,7 @@ use std::fs;
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicU64, Ordering};
 
-use xrf_assets::XrayPath;
+use xrf_vfs::XrayPath;
 
 use super::verify_weathers_result::GamedataWeathersVerificationResult;
 use super::weather_definitions::WeatherDefinitions;

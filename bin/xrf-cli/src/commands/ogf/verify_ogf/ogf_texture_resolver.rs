@@ -6,8 +6,8 @@
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
-use xrf_assets::{XrayScope, XrayVfs, implied_asset_root};
 use xrf_dds::{DdsFile, DdsFormat, DdsMetadata};
+use xrf_vfs::{XrayScope, XrayVfs, implied_asset_root};
 
 /// The outcome of resolving and reading one texture reference.
 pub enum TextureResolution {

@@ -32,7 +32,7 @@ pub(crate) fn read_descriptor_bytes(descriptor: &ArchiveFileDescriptor) -> XrfRe
 ///
 /// Shared by whole-archive unpacking and single file extraction so the two cannot drift on CRC
 /// verification or on how stored entries are streamed.
-pub(crate) fn write_descriptor_contents(target: &mut File, descriptor: &ArchiveFileDescriptor) -> XrfResult {
+pub fn write_descriptor_contents(target: &mut File, descriptor: &ArchiveFileDescriptor) -> XrfResult {
   let mut source: File = open_at_descriptor(descriptor)?;
 
   if descriptor.size_real != descriptor.size_compressed {

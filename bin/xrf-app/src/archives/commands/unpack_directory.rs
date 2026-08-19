@@ -1,6 +1,7 @@
 use std::path::Path;
 
-use xrf_archive::{ArchiveProject, ArchiveUnpackResult, ArchiveUnpacker};
+use xrf_archive::{ArchiveUnpackResult, ArchiveUnpacker};
+use xrf_vfs::ArchiveProject;
 
 use crate::types::TauriResult;
 use crate::utils::error_to_string;

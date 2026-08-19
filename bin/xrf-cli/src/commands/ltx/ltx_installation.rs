@@ -1,8 +1,7 @@
 use std::path::Path;
 
-use xrf_archive::mount_plan;
-use xrf_assets::{FSGAME_FILE_NAME, XrayMountPlan, XrayVfs};
 use xrf_error::XrfResult;
+use xrf_vfs::{XrayMountMode, XrayVfs, open_vfs};
 
 /// Mounts a game installation's declared sources, or returns `None` when `path` is not one.
 ///
@@ -15,13 +14,9 @@ use xrf_error::XrfResult;
 /// Returns an error when `fsgame.ltx` is present but cannot be read, decoded, or parsed, or when a declared source cannot
 /// be mounted.
 pub fn mount_installation(path: &Path) -> XrfResult<Option<XrayVfs>> {
-  if !path.join(FSGAME_FILE_NAME).is_file() {
+  if !XrayMountMode::declares_installation(path) {
     return Ok(None);
   }
 
-  let mut vfs: XrayVfs = XrayVfs::new();
-
-  mount_plan(&mut vfs, &XrayMountPlan::from_fsgame(path)?)?;
-
-  Ok(Some(vfs))
+  Ok(Some(open_vfs(XrayMountMode::Installation, path)?))
 }

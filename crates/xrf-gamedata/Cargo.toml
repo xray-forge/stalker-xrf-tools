@@ -17,7 +17,7 @@ xrf-ltx = { workspace = true }
 xrf-lua = { workspace = true }
 xrf-output = { workspace = true }
 xrf-report = { workspace = true }
-xrf-assets = { workspace = true }
+xrf-vfs = { workspace = true }
 xrf-shaders = { workspace = true }
 xrf-sound = { workspace = true }
 xrf-utils = { workspace = true }
