@@ -6,7 +6,7 @@ import { Injectable } from "@wirestate/core";
 
 import { ArchiveFileExtractAction } from "@/applications/archives-explorer/components/editor/preview/ArchiveFileExtractAction";
 import { ArchivesService } from "@/applications/archives-explorer/services/archives";
-import { ArchiveFileDescriptor } from "@/core/bindings/xrf-archive";
+import { ArchiveFileDescriptor } from "@/core/bindings/xrf-app-archives";
 import { mockArchiveFileDescriptor } from "@/fixtures/mocks/archive.mocks";
 import { mockInvoke } from "@/fixtures/mocks/tauri.mocks";
 import { renderWithProviders } from "@/fixtures/utils/render";

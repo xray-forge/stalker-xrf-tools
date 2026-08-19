@@ -1,6 +1,6 @@
 import { ReactElement, useMemo } from "react";
 
-import { ProjectReadResult } from "@/core/bindings/xrf-archive";
+import { ProjectReadResult } from "@/core/bindings/xrf-app-archives";
 import { CodeView } from "@/core/syntax/components/CodeView";
 import { ESyntaxLanguage, getSyntaxLanguage } from "@/core/syntax/lib";
 import { BaseComponentProps } from "@/lib/dom/element-types";

@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from "@jest/globals";
 import { EventBus, WireEvent } from "@wirestate/core";
 
 import { ArchivesService } from "@/applications/archives-explorer/services/archives/archives.service";
-import { ArchiveFileDescriptor } from "@/core/bindings/xrf-archive";
+import { ArchiveFileDescriptor } from "@/core/bindings/xrf-app-archives";
 import { EMIT_NOTIFICATION_EVENT, ENotificationSeverity, INotificationPayload } from "@/core/notifications/lib";
 import { mockArchiveFileDescriptor } from "@/fixtures/mocks/archive.mocks";
 import { setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";

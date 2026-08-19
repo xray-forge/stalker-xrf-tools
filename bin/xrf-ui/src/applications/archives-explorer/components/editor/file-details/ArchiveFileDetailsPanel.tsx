@@ -4,7 +4,7 @@ import { ReactElement, useCallback } from "react";
 import { ARCHIVE_EDITOR_MONOSPACE_FONT } from "@/applications/archives-explorer/components/editor/archive-editor.styles";
 import { ArchiveFileDetailRow } from "@/applications/archives-explorer/components/editor/file-details/ArchiveFileDetailRow";
 import { ArchivesService } from "@/applications/archives-explorer/services/archives";
-import { ArchiveFileDescriptor } from "@/core/bindings/xrf-archive";
+import { ArchiveFileDescriptor } from "@/core/bindings/xrf-app-archives";
 import { BaseComponentProps } from "@/lib/dom/element-types";
 import { formatBytes } from "@/lib/memory/format";
 import { Nullable } from "@/lib/types/general";

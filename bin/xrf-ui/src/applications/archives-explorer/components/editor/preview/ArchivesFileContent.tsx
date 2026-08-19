@@ -10,7 +10,7 @@ import { ArchiveImagePreview } from "@/applications/archives-explorer/components
 import { ArchivePreviewError } from "@/applications/archives-explorer/components/editor/preview/ArchivePreviewError";
 import { ArchivesService } from "@/applications/archives-explorer/services/archives";
 import { ArchivePreviewSupport, getArchivePreviewSupport, TArchiveContent, TArchiveSelection } from "@/core/archive";
-import { ArchiveFileDescriptor, ArchiveProject } from "@/core/bindings/xrf-archive";
+import { ArchiveFileDescriptor, ArchiveProject } from "@/core/bindings/xrf-app-archives";
 import { DelayedProgress } from "@/core/ui/layout/DelayedProgress";
 import { EmptyState } from "@/core/ui/layout/EmptyState";
 import { BaseComponentProps } from "@/lib/dom/element-types";

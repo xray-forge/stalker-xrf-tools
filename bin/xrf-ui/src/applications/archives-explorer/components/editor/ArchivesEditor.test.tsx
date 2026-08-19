@@ -5,7 +5,7 @@ import { userEvent } from "@testing-library/user-event";
 
 import { ArchivesExplorerApplication } from "@/applications/archives-explorer/ArchivesExplorerApplication";
 import { ArchivesService } from "@/applications/archives-explorer/services/archives";
-import { ArchiveProject } from "@/core/bindings/xrf-archive";
+import { ArchiveProject } from "@/core/bindings/xrf-app-archives";
 import { ProjectService } from "@/core/settings/services/project";
 import { ApplicationShellFrame } from "@/core/shell/ApplicationShellFrame";
 import { EditorBusyProvider } from "@/core/shell/EditorBusyContext";
