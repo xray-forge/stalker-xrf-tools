@@ -4,7 +4,7 @@ use std::path::{Path, PathBuf};
 use xrf_error::XrfResult;
 
 use crate::xray_asset_utils::normalize;
-use crate::{FsgameFile, XrayMountKind, implied_asset_root};
+use crate::{FsgameFile, XrayMountKind, implied_asset_root, implied_install_root};
 
 /// One source to mount before it is opened or indexed.
 ///
@@ -24,7 +24,7 @@ pub struct XrayPlannedMount {
 
 /// An ordered list of sources to mount, highest priority first.
 ///
-/// Constructors cover a full installation, a bare gamedata root, a root inferred from one asset, and a partial subtree.
+/// Constructors cover explicit or inferred installations, explicit or inferred asset roots, and partial subtrees.
 ///
 /// Order is priority. [`Self::from_fsgame`] reverses declaration order, because the engine registers roots as declared and
 /// later registrations overwrite earlier ones.
@@ -57,6 +57,21 @@ impl XrayMountPlan {
   pub fn implied(asset: impl AsRef<Path>) -> XrfResult<Self> {
     match implied_asset_root(asset.as_ref()) {
       Some(root) => Self::new().with(root, "", "implied"),
+      None => Ok(Self::new()),
+    }
+  }
+
+  /// Plans the nearest installation containing an asset.
+  ///
+  /// Unlike [`Self::implied`], this uses an ancestor `fsgame.ltx`, so it also finds installations with an empty
+  /// `gamedata/`. Returns an empty plan when no installation is found.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when an installation is found but its `fsgame.ltx` cannot be read, decoded, or parsed.
+  pub fn implied_install(asset: impl AsRef<Path>) -> XrfResult<Self> {
+    match implied_install_root(asset.as_ref()) {
+      Some(install) => Self::from_fsgame(install),
       None => Ok(Self::new()),
     }
   }

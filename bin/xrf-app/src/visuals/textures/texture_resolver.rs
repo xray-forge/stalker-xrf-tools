@@ -1,6 +1,8 @@
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
-use xrf_assets::{XrayMountId, XrayScope, XrayVfs, implied_asset_root};
+use xrf_archive::mount_plan;
+use xrf_assets::{XrayMountPlan, XrayScope, XrayVfs};
+use xrf_error::XrfResult;
 use xrf_visual::VisualSubmesh;
 
 use crate::types::TauriResult;
@@ -17,9 +19,7 @@ impl VisualTextureResolver {
     Self::default()
   }
 
-  /// Resolves each submesh texture against the visual's implied root and optional fallback root.
-  ///
-  /// The implied root has priority over `fallback_root`.
+  /// Resolves each submesh texture using the visual's ordered source scope.
   pub fn resolve_submeshes(
     &mut self,
     visual: Option<&Path>,
@@ -71,27 +71,36 @@ impl VisualTextureResolver {
       .map_err(|error| format!("Failed to read texture '{reference}': {error}"))
   }
 
-  /// Mounts the available texture roots and returns their search scope.
+  /// Mounts texture sources for a visual and returns their search scope.
   ///
-  /// The visual's implied root is searched before the fallback root. Non-directory fallbacks and roots that fail to mount
-  /// are omitted; an empty scope means no lookup can be attempted.
+  /// Search order is the visual's implied loose root, its containing installation, then `fallback_root`. An empty scope
+  /// means no source could be planned or mounted.
   pub fn scope_for(&mut self, visual: Option<&Path>, fallback_root: Option<&Path>) -> XrayScope {
-    let implied: Option<PathBuf> = visual.and_then(implied_asset_root);
-    let fallback: Option<PathBuf> = fallback_root.filter(|root| root.is_dir()).map(Path::to_path_buf);
+    let plan: XrayMountPlan = self.plan_for(visual, fallback_root);
 
-    let mounts: Vec<XrayMountId> = implied
-      .into_iter()
-      .chain(fallback)
-      .filter_map(|root| {
-        self
-          .vfs
-          .mount_directory("", &root)
-          .inspect_err(|error| log::warn!("Failed to mount root {}: {error}", root.display()))
-          .ok()
-      })
-      .collect();
+    XrayScope::only(mount_plan(&mut self.vfs, &plan).unwrap_or_default())
+  }
 
-    XrayScope::only(mounts)
+  /// Builds a priority-ordered plan from the visual root, containing installation, and fallback root.
+  ///
+  /// [`XrayMountPlan::behind`] drops duplicate paths.
+  fn plan_for(&self, visual: Option<&Path>, fallback_root: Option<&Path>) -> XrayMountPlan {
+    let implied: XrayMountPlan = Self::planned(visual.map(XrayMountPlan::implied));
+    let install: XrayMountPlan = Self::planned(visual.map(XrayMountPlan::implied_install));
+    let fallback: XrayMountPlan = Self::planned(fallback_root.filter(|root| root.is_dir()).map(XrayMountPlan::root));
+
+    implied.behind(install).behind(fallback)
+  }
+
+  /// Returns an optional plan, or an empty plan when absent or failed.
+  ///
+  /// Planning failures are logged; one malformed installation must not suppress the visual's loose root.
+  fn planned(plan: Option<XrfResult<XrayMountPlan>>) -> XrayMountPlan {
+    plan
+      .transpose()
+      .inspect_err(|error| log::warn!("Failed to plan visual texture mounts: {error}"))
+      .unwrap_or_default()
+      .unwrap_or_default()
   }
 
   fn lookup(&self, scope: &XrayScope, reference: &str) -> Option<xrf_assets::XrayAssetLocation> {

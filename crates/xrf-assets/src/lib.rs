@@ -34,6 +34,6 @@ pub use xray_asset_type::XrayAssetType;
 pub use xray_directory_source::XrayDirectorySource;
 pub use xray_mount::{XrayMount, XrayMountId};
 pub use xray_mount_plan::{XrayMountPlan, XrayPlannedMount};
-pub use xray_root::{MESHES_DIRECTORY, TEXTURES_DIRECTORY, implied_asset_root};
+pub use xray_root::{MESHES_DIRECTORY, TEXTURES_DIRECTORY, implied_asset_root, implied_install_root};
 pub use xray_scope::{XrayMountSelection, XrayScope};
 pub use xray_vfs::XrayVfs;

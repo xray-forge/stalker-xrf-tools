@@ -49,6 +49,9 @@ impl OgfTextureResolver {
     };
 
     // Search only the visual's tree; a fallback mount would hide gaps that verification must report.
+    //
+    // Do not widen this scope to installation archives: archive reads load complete entries, while verification needs
+    // only DDS metadata. Add header-only archive reads before including them.
     let scope: XrayScope = XrayScope::only([mount]);
 
     let located: Option<PathBuf> = self

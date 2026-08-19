@@ -26,6 +26,18 @@ pub fn implied_asset_root(path: &Path) -> Option<PathBuf> {
     .map(Path::to_path_buf)
 }
 
+/// Finds the nearest installation containing a physical asset path.
+///
+/// An installation is an ancestor containing `fsgame.ltx`. Unlike [`implied_asset_root`], this also finds installations
+/// whose `gamedata/` has no loose `meshes/` and `textures/` directories. Returns `None` when no ancestor declares one.
+pub fn implied_install_root(path: &Path) -> Option<PathBuf> {
+  path
+    .ancestors()
+    .skip(1)
+    .find(|candidate| candidate.join(crate::FSGAME_FILE_NAME).is_file())
+    .map(Path::to_path_buf)
+}
+
 #[cfg(test)]
 mod tests {
   use std::fs;
