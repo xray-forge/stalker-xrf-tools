@@ -4,6 +4,12 @@ use clap::{ArgMatches, Command};
 
 pub type CommandResult<T = ()> = Result<T, Box<dyn Error>>;
 
+/// Named set of related commands; drives both CLI registration order and generated documentation layout.
+pub struct CommandGroup {
+  pub name: &'static str,
+  pub commands: Vec<Box<dyn GenericCommand>>,
+}
+
 pub trait GenericCommand {
   fn new() -> Self
   where

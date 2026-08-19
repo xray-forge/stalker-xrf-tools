@@ -26,7 +26,8 @@ Documented in [xrf book](https://xray-forge.github.io/stalker-xrf-book/tools/app
 
 ## CLI
 
-Documented in [xrf book](https://xray-forge.github.io/stalker-xrf-book/tools/cli/cli.html).
+Documented in [xrf book](https://xray-forge.github.io/stalker-xrf-book/tools/cli/cli.html).\
+Command reference is generated from clap definitions with `cargo make docs-cli` into `target/commands-docs`.
 
 - [Archive commands](https://xray-forge.github.io/stalker-xrf-book/tools/cli/archive.html)
 - [Gamedata commands](https://xray-forge.github.io/stalker-xrf-book/tools/cli/gamedata.html)

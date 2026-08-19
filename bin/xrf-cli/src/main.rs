@@ -1,55 +1,18 @@
 pub(crate) mod commands;
 pub(crate) mod generic_command;
+pub(crate) mod logger;
 pub(crate) mod output;
+pub(crate) mod setup;
 
 use std::error::Error;
-use std::{env, process};
+use std::process;
 
 use clap::Command;
-use commands::archive::pack_archive::PackArchiveCommand;
-use commands::archive::unpack_archive::UnpackArchiveCommand;
-use commands::assets::list_assets::ListAssetsCommand;
-use commands::externs::export_externs::ExportExternsCommand;
-use commands::ltx::verify_ltx::VerifyLtxCommand;
-use commands::ogf::info_ogf::InfoOgfCommand;
-use commands::ogf::patch_ogf_motion_refs::PatchOgfMotionRefsCommand;
-use commands::ogf::patch_ogf_texture_refs::PatchOgfTextureRefsCommand;
-use commands::ogf::verify_ogf::VerifyOgfCommand;
-use commands::omf::duplicate_omf_motion::DuplicateOmfMotionCommand;
-use commands::omf::filter_omf_motions::FilterOmfMotionsCommand;
-use commands::omf::info_omf::InfoOmfCommand;
-use commands::omf::rename_omf_motions::RenameOmfMotionsCommand;
-use commands::omf::repack_omf::RepackOmfCommand;
-use commands::particle::info_particles::InfoParticlesCommand;
-use commands::particle::pack_particles::PackParticlesFileCommand;
-use commands::particle::repack_particles::RepackParticlesCommand;
-use commands::particle::reunpack_particles::ReUnpackParticlesCommand;
-use commands::particle::unpack_particles::UnpackParticlesCommand;
-use commands::particle::verify_particles::VerifyParticlesFileCommand;
-use commands::spawn::info_spawn::InfoSpawnCommand;
-use commands::spawn::pack_spawn::PackSpawnFileCommand;
-use commands::spawn::repack_spawn::RepackSpawnCommand;
-use commands::spawn::unpack_spawn::UnpackSpawnFileCommand;
-use commands::spawn::verify_spawn::VerifySpawnFileCommand;
-use commands::texture::pack_equipment_icons::PackEquipmentIconsCommand;
-use commands::texture::pack_texture_description::PackTextureDescriptionCommand;
-use commands::texture::unpack_equipment_icons::UnpackEquipmentIconsCommand;
-use commands::texture::unpack_texture_description::UnpackTextureDescriptionCommand;
-use commands::texture::verify_equipment_icons::VerifyEquipmentIconsCommand;
-use commands::thm::patch_thm_bump::PatchThmBumpCommand;
-use commands::translation::build_translations::BuildTranslationsCommand;
-use commands::translation::initialize_translations::InitializeTranslationsCommand;
-use commands::translation::parse_translations::ParseTranslationsCommand;
-use commands::translation::verify_translations::VerifyTranslationsCommand;
-use env_logger::Builder;
-use log::LevelFilter;
 
-use crate::commands::gamedata::verify_gamedata::VerifyGamedataCommand;
-use crate::commands::ltx::format_ltx::FormatLtxCommand;
-use crate::commands::texture::crop_dds::CropDdsCommand;
-use crate::commands::texture::info_dds::InfoDdsCommand;
 use crate::generic_command::{CommandResult, GenericCommand};
+use crate::logger::setup_logger;
 use crate::output::TerminalOutput;
+use crate::setup::setup_subcommands;
 
 fn main() -> Result<(), Box<dyn Error>> {
   setup_logger();
@@ -86,77 +49,4 @@ fn main() -> Result<(), Box<dyn Error>> {
   }
 
   Ok(())
-}
-
-pub fn setup_subcommands() -> Vec<Box<dyn GenericCommand>> {
-  vec![
-    // Archive:
-    PackArchiveCommand::new_box(),
-    UnpackArchiveCommand::new_box(),
-    // Assets:
-    ListAssetsCommand::new_box(),
-    // Externs:
-    ExportExternsCommand::new_box(),
-    // Gamedata:
-    VerifyGamedataCommand::new_box(),
-    // LTX:
-    FormatLtxCommand::new_box(),
-    VerifyLtxCommand::new_box(),
-    // OGF:
-    InfoOgfCommand::new_box(),
-    PatchOgfMotionRefsCommand::new_box(),
-    PatchOgfTextureRefsCommand::new_box(),
-    VerifyOgfCommand::new_box(),
-    // OMF:
-    DuplicateOmfMotionCommand::new_box(),
-    FilterOmfMotionsCommand::new_box(),
-    InfoOmfCommand::new_box(),
-    RenameOmfMotionsCommand::new_box(),
-    RepackOmfCommand::new_box(),
-    // Particles:
-    InfoParticlesCommand::new_box(),
-    PackParticlesFileCommand::new_box(),
-    RepackParticlesCommand::new_box(),
-    ReUnpackParticlesCommand::new_box(),
-    UnpackParticlesCommand::new_box(),
-    VerifyParticlesFileCommand::new_box(),
-    // Spawn:
-    InfoSpawnCommand::new_box(),
-    PackSpawnFileCommand::new_box(),
-    RepackSpawnCommand::new_box(),
-    UnpackSpawnFileCommand::new_box(),
-    VerifySpawnFileCommand::new_box(),
-    // Textures:
-    CropDdsCommand::new_box(),
-    InfoDdsCommand::new_box(),
-    PackEquipmentIconsCommand::new_box(),
-    PackTextureDescriptionCommand::new_box(),
-    UnpackEquipmentIconsCommand::new_box(),
-    VerifyEquipmentIconsCommand::new_box(),
-    UnpackTextureDescriptionCommand::new_box(),
-    // THM:
-    PatchThmBumpCommand::new_box(),
-    // Translations:
-    BuildTranslationsCommand::new_box(),
-    InitializeTranslationsCommand::new_box(),
-    ParseTranslationsCommand::new_box(),
-    VerifyTranslationsCommand::new_box(),
-  ]
-}
-
-/// Configure environment logger, fallback to info level.
-pub fn setup_logger() {
-  let mut logger: Builder = env_logger::builder();
-
-  if let Ok(rust_log) = env::var("RUST_LOG") {
-    logger.parse_filters(&rust_log);
-  } else {
-    match cfg!(debug_assertions) {
-      true => logger.filter_level(LevelFilter::Warn),
-      false => logger.filter_level(LevelFilter::Error),
-    };
-  }
-
-  logger.default_format();
-  logger.init();
 }
