@@ -255,6 +255,14 @@ impl LtxProject {
     PathBuf::from("system.ltx")
   }
 
+  /// Returns the user-facing path of `system.ltx`, for findings that name it.
+  ///
+  /// [`Self::get_system_ltx_path`] answers the logical path, which is what reads it; a finding needs the path a person can
+  /// act on.
+  pub fn get_system_ltx_report_path(&self) -> PathBuf {
+    self.path_of(&self.get_system_ltx_path())
+  }
+
   pub fn get_system_ltx(&self) -> XrfResult<Ltx> {
     self.read_full(&self.get_system_ltx_path())
   }

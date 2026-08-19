@@ -4,6 +4,7 @@ mod directory_asset;
 mod directory_asset_index;
 mod fsgame;
 pub mod shader;
+pub mod sound;
 pub mod texture;
 #[cfg(feature = "typescript-bindings")]
 mod typescript_bindings;

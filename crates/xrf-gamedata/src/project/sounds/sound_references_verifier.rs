@@ -1,6 +1,7 @@
 use std::collections::HashSet;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
+use xrf_assets::sound::sound_reference_name;
 use xrf_error::XrfResult;
 use xrf_ltx::{Ltx, LtxProject};
 use xrf_xml::{XmlDocument, XmlParseOptions};
@@ -42,7 +43,7 @@ impl<'a> SoundReferencesVerifier<'a> {
   fn read_sound_names(sound_paths: &[String]) -> HashSet<String> {
     sound_paths
       .iter()
-      .filter_map(|path| path.strip_prefix("sounds\\").map(Self::normalize_sound_reference))
+      .filter_map(|path| path.strip_prefix("sounds\\").map(sound_reference_name))
       .collect()
   }
 
@@ -64,12 +65,15 @@ impl<'a> SoundReferencesVerifier<'a> {
         continue;
       }
 
-      match Ltx::read_from_file_full(path) {
-        Ok(ltx) => self.verify_references_in_ltx(sound_names, sound_roots, &ltx, path, result),
+      // Read through the project: its entries are logical paths, which a filesystem read cannot resolve.
+      let reported: PathBuf = self.project.ltx_project.path_of(path);
+
+      match self.project.ltx_project.read_full(path) {
+        Ok(ltx) => self.verify_references_in_ltx(sound_names, sound_roots, &ltx, &reported, result),
         Err(error) => xrf_output::verbose!(
           self.options.output,
           "Skipping ltx entry in sound reference check: {} - {}",
-          path.display(),
+          reported.display(),
           error
         ),
       }
@@ -164,7 +168,7 @@ impl<'a> SoundReferencesVerifier<'a> {
     location: &str,
     result: &mut GamedataSoundReferencesVerificationResult,
   ) {
-    let sound_name: String = Self::normalize_sound_reference(reference);
+    let sound_name: String = sound_reference_name(reference);
     result.checked_references_count += 1;
 
     if Self::sound_reference_exists(sound_names, &sound_name) {
@@ -184,19 +188,9 @@ impl<'a> SoundReferencesVerifier<'a> {
   }
 
   fn is_direct_sound_reference(sound_roots: &HashSet<String>, reference: &str) -> bool {
-    let sound_name: String = Self::normalize_sound_reference(reference);
-
-    sound_name
+    sound_reference_name(reference)
       .split_once('\\')
       .is_some_and(|(root, _)| sound_roots.contains(root))
-  }
-
-  fn normalize_sound_reference(reference: &str) -> String {
-    let reference: String = reference.trim().replace('/', "\\").to_ascii_lowercase();
-    let reference: &str = reference.strip_prefix("sounds\\").unwrap_or(&reference);
-    let reference: &str = reference.strip_suffix(".ogg").unwrap_or(reference);
-
-    reference.to_string()
   }
 
   fn sound_reference_exists(sound_names: &HashSet<String>, reference: &str) -> bool {
@@ -209,7 +203,7 @@ impl<'a> SoundReferencesVerifier<'a> {
 mod tests {
   use std::collections::HashSet;
 
-  use super::SoundReferencesVerifier;
+  use super::{SoundReferencesVerifier, sound_reference_name};
 
   #[test]
   fn resolves_exact_and_randomized_sound_references() {
@@ -222,15 +216,15 @@ mod tests {
 
     assert!(SoundReferencesVerifier::sound_reference_exists(
       &names,
-      &SoundReferencesVerifier::normalize_sound_reference("sounds/weapons/ak74_shot.ogg")
+      &sound_reference_name("sounds/weapons/ak74_shot.ogg")
     ));
     assert!(SoundReferencesVerifier::sound_reference_exists(
       &names,
-      &SoundReferencesVerifier::normalize_sound_reference("monsters\\boar\\boar_idle_")
+      &sound_reference_name("monsters\\boar\\boar_idle_")
     ));
     assert!(!SoundReferencesVerifier::sound_reference_exists(
       &names,
-      &SoundReferencesVerifier::normalize_sound_reference("weapons\\missing")
+      &sound_reference_name("weapons\\missing")
     ));
   }
 

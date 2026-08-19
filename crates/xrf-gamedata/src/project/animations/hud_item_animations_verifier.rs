@@ -36,7 +36,7 @@ impl<'a> HudItemAnimationsVerifier<'a> {
     xrf_output::verbose!(self.options.output, "Verify hud item animations");
 
     let system_ltx: Ltx = self.project.ltx_project.get_system_ltx()?;
-    let system_ltx_path: PathBuf = self.project.ltx_project.get_system_ltx_path();
+    let system_ltx_path: PathBuf = self.project.ltx_project.get_system_ltx_report_path();
 
     let item_sections: Vec<(&String, &Section)> = system_ltx
       .sections

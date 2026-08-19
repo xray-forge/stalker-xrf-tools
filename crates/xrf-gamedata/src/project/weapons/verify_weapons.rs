@@ -1,6 +1,7 @@
 use std::path::Path;
 use std::time::{Duration, Instant};
 
+use xrf_assets::sound::ogg_logical_path;
 use xrf_db::{OgfFile, OmfFile, XRayByteOrder};
 use xrf_error::XrfResult;
 use xrf_ltx::{LTX_SYMBOL_SCHEME, Ltx, Section};
@@ -20,7 +21,7 @@ impl GamedataProject {
 
     let started_at: Instant = Instant::now();
     let system_ltx: Ltx = self.ltx_project.get_system_ltx()?;
-    let system_ltx_path = self.ltx_project.get_system_ltx_path();
+    let system_ltx_path = self.ltx_project.get_system_ltx_report_path();
 
     let mut checked_weapons_count: u32 = 0;
     let mut findings: Vec<Finding> = Vec::new();
@@ -443,13 +444,8 @@ impl GamedataProject {
   ) -> XrfResult<bool> {
     let mut is_valid: bool = true;
 
-    // Sounds field is 1-3 comma separated values:
-    let mut sound_object_value: String = get_weapon_animation_name(field_value);
-
-    // Support variant with and without extension in ltx files.
-    if !sound_object_value.ends_with(".ogg") {
-      sound_object_value.push_str(".ogg");
-    }
+    // Sounds field is 1-3 comma separated values, and may name the sound with or without its extension.
+    let sound_object_value: String = ogg_logical_path(&get_weapon_animation_name(field_value));
 
     // todo: Check OGG file, check existing.
     if let Some(sound_path) = self

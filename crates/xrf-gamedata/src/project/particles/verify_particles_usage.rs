@@ -85,16 +85,19 @@ impl GamedataProject {
         continue;
       }
 
-      match Ltx::read_from_file_full(path) {
+      // Read through the project: its entries are logical paths, which a filesystem read cannot resolve.
+      let reported: PathBuf = self.ltx_project.path_of(path);
+
+      match self.ltx_project.read_full(path) {
         Ok(ltx) => {
-          self.verify_particles_usage_in_ltx(options, particle_names, &ltx, path, result);
+          self.verify_particles_usage_in_ltx(options, particle_names, &ltx, &reported, result);
         }
         Err(error) => {
           // Malformed ltx files are reported by the generic ltx check, not this one.
           xrf_output::verbose!(
             options.output,
             "Skipping ltx entry in particles usage check: {} - {}",
-            path.display(),
+            reported.display(),
             error
           );
         }
