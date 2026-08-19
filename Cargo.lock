@@ -6997,6 +6997,7 @@ dependencies = [
  "serde",
  "specta",
  "walkdir",
+ "xrf-assets",
  "xrf-error",
  "xrf-output",
  "xrf-test-utils",

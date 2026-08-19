@@ -5,19 +5,25 @@ use std::path::{MAIN_SEPARATOR_STR, Path, PathBuf};
 use xrf_error::{XrfError, XrfResult};
 
 use crate::Ltx;
+use crate::file::include_filesystem_source::LtxIncludeFilesystemSource;
+use crate::file::include_source::LtxIncludeSource;
 
 /// Converter object to process and inject all child #include statements.
 #[derive(Default)]
 pub struct LtxIncludeConvertor {}
 
 impl LtxIncludeConvertor {
-  fn new() -> Self {
-    Self {}
+  /// Cast LTX file to fully parsed with include sections, reading them from the filesystem.
+  pub fn convert(ltx: Ltx) -> XrfResult<Ltx> {
+    Self::convert_with(ltx, &LtxIncludeFilesystemSource)
   }
 
-  /// Cast LTX file to fully parsed with include sections.
-  pub fn convert(ltx: Ltx) -> XrfResult<Ltx> {
-    Self::new().convert_ltx(ltx)
+  /// Cast LTX file to fully parsed, reading includes from a given source.
+  ///
+  /// The merge rules live here and nowhere else: which file a statement names differs between backends, what merging two
+  /// sections means does not.
+  pub(crate) fn convert_with<S: LtxIncludeSource>(ltx: Ltx, source: &S) -> XrfResult<Ltx> {
+    Self {}.convert_ltx(ltx, source)
   }
 
   /// Transform ltx statement to cross-platform path.
@@ -76,7 +82,7 @@ impl LtxIncludeConvertor {
 
 impl LtxIncludeConvertor {
   /// Convert ltx file with inclusion of nested files.
-  fn convert_ltx(&self, ltx: Ltx) -> XrfResult<Ltx> {
+  fn convert_ltx<S: LtxIncludeSource>(&self, ltx: Ltx, source: &S) -> XrfResult<Ltx> {
     if ltx.directory.is_none() {
       return Err(XrfError::new_convert_error(
         "Failed to parse ltx file, parent directory is not specified",
@@ -97,10 +103,10 @@ impl LtxIncludeConvertor {
     };
 
     for included in &ltx.includes {
-      let included_paths: Vec<PathBuf> = Self::resolve_include_paths(result.directory.as_ref().unwrap(), included)?;
+      let included_paths: Vec<PathBuf> = source.resolve(result.directory.as_ref().unwrap(), included)?;
 
       for included_path in included_paths {
-        self.include_children(&mut result, &included_path)?;
+        self.include_children(&mut result, &included_path, source)?;
       }
     }
 
@@ -126,8 +132,8 @@ impl LtxIncludeConvertor {
   }
 
   /// Include children ltx into provided ltx.
-  fn include_children<P: AsRef<Path>>(&self, into: &mut Ltx, path: &P) -> XrfResult {
-    let ltx: Ltx = match self.parse_nested_file(path) {
+  fn include_children<S: LtxIncludeSource>(&self, into: &mut Ltx, path: &Path, source: &S) -> XrfResult {
+    let ltx: Ltx = match source.read(path) {
       Ok(value) => match value {
         Some(ltx) => ltx,
         None => return Ok(()),
@@ -135,13 +141,13 @@ impl LtxIncludeConvertor {
       Err(error) => {
         return Err(XrfError::new_convert_error(format!(
           "Failed to parse ltx file, nested file {} in {} error: {error}",
-          path.as_ref().display(),
+          source.describe(path),
           into.path.as_ref().unwrap().display(),
         )));
       }
     };
 
-    for (key, value) in ltx.into_included()?.sections {
+    for (key, value) in Self::convert_with(ltx, source)?.sections {
       match into.section_mut(&key) {
         None => {
           into.sections.insert(key, value);
@@ -153,7 +159,7 @@ impl LtxIncludeConvertor {
           } else {
             return Err(XrfError::new_convert_error(format!(
               "Failed to include ltx file '{}' in {}, duplicate section '{}' found",
-              path.as_ref().display(),
+              source.describe(path),
               into.path.as_ref().unwrap().display(),
               key
             )));
@@ -196,7 +202,7 @@ impl LtxIncludeConvertor {
     }
   }
 
-  fn matches_wildcard_mask(file_name: &str, mask: &str) -> bool {
+  pub(crate) fn matches_wildcard_mask(file_name: &str, mask: &str) -> bool {
     let mut remaining: &str = file_name;
     let mut is_first_part: bool = true;
 

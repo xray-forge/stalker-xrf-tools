@@ -2,10 +2,13 @@ use std::fs::File;
 use std::io::Read;
 use std::path::{Path, PathBuf};
 
+use xrf_assets::{XrayScope, XrayVfs};
 use xrf_error::XrfResult;
 use xrf_utils::read_as_string_from_w1251_encoded;
 
 use crate::Ltx;
+use crate::file::include::LtxIncludeConvertor;
+use crate::file::include_vfs_source::LtxIncludeVfsSource;
 use crate::file::parser::LtxParser;
 use crate::file::types::LtxIncluded;
 
@@ -23,6 +26,32 @@ impl Ltx {
   /// Read LTX from a file, inject all includes and unwrap inherited sections.
   pub fn read_from_file_full<P: AsRef<Path>>(filename: P) -> XrfResult<Self> {
     Self::read_from_path(filename)?.into_included()?.into_inherited()
+  }
+
+  /// Read LTX out of a mounted VFS, injecting includes resolved through it.
+  ///
+  /// This is how configs are read from an installation, where they sit inside `db\configs` volumes and have no filesystem
+  /// path. Wildcard includes resolve by prefix enumeration rather than `read_dir`, and an include the VFS does not hold is
+  /// nothing to merge rather than a failure - the same tolerance a not-yet-generated config gets on disk.
+  ///
+  /// `path` and `directory` on the result carry logical paths, not filesystem ones.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when the path is not in scope, its bytes are not valid Windows-1251, or the contents will not parse.
+  pub fn read_from_vfs(vfs: &XrayVfs, scope: &XrayScope, logical_path: &str) -> XrfResult<Self> {
+    let source: LtxIncludeVfsSource = LtxIncludeVfsSource::new(vfs, scope);
+
+    LtxIncludeConvertor::convert_with(source.read_ltx(logical_path)?, &source)
+  }
+
+  /// Read LTX out of a mounted VFS with includes injected and inherited sections unwrapped.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when reading fails, or when an inherited section cannot be resolved.
+  pub fn read_from_vfs_full(vfs: &XrayVfs, scope: &XrayScope, logical_path: &str) -> XrfResult<Self> {
+    Self::read_from_vfs(vfs, scope, logical_path)?.into_inherited()
   }
 
   /// Read from a file as generic ltx with LTX descriptor filled.
