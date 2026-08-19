@@ -2,7 +2,7 @@ use std::path::{Path, PathBuf};
 
 use xrf_error::XrfResult;
 use xrf_utils::{decode_bytes_to_string, get_windows1251_encoder};
-use xrf_vfs::{XrayScope, XrayVfs, xray_path};
+use xrf_vfs::{XrayPath, XrayScope, XrayVfs, xray_path};
 
 use crate::Ltx;
 use crate::file::include::LtxIncludeConvertor;
@@ -28,10 +28,17 @@ impl<'a> LtxIncludeVfsSource<'a> {
     let bytes: Vec<u8> = self.vfs.read(self.scope, logical_path)?;
     let contents: String = decode_bytes_to_string(&bytes, get_windows1251_encoder())?;
     let mut ltx: Ltx = Ltx::read_from_str(&contents)?;
-    let path: PathBuf = PathBuf::from(logical_path);
+    let path: XrayPath = XrayPath::new(logical_path)?;
 
-    ltx.directory = path.parent().map(Path::to_path_buf);
-    ltx.path = Some(path);
+    // The logical parent, not `Path::parent`: on a host that does not separate on `\` the latter answers the path unsplit, and
+    // every nested include then resolves against the mount root. An empty directory stands for a top-level config, which is
+    // what a filesystem read records for one too.
+    ltx.directory = Some(PathBuf::from(
+      path
+        .parent()
+        .map_or_else(String::new, |parent| parent.as_str().to_string()),
+    ));
+    ltx.path = Some(PathBuf::from(path.as_str()));
 
     Ok(ltx)
   }

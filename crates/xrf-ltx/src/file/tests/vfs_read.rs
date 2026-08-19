@@ -159,6 +159,24 @@ fn records_the_logical_path_it_was_read_from() {
 }
 
 #[test]
+fn records_that_location_as_the_normalized_identity() {
+  // The recorded location is an engine identity, so it is derived by logical rules rather than host ones. Normalization is the
+  // half of that a Windows run can see; the separator half only shows up where `\` does not split a path.
+  let (vfs, scope) = mount(
+    "normalized",
+    &[("configs\\system.ltx", "#include \"sections\\first.ltx\"\n")],
+  );
+
+  let ltx: Ltx = Ltx::read_from_vfs(&vfs, &scope, "Configs\\System.LTX").expect("config reads");
+
+  assert_eq!(
+    ltx.path.as_deref(),
+    Some(PathBuf::from("configs\\system.ltx").as_path())
+  );
+  assert_eq!(ltx.directory.as_deref(), Some(PathBuf::from("configs").as_path()));
+}
+
+#[test]
 fn a_loose_config_overrides_one_lower_in_the_mount_order() {
   // What the whole layer is for: an override in front of a base tree is what the reader sees.
   let overlay: PathBuf = get_absolute_generated_test_resource_path("ltx_vfs_read/override_overlay");
