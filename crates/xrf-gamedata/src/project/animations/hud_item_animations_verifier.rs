@@ -1,5 +1,5 @@
 use std::collections::HashSet;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 use rayon::prelude::*;
 use xrf_db::{OgfFile, OmfFile, XRayByteOrder};
@@ -150,7 +150,13 @@ impl<'a> HudItemAnimationsVerifier<'a> {
 
   /// Read motions provided by the model, or `None` when the model carries no animations at all.
   fn read_model_motions(&self, visual: &str) -> XrfResult<Option<HashSet<String>>> {
-    let Some(visual_path) = self.project.assets.ogf(visual)?.map(|asset| asset.absolute_path()) else {
+    // Resolved and read through the VFS, so a visual and its animations inside archive volumes are checked too.
+    let Some(visual_path) = self
+      .project
+      .vfs
+      .ogf(&self.project.scope, visual)?
+      .map(|location| location.logical_path().to_string())
+    else {
       return Err(XrfError::new_not_found_error(format!(
         "Visual '{visual}' was not found"
       )));
@@ -163,27 +169,37 @@ impl<'a> HudItemAnimationsVerifier<'a> {
     let mut motions: HashSet<String> = HashSet::new();
 
     for linked in linked_assets {
-      motions.extend(OmfFile::read_motions_from_path::<XRayByteOrder, &PathBuf>(&linked)?);
+      let mut chunks = self.project.read_asset_chunks(&linked)?;
+
+      motions.extend(OmfFile::read_motions_from_chunk::<XRayByteOrder, _>(&mut chunks)?);
     }
 
     Ok(Some(motions))
   }
 
   /// Resolve omf assets linked by the model motion refs, or `None` when the model has no refs.
-  fn read_motion_refs<P: AsRef<Path>>(&self, path: &P) -> XrfResult<Option<HashSet<PathBuf>>> {
-    let motion_refs: Vec<String> = match OgfFile::read_motion_refs_from_path::<XRayByteOrder, P>(path) {
+  fn read_motion_refs(&self, path: &str) -> XrfResult<Option<HashSet<String>>> {
+    let motion_refs: Vec<String> = match self
+      .project
+      .read_asset_chunks(path)
+      .and_then(|mut chunks| OgfFile::read_motion_refs_from_chunk::<XRayByteOrder, _>(&mut chunks))
+    {
       Ok(refs) => refs,
       // Model has no motion refs chunk, so it is a static visual without animations.
       Err(XrfError::NotFound { .. }) => return Ok(None),
       Err(error) => return Err(error),
     };
 
-    let mut assets: HashSet<PathBuf> = HashSet::new();
+    let mut assets: HashSet<String> = HashSet::new();
 
     for motion_ref in &motion_refs {
-      for asset in self.project.assets.omfs(motion_ref)? {
-        if asset.is_type(AssetType::Omf) {
-          assets.insert(asset.absolute_path());
+      for location in self
+        .project
+        .vfs
+        .resolve_all(&self.project.scope, AssetType::Omf, motion_ref)?
+      {
+        if location.is_type(AssetType::Omf) {
+          assets.insert(location.logical_path().to_string());
         }
       }
     }

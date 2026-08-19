@@ -425,6 +425,52 @@ impl XrayVfs {
     self.find_in(scope, rules.directory, &rules.logical_path(reference))
   }
 
+  /// Resolves every asset of one kind a reference names, which may be a `*` mask.
+  ///
+  /// A motion reference is allowed to name a set — `wpn\wpn_ak74_*.omf` means every matching animation file — so this
+  /// answers a list where [`Self::resolve`] answers at most one. A reference without `*` resolves to a single asset or none,
+  /// which is why this is not two separate calls at the consumer.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when the kind has no canonical home, the reference is not a valid X-Ray path, or a mask carries more
+  /// than one `*`.
+  pub fn resolve_all(
+    &self,
+    scope: &XrayScope,
+    asset_type: XrayAssetType,
+    reference: &str,
+  ) -> XrfResult<Vec<XrayAssetLocation>> {
+    if !reference.contains('*') {
+      return Ok(self.resolve(scope, asset_type, reference)?.into_iter().collect());
+    }
+
+    let rules: XrayAssetRules = asset_type.rules().ok_or_else(|| {
+      XrfError::new_asset_error(format!(
+        "asset kind {asset_type:?} has no single directory to resolve under"
+      ))
+    })?;
+
+    let mask: String = crate::xray_path::join(rules.directory, &rules.logical_path(reference))?;
+    let Some((start, end)) = mask.split_once('*') else {
+      return Ok(Vec::new());
+    };
+
+    if end.contains('*') {
+      return Err(XrfError::new_asset_error(
+        "X-Ray asset mask must contain exactly one '*'",
+      ));
+    }
+
+    Ok(
+      self
+        .entries(&scope.clone().with_prefix(rules.directory)?)
+        .into_iter()
+        .filter(|entry| entry.logical_path().starts_with(start) && entry.logical_path().ends_with(end))
+        .collect(),
+    )
+  }
+
   /// Resolves a texture reference, appending `.dds` or replacing its authoring extension.
   ///
   /// # Errors
