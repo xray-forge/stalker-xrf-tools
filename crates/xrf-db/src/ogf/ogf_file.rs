@@ -140,8 +140,16 @@ impl OgfFile {
 
   /// Read only list of motion refs specifically and skip other data parts.
   pub fn read_motion_refs_from_file<T: ByteOrder>(file: File) -> XrfResult<Vec<String>> {
-    let mut reader: ChunkReader = ChunkReader::from_file(file)?;
-    let chunks: Vec<ChunkReader> = reader.read_children()?;
+    Self::read_motion_refs_from_chunk::<T, _>(&mut ChunkReader::from_file(file)?)
+  }
+
+  /// Lists motion references from a chunk reader over any data source.
+  ///
+  /// The route an archived visual takes: a volume entry has no file, so only its decompressed bytes are available.
+  pub fn read_motion_refs_from_chunk<T: ByteOrder, D: ChunkDataSource>(
+    reader: &mut ChunkReader<D>,
+  ) -> XrfResult<Vec<String>> {
+    let chunks: Vec<ChunkReader<D>> = reader.read_children()?;
 
     log::info!(
       "Reading ogf file motion refs, {} chunks, {} bytes",

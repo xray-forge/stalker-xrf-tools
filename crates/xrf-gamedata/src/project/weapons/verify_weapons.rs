@@ -174,11 +174,19 @@ impl GamedataProject {
   ) -> XrfResult<bool> {
     let mut is_valid: bool = true;
 
-    if let Some(visual) = &section
-      .get("visual")
-      .and_then(|it| self.assets.ogf(it).ok().flatten().map(|asset| asset.absolute_path()))
-    {
-      if let Err(error) = OgfFile::read_from_path::<XRayByteOrder, _>(visual) {
+    // Resolved and read through the VFS, so a visual inside an archive volume is checked too.
+    if let Some(visual) = &section.get("visual").and_then(|it| {
+      self
+        .vfs
+        .ogf(&self.scope, it)
+        .ok()
+        .flatten()
+        .map(|location| location.logical_path().to_string())
+    }) {
+      if let Err(error) = self
+        .read_asset_chunks(visual)
+        .and_then(|mut chunks| OgfFile::read_from_chunk::<XRayByteOrder, _>(&mut chunks))
+      {
         xrf_output::error!(
           options.output,
           "Failed to read weapon visual: [{}] - {:?} - {}",
@@ -214,11 +222,18 @@ impl GamedataProject {
       }
     };
 
-    if let Some(visual_path) = &hud_section
-      .get("item_visual")
-      .and_then(|it| self.assets.ogf(it).ok().flatten().map(|asset| asset.absolute_path()))
-    {
-      match OgfFile::read_from_path::<XRayByteOrder, _>(visual_path) {
+    if let Some(visual_path) = &hud_section.get("item_visual").and_then(|it| {
+      self
+        .vfs
+        .ogf(&self.scope, it)
+        .ok()
+        .flatten()
+        .map(|location| location.logical_path().to_string())
+    }) {
+      match self
+        .read_asset_chunks(visual_path)
+        .and_then(|mut chunks| OgfFile::read_from_chunk::<XRayByteOrder, _>(&mut chunks))
+      {
         Ok(hud_visual) => {
           if let Some(motion_refs) = hud_visual.kinematics.map(|it| it.motion_refs) {
             let mut ref_animations: Vec<String> = Vec::new();
@@ -238,7 +253,7 @@ impl GamedataProject {
                       options.output,
                       "Error reading OMF motions for weapon hud: [{}] : {} - {}",
                       section_name,
-                      visual_path.display(),
+                      visual_path,
                       error
                     );
 
@@ -250,7 +265,7 @@ impl GamedataProject {
                   options.output,
                   "Error reading OMF motions for weapon hud: [{}] : {}, no asset found",
                   section_name,
-                  visual_path.display()
+                  visual_path
                 );
 
                 is_valid = false;
@@ -273,7 +288,7 @@ impl GamedataProject {
               options.output,
               "Missing motion refs for weapon hud: [{}] : {}",
               section_name,
-              visual_path.display()
+              visual_path
             );
 
             is_valid = false;

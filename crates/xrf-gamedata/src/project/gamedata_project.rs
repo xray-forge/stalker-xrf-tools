@@ -2,6 +2,7 @@ use std::io;
 use std::io::ErrorKind;
 use std::path::{Path, PathBuf};
 
+use xrf_chunk::{ChunkReader, InMemoryChunkDataSource};
 use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{LtxProject, LtxProjectOptions};
 use xrf_vfs::{DirectoryAssetIndex, XrayAssetIndex, XrayMountPlan, XrayPathCollision, XrayScope, XrayVfs, open_plan};
@@ -66,6 +67,27 @@ impl GamedataProject {
       scope: XrayScope::all(),
       vfs: open_plan(&XrayMountPlan::root(&options.root)?.ignoring(&options.ignored)?)?,
     })
+  }
+
+  /// Reads an asset's bytes through the VFS, whether it is loose or inside an archive volume.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when nothing in scope holds the path, or the source cannot read it.
+  pub(crate) fn read_asset(&self, logical_path: &str) -> XrfResult<Vec<u8>> {
+    self.vfs.read(&self.scope, logical_path)
+  }
+
+  /// Opens a chunk reader over an asset's bytes.
+  ///
+  /// The single way a check reads a chunked format, so none of them has to care whether the asset is loose or archived. An
+  /// archived entry has no file to slice, which is why this goes through bytes rather than a path.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when the asset cannot be read or holds no chunk.
+  pub(crate) fn read_asset_chunks(&self, logical_path: &str) -> XrfResult<ChunkReader<InMemoryChunkDataSource>> {
+    ChunkReader::from_bytes(&self.read_asset(logical_path)?)
   }
 
   /// Files any mount holds but cannot reach, because another file in the same mount claims their engine identity.

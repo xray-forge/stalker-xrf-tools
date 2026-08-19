@@ -5,7 +5,7 @@ use std::path::Path;
 
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
-use xrf_chunk::{ChunkReader, ChunkWriter, find_required_chunk_by_id};
+use xrf_chunk::{ChunkDataSource, ChunkReader, ChunkWriter, find_required_chunk_by_id};
 use xrf_error::{XrfError, XrfResult};
 use xrf_utils::{assert_equal, open_export_file};
 
@@ -103,8 +103,16 @@ impl OmfFile {
   }
 
   pub fn read_motions_from_file<T: ByteOrder>(file: File) -> XrfResult<Vec<String>> {
-    let mut reader: ChunkReader = ChunkReader::from_file(file)?;
-    let chunks: Vec<ChunkReader> = reader.read_children()?;
+    Self::read_motions_from_chunk::<T, _>(&mut ChunkReader::from_file(file)?)
+  }
+
+  /// Lists motion names from a chunk reader over any data source.
+  ///
+  /// The route an archived omf takes: a volume entry has no file, so only its decompressed bytes are available.
+  pub fn read_motions_from_chunk<T: ByteOrder, D: ChunkDataSource>(
+    reader: &mut ChunkReader<D>,
+  ) -> XrfResult<Vec<String>> {
+    let chunks: Vec<ChunkReader<D>> = reader.read_children()?;
 
     log::info!(
       "Reading omf file motions, {} chunks, {} bytes",
