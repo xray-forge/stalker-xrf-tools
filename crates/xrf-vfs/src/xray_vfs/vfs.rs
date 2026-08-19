@@ -159,6 +159,28 @@ impl XrayVfs {
     located
   }
 
+  /// Returns winning entries in scope whose extension identifies one kind.
+  ///
+  /// Narrows by the kind's own directory when it has one, so asking for sounds walks `sounds\` rather than the whole tree.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when the kind's directory is not a valid X-Ray logical path.
+  pub fn entries_of_type(&self, scope: &XrayScope, asset_type: XrayAssetType) -> XrfResult<Vec<XrayAssetLocation>> {
+    let scope: XrayScope = match asset_type.rules() {
+      Some(rules) => scope.clone().with_prefix(rules.directory)?,
+      None => scope.clone(),
+    };
+
+    Ok(
+      self
+        .entries(&scope)
+        .into_iter()
+        .filter(|entry| entry.is_type(asset_type))
+        .collect(),
+    )
+  }
+
   /// Files any mount in scope holds but cannot reach, because another file in the same mount claims their identity.
   ///
   /// An authoring problem to report rather than a reason to refuse the VFS: nothing here affects what resolves, only what a

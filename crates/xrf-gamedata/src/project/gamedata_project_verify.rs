@@ -40,7 +40,7 @@ mod tests {
   use std::path::PathBuf;
 
   use xrf_ltx::LtxProject;
-  use xrf_vfs::{DirectoryAssetIndex, XrayAssetIndex};
+  use xrf_vfs::{DirectoryAssetIndex, XrayAssetIndex, XrayScope, XrayVfs};
 
   use super::GamedataProject;
   use crate::{GamedataProjectVerifyOptions, GamedataVerificationStatus, GamedataVerificationType};
@@ -53,6 +53,8 @@ mod tests {
       )
       .expect("create test assets"),
       ltx_project: LtxProject::empty(PathBuf::new()),
+      scope: XrayScope::all(),
+      vfs: XrayVfs::new(),
     }
   }
 

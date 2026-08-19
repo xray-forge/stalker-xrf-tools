@@ -2,7 +2,7 @@ use std::path::{Path, PathBuf};
 
 use serde::Serialize;
 
-use crate::XrayAsset;
+use crate::{XrayAsset, XrayAssetType};
 
 /// The physical container of a located asset.
 ///
@@ -72,6 +72,19 @@ impl XrayAssetLocation {
   /// Returns the physical container that supplied this location.
   pub fn container(&self) -> &XrayAssetContainer {
     &self.container
+  }
+
+  /// Returns the kind this asset's extension identifies, when it is one the tools recognize.
+  ///
+  /// Derived from the logical path rather than stored, because the path is the only evidence: a container says where the
+  /// bytes are, not what they mean.
+  pub fn asset_type(&self) -> Option<XrayAssetType> {
+    XrayAssetType::from_logical_path(&self.logical_path)
+  }
+
+  /// Whether this asset's extension identifies the requested kind.
+  pub fn is_type(&self, asset_type: XrayAssetType) -> bool {
+    self.asset_type() == Some(asset_type)
   }
 
   /// Returns the containing tree for a loose asset, or `None` for an archived asset.

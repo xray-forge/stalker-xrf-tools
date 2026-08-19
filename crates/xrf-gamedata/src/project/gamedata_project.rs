@@ -4,13 +4,19 @@ use std::path::{Path, PathBuf};
 
 use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{LtxProject, LtxProjectOptions};
-use xrf_vfs::{DirectoryAssetIndex, XrayAssetIndex};
+use xrf_vfs::{DirectoryAssetIndex, XrayAssetIndex, XrayMountPlan, XrayPathCollision, XrayScope, XrayVfs, open_plan};
 
 use crate::project::gamedata_project_options::GamedataProjectReadOptions;
 
 pub struct GamedataProject {
   pub(crate) assets: XrayAssetIndex,
   pub(crate) ltx_project: LtxProject,
+  /// Mounted sources the project resolves through.
+  ///
+  /// Present alongside `assets` while checks migrate onto it one at a time. The index only ever sees one loose directory, so
+  /// a check still reading through it cannot see an installation's archives; the VFS is what makes that possible.
+  pub(crate) vfs: XrayVfs,
+  pub(crate) scope: XrayScope,
 }
 
 impl GamedataProject {
@@ -57,7 +63,16 @@ impl GamedataProject {
         },
       )
       .map_err(|error| XrfError::new_asset_error(format!("Failed to open gamedata project ltx configs: {}", error)))?,
+      scope: XrayScope::all(),
+      vfs: open_plan(&XrayMountPlan::root(&options.root)?.ignoring(&options.ignored)?)?,
     })
+  }
+
+  /// Files any mount holds but cannot reach, because another file in the same mount claims their engine identity.
+  ///
+  /// Reported rather than refused at open time: a tool has to be able to load a project and say what is wrong with it.
+  pub fn collisions(&self) -> Vec<XrayPathCollision> {
+    self.vfs.collisions(&self.scope)
   }
 }
 

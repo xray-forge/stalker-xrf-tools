@@ -23,11 +23,14 @@ impl<'a> SoundsVerifier<'a> {
 
     let started_at: Instant = Instant::now();
 
+    // Enumerated through the VFS, so an installation's archived sounds count too. The index only ever sees one loose
+    // directory.
     let sound_paths: Vec<String> = self
       .project
-      .assets
-      .with_type(AssetType::Ogg)
-      .map(|asset| asset.logical_path().to_string())
+      .vfs
+      .entries_of_type(&self.project.scope, AssetType::Ogg)?
+      .into_iter()
+      .map(|location| location.logical_path().to_string())
       .collect();
 
     let sound_files = SoundFilesVerifier::new(self.project, self.options, &sound_paths).verify()?;
