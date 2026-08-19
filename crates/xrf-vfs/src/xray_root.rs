@@ -4,8 +4,8 @@ use std::path::{Path, PathBuf};
 ///
 /// `fsgame.ltx` defines `$game_meshes$` and `$game_textures$` relative to `$game_data$`, so a directory holding both is
 /// the root those aliases resolve against.
-pub const MESHES_DIRECTORY: &str = "meshes";
-pub const TEXTURES_DIRECTORY: &str = "textures";
+pub(crate) const MESHES_DIRECTORY: &str = "meshes";
+pub(crate) const TEXTURES_DIRECTORY: &str = "textures";
 
 /// The X-Ray root a physical asset path sits under, if any.
 ///
@@ -30,7 +30,7 @@ pub fn implied_asset_root(path: &Path) -> Option<PathBuf> {
 ///
 /// An installation is an ancestor containing `fsgame.ltx`. Unlike [`implied_asset_root`], this also finds installations
 /// whose `gamedata/` has no loose `meshes/` and `textures/` directories. Returns `None` when no ancestor declares one.
-pub fn implied_install_root(path: &Path) -> Option<PathBuf> {
+pub(crate) fn implied_install_root(path: &Path) -> Option<PathBuf> {
   path
     .ancestors()
     .skip(1)

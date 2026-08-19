@@ -35,6 +35,72 @@ pub enum XrayAssetType {
   XrPack,
 }
 
+/// Where a kind of asset lives and what extension the engine loads it as.
+///
+/// A table rather than a method per kind, so resolving a new kind is a row here instead of a new accessor on every
+/// resolver — which is how the same extension rule came to be written twice and drift.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct XrayAssetRules {
+  /// Logical directory the engine resolves this kind under.
+  pub directory: &'static str,
+  /// Extension the engine loads.
+  pub extension: &'static str,
+  /// Extensions a reference may be authored with, which resolve to [`Self::extension`].
+  pub authoring_extensions: &'static [&'static str],
+}
+
+impl XrayAssetType {
+  /// Where this kind lives, for the kinds with one canonical home.
+  ///
+  /// `None` covers two different cases, and both are deliberate rather than gaps to fill in speculatively: a kind whose
+  /// home is not one directory — `Level` names a directory per level, `Shader` loads a dozen extensions — and a kind no
+  /// caller resolves by reference yet. Add a row when a consumer needs one, with evidence from a real tree.
+  pub fn rules(self) -> Option<XrayAssetRules> {
+    let (directory, extension, authoring_extensions): (&str, &str, &[&str]) = match self {
+      Self::Ogf => ("meshes", ".ogf", &[]),
+      Self::Omf => ("meshes", ".omf", &[]),
+      // A renderer reference may name the authored source; the engine loads the compiled `.dds` beside it.
+      Self::Dds => ("textures", ".dds", &["tga", "bmp", "ogm"]),
+      Self::Thm => ("textures", ".thm", &[]),
+      Self::Ogg => ("sounds", ".ogg", &[]),
+      Self::Ltx => ("configs", ".ltx", &[]),
+      Self::Script => ("scripts", ".script", &[]),
+      Self::Ppe => ("anims", ".ppe", &[]),
+      _ => return None,
+    };
+
+    Some(XrayAssetRules {
+      authoring_extensions,
+      directory,
+      extension,
+    })
+  }
+}
+
+impl XrayAssetRules {
+  /// Converts a raw engine reference into the logical path below the kind's directory.
+  ///
+  /// An authoring extension is replaced rather than appended, and a reference already carrying the loaded extension is
+  /// left alone. Both comparisons ignore case, because a reference authored as `wpn\wpn_ak74.OGF` names the same asset.
+  pub fn logical_path(&self, reference: &str) -> String {
+    if let Some((stem, extension)) = reference.rsplit_once('.') {
+      if self
+        .authoring_extensions
+        .iter()
+        .any(|known| extension.eq_ignore_ascii_case(known))
+      {
+        return format!("{stem}{}", self.extension);
+      }
+
+      if extension.eq_ignore_ascii_case(self.extension.trim_start_matches('.')) {
+        return reference.to_string();
+      }
+    }
+
+    format!("{reference}{}", self.extension)
+  }
+}
+
 impl XrayAssetType {
   pub(crate) fn from_logical_path(path: &str) -> Option<Self> {
     match path.rsplit_once('.').map(|(_, extension)| extension) {
@@ -73,5 +139,78 @@ impl XrayAssetType {
       _ if path.ends_with(".s") => Some(Self::Shader),
       _ => None,
     }
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::{XrayAssetRules, XrayAssetType};
+
+  fn rules(asset_type: XrayAssetType) -> XrayAssetRules {
+    asset_type.rules().expect("kind has a canonical home")
+  }
+
+  #[test]
+  fn replaces_an_authoring_extension_with_the_loaded_one() {
+    assert_eq!(
+      rules(XrayAssetType::Dds).logical_path("pfx\\smoke.tga"),
+      "pfx\\smoke.dds"
+    );
+    assert_eq!(
+      rules(XrayAssetType::Dds).logical_path("pfx\\smoke.TGA"),
+      "pfx\\smoke.dds"
+    );
+    assert_eq!(
+      rules(XrayAssetType::Dds).logical_path("pfx\\smoke.bmp"),
+      "pfx\\smoke.dds"
+    );
+  }
+
+  #[test]
+  fn appends_the_extension_when_a_reference_omits_it() {
+    assert_eq!(rules(XrayAssetType::Dds).logical_path("pfx\\smoke"), "pfx\\smoke.dds");
+    assert_eq!(
+      rules(XrayAssetType::Ogf).logical_path("actors\\stalker"),
+      "actors\\stalker.ogf"
+    );
+  }
+
+  #[test]
+  fn leaves_an_already_loaded_extension_alone_whatever_its_case() {
+    // Appending a second extension resolves to nothing, which is how mesh references silently failed.
+    assert_eq!(
+      rules(XrayAssetType::Ogf).logical_path("actors\\stalker.OGF"),
+      "actors\\stalker.OGF"
+    );
+    assert_eq!(
+      rules(XrayAssetType::Dds).logical_path("pfx\\smoke.dds"),
+      "pfx\\smoke.dds"
+    );
+  }
+
+  #[test]
+  fn treats_an_unknown_extension_as_part_of_the_name() {
+    // A reference is not a filename: `smoke.png` names an asset the engine loads as `smoke.png.dds`.
+    assert_eq!(
+      rules(XrayAssetType::Dds).logical_path("pfx\\smoke.png"),
+      "pfx\\smoke.png.dds"
+    );
+  }
+
+  #[test]
+  fn answers_no_rules_for_kinds_without_one_home() {
+    // `Level` names a directory per level and `Shader` loads a dozen extensions; neither is a directory-plus-extension pair.
+    assert!(XrayAssetType::Level.rules().is_none());
+    assert!(XrayAssetType::Shader.rules().is_none());
+  }
+
+  #[test]
+  fn places_each_known_kind_under_its_engine_directory() {
+    assert_eq!(rules(XrayAssetType::Ogf).directory, "meshes");
+    assert_eq!(rules(XrayAssetType::Thm).directory, "textures");
+    assert_eq!(rules(XrayAssetType::Ogg).directory, "sounds");
+    assert_eq!(rules(XrayAssetType::Ltx).directory, "configs");
+    assert_eq!(rules(XrayAssetType::Script).directory, "scripts");
+    assert_eq!(rules(XrayAssetType::Ppe).directory, "anims");
   }
 }

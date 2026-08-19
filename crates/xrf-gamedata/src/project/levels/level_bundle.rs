@@ -1,6 +1,8 @@
 use std::fs;
 use std::path::PathBuf;
 
+use xrf_vfs::XrayAssetType;
+
 use crate::GamedataProject;
 use crate::project::levels::level_engine_constants::LEVELS_DIRECTORY;
 
@@ -62,7 +64,10 @@ impl<'a> LevelBundle<'a> {
   /// atlases shipped inside the bundle resolve even though they are absent from the shared texture
   /// tree. `$game_saves$` is probed in between, but it is not part of gamedata.
   pub(crate) fn resolves_texture(&self, reference: &str) -> bool {
-    let logical: String = xrf_vfs::texture::dds_logical_path(reference);
+    let logical: String = XrayAssetType::Dds
+      .rules()
+      .expect("dds has rules")
+      .logical_path(reference);
 
     let in_bundle: bool = self
       .project

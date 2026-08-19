@@ -65,18 +65,12 @@ impl LtxIncludeSource for LtxIncludeVfsSource<'_> {
       None => (String::new(), normalized.clone()),
     };
 
-    // Narrowing the scope to the include's own directory keeps a `w_*.ltx` mask from reaching the whole tree.
-    let scope: XrayScope = if prefix.is_empty() {
-      self.scope.clone()
-    } else {
-      self.scope.clone().with_prefix(&prefix)?
-    };
-
+    // `#include "sections\*.ltx"` means that one directory, so this asks for its children rather than everything below it.
     let mut resolved: Vec<PathBuf> = self
       .vfs
-      .entries(&scope)
+      .children(self.scope, &prefix)?
+      .files
       .into_iter()
-      .filter(|location| Self::is_direct_child(location.logical_path(), &prefix))
       .filter(|location| {
         location
           .logical_path()
@@ -107,27 +101,5 @@ impl LtxIncludeSource for LtxIncludeVfsSource<'_> {
 
   fn describe(&self, path: &Path) -> String {
     format!("{} (logical)", Self::to_logical(path))
-  }
-}
-
-impl LtxIncludeVfsSource<'_> {
-  /// Whether a logical path sits directly in a directory rather than deeper inside it.
-  ///
-  /// A prefix scope answers everything below it, but `#include "sections\*.ltx"` means that one directory. Without this a
-  /// mask would pull in files from nested directories the engine never loads.
-  fn is_direct_child(logical_path: &str, prefix: &str) -> bool {
-    let remainder: &str = if prefix.is_empty() {
-      logical_path
-    } else {
-      match logical_path
-        .strip_prefix(prefix)
-        .and_then(|rest| rest.strip_prefix('\\'))
-      {
-        Some(remainder) => remainder,
-        None => return false,
-      }
-    };
-
-    !remainder.contains('\\')
   }
 }

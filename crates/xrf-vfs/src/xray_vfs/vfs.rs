@@ -5,8 +5,8 @@ use xrf_error::{XrfError, XrfResult};
 
 use crate::xray_path::normalize;
 use crate::{
-  XrayAssetContainer, XrayAssetLocation, XrayAssetSource, XrayDirectorySource, XrayMount, XrayMountId, XrayMountKind,
-  XrayScope,
+  XrayAssetContainer, XrayAssetLocation, XrayAssetRules, XrayAssetSource, XrayAssetType, XrayDirectoryListing,
+  XrayDirectorySource, XrayMount, XrayMountId, XrayMountKind, XrayScope,
 };
 
 /// The engine's view of assets: several mounted sources, searched in order, first hit wins.
@@ -159,6 +159,67 @@ impl XrayVfs {
     located
   }
 
+  /// Returns what sits directly inside one logical directory, as a browser or a tree view needs it.
+  ///
+  /// Separate from [`Self::entries`], which answers everything *below* a prefix: listing `textures` with a prefix scope
+  /// yields every texture in the tree, while this yields its handful of folders and files. That is the difference between
+  /// expanding one node and loading the whole tree.
+  ///
+  /// Directories are not entries — a volume records them, and treating them as assets inflates every count — so folder
+  /// names are derived from the path segments of entries. Cost is therefore proportional to the entries under `directory`,
+  /// not to the number of children returned.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when `directory` is not a valid X-Ray logical path. An empty `directory` lists the logical root.
+  pub fn children(&self, scope: &XrayScope, directory: &str) -> XrfResult<XrayDirectoryListing> {
+    let directory: String = if directory.is_empty() {
+      String::new()
+    } else {
+      normalize(directory)?
+    };
+
+    let scope: XrayScope = if directory.is_empty() {
+      scope.clone()
+    } else {
+      scope.clone().with_prefix(&directory)?
+    };
+
+    let mut listing: XrayDirectoryListing = Default::default();
+    let mut directories: HashSet<String> = HashSet::new();
+
+    for entry in self.entries(&scope) {
+      let Some(remainder) = Self::remainder_under(entry.logical_path(), &directory) else {
+        continue;
+      };
+
+      match remainder.split_once('\\') {
+        Some((child, _)) => {
+          if directories.insert(child.to_string()) {
+            listing.directories.push(child.to_string());
+          }
+        }
+        None => listing.files.push(entry),
+      }
+    }
+
+    listing.directories.sort();
+    listing.files.sort_by(|a, b| a.logical_path().cmp(b.logical_path()));
+
+    Ok(listing)
+  }
+
+  /// The part of a logical path below `directory`, or `None` when it does not sit under it.
+  fn remainder_under<'a>(logical_path: &'a str, directory: &str) -> Option<&'a str> {
+    if directory.is_empty() {
+      return Some(logical_path);
+    }
+
+    logical_path
+      .strip_prefix(directory)
+      .and_then(|rest| rest.strip_prefix('\\'))
+  }
+
   /// Returns every entry in scope, including shadowed copies.
   pub fn entries_all(&self, scope: &XrayScope) -> Vec<XrayAssetLocation> {
     let mut located: Vec<XrayAssetLocation> = Vec::new();
@@ -287,13 +348,37 @@ impl XrayVfs {
     Ok(())
   }
 
-  /// Resolves a texture reference under the `textures` namespace after appending `.dds` or replacing its authoring extension.
+  /// Resolves a raw engine reference of one kind, under that kind's directory and extension.
+  ///
+  /// This is how an editor resolves any kind the table knows without the VFS growing a method per kind. `reference` is
+  /// untrusted engine text — from a config field or a mesh header — so normalizing it is this call's job, which is why it
+  /// takes `&str` rather than an [`crate::XrayPath`].
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when `asset_type` has no canonical home, or when the reference cannot be normalized as an X-Ray path.
+  pub fn resolve(
+    &self,
+    scope: &XrayScope,
+    asset_type: XrayAssetType,
+    reference: &str,
+  ) -> XrfResult<Option<XrayAssetLocation>> {
+    let rules: XrayAssetRules = asset_type.rules().ok_or_else(|| {
+      XrfError::new_asset_error(format!(
+        "asset kind {asset_type:?} has no single directory to resolve under"
+      ))
+    })?;
+
+    self.find_in(scope, rules.directory, &rules.logical_path(reference))
+  }
+
+  /// Resolves a texture reference, appending `.dds` or replacing its authoring extension.
   ///
   /// # Errors
   ///
   /// Returns an error when the reference cannot be normalized as an X-Ray path.
   pub fn dds_texture(&self, scope: &XrayScope, reference: &str) -> XrfResult<Option<XrayAssetLocation>> {
-    self.find_in(scope, "textures", &crate::texture::dds_logical_path(reference))
+    self.resolve(scope, XrayAssetType::Dds, reference)
   }
 
   /// Resolves an OGF reference under the `meshes` namespace.
@@ -302,7 +387,7 @@ impl XrayVfs {
   ///
   /// Returns an error when the reference cannot be normalized as an X-Ray path.
   pub fn ogf(&self, scope: &XrayScope, reference: &str) -> XrfResult<Option<XrayAssetLocation>> {
-    self.find_in(scope, "meshes", &crate::xray_path::with_extension(reference, ".ogf"))
+    self.resolve(scope, XrayAssetType::Ogf, reference)
   }
 
   /// Resolves an OMF reference under the `meshes` namespace.
@@ -311,7 +396,7 @@ impl XrayVfs {
   ///
   /// Returns an error when the reference cannot be normalized as an X-Ray path.
   pub fn omf(&self, scope: &XrayScope, reference: &str) -> XrfResult<Option<XrayAssetLocation>> {
-    self.find_in(scope, "meshes", &crate::xray_path::with_extension(reference, ".omf"))
+    self.resolve(scope, XrayAssetType::Omf, reference)
   }
 
   fn find_in(&self, scope: &XrayScope, prefix: &str, path: &str) -> XrfResult<Option<XrayAssetLocation>> {

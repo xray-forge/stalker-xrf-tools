@@ -118,7 +118,13 @@ impl XrayAssetIndex {
 
   /// Finds a texture reference below `textures`, resolving its authoring extension to `.dds`.
   pub fn dds_texture(&self, reference: &str) -> XrfResult<Option<XrayAsset<'_>>> {
-    self.find_in("textures", &crate::texture::dds_logical_path(reference))
+    self.find_in(
+      "textures",
+      &XrayAssetType::Dds
+        .rules()
+        .expect("dds has rules")
+        .logical_path(reference),
+    )
   }
 
   /// Iterates over assets in a normalized logical subtree.

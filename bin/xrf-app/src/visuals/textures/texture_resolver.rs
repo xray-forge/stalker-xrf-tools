@@ -2,7 +2,7 @@ use std::path::Path;
 
 use xrf_error::XrfResult;
 use xrf_vfs::mount_plan;
-use xrf_vfs::{XrayMountPlan, XrayScope, XrayVfs};
+use xrf_vfs::{XrayAssetType, XrayMountPlan, XrayScope, XrayVfs};
 use xrf_visual::VisualSubmesh;
 
 use crate::types::TauriResult;
@@ -63,7 +63,10 @@ impl VisualTextureResolver {
   ///
   /// Reading through the VFS avoids exposing the winning mount's physical path to the caller.
   pub fn read(&self, scope: &XrayScope, reference: &str) -> TauriResult<Vec<u8>> {
-    let logical_path: String = xrf_vfs::texture::dds_logical_path(reference);
+    let logical_path: String = XrayAssetType::Dds
+      .rules()
+      .expect("dds has rules")
+      .logical_path(reference);
 
     self
       .vfs

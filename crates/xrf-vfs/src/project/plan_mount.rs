@@ -5,8 +5,7 @@ use crate::{XrayDirectorySource, XrayMountId, XrayMountKind, XrayMountPlan, Xray
 
 /// Mounts each planned source that can be opened, in plan order.
 ///
-/// `xrf-vfs` decides what to mount without depending on archive support; this function constructs the planned directory
-/// and archive sources.
+/// Planning is a decision about the filesystem; this is the construction of the sources it named.
 ///
 /// Sources that fail to open or mount are logged and omitted. The returned mount IDs preserve plan order.
 pub fn mount_plan(vfs: &mut XrayVfs, plan: &XrayMountPlan) -> XrfResult<Vec<XrayMountId>> {

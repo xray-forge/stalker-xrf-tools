@@ -4,12 +4,12 @@ use std::path::{Path, PathBuf};
 use xrf_error::XrfResult;
 
 use crate::xray_path::normalize;
-use crate::{FsgameFile, XrayMountKind, implied_asset_root, implied_install_root};
+use crate::xray_root::implied_install_root;
+use crate::{FsgameFile, XrayMountKind, implied_asset_root};
 
 /// One source to mount before it is opened or indexed.
 ///
-/// The plan remains plain data so `xrf-vfs` can inspect an installation without depending on the crate that opens
-/// archives.
+/// The plan stays plain data, so what to mount can be decided and inspected before anything is opened.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct XrayPlannedMount {
   /// Where the source lives.

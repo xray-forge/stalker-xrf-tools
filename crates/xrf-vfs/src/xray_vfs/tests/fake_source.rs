@@ -18,9 +18,16 @@ pub struct FakeArchiveSource {
 impl FakeArchiveSource {
   pub fn new(label: &str, entries: &[&str]) -> Self {
     Self {
+      // Keys are normalized at construction, as a real archive source derives them: a header keeps a name as authored, so
+      // only the canonical form can answer a lookup or a prefix scope.
       entries: entries
         .iter()
-        .map(|path| ((*path).to_string(), label.as_bytes().to_vec()))
+        .map(|entry| {
+          (
+            crate::xray_path::normalize_logical(entry).expect("test entry is a valid logical path"),
+            label.as_bytes().to_vec(),
+          )
+        })
         .collect(),
       label: label.to_string(),
       root: PathBuf::from(format!("C:\\install\\db\\{label}")),
@@ -76,7 +83,7 @@ impl XrayAssetSource for FakeArchiveSource {
       self
         .entries
         .keys()
-        .filter(move |path| prefix.is_none_or(|prefix| path.starts_with(prefix)))
+        .filter(move |entry| prefix.is_none_or(|prefix| crate::xray_path::is_component_prefix(entry, prefix)))
         .cloned(),
     )
   }

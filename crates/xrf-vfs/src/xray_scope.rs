@@ -5,7 +5,7 @@ use crate::{XrayMount, XrayMountId, XrayMountKind};
 
 /// A mount filter for one VFS operation.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
-pub enum XrayMountSelection {
+pub(crate) enum XrayMountSelection {
   /// Every mount, in mount order.
   #[default]
   All,
@@ -65,7 +65,7 @@ impl XrayScope {
     Ok(self)
   }
 
-  pub fn selection(&self) -> &XrayMountSelection {
+  pub(crate) fn selection(&self) -> &XrayMountSelection {
     &self.selection
   }
 
@@ -87,7 +87,8 @@ impl XrayScope {
 
 #[cfg(test)]
 mod tests {
-  use crate::{XrayMountKind, XrayMountSelection, XrayScope};
+  use super::XrayMountSelection;
+  use crate::{XrayMountKind, XrayScope};
 
   #[test]
   fn defaults_to_everything() {

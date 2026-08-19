@@ -6,7 +6,6 @@ mod fsgame;
 mod open;
 pub mod shader;
 pub mod sound;
-pub mod texture;
 #[cfg(feature = "typescript-bindings")]
 mod typescript_bindings;
 mod xray_asset;
@@ -33,15 +32,15 @@ pub use xray_asset::XrayAsset;
 pub use xray_asset_index::XrayAssetIndex;
 pub use xray_asset_location::{XrayAssetContainer, XrayAssetLocation};
 pub use xray_asset_source::{XrayAssetSource, XrayMountKind};
-pub use xray_asset_type::XrayAssetType;
+pub use xray_asset_type::{XrayAssetRules, XrayAssetType};
 pub use xray_directory_source::XrayDirectorySource;
 pub use xray_mount::{XrayMount, XrayMountId};
 pub use xray_mount_mode::XrayMountMode;
 pub use xray_mount_plan::{XrayMountPlan, XrayPlannedMount};
 pub use xray_path::XrayPath;
-pub use xray_root::{MESHES_DIRECTORY, TEXTURES_DIRECTORY, implied_asset_root, implied_install_root};
-pub use xray_scope::{XrayMountSelection, XrayScope};
-pub use xray_vfs::XrayVfs;
+pub use xray_root::implied_asset_root;
+pub use xray_scope::XrayScope;
+pub use xray_vfs::{XrayDirectoryListing, XrayVfs};
 
 pub(crate) mod archive;
 pub(crate) mod project;
