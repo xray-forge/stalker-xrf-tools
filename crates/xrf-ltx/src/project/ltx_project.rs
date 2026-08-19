@@ -1,10 +1,12 @@
 use std::path::{Path, PathBuf};
 
-use xrf_assets::{XrayScope, XrayVfs};
+use xrf_assets::{XrayPath, XrayScope, XrayVfs};
 use xrf_error::{XrfError, XrfResult};
 
 use crate::Ltx;
-use crate::file::file_configuration::constants::{LTX_EXTENSION, LTX_SCHEME_EXTENSION, LTX_SCHEME_LTX_FILENAME};
+use crate::file::file_configuration::constants::{
+  LTX_EXTENSION, LTX_SCHEME_EXTENSION, LTX_SCHEME_LTX_FILENAME, SYSTEM_LTX_FILENAME,
+};
 use crate::file::include_source::LtxIncludeSource;
 use crate::file::include_vfs_source::LtxIncludeVfsSource;
 use crate::file::types::LtxSectionSchemes;
@@ -13,20 +15,21 @@ use crate::scheme::parser::LtxSchemeParser;
 
 /// An LTX project assembled from one VFS scope.
 ///
-/// Its files use the VFS's logical X-Ray paths, so callers do not depend on whether a config is loose or archived. Use
-/// [`Self::path_of`] for display and [`Self::read_full`] to read a file; a logical path is not a filesystem path.
+/// Its files are [`XrayPath`] engine identities rather than filesystem paths, so callers do not depend on whether a config
+/// is loose or archived, and cannot read one with host I/O by mistake. Use [`Self::read_full`] to read a file and
+/// [`Self::path_of`] to show one.
 #[derive(Debug)]
 pub struct LtxProject {
-  /// Location shown in project output.
+  /// Location shown in project output, on the host filesystem.
   pub root: PathBuf,
   /// LTX entry points not included by another config in scope.
-  pub ltx_file_entries: Vec<PathBuf>,
+  pub ltx_file_entries: Vec<XrayPath>,
   /// Every LTX logical path in scope.
-  pub ltx_files: Vec<PathBuf>,
+  pub ltx_files: Vec<XrayPath>,
   /// Scheme-definition LTX paths in scope.
-  pub ltx_scheme_files: Vec<PathBuf>,
+  pub ltx_scheme_files: Vec<XrayPath>,
   /// Scheme entry points not included by another config in scope.
-  pub ltx_scheme_file_entries: Vec<PathBuf>,
+  pub ltx_scheme_file_entries: Vec<XrayPath>,
   /// Section schemes declared by scheme entry points.
   pub ltx_scheme_declarations: LtxSectionSchemes,
   /// Mounted sources that resolve project files.
@@ -91,16 +94,20 @@ impl LtxProject {
   fn assemble(root: PathBuf, vfs: XrayVfs, scope: XrayScope, options: LtxProjectOptions) -> XrfResult<Self> {
     let source: LtxIncludeVfsSource = LtxIncludeVfsSource::new(&vfs, &scope);
 
-    let mut ltx_files: Vec<PathBuf> = Vec::new();
-    let mut ltx_scheme_files: Vec<PathBuf> = Vec::new();
-    let mut included: Vec<PathBuf> = Vec::new();
+    let mut ltx_files: Vec<XrayPath> = Vec::new();
+    let mut ltx_scheme_files: Vec<XrayPath> = Vec::new();
+    let mut included: Vec<XrayPath> = Vec::new();
 
-    for logical_path in Self::collect_logical_paths(&vfs, &scope) {
-      let path: PathBuf = PathBuf::from(&logical_path);
-      let directory: PathBuf = path.parent().map(Path::to_path_buf).unwrap_or_default();
+    for path in Self::collect_logical_paths(&vfs, &scope)? {
+      let directory: PathBuf = path
+        .parent()
+        .map(|parent| PathBuf::from(parent.as_str()))
+        .unwrap_or_default();
 
-      for include in &Ltx::read_included_from_vfs(&vfs, &scope, &logical_path)? {
-        included.extend(source.resolve(&directory, include)?);
+      for include in &Ltx::read_included_from_vfs(&vfs, &scope, path.as_str())? {
+        for resolved in source.resolve(&directory, include)? {
+          included.push(Self::included_path(&resolved)?);
+        }
       }
 
       if options.is_with_schemes_check && Self::is_ltx_scheme_path(&path) {
@@ -110,8 +117,8 @@ impl LtxProject {
       ltx_files.push(path);
     }
 
-    let mut ltx_file_entries: Vec<PathBuf> = Vec::new();
-    let mut ltx_file_entries_failures: Vec<(PathBuf, PathBuf)> = Vec::new();
+    let mut ltx_file_entries: Vec<XrayPath> = Vec::new();
+    let mut ltx_file_entries_failures: Vec<(XrayPath, XrayPath)> = Vec::new();
 
     // Filter our entries not included in other files and consider them entry-points.
     for ltx_file_path in ltx_files.iter() {
@@ -122,12 +129,14 @@ impl LtxProject {
       // To make checks more strict and consistent, verify typos with case-insensitive Windows OS.
       // Linux / sane logics fail when assuming that `ExAmPlE.TxT` is same as `example.txt`.
       // Part of strict checking because original gamedata has such failures.
+      //
+      // Currently unreachable: an [`XrayPath`] is normalized to lower case on both sides, so a case-only mismatch is already
+      // equal above and never reaches here. Catching it again needs the spelling as authored, which the VFS does not carry
+      // yet.
       if options.is_strict_check
-        && let Some(matching_path) = included.iter().find(|it| {
-          it.to_str()
-            .unwrap()
-            .eq_ignore_ascii_case(ltx_file_path.to_str().unwrap())
-        })
+        && let Some(matching_path) = included
+          .iter()
+          .find(|it| it.as_str().eq_ignore_ascii_case(ltx_file_path.as_str()))
       {
         ltx_file_entries_failures.push((ltx_file_path.clone(), matching_path.clone()));
         continue;
@@ -142,14 +151,14 @@ impl LtxProject {
         "Cannot read LTX project safely, detected case-insensitive #include statements:\n{}",
         ltx_file_entries_failures
           .iter()
-          .map(|(first, second)| format!("  - {} incorrectly imported as {}", first.display(), second.display()))
+          .map(|(first, second)| format!("  - {} incorrectly imported as {}", first, second))
           .collect::<Vec<_>>()
           .join("\n")
       )));
     }
 
     // Filter our entries not included in other files.
-    let ltx_scheme_file_entries: Vec<PathBuf> = if options.is_with_schemes_check {
+    let ltx_scheme_file_entries: Vec<XrayPath> = if options.is_with_schemes_check {
       ltx_scheme_files
         .iter()
         .filter_map(|it| if included.contains(it) { None } else { Some(it.clone()) })
@@ -177,28 +186,45 @@ impl LtxProject {
   }
 
   /// Every LTX logical path in scope, sorted so assembly is deterministic.
-  fn collect_logical_paths(vfs: &XrayVfs, scope: &XrayScope) -> Vec<String> {
-    let mut paths: Vec<String> = vfs
-      .entries(scope)
-      .into_iter()
-      .map(|location| location.logical_path().to_string())
-      .filter(|path| path.ends_with(&format!(".{LTX_EXTENSION}")))
-      .collect();
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when a mounted entry is not a valid X-Ray logical path.
+  fn collect_logical_paths(vfs: &XrayVfs, scope: &XrayScope) -> XrfResult<Vec<XrayPath>> {
+    let mut paths: Vec<XrayPath> = Vec::new();
+
+    for location in vfs.entries(scope) {
+      let path: XrayPath = XrayPath::new(location.logical_path())?;
+
+      if path.has_extension(&format!(".{LTX_EXTENSION}")) {
+        paths.push(path);
+      }
+    }
 
     paths.sort();
 
-    paths
+    Ok(paths)
+  }
+
+  /// Converts a path the include source resolved back into an engine identity.
+  ///
+  /// [`LtxIncludeSource`] carries logical paths in `PathBuf` for both of its backends, for the reason its own documentation
+  /// gives; this is the single place a project crosses back out of that representation.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when the resolved path is not a valid X-Ray logical path.
+  fn included_path(path: &Path) -> XrfResult<XrayPath> {
+    XrayPath::new(&path.to_string_lossy())
   }
 }
 
 impl LtxProject {
   /// Check if provided LTX file is scheme definition file.
-  pub fn is_ltx_scheme_path<P: AsRef<Path>>(path: P) -> bool {
-    path
-      .as_ref()
-      .file_name()
-      .and_then(|name| name.to_str())
-      .is_some_and(|name| name == LTX_SCHEME_LTX_FILENAME || name.ends_with(LTX_SCHEME_EXTENSION))
+  pub fn is_ltx_scheme_path(path: &XrayPath) -> bool {
+    let name: &str = path.file_name();
+
+    name == LTX_SCHEME_LTX_FILENAME || name.ends_with(LTX_SCHEME_EXTENSION)
   }
 
   /// Returns the VFS that resolves this project's files.
@@ -212,24 +238,21 @@ impl LtxProject {
 
   /// Returns the user-facing path for one logical config.
   ///
-  /// Loose configs use their filesystem path. Archived or missing configs use the supplied logical path.
-  pub fn path_of(&self, logical_path: &Path) -> PathBuf {
+  /// Loose configs use their filesystem path. Archived or missing configs use the logical path, which is the only honest
+  /// answer for a config with no file on disk.
+  pub fn path_of(&self, logical_path: &XrayPath) -> PathBuf {
     self
-      .vfs
-      .find(&self.scope, &logical_path.to_string_lossy().replace('/', "\\"))
-      .ok()
-      .flatten()
-      .and_then(|location| location.physical_path())
-      .unwrap_or_else(|| logical_path.to_path_buf())
+      .physical_path_of(logical_path)
+      .unwrap_or_else(|| PathBuf::from(logical_path.as_str()))
   }
 
   /// Returns a filesystem path when a loose config resolves.
   ///
   /// Returns `None` for archived or missing configs, so in-place operations can reject them.
-  pub fn physical_path_of(&self, logical_path: &Path) -> Option<PathBuf> {
+  pub fn physical_path_of(&self, logical_path: &XrayPath) -> Option<PathBuf> {
     self
       .vfs
-      .find(&self.scope, &logical_path.to_string_lossy().replace('/', "\\"))
+      .find(&self.scope, logical_path.as_str())
       .ok()
       .flatten()
       .and_then(|location| location.physical_path())
@@ -243,27 +266,37 @@ impl LtxProject {
   /// # Errors
   ///
   /// Returns an error when the file is not in scope or cannot be read or parsed.
-  pub fn read_full(&self, logical_path: &Path) -> XrfResult<Ltx> {
-    Ltx::read_from_vfs_full(
-      &self.vfs,
-      &self.scope,
-      &logical_path.to_string_lossy().replace('/', "\\"),
-    )
+  pub fn read_full(&self, logical_path: &XrayPath) -> XrfResult<Ltx> {
+    Ltx::read_from_vfs_full(&self.vfs, &self.scope, logical_path.as_str())
   }
 
-  pub fn get_system_ltx_path(&self) -> PathBuf {
-    PathBuf::from("system.ltx")
-  }
-
-  /// Returns the user-facing path of `system.ltx`, for findings that name it.
+  /// The engine identity of `system.ltx`, which is what reads it.
   ///
-  /// [`Self::get_system_ltx_path`] answers the logical path, which is what reads it; a finding needs the path a person can
-  /// act on.
-  pub fn get_system_ltx_report_path(&self) -> PathBuf {
-    self.path_of(&self.get_system_ltx_path())
+  /// # Errors
+  ///
+  /// Returns an error only if the constant name stops being a valid logical path.
+  pub fn system_ltx_path(&self) -> XrfResult<XrayPath> {
+    XrayPath::new(SYSTEM_LTX_FILENAME)
   }
 
-  pub fn get_system_ltx(&self) -> XrfResult<Ltx> {
-    self.read_full(&self.get_system_ltx_path())
+  /// The user-facing path of `system.ltx`, for findings that name it.
+  ///
+  /// Separate from [`Self::system_ltx_path`] because a finding needs the path a person can act on, while a read needs the
+  /// logical one.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error only if the constant name stops being a valid logical path.
+  pub fn system_ltx_report_path(&self) -> XrfResult<PathBuf> {
+    Ok(self.path_of(&self.system_ltx_path()?))
+  }
+
+  /// Reads `system.ltx` with its includes merged and inherited sections resolved.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when the config is not in scope or cannot be read or parsed.
+  pub fn system_ltx(&self) -> XrfResult<Ltx> {
+    self.read_full(&self.system_ltx_path()?)
   }
 }

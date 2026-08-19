@@ -1,6 +1,6 @@
 use xrf_error::XrfResult;
 
-use crate::xray_asset_utils::normalize;
+use crate::xray_path::normalize;
 use crate::{XrayMount, XrayMountId, XrayMountKind};
 
 /// A mount filter for one VFS operation.

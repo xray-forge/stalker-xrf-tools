@@ -1,9 +1,9 @@
 //! Discovery and aggregate reporting for assembled weather cycles.
 
 use std::collections::BTreeSet;
-use std::path::{Path, PathBuf};
 use std::time::Instant;
 
+use xrf_assets::XrayPath;
 use xrf_error::{XrfError, XrfResult};
 
 use super::verify_weathers_result::GamedataWeathersVerificationResult;
@@ -11,6 +11,12 @@ use super::weather_definitions::WeatherDefinitions;
 use super::weather_validator::verify_weather_findings_with_definitions;
 use crate::GamedataFindingFactory;
 use crate::{Finding, GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationRule};
+
+/// Logical directory holding assembled weather cycles.
+///
+/// Spelled with X-Ray separators rather than joined with `Path`, because the project addresses its configs logically; a host
+/// join would read `environment/weathers` off Windows and match nothing.
+const WEATHERS_DIRECTORY: &str = "environment\\weathers";
 
 impl GamedataProject {
   /// Verifies every assembled weather cycle under `configs/environment/weathers`.
@@ -25,16 +31,15 @@ impl GamedataProject {
 
     let started_at: Instant = Instant::now();
 
-    let weathers_path: String = Path::new("environment")
-      .join("weathers")
-      .to_str()
-      .expect("Expected valid weathers path")
-      .to_string();
-    let weather_configs: Vec<&PathBuf> = self
+    let weather_configs: Vec<&XrayPath> = self
       .ltx_project
       .ltx_files
       .iter()
-      .filter(|path| path.parent().expect("Config parent expected").ends_with(&weathers_path))
+      .filter(|path| {
+        path
+          .parent()
+          .is_some_and(|parent| parent.as_str().ends_with(WEATHERS_DIRECTORY))
+      })
       .collect();
 
     let checked_weather_files_count: u32 = u32::try_from(weather_configs.len())

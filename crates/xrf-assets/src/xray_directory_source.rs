@@ -3,7 +3,7 @@ use std::path::{Path, PathBuf};
 
 use xrf_error::{XrfError, XrfResult};
 
-use crate::xray_asset_utils::is_component_prefix;
+use crate::xray_path::is_component_prefix;
 use crate::{DirectoryAssetIndex, XrayAssetContainer, XrayAssetIndex, XrayAssetSource, XrayMountKind};
 
 /// A directory of loose files, indexed once at mount time.

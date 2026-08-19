@@ -4,7 +4,7 @@ use std::path::PathBuf;
 
 use xrf_error::{XrfError, XrfResult};
 
-use crate::xray_asset_utils::{is_component_prefix, join, logical_path, normalize};
+use crate::xray_path::{is_component_prefix, join, normalize, normalize_host_relative};
 use crate::{DirectoryAssetIndex, XrayAsset, XrayAssetType};
 
 #[derive(Debug)]
@@ -28,7 +28,7 @@ impl XrayAssetIndex {
     let mut assets: BTreeMap<String, usize> = BTreeMap::new();
 
     for (index, asset) in directory.assets().enumerate() {
-      let logical_path = logical_path(asset.relative_path())?;
+      let logical_path = normalize_host_relative(asset.relative_path())?;
 
       if ignored.iter().any(|prefix| is_component_prefix(&logical_path, prefix)) {
         continue;

@@ -3,7 +3,7 @@ use std::path::{Path, PathBuf};
 
 use xrf_error::XrfResult;
 
-use crate::xray_asset_utils::normalize;
+use crate::xray_path::normalize;
 use crate::{FsgameFile, XrayMountKind, implied_asset_root, implied_install_root};
 
 /// One source to mount before it is opened or indexed.

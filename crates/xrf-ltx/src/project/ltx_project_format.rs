@@ -35,7 +35,7 @@ impl LtxProject {
         None => {
           return Err(XrfError::new_asset_error(format!(
             "Cannot format '{}': it has no file on disk, being read out of an archive",
-            logical_path.display()
+            logical_path
           )));
         }
       }

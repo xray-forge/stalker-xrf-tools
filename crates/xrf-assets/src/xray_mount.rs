@@ -1,7 +1,7 @@
 use serde::Serialize;
 use xrf_error::XrfResult;
 
-use crate::xray_asset_utils::{is_component_prefix, join, normalize};
+use crate::xray_path::{is_component_prefix, join, normalize};
 use crate::{XrayAssetSource, XrayMountKind};
 
 /// Stable identity of a mount within one VFS.

@@ -3,7 +3,7 @@ use std::path::{Path, PathBuf};
 
 use xrf_error::{XrfError, XrfResult};
 
-use crate::xray_asset_utils::normalize;
+use crate::xray_path::normalize;
 use crate::{
   XrayAssetContainer, XrayAssetLocation, XrayAssetSource, XrayDirectorySource, XrayMount, XrayMountId, XrayMountKind,
   XrayScope,
@@ -315,14 +315,14 @@ impl XrayVfs {
   }
 
   fn find_in(&self, scope: &XrayScope, prefix: &str, path: &str) -> XrfResult<Option<XrayAssetLocation>> {
-    self.find(scope, &crate::xray_asset_utils::join(prefix, path)?)
+    self.find(scope, &crate::xray_path::join(prefix, path)?)
   }
 
   /// Checks whether a logical path falls inside the scope's subtree.
   fn within_prefix(scope: &XrayScope, logical_path: &str) -> bool {
     scope
       .prefix()
-      .is_none_or(|prefix| crate::xray_asset_utils::is_component_prefix(logical_path, prefix))
+      .is_none_or(|prefix| crate::xray_path::is_component_prefix(logical_path, prefix))
   }
 
   fn locate(&self, scope: &XrayScope, logical_path: &str) -> Option<XrayAssetLocation> {

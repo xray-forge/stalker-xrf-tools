@@ -6,6 +6,7 @@
 use std::fs;
 use std::path::PathBuf;
 
+use xrf_assets::XrayPath;
 use xrf_error::XrfResult;
 
 use crate::project::ltx_project::LtxProject;
@@ -34,7 +35,7 @@ fn does_not_treat_wildcard_included_files_as_entries() -> XrfResult {
 
   let project: LtxProject = LtxProject::open_at_path(&root)?;
 
-  assert_eq!(project.ltx_file_entries, vec![PathBuf::from("root.ltx")]);
+  assert_eq!(project.ltx_file_entries, vec![XrayPath::new("root.ltx")?]);
   assert_eq!(project.ltx_files.len(), 3, "every config is still listed");
 
   fs::remove_dir_all(root)?;
@@ -51,7 +52,7 @@ fn does_not_treat_a_named_included_file_as_an_entry() -> XrfResult {
 
   let project: LtxProject = LtxProject::open_at_path(&root)?;
 
-  assert_eq!(project.ltx_file_entries, vec![PathBuf::from("root.ltx")]);
+  assert_eq!(project.ltx_file_entries, vec![XrayPath::new("root.ltx")?]);
 
   fs::remove_dir_all(root)?;
 
@@ -69,7 +70,7 @@ fn does_not_treat_a_file_included_after_a_section_as_an_entry() -> XrfResult {
 
   let project: LtxProject = LtxProject::open_at_path(&root)?;
 
-  assert_eq!(project.ltx_file_entries, vec![PathBuf::from("root.ltx")]);
+  assert_eq!(project.ltx_file_entries, vec![XrayPath::new("root.ltx")?]);
 
   fs::remove_dir_all(root)?;
 
@@ -85,9 +86,9 @@ fn renders_a_loose_path_for_a_person_and_reads_it_through_the_project() -> XrfRe
   fs::write(root.join("root.ltx"), "[section]\nvalue = 1\n")?;
 
   let project: LtxProject = LtxProject::open_at_path(&root)?;
-  let entry: &PathBuf = project.ltx_file_entries.first().expect("one entry");
+  let entry: &XrayPath = project.ltx_file_entries.first().expect("one entry");
 
-  assert_eq!(entry, &PathBuf::from("root.ltx"));
+  assert_eq!(entry, &XrayPath::new("root.ltx")?);
   assert_eq!(project.path_of(entry), root.join("root.ltx"));
   assert_eq!(project.physical_path_of(entry), Some(root.join("root.ltx")));
   assert_eq!(
@@ -108,7 +109,7 @@ fn an_empty_project_holds_nothing_and_still_answers() -> XrfResult {
   assert!(project.ltx_files.is_empty());
   assert!(project.ltx_file_entries.is_empty());
   assert!(
-    project.physical_path_of(&PathBuf::from("system.ltx")).is_none(),
+    project.physical_path_of(&XrayPath::new("system.ltx")?).is_none(),
     "nothing is mounted, so nothing resolves"
   );
 

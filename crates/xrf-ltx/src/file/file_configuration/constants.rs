@@ -8,6 +8,9 @@ pub const LTX_SCHEME_STRICT_FIELD: &str = "$strict";
 
 pub const LTX_SCHEME_LTX_FILENAME: &str = "scheme.ltx";
 
+/// Root config the engine loads, which every project entry point chain reaches.
+pub const SYSTEM_LTX_FILENAME: &str = "system.ltx";
+
 pub const LTX_SCHEME_EXTENSION: &str = ".scheme.ltx";
 
 pub const LTX_SYMBOL_COMMENT: char = ';';

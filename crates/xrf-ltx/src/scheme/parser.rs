@@ -1,7 +1,5 @@
-use std::path::PathBuf;
-
 use indexmap::map::Entry;
-use xrf_assets::{XrayScope, XrayVfs};
+use xrf_assets::{XrayPath, XrayScope, XrayVfs};
 use xrf_error::{XrfError, XrfResult};
 
 use crate::file::file_configuration::constants::{LTX_SCHEME_FIELD, LTX_SCHEME_STRICT_FIELD, LTX_SYMBOL_SCHEME};
@@ -22,11 +20,11 @@ impl LtxSchemeParser {
   /// # Errors
   ///
   /// Returns an error when a scheme cannot be read or contains invalid, duplicate, or malformed declarations.
-  pub fn parse_from_vfs(vfs: &XrayVfs, scope: &XrayScope, files: &[PathBuf]) -> XrfResult<LtxSectionSchemes> {
+  pub fn parse_from_vfs(vfs: &XrayVfs, scope: &XrayScope, files: &[XrayPath]) -> XrfResult<LtxSectionSchemes> {
     let mut schemes: LtxSectionSchemes = Default::default();
 
     for file in files {
-      let ltx: Ltx = Ltx::read_from_vfs_full(vfs, scope, &file.to_string_lossy().replace('/', "\\"))?;
+      let ltx: Ltx = Ltx::read_from_vfs_full(vfs, scope, file.as_str())?;
 
       for (name, section) in &ltx {
         if !name.starts_with(LTX_SYMBOL_SCHEME) {

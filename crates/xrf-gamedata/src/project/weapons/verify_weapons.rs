@@ -20,8 +20,8 @@ impl GamedataProject {
     xrf_output::heading!(options.output, "Verify weapons:");
 
     let started_at: Instant = Instant::now();
-    let system_ltx: Ltx = self.ltx_project.get_system_ltx()?;
-    let system_ltx_path = self.ltx_project.get_system_ltx_report_path();
+    let system_ltx: Ltx = self.ltx_project.system_ltx()?;
+    let system_ltx_path = self.ltx_project.system_ltx_report_path()?;
 
     let mut checked_weapons_count: u32 = 0;
     let mut findings: Vec<Finding> = Vec::new();

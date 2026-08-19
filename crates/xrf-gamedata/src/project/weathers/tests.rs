@@ -3,6 +3,8 @@ use std::fs;
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicU64, Ordering};
 
+use xrf_assets::XrayPath;
+
 use super::verify_weathers_result::GamedataWeathersVerificationResult;
 use super::weather_definitions::WeatherDefinitions;
 use super::weather_validator::verify_weather_with_definitions;
@@ -555,7 +557,7 @@ fn unreadable_legacy_fallback_is_reported_once_when_missing_names_consult_it() {
     semantic_weather_project_files_with_system(&[("test.ltx", &weather)], None, UNREADABLE_SYSTEM_LTX);
   let definitions: WeatherDefinitions = WeatherDefinitions::read(&project.ltx_project.root);
   // A logical path now, since the project addresses its files that way and reads them itself.
-  let config_path: PathBuf = PathBuf::from("environment").join("weathers").join("test.ltx");
+  let config_path: XrayPath = XrayPath::new("environment\\weathers\\test.ltx").expect("valid logical path");
   let mut definition_load_errors: BTreeSet<String> = BTreeSet::new();
 
   let is_valid: bool = verify_weather_with_definitions(

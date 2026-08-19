@@ -1,5 +1,7 @@
 use std::collections::{BTreeSet, HashSet};
-use std::path::Path;
+use std::path::{Path, PathBuf};
+
+use xrf_assets::XrayPath;
 
 use xrf_error::XrfResult;
 use xrf_ltx::{Ltx, Section};
@@ -17,7 +19,7 @@ use crate::{Finding, GamedataProject, GamedataProjectVerifyOptions, GamedataVeri
 pub fn verify_weather_with_definitions(
   project: &GamedataProject,
   options: &GamedataProjectVerifyOptions,
-  config_path: &Path,
+  config_path: &XrayPath,
   definitions: &WeatherDefinitions,
   definition_load_errors: &mut BTreeSet<String>,
 ) -> XrfResult<bool> {
@@ -31,10 +33,12 @@ pub fn verify_weather_with_definitions(
 pub fn verify_weather_findings_with_definitions(
   project: &GamedataProject,
   options: &GamedataProjectVerifyOptions,
-  config_path: &Path,
+  config_path: &XrayPath,
   definitions: &WeatherDefinitions,
   definition_load_errors: &mut BTreeSet<String>,
 ) -> XrfResult<Vec<Finding>> {
+  // The logical path reads the config; findings need the path a person can act on.
+  let reported: PathBuf = project.ltx_project.path_of(config_path);
   let ltx: Ltx = match project.ltx_project.read_full(config_path) {
     Ok(ltx) => ltx,
     Err(error) => {
@@ -42,7 +46,7 @@ pub fn verify_weather_findings_with_definitions(
 
       return Ok(vec![GamedataFindingFactory::for_asset(
         GamedataVerificationRule::WeathersValidation,
-        project.ltx_project.path_of(config_path),
+        &reported,
         format!("Could not open weather LTX: {error}"),
       )]);
     }
@@ -58,7 +62,7 @@ pub fn verify_weather_findings_with_definitions(
   if weather_sections.len() < 2 {
     findings.push(report_weather_finding(
       options,
-      config_path,
+      &reported,
       "Weather file requires at least two time sections",
     ));
   }
@@ -74,7 +78,7 @@ pub fn verify_weather_findings_with_definitions(
       if !section.contains_key(field_name) {
         findings.push(report_weather_finding(
           options,
-          config_path,
+          &reported,
           format!("Weather [{section_name}] is missing required field [{field_name}]"),
         ));
       }
@@ -85,7 +89,7 @@ pub fn verify_weather_findings_with_definitions(
     {
       findings.push(report_weather_finding(
         options,
-        config_path,
+        &reported,
         format!("Weather [{section_name}] uses unexpected schema [{scheme}]"),
       ));
     }
@@ -94,7 +98,7 @@ pub fn verify_weather_findings_with_definitions(
       if !is_valid_weather_field_value(field_name, value) {
         findings.push(report_weather_finding(
           options,
-          config_path,
+          &reported,
           format!("Weather [{section_name}] has invalid [{field_name}] value [{value}]"),
         ));
       }
@@ -104,14 +108,14 @@ pub fn verify_weather_findings_with_definitions(
       if !execution_times.insert(execution_time) {
         findings.push(report_weather_finding(
           options,
-          config_path,
+          &reported,
           format!("Weather file has duplicate execution time [{section_name}]"),
         ));
       }
     } else {
       findings.push(report_weather_finding(
         options,
-        config_path,
+        &reported,
         format!("Weather file has invalid time section [{section_name}]"),
       ));
     }
@@ -122,7 +126,7 @@ pub fn verify_weather_findings_with_definitions(
         Ok(_) => {
           findings.push(report_weather_finding(
             options,
-            config_path,
+            &reported,
             format!("Weather [{section_name}] references missing ambient [{ambient}]"),
           ));
         }
@@ -130,7 +134,7 @@ pub fn verify_weather_findings_with_definitions(
           definition_load_errors.insert(error.clone());
           findings.push(GamedataFindingFactory::for_asset(
             GamedataVerificationRule::WeathersDefinitions,
-            config_path,
+            &reported,
             format!("Could not load weather definitions: {error}"),
           ));
         }
@@ -143,7 +147,7 @@ pub fn verify_weather_findings_with_definitions(
         Ok(false) => {
           findings.push(report_weather_finding(
             options,
-            config_path,
+            &reported,
             format!("Weather [{section_name}] references missing sun [{sun}]"),
           ));
         }
@@ -151,7 +155,7 @@ pub fn verify_weather_findings_with_definitions(
           definition_load_errors.insert(error.clone());
           findings.push(GamedataFindingFactory::for_asset(
             GamedataVerificationRule::WeathersDefinitions,
-            config_path,
+            &reported,
             format!("Could not load weather definitions: {error}"),
           ));
         }
@@ -167,7 +171,7 @@ pub fn verify_weather_findings_with_definitions(
         Ok(Some(missing_definitions)) => {
           findings.push(report_weather_finding(
             options,
-            config_path,
+            &reported,
             format!(
               "Weather [{section_name}] thunderbolt collection [{collection}] references missing definitions [{}]",
               missing_definitions.join(", ")
@@ -177,7 +181,7 @@ pub fn verify_weather_findings_with_definitions(
         Ok(None) => {
           findings.push(report_weather_finding(
             options,
-            config_path,
+            &reported,
             format!("Weather [{section_name}] references missing thunderbolt collection [{collection}]"),
           ));
         }
@@ -185,7 +189,7 @@ pub fn verify_weather_findings_with_definitions(
           definition_load_errors.insert(error.clone());
           findings.push(GamedataFindingFactory::for_asset(
             GamedataVerificationRule::WeathersDefinitions,
-            config_path,
+            &reported,
             format!("Could not load weather definitions: {error}"),
           ));
         }
@@ -197,7 +201,7 @@ pub fn verify_weather_findings_with_definitions(
         if project.assets.dds_texture(&texture_reference).ok().flatten().is_none() {
           findings.push(report_weather_finding(
             options,
-            config_path,
+            &reported,
             format!("Weather [{section_name}] references missing sky texture [{texture_reference}]"),
           ));
         }
@@ -209,7 +213,7 @@ pub fn verify_weather_findings_with_definitions(
     {
       findings.push(report_weather_finding(
         options,
-        config_path,
+        &reported,
         format!("Weather [{section_name}] references missing clouds texture [{clouds_texture}]"),
       ));
     }
