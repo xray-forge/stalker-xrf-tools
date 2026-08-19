@@ -1,7 +1,7 @@
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
+use xrf_chunk::{ChunkDataSource, ChunkReadWrite, ChunkReader, ChunkWriter};
 use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{Ltx, Section};
 
@@ -23,7 +23,7 @@ pub struct GraphLevel {
 
 impl ChunkReadWrite for GraphLevel {
   /// Read graph level data from the chunk reader.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
+  fn read<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
     Ok(Self {
       name: reader.read_w1251_string()?,
       offset: reader.read_xr::<T, _>()?,
@@ -135,7 +135,7 @@ mod tests {
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    assert_eq!(GraphLevel::read::<XRayByteOrder>(&mut reader)?, original);
+    assert_eq!(GraphLevel::read::<XRayByteOrder, _>(&mut reader)?, original);
 
     Ok(())
   }

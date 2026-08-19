@@ -4,7 +4,7 @@ use std::path::Path;
 
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
+use xrf_chunk::{ChunkDataSource, ChunkReadWrite, ChunkReader, ChunkWriter};
 use xrf_error::XrfResult;
 use xrf_ltx::Ltx;
 use xrf_utils::{assert_length, open_export_file};
@@ -27,11 +27,11 @@ impl SpawnPatrolsChunk {
 
 impl ChunkReadWrite for SpawnPatrolsChunk {
   /// Read patrols list from the chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
+  fn read<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
     log::info!("Reading patrols chunk, bytes {}", reader.read_bytes_remain());
 
-    let mut meta_reader: ChunkReader = reader.read_child_by_index(Self::META_NESTED_CHUNK_ID)?;
-    let mut data_reader: ChunkReader = reader.read_child_by_index(Self::DATA_NESTED_CHUNK_ID)?;
+    let mut meta_reader: ChunkReader<D> = reader.read_child_by_index(Self::META_NESTED_CHUNK_ID)?;
+    let mut data_reader: ChunkReader<D> = reader.read_child_by_index(Self::DATA_NESTED_CHUNK_ID)?;
 
     let count: u32 = meta_reader.read_u32::<T>()?;
     let patrols: Vec<Patrol> = data_reader.read_xr_list::<T, _>()?;
@@ -211,7 +211,7 @@ mod tests {
     assert_eq!(file.bytes_remaining(), 450 + 8);
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
-    let read: SpawnPatrolsChunk = SpawnPatrolsChunk::read::<XRayByteOrder>(&mut reader)?;
+    let read: SpawnPatrolsChunk = SpawnPatrolsChunk::read::<XRayByteOrder, _>(&mut reader)?;
 
     assert_eq!(read, original);
 

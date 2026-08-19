@@ -2,7 +2,7 @@ use std::path::Path;
 
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
+use xrf_chunk::{ChunkDataSource, ChunkReadWrite, ChunkReader, ChunkWriter};
 use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{Ltx, Section};
 use xrf_utils::{assert_equal, open_export_file};
@@ -25,7 +25,7 @@ impl ParticlesHeaderChunk {
 impl ChunkReadWrite for ParticlesHeaderChunk {
   /// Read version chunk by position descriptor.
   /// Parses binary data into version chunk representation object.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
+  fn read<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
     let header_chunk: Self = Self {
       version: reader.read_u16::<T>()?,
     };
@@ -143,7 +143,7 @@ mod tests {
       .expect("0 index chunk to exist");
 
     assert_eq!(
-      ParticlesHeaderChunk::read::<XRayByteOrder>(&mut reader)
+      ParticlesHeaderChunk::read::<XRayByteOrder, _>(&mut reader)
         .unwrap_err()
         .to_string(),
       "Not implemented error: Unknown version in particles header chunk, expected v1 only",
@@ -177,7 +177,7 @@ mod tests {
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    assert_eq!(ParticlesHeaderChunk::read::<XRayByteOrder>(&mut reader)?, original);
+    assert_eq!(ParticlesHeaderChunk::read::<XRayByteOrder, _>(&mut reader)?, original);
 
     Ok(())
   }

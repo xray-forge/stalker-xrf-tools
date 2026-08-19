@@ -2,7 +2,7 @@ use std::io::Write;
 
 use byteorder::{ByteOrder, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, read_u32_chunk};
+use xrf_chunk::{ChunkDataSource, ChunkReadWrite, ChunkReader, ChunkWriter, read_u32_chunk};
 use xrf_error::{XrfError, XrfResult};
 use xrf_utils::assert_equal;
 
@@ -18,16 +18,16 @@ impl OmfMotionsChunk {
 }
 
 impl ChunkReadWrite for OmfMotionsChunk {
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
+  fn read<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
     log::info!("Reading motions chunk: {} bytes", reader.read_bytes_remain());
 
-    let mut chunks: Vec<ChunkReader> = reader.read_children()?;
+    let mut chunks: Vec<ChunkReader<D>> = reader.read_children()?;
 
-    let (count_chunk, motion_chunks): (&mut ChunkReader, &mut [ChunkReader]) = chunks
+    let (count_chunk, motion_chunks): (&mut ChunkReader<D>, &mut [ChunkReader<D>]) = chunks
       .split_first_mut()
       .ok_or_else(|| XrfError::new_read_error("OMF motions chunk has no count definition"))?;
 
-    let bones_motions_count: u32 = read_u32_chunk::<T>(count_chunk)?;
+    let bones_motions_count: u32 = read_u32_chunk::<T, _>(count_chunk)?;
 
     assert_equal(
       bones_motions_count as usize,

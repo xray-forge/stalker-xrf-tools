@@ -3,7 +3,7 @@ use std::str::FromStr;
 
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xrf_chunk::{ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkWriter};
+use xrf_chunk::{ChunkDataSource, ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkWriter};
 use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{Ltx, Section};
 use xrf_utils::{assert_equal, assert_length};
@@ -82,7 +82,7 @@ impl ParticleAction {
 
 impl ChunkReadWriteList for ParticleAction {
   /// Read list of particle action data from chunk reader.
-  fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Vec<Self>> {
+  fn read_list<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Vec<Self>> {
     let count: u32 = reader.read_u32::<T>()?;
 
     let mut actions: Vec<Self> = Vec::with_capacity(count as usize);
@@ -118,7 +118,7 @@ impl ChunkReadWriteList for ParticleAction {
 }
 
 impl ChunkReadWrite for ParticleAction {
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
+  fn read<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
     let action_type: ParticleActionType = ParticleActionType::from(reader.read_u32::<T>()?);
 
     Ok(match action_type {
@@ -387,8 +387,8 @@ mod tests {
     let mut reader: ChunkReader =
       ChunkReader::from_slice(open_generated_test_resource_as_slice(&filename)?)?.read_child_by_index(0)?;
 
-    assert_eq!(ParticleAction::read::<XRayByteOrder>(&mut reader)?, rotate);
-    assert_eq!(ParticleAction::read::<XRayByteOrder>(&mut reader)?, velocity);
+    assert_eq!(ParticleAction::read::<XRayByteOrder, _>(&mut reader)?, rotate);
+    assert_eq!(ParticleAction::read::<XRayByteOrder, _>(&mut reader)?, velocity);
 
     Ok(())
   }

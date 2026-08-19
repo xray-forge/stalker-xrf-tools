@@ -2,7 +2,7 @@ use std::io::Write;
 
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
-use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
+use xrf_chunk::{ChunkDataSource, ChunkReadWrite, ChunkReader, ChunkWriter};
 use xrf_error::XrfResult;
 use xrf_utils::{decode_bytes_to_string, encode_string_to_bytes, get_windows1251_encoder};
 
@@ -21,7 +21,7 @@ impl OgfLodsChunk {
 }
 
 impl ChunkReadWrite for OgfLodsChunk {
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
+  fn read<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
     let bytes: Vec<u8> = reader.read_remaining()?;
 
     Ok(Self {
@@ -73,7 +73,7 @@ mod tests {
       .next()
       .expect("expect the written chunk to be present");
 
-    OgfLodsChunk::read::<XRayByteOrder>(&mut chunk)
+    OgfLodsChunk::read::<XRayByteOrder, _>(&mut chunk)
   }
 
   #[test]

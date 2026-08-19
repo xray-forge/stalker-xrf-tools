@@ -1,6 +1,6 @@
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xrf_chunk::{ChunkReader, ChunkWriter};
+use xrf_chunk::{ChunkDataSource, ChunkReader, ChunkWriter};
 use xrf_error::{XrfError, XrfResult};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -18,7 +18,7 @@ impl OgfKinematicsChunk {
 // todo: Conditional read + implement chunk RW.
 // todo: Conditional read + implement chunk RW.
 impl OgfKinematicsChunk {
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader, chunk_id: u32) -> XrfResult<Self> {
+  pub fn read<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>, chunk_id: u32) -> XrfResult<Self> {
     log::info!(
       "Reading motion refs chunk: {} bytes, chunk id {} ",
       reader.read_bytes_remain(),

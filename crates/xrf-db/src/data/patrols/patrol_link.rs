@@ -1,6 +1,6 @@
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xrf_chunk::{ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkWriter};
+use xrf_chunk::{ChunkDataSource, ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkWriter};
 use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{Ltx, Section};
 use xrf_utils::assert_length;
@@ -18,11 +18,11 @@ pub struct PatrolLink {
 
 impl ChunkReadWriteList for PatrolLink {
   /// Read links from chunk file.
-  fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Vec<Self>> {
+  fn read_list<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Vec<Self>> {
     let mut links: Vec<Self> = Vec::new();
 
     while reader.has_data() {
-      links.push(Self::read::<T>(reader)?);
+      links.push(Self::read::<T, _>(reader)?);
     }
 
     reader.assert_read("Chunk data should be read for patrol links")?;
@@ -42,7 +42,7 @@ impl ChunkReadWriteList for PatrolLink {
 
 impl ChunkReadWrite for PatrolLink {
   /// Read patrol link from chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
+  fn read<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
     let index: u32 = reader.read_u32::<T>()?;
     let count: u32 = reader.read_u32::<T>()?;
 
@@ -171,7 +171,7 @@ mod tests {
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    assert_eq!(PatrolLink::read::<XRayByteOrder>(&mut reader)?, original);
+    assert_eq!(PatrolLink::read::<XRayByteOrder, _>(&mut reader)?, original);
 
     Ok(())
   }
@@ -209,7 +209,7 @@ mod tests {
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    assert_eq!(PatrolLink::read_list::<XRayByteOrder>(&mut reader)?, original);
+    assert_eq!(PatrolLink::read_list::<XRayByteOrder, _>(&mut reader)?, original);
 
     Ok(())
   }

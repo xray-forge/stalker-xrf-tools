@@ -1,6 +1,6 @@
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xrf_chunk::{ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkWriter};
+use xrf_chunk::{ChunkDataSource, ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkWriter};
 use xrf_error::{XrfError, XrfResult};
 use xrf_utils::assert_length;
 
@@ -18,13 +18,13 @@ impl OgfPart {
 }
 
 impl ChunkReadWriteList for OgfPart {
-  fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Vec<Self>> {
+  fn read_list<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Vec<Self>> {
     let count: u16 = reader.read_u16::<T>()?;
     let mut parts: Vec<Self> = Vec::with_capacity(count as usize);
 
     for _ in 0..count {
       parts.push(
-        Self::read::<T>(reader)
+        Self::read::<T, _>(reader)
           .map_err(|error| XrfError::new_read_error(format!("Failed to read ogf part: {error}")))?,
       );
     }
@@ -48,7 +48,7 @@ impl ChunkReadWriteList for OgfPart {
 }
 
 impl ChunkReadWrite for OgfPart {
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
+  fn read<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
     let name: String = reader.read_w1251_string()?;
     let count: u16 = reader.read_u16::<T>()?;
 
@@ -109,7 +109,7 @@ mod tests {
     let file: FileSlice = open_generated_test_resource_as_slice(&filename)?;
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
 
-    assert_eq!(OgfPart::read_list::<XRayByteOrder>(&mut reader)?, original);
+    assert_eq!(OgfPart::read_list::<XRayByteOrder, _>(&mut reader)?, original);
 
     Ok(())
   }

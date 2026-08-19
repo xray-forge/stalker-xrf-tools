@@ -3,7 +3,7 @@ use std::str::FromStr;
 
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
+use xrf_chunk::{ChunkDataSource, ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
 use xrf_error::{XrfError, XrfResult};
 
 use crate::data::generic::vector_3d::Vector3d;
@@ -22,7 +22,7 @@ pub struct ParticleDomain {
 
 impl ChunkReadWrite for ParticleDomain {
   /// Read particle domain from chunk reader.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
+  fn read<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
     Ok(Self {
       domain_type: reader.read_u32::<T>()?,
       coordinates: (reader.read_xr::<T, _>()?, reader.read_xr::<T, _>()?),
@@ -229,7 +229,7 @@ mod tests {
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    assert_eq!(ParticleDomain::read::<XRayByteOrder>(&mut reader)?, original);
+    assert_eq!(ParticleDomain::read::<XRayByteOrder, _>(&mut reader)?, original);
 
     Ok(())
   }

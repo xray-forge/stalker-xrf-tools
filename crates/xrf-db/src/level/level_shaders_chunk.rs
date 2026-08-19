@@ -1,6 +1,6 @@
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
+use xrf_chunk::{ChunkDataSource, ChunkReadWrite, ChunkReader, ChunkWriter};
 use xrf_error::XrfResult;
 
 use crate::level::level_shader_entry::{LevelShaderEntry, LevelShaderReference};
@@ -35,7 +35,7 @@ impl LevelShadersChunk {
 
 impl ChunkReadWrite for LevelShadersChunk {
   /// Read level shaders table from the chunk reader.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
+  fn read<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
     let count: u32 = reader.read_u32::<T>()?;
     let mut entries: Vec<LevelShaderEntry> = Vec::with_capacity(count as usize);
 
@@ -117,7 +117,7 @@ mod tests {
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    assert_eq!(LevelShadersChunk::read::<XRayByteOrder>(&mut reader)?, original);
+    assert_eq!(LevelShadersChunk::read::<XRayByteOrder, _>(&mut reader)?, original);
 
     Ok(())
   }

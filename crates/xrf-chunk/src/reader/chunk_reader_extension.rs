@@ -7,20 +7,20 @@ use crate::chunk_trait::ChunkReadWrite;
 use crate::source::chunk_data_source::ChunkDataSource;
 use crate::{ChunkReadWriteList, ChunkReadWriteOptional, ChunkReader};
 
-impl ChunkReader {
+impl<D: ChunkDataSource> ChunkReader<D> {
   #[inline]
   pub fn read_xr<T: ByteOrder, C: ChunkReadWrite>(&mut self) -> XrfResult<C> {
-    C::read::<T>(self)
+    C::read::<T, D>(self)
   }
 
   #[inline]
   pub fn read_xr_optional<T: ByteOrder, C: ChunkReadWriteOptional>(&mut self) -> XrfResult<Option<C>> {
-    C::read_optional::<T>(self)
+    C::read_optional::<T, D>(self)
   }
 
   #[inline]
   pub fn read_xr_list<T: ByteOrder, C: ChunkReadWriteList>(&mut self) -> XrfResult<Vec<C>> {
-    C::read_list::<T>(self)
+    C::read_list::<T, D>(self)
   }
 }
 

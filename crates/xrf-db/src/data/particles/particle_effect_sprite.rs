@@ -1,6 +1,6 @@
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
-use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
+use xrf_chunk::{ChunkDataSource, ChunkReadWrite, ChunkReader, ChunkWriter};
 use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{Ltx, Section};
 use xrf_utils::assert_equal;
@@ -22,7 +22,7 @@ impl ParticleEffectSprite {
 
 impl ChunkReadWrite for ParticleEffectSprite {
   /// Read effect sprite data from chunk redder.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
+  fn read<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
     let particle_sprite: Self = Self {
       shader_name: reader.read_w1251_string()?,
       texture_name: reader.read_w1251_string()?,
@@ -129,7 +129,7 @@ mod tests {
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    let read_sprite: ParticleEffectSprite = ParticleEffectSprite::read::<XRayByteOrder>(&mut reader)?;
+    let read_sprite: ParticleEffectSprite = ParticleEffectSprite::read::<XRayByteOrder, _>(&mut reader)?;
 
     assert_eq!(read_sprite, original);
 

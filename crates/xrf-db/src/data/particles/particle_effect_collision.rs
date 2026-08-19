@@ -1,6 +1,6 @@
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
+use xrf_chunk::{ChunkDataSource, ChunkReadWrite, ChunkReader, ChunkWriter};
 use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{Ltx, Section};
 use xrf_utils::assert_equal;
@@ -23,7 +23,7 @@ impl ParticleEffectCollision {
 
 impl ChunkReadWrite for ParticleEffectCollision {
   /// Read particle effect collision data from chunk reader.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
+  fn read<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
     let particle_collision: Self = Self {
       collide_one_minus_friction: reader.read_f32::<T>()?,
       collide_resilience: reader.read_f32::<T>()?,

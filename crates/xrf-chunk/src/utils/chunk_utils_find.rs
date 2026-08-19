@@ -1,16 +1,23 @@
 use xrf_error::{XrfError, XrfResult};
 
 use crate::reader::chunk_reader::ChunkReader;
+use crate::source::chunk_data_source::ChunkDataSource;
 
-/// Find chink in list by id.
+/// Find chunk in list by id.
+///
+/// Generic over the data source so a chunked format can be read from bytes as well as from a file. An archived entry has no
+/// file to slice, so without this nothing chunked could be read out of a volume.
 #[inline]
-pub fn find_optional_chunk_by_id(chunks: &[ChunkReader], id: u32) -> Option<ChunkReader> {
+pub fn find_optional_chunk_by_id<S: ChunkDataSource>(chunks: &[ChunkReader<S>], id: u32) -> Option<ChunkReader<S>> {
   chunks.iter().find(|it| it.id == id).cloned()
 }
 
-/// Find chink in list by id.
+/// Find chunk in list by id.
 #[inline]
-pub fn find_one_of_optional_chunk_by_id(chunks: &[ChunkReader], ids: &[u32]) -> Option<(u32, ChunkReader)> {
+pub fn find_one_of_optional_chunk_by_id<S: ChunkDataSource>(
+  chunks: &[ChunkReader<S>],
+  ids: &[u32],
+) -> Option<(u32, ChunkReader<S>)> {
   for id in ids {
     if let Some(chunk) = chunks.iter().find(|it| it.id == *id).cloned() {
       return Some((*id, chunk));
@@ -22,7 +29,7 @@ pub fn find_one_of_optional_chunk_by_id(chunks: &[ChunkReader], ids: &[u32]) -> 
 
 /// Find required chunk in list by id.
 #[inline]
-pub fn find_required_chunk_by_id(chunks: &[ChunkReader], id: u32) -> XrfResult<ChunkReader> {
+pub fn find_required_chunk_by_id<S: ChunkDataSource>(chunks: &[ChunkReader<S>], id: u32) -> XrfResult<ChunkReader<S>> {
   match chunks.iter().find(|it| it.id == id).cloned() {
     None => Err(XrfError::new_not_found_error(format!(
       "Chunk with ID {} was not found",
@@ -34,7 +41,10 @@ pub fn find_required_chunk_by_id(chunks: &[ChunkReader], id: u32) -> XrfResult<C
 
 /// Find required chunk in list by one of ids.
 #[inline]
-pub fn find_one_of_required_chunks_by_id(chunks: &[ChunkReader], ids: &[u32]) -> XrfResult<(u32, ChunkReader)> {
+pub fn find_one_of_required_chunks_by_id<S: ChunkDataSource>(
+  chunks: &[ChunkReader<S>],
+  ids: &[u32],
+) -> XrfResult<(u32, ChunkReader<S>)> {
   for id in ids {
     if let Some(chunk) = chunks.iter().find(|it| it.id == *id).cloned() {
       return Ok((*id, chunk));

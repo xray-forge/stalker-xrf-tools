@@ -1,6 +1,6 @@
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
-use xrf_chunk::{ChunkIterator, ChunkReadWrite, ChunkReader, ChunkWriter};
+use xrf_chunk::{ChunkDataSource, ChunkIterator, ChunkReadWrite, ChunkReader, ChunkWriter};
 use xrf_error::{XrfError, XrfResult};
 
 use crate::OgfFile;
@@ -15,13 +15,13 @@ impl OgfChildrenChunk {
 }
 
 impl ChunkReadWrite for OgfChildrenChunk {
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
+  fn read<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
     log::info!("Reading children chunk: {} bytes", reader.read_bytes_remain());
 
     let mut children: Vec<OgfFile> = Vec::new();
 
     for (index, object_reader) in (0..).zip(ChunkIterator::from_start(reader)?) {
-      let mut object_reader: ChunkReader = object_reader?;
+      let mut object_reader: ChunkReader<D> = object_reader?;
 
       if object_reader.id != index {
         return Err(XrfError::new_unexpected_error(format!(
@@ -30,7 +30,7 @@ impl ChunkReadWrite for OgfChildrenChunk {
         )));
       }
 
-      children.push(OgfFile::read_from_chunk::<T>(&mut object_reader)?);
+      children.push(OgfFile::read_from_chunk::<T, _>(&mut object_reader)?);
     }
 
     reader.assert_read("Expect all data to be read from ogf children")?;

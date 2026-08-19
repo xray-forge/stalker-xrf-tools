@@ -2,7 +2,7 @@ use std::io::Write;
 
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
+use xrf_chunk::{ChunkDataSource, ChunkReadWrite, ChunkReader, ChunkWriter};
 use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{Ltx, Section};
 use xrf_utils::{assert, assert_equal, assert_not_equal, decode_bytes_from_base64, encode_bytes_to_base64};
@@ -49,8 +49,8 @@ impl AlifeObject {
 
 impl ChunkReadWrite for AlifeObject {
   /// Read generic ALife object data from the chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
-    let mut spawn_reader: ChunkReader = reader.read_child_by_index(Self::DATA_SPAWN_CHUNK_ID)?;
+  fn read<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
+    let mut spawn_reader: ChunkReader<D> = reader.read_child_by_index(Self::DATA_SPAWN_CHUNK_ID)?;
 
     let data_length: u16 = spawn_reader.read_u16::<T>()?;
 
@@ -109,9 +109,9 @@ impl ChunkReadWrite for AlifeObject {
 
     assert_not_equal(&class, &AlifeClass::Unknown, "Expect known ALife object clsid")?;
 
-    let inherited: AlifeObjectInherited = AlifeObjectInherited::read::<T>(&mut spawn_reader, &class)?;
+    let inherited: AlifeObjectInherited = AlifeObjectInherited::read::<T, _>(&mut spawn_reader, &class)?;
 
-    let mut update_reader: ChunkReader = reader.read_child_by_index(Self::DATA_UPDATE_CHUNK_ID)?;
+    let mut update_reader: ChunkReader<D> = reader.read_child_by_index(Self::DATA_UPDATE_CHUNK_ID)?;
     let update_data_length: u16 = update_reader.read_u16::<T>()?;
     let update_size: u16 = update_reader.read_u16::<T>()?;
 
@@ -324,7 +324,7 @@ mod tests {
     fs::write(&path, bytes)?;
 
     let mut reader: ChunkReader = ChunkReader::from_file(File::open(&path)?)?;
-    let result: XrfResult<AlifeObject> = AlifeObject::read::<XRayByteOrder>(&mut reader);
+    let result: XrfResult<AlifeObject> = AlifeObject::read::<XRayByteOrder, _>(&mut reader);
 
     drop(reader);
     fs::remove_file(path)?;
@@ -414,7 +414,7 @@ mod tests {
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
 
-    assert_eq!(AlifeObject::read::<XRayByteOrder>(&mut reader)?, original);
+    assert_eq!(AlifeObject::read::<XRayByteOrder, _>(&mut reader)?, original);
 
     Ok(())
   }

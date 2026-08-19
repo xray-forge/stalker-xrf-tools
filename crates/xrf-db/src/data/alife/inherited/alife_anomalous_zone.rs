@@ -1,6 +1,6 @@
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
-use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
+use xrf_chunk::{ChunkDataSource, ChunkReadWrite, ChunkReader, ChunkWriter};
 use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{Ltx, Section};
 
@@ -19,7 +19,7 @@ pub struct AlifeAnomalousZone {
 
 impl ChunkReadWrite for AlifeAnomalousZone {
   /// Read anomalous zone object data from the chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
+  fn read<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
     Ok(Self {
       base: reader.read_xr::<T, _>()?,
       last_spawn_time: reader.read_xr_optional::<T, Time>()?,
@@ -157,7 +157,7 @@ mod tests {
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
 
-    assert_eq!(AlifeAnomalousZone::read::<XRayByteOrder>(&mut reader)?, original);
+    assert_eq!(AlifeAnomalousZone::read::<XRayByteOrder, _>(&mut reader)?, original);
 
     Ok(())
   }

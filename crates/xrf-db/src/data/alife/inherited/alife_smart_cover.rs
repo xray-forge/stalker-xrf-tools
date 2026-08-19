@@ -1,6 +1,6 @@
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
+use xrf_chunk::{ChunkDataSource, ChunkReadWrite, ChunkReader, ChunkWriter};
 use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{Ltx, Section};
 
@@ -21,7 +21,7 @@ pub struct AlifeSmartCover {
 
 impl ChunkReadWrite for AlifeSmartCover {
   /// Read smart cover data from the chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
+  fn read<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
     let base: AlifeObjectSmartCover = reader.read_xr::<T, _>()?;
 
     let last_description: String = reader.read_w1251_string()?;
@@ -155,7 +155,7 @@ mod tests {
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
 
-    assert_eq!(AlifeObjectSmartCover::read::<XRayByteOrder>(&mut reader)?, original);
+    assert_eq!(AlifeObjectSmartCover::read::<XRayByteOrder, _>(&mut reader)?, original);
 
     Ok(())
   }

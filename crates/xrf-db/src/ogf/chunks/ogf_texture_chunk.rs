@@ -1,6 +1,6 @@
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
-use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
+use xrf_chunk::{ChunkDataSource, ChunkReadWrite, ChunkReader, ChunkWriter};
 use xrf_error::XrfResult;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -14,7 +14,7 @@ impl OgfTextureChunk {
 }
 
 impl ChunkReadWrite for OgfTextureChunk {
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
+  fn read<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
     let texture: Self = Self {
       texture_name: reader.read_w1251_string()?,
       shader_name: reader.read_w1251_string()?,

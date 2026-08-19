@@ -2,7 +2,7 @@ use std::io::Write;
 
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xrf_chunk::{ChunkIterator, ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkWriter};
+use xrf_chunk::{ChunkDataSource, ChunkIterator, ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkWriter};
 use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{Ltx, Section};
 use xrf_utils::{assert_equal, assert_length};
@@ -43,13 +43,13 @@ impl Patrol {
 
 impl ChunkReadWriteList for Patrol {
   /// Read chunk as list of patrol samples.
-  fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Vec<Self>> {
+  fn read_list<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Vec<Self>> {
     let mut patrols: Vec<Self> = Vec::new();
 
     for patrol_reader in ChunkIterator::from_start(reader)? {
-      let mut patrol_reader: ChunkReader = patrol_reader?;
+      let mut patrol_reader: ChunkReader<D> = patrol_reader?;
 
-      patrols.push(Self::read::<T>(&mut patrol_reader)?);
+      patrols.push(Self::read::<T, _>(&mut patrol_reader)?);
     }
 
     reader.assert_read("Chunk data should be read for patrols list")?;
@@ -73,13 +73,13 @@ impl ChunkReadWriteList for Patrol {
 
 impl ChunkReadWrite for Patrol {
   /// Read chunk as patrol.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
-    let mut meta_reader: ChunkReader = reader.read_child_by_index(Self::META_CHUNK_ID)?;
-    let mut data_reader: ChunkReader = reader.read_child_by_index(Self::DATA_CHUNK_ID)?;
+  fn read<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
+    let mut meta_reader: ChunkReader<D> = reader.read_child_by_index(Self::META_CHUNK_ID)?;
+    let mut data_reader: ChunkReader<D> = reader.read_child_by_index(Self::DATA_CHUNK_ID)?;
 
-    let mut point_count_reader: ChunkReader = data_reader.read_child_by_index(Self::DATA_POINT_COUNT_CHUNK_ID)?;
-    let mut points_reader: ChunkReader = data_reader.read_child_by_index(Self::DATA_POINT_DATA_CHUNK_ID)?;
-    let mut links_reader: ChunkReader = data_reader.read_child_by_index(Self::DATA_LIST_CHUNK_ID)?;
+    let mut point_count_reader: ChunkReader<D> = data_reader.read_child_by_index(Self::DATA_POINT_COUNT_CHUNK_ID)?;
+    let mut points_reader: ChunkReader<D> = data_reader.read_child_by_index(Self::DATA_POINT_DATA_CHUNK_ID)?;
+    let mut links_reader: ChunkReader<D> = data_reader.read_child_by_index(Self::DATA_LIST_CHUNK_ID)?;
 
     let name: String = meta_reader.read_w1251_string()?;
 
@@ -269,7 +269,7 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 210 + 8);
     assert_eq!(
-      Patrol::read::<XRayByteOrder>(&mut ChunkReader::from_slice(file)?.read_child_by_index(0)?)?,
+      Patrol::read::<XRayByteOrder, _>(&mut ChunkReader::from_slice(file)?.read_child_by_index(0)?)?,
       original
     );
 
@@ -343,7 +343,7 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 430 + 8);
     assert_eq!(
-      Patrol::read_list::<XRayByteOrder>(&mut ChunkReader::from_slice(file)?.read_child_by_index(0)?)?,
+      Patrol::read_list::<XRayByteOrder, _>(&mut ChunkReader::from_slice(file)?.read_child_by_index(0)?)?,
       original
     );
 

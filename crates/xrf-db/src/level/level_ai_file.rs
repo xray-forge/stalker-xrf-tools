@@ -4,7 +4,7 @@ use std::path::Path;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
+use xrf_chunk::{ChunkDataSource, ChunkReadWrite, ChunkReader, ChunkWriter};
 use xrf_error::{XrfError, XrfResult};
 
 use crate::data::generic::vector_3d::Vector3d;
@@ -32,7 +32,7 @@ impl LevelAiHeader {
 
 impl ChunkReadWrite for LevelAiHeader {
   /// Read level AI-map header from the chunk reader.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
+  fn read<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
     Ok(Self {
       version: reader.read_u32::<T>()?,
       count: reader.read_u32::<T>()?,

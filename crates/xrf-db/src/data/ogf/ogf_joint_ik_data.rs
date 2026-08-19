@@ -1,6 +1,6 @@
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
+use xrf_chunk::{ChunkDataSource, ChunkReadWrite, ChunkReader, ChunkWriter};
 use xrf_error::XrfResult;
 
 use crate::data::ogf::ogf_joint_limit::OgfJointLimit;
@@ -27,7 +27,10 @@ pub struct OgfJointIkData {
 }
 
 impl OgfJointIkData {
-  pub fn read_versioned<T: ByteOrder>(reader: &mut ChunkReader, version: u16) -> XrfResult<Self> {
+  pub fn read_versioned<T: ByteOrder, D: ChunkDataSource>(
+    reader: &mut ChunkReader<D>,
+    version: u16,
+  ) -> XrfResult<Self> {
     Ok(Self {
       joint_type: reader.read_u32::<T>()?,
       limits: [

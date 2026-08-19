@@ -1,6 +1,6 @@
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
+use xrf_chunk::{ChunkDataSource, ChunkReadWrite, ChunkReader, ChunkWriter};
 use xrf_error::XrfResult;
 
 /// Link to a sliding window table stored outside the visual, `OGF_SWICONTAINER` (chunk 20).
@@ -11,7 +11,7 @@ pub struct OgfSwiContainer {
 }
 
 impl ChunkReadWrite for OgfSwiContainer {
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
+  fn read<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
     let container: Self = Self {
       ext_swib_index: reader.read_u32::<T>()?,
     };

@@ -4,7 +4,7 @@ use std::path::Path;
 
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
-use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
+use xrf_chunk::{ChunkDataSource, ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
 use xrf_error::XrfResult;
 use xrf_ltx::Ltx;
 use xrf_utils::{assert_length, open_export_file};
@@ -36,7 +36,7 @@ impl SpawnGraphsChunk {
 
 impl ChunkReadWrite for SpawnGraphsChunk {
   /// Read graphs chunk by position descriptor.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
+  fn read<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
     log::info!("Reading graphs chunk, bytes {}", reader.read_bytes_remain());
 
     let header: GraphHeader = reader.read_xr::<T, _>()?;
@@ -314,7 +314,7 @@ mod tests {
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    assert_eq!(SpawnGraphsChunk::read::<XRayByteOrder>(&mut reader)?, original);
+    assert_eq!(SpawnGraphsChunk::read::<XRayByteOrder, _>(&mut reader)?, original);
 
     Ok(())
   }
@@ -449,7 +449,7 @@ mod tests {
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    assert_eq!(SpawnGraphsChunk::read::<XRayByteOrder>(&mut reader)?, original);
+    assert_eq!(SpawnGraphsChunk::read::<XRayByteOrder, _>(&mut reader)?, original);
 
     Ok(())
   }

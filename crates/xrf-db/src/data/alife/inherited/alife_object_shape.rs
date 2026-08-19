@@ -1,6 +1,6 @@
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
-use xrf_chunk::{ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkWriter};
+use xrf_chunk::{ChunkDataSource, ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkWriter};
 use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{Ltx, Section};
 
@@ -18,10 +18,10 @@ pub struct AlifeObjectShape {
 
 impl ChunkReadWrite for AlifeObjectShape {
   /// Read shape object data from the chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
+  fn read<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
     Ok(Self {
       base: reader.read_xr::<T, _>()?,
-      shape: Shape::read_list::<T>(reader)?,
+      shape: Shape::read_list::<T, _>(reader)?,
     })
   }
 
@@ -118,7 +118,7 @@ mod tests {
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
 
-    assert_eq!(AlifeObjectShape::read::<XRayByteOrder>(&mut reader)?, original);
+    assert_eq!(AlifeObjectShape::read::<XRayByteOrder, _>(&mut reader)?, original);
 
     Ok(())
   }

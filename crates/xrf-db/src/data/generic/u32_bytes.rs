@@ -3,7 +3,7 @@ use std::str::FromStr;
 
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
+use xrf_chunk::{ChunkDataSource, ChunkReadWrite, ChunkReader, ChunkWriter};
 use xrf_error::{XrfError, XrfResult};
 use xrf_utils::vector_from_string_sized;
 
@@ -12,7 +12,7 @@ use xrf_utils::vector_from_string_sized;
 pub struct U32Bytes(pub u8, pub u8, pub u8, pub u8);
 
 impl ChunkReadWrite for U32Bytes {
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
+  fn read<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
     Ok(U32Bytes(
       reader.read_u8()?,
       reader.read_u8()?,

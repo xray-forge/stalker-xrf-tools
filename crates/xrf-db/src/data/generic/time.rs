@@ -3,7 +3,7 @@ use std::str::FromStr;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use derive_more::Display;
 use serde::{Deserialize, Serialize};
-use xrf_chunk::{ChunkReadWrite, ChunkReadWriteOptional, ChunkReader, ChunkWriter};
+use xrf_chunk::{ChunkDataSource, ChunkReadWrite, ChunkReadWriteOptional, ChunkReader, ChunkWriter};
 use xrf_error::{XrfError, XrfResult};
 
 use crate::constants::NIL;
@@ -24,9 +24,9 @@ pub struct Time {
 
 impl ChunkReadWriteOptional for Time {
   /// Read optional time object from the chunk.
-  fn read_optional<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Option<Self>> {
+  fn read_optional<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Option<Self>> {
     if reader.read_u8()? == 1 {
-      Ok(Some(Self::read::<T>(reader)?))
+      Ok(Some(Self::read::<T, _>(reader)?))
     } else {
       Ok(None)
     }
@@ -48,7 +48,7 @@ impl ChunkReadWriteOptional for Time {
 
 impl ChunkReadWrite for Time {
   /// Read time object from chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
+  fn read<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
     let year: u8 = reader.read_u8()?;
     let month: u8 = reader.read_u8()?;
     let day: u8 = reader.read_u8()?;
@@ -156,7 +156,9 @@ mod tests {
   use std::str::FromStr;
 
   use serde_json::to_string_pretty;
-  use xrf_chunk::{ChunkReadWrite, ChunkReadWriteOptional, ChunkReader, ChunkWriter, XRayByteOrder};
+  use xrf_chunk::{
+    ChunkReadWrite, ChunkReadWriteOptional, ChunkReader, ChunkWriter, InMemoryChunkDataSource, XRayByteOrder,
+  };
   use xrf_error::XrfResult;
   use xrf_test_utils::FileSlice;
   use xrf_test_utils::file::read_file_as_string;
@@ -166,6 +168,38 @@ mod tests {
   };
 
   use crate::data::generic::time::Time;
+
+  /// Reads a chunked value from bytes rather than from a file.
+  ///
+  /// This is what an archived asset requires: a `.db` volume entry has no file to slice, so its decompressed bytes are the
+  /// only way in. Until `ChunkReadWrite` became generic over `ChunkDataSource` this could not compile at all, which is why
+  /// nothing had ever read a chunked format out of an archive.
+  #[test]
+  fn reads_from_bytes_as_well_as_from_a_file() -> XrfResult {
+    let original: Time = Time {
+      year: 22,
+      month: 10,
+      day: 24,
+      hour: 20,
+      minute: 30,
+      second: 50,
+      millis: 250,
+    };
+
+    let mut writer: ChunkWriter = ChunkWriter::new();
+
+    original.write::<XRayByteOrder>(&mut writer)?;
+
+    let mut bytes: Vec<u8> = Vec::new();
+
+    writer.flush_chunk_into::<XRayByteOrder>(&mut bytes, 0)?;
+
+    let mut reader: ChunkReader<InMemoryChunkDataSource> = ChunkReader::from_bytes(&bytes)?.read_child_by_index(0)?;
+
+    assert_eq!(Time::read::<XRayByteOrder, _>(&mut reader)?, original);
+
+    Ok(())
+  }
 
   #[test]
   fn test_read_write() -> XrfResult {
@@ -197,7 +231,7 @@ mod tests {
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
 
-    assert_eq!(Time::read::<XRayByteOrder>(&mut reader)?, original);
+    assert_eq!(Time::read::<XRayByteOrder, _>(&mut reader)?, original);
 
     Ok(())
   }
@@ -232,7 +266,7 @@ mod tests {
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
 
-    assert_eq!(Time::read_optional::<XRayByteOrder>(&mut reader)?, Some(original));
+    assert_eq!(Time::read_optional::<XRayByteOrder, _>(&mut reader)?, Some(original));
 
     Ok(())
   }
@@ -257,7 +291,7 @@ mod tests {
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
 
-    assert_eq!(Time::read_optional::<XRayByteOrder>(&mut reader)?, None);
+    assert_eq!(Time::read_optional::<XRayByteOrder, _>(&mut reader)?, None);
 
     Ok(())
   }

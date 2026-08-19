@@ -2,7 +2,7 @@ use std::io::Write;
 
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
+use xrf_chunk::{ChunkDataSource, ChunkReadWrite, ChunkReader, ChunkWriter};
 use xrf_error::XrfResult;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -15,7 +15,7 @@ pub struct OgfMotion {
 }
 
 impl ChunkReadWrite for OgfMotion {
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
+  fn read<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
     let name: String = reader.read_w1251_string()?;
     let count: u32 = reader.read_u32::<T>()?;
     let flags: u8 = reader.read_u8()?;
@@ -75,7 +75,7 @@ mod tests {
     let file: FileSlice = open_generated_test_resource_as_slice(&filename)?;
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
 
-    assert_eq!(OgfMotion::read::<XRayByteOrder>(&mut reader)?, original);
+    assert_eq!(OgfMotion::read::<XRayByteOrder, _>(&mut reader)?, original);
 
     Ok(())
   }

@@ -1,6 +1,6 @@
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
-use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
+use xrf_chunk::{ChunkDataSource, ChunkReadWrite, ChunkReader, ChunkWriter};
 use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{Ltx, Section};
 
@@ -18,7 +18,7 @@ pub struct AlifeObjectClimable {
 
 impl ChunkReadWrite for AlifeObjectClimable {
   /// Read climable object data from the chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
+  fn read<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
     Ok(Self {
       base: reader.read_xr::<T, _>()?,
       game_material: reader.read_w1251_string()?,
@@ -131,7 +131,7 @@ mod tests {
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
 
-    assert_eq!(AlifeObjectClimable::read::<XRayByteOrder>(&mut reader)?, original);
+    assert_eq!(AlifeObjectClimable::read::<XRayByteOrder, _>(&mut reader)?, original);
 
     Ok(())
   }

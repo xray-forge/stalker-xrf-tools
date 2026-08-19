@@ -1,6 +1,6 @@
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
+use xrf_chunk::{ChunkDataSource, ChunkReadWrite, ChunkReader, ChunkWriter};
 use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{Ltx, Section};
 use xrf_utils::{vector_from_string, vector_to_string};
@@ -26,7 +26,7 @@ pub struct AlifeObjectCreature {
 
 impl ChunkReadWrite for AlifeObjectCreature {
   /// Read ALife creature object data from the chunk reader.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
+  fn read<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
     Ok(Self {
       base: reader.read_xr::<T, _>()?,
       team: reader.read_u8()?,
@@ -179,7 +179,7 @@ mod tests {
     assert_eq!(file.bytes_remaining(), 87 + 8);
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
-    let read_object: AlifeObjectCreature = AlifeObjectCreature::read::<XRayByteOrder>(&mut reader)?;
+    let read_object: AlifeObjectCreature = AlifeObjectCreature::read::<XRayByteOrder, _>(&mut reader)?;
 
     assert_eq!(read_object, original);
 

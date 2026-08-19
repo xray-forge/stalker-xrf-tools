@@ -1,6 +1,6 @@
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
+use xrf_chunk::{ChunkDataSource, ChunkReadWrite, ChunkReader, ChunkWriter};
 use xrf_error::{XrfError, XrfResult};
 use xrf_utils::assert_length;
 
@@ -24,13 +24,16 @@ pub struct OgfMotionDefinition {
 // todo: Version based switcher?
 // todo: Version based switcher?
 impl OgfMotionDefinition {
-  pub fn read_list<T: ByteOrder>(reader: &mut ChunkReader, version: u16) -> XrfResult<Vec<Self>> {
+  pub fn read_list<T: ByteOrder, D: ChunkDataSource>(
+    reader: &mut ChunkReader<D>,
+    version: u16,
+  ) -> XrfResult<Vec<Self>> {
     let count: u16 = reader.read_u16::<T>()?;
     let mut definitions: Vec<Self> = Vec::with_capacity(count as usize);
 
     for _ in 0..count {
       definitions.push(
-        Self::read::<T>(reader, version)
+        Self::read::<T, _>(reader, version)
           .map_err(|error| XrfError::new_read_error(format!("Failed to read ogf motion: {error}")))?,
       );
     }
@@ -44,7 +47,7 @@ impl OgfMotionDefinition {
     Ok(definitions)
   }
 
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader, version: u16) -> XrfResult<Self> {
+  pub fn read<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>, version: u16) -> XrfResult<Self> {
     let name: String = reader.read_w1251_string()?;
     let flags: u32 = reader.read_u32::<T>()?;
     let bone_or_part: u16 = reader.read_u16::<T>()?;
@@ -60,7 +63,7 @@ impl OgfMotionDefinition {
 
       for _ in 0..count {
         marks.push(
-          OgfMotionMark::read::<T>(reader)
+          OgfMotionMark::read::<T, _>(reader)
             .map_err(|error| XrfError::new_read_error(format!("Failed to read ogf motion mark: {error}")))?,
         );
       }
@@ -177,7 +180,7 @@ mod tests {
     let file: FileSlice = open_generated_test_resource_as_slice(filename)?;
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
 
-    OgfMotionDefinition::read_list::<XRayByteOrder>(&mut reader, version)
+    OgfMotionDefinition::read_list::<XRayByteOrder, _>(&mut reader, version)
   }
 
   #[test]

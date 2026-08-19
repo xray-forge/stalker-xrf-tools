@@ -1,6 +1,6 @@
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
+use xrf_chunk::{ChunkDataSource, ChunkReadWrite, ChunkReader, ChunkWriter};
 use xrf_error::XrfResult;
 use xrf_utils::assert_length;
 
@@ -12,7 +12,7 @@ pub struct OgfMotionMark {
 }
 
 impl ChunkReadWrite for OgfMotionMark {
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
+  fn read<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
     let name: String = reader.read_w1251_rn_string()?;
 
     let count: u32 = reader.read_u32::<T>()?;
@@ -76,7 +76,7 @@ mod tests {
     let file: FileSlice = open_generated_test_resource_as_slice(&filename)?;
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
 
-    assert_eq!(OgfMotionMark::read::<XRayByteOrder>(&mut reader)?, original);
+    assert_eq!(OgfMotionMark::read::<XRayByteOrder, _>(&mut reader)?, original);
 
     Ok(())
   }
@@ -98,7 +98,7 @@ mod tests {
     let file: FileSlice = open_generated_test_resource_as_slice(&filename)?;
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
 
-    assert_eq!(OgfMotionMark::read::<XRayByteOrder>(&mut reader)?, original);
+    assert_eq!(OgfMotionMark::read::<XRayByteOrder, _>(&mut reader)?, original);
 
     Ok(())
   }

@@ -1,6 +1,6 @@
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
+use xrf_chunk::{ChunkDataSource, ChunkReadWrite, ChunkReader, ChunkWriter};
 use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{Ltx, Section};
 use xrf_utils::vector_to_string;
@@ -27,7 +27,7 @@ pub struct GraphVertex {
 
 impl ChunkReadWrite for GraphVertex {
   /// Read graph vertex data from the chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
+  fn read<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
     Ok(Self {
       level_point: reader.read_xr::<T, _>()?,
       game_point: reader.read_xr::<T, _>()?,
@@ -165,7 +165,7 @@ mod tests {
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    assert_eq!(GraphVertex::read::<XRayByteOrder>(&mut reader)?, original);
+    assert_eq!(GraphVertex::read::<XRayByteOrder, _>(&mut reader)?, original);
 
     Ok(())
   }

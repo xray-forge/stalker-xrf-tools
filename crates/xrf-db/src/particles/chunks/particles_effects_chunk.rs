@@ -3,7 +3,7 @@ use std::path::Path;
 
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
-use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
+use xrf_chunk::{ChunkDataSource, ChunkReadWrite, ChunkReader, ChunkWriter};
 use xrf_error::XrfResult;
 use xrf_ltx::Ltx;
 use xrf_utils::{assert, open_export_file};
@@ -25,8 +25,8 @@ impl ParticlesEffectsChunk {
 impl ChunkReadWrite for ParticlesEffectsChunk {
   /// Read effects chunk by position descriptor.
   /// Parses binary data into version chunk representation object.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
-    let chunks: Vec<ChunkReader> = reader.read_children()?;
+  fn read<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
+    let chunks: Vec<ChunkReader<D>> = reader.read_children()?;
     let mut effects: Vec<ParticleEffect> = Vec::new();
 
     log::info!(
@@ -36,7 +36,7 @@ impl ChunkReadWrite for ParticlesEffectsChunk {
     );
 
     for mut chunk in chunks {
-      effects.push(ParticleEffect::read::<T>(&mut chunk)?);
+      effects.push(ParticleEffect::read::<T, _>(&mut chunk)?);
     }
 
     effects.sort_by(|first, second| first.name.cmp(&second.name));

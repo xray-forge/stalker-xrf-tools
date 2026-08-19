@@ -1,6 +1,6 @@
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
+use xrf_chunk::{ChunkDataSource, ChunkReadWrite, ChunkReader, ChunkWriter};
 use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{Ltx, Section};
 use xrf_utils::assert_equal;
@@ -25,7 +25,7 @@ impl ParticleEffectFrame {
 
 impl ChunkReadWrite for ParticleEffectFrame {
   /// Read frame data from chunk redder.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
+  fn read<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
     let particle_frame: Self = Self {
       texture_size: (reader.read_f32::<T>()?, reader.read_f32::<T>()?),
       reserved: (reader.read_f32::<T>()?, reader.read_f32::<T>()?),
@@ -180,7 +180,7 @@ mod tests {
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    let read: ParticleEffectFrame = ParticleEffectFrame::read::<XRayByteOrder>(&mut reader)?;
+    let read: ParticleEffectFrame = ParticleEffectFrame::read::<XRayByteOrder, _>(&mut reader)?;
 
     assert_eq!(read, original);
 

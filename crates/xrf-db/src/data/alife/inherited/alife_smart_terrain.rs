@@ -1,6 +1,6 @@
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
+use xrf_chunk::{ChunkDataSource, ChunkReadWrite, ChunkReader, ChunkWriter};
 use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{Ltx, Section};
 use xrf_utils::assert_equal;
@@ -25,8 +25,8 @@ pub struct AlifeSmartTerrain {
 
 impl ChunkReadWrite for AlifeSmartTerrain {
   /// Read ALife smart terrain data from the chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
-    let base: AlifeSmartZone = AlifeSmartZone::read::<T>(reader)?;
+  fn read<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
+    let base: AlifeSmartZone = AlifeSmartZone::read::<T, _>(reader)?;
 
     let arriving_objects_count: u8 = reader.read_u8()?;
 
@@ -213,7 +213,7 @@ mod tests {
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
 
-    assert_eq!(AlifeSmartTerrain::read::<XRayByteOrder>(&mut reader)?, original);
+    assert_eq!(AlifeSmartTerrain::read::<XRayByteOrder, _>(&mut reader)?, original);
 
     Ok(())
   }

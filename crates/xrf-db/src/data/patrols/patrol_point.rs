@@ -2,7 +2,7 @@ use std::io::Write;
 
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xrf_chunk::{ChunkIterator, ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkWriter};
+use xrf_chunk::{ChunkDataSource, ChunkIterator, ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkWriter};
 use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{Ltx, Section};
 use xrf_utils::assert_equal;
@@ -30,14 +30,14 @@ impl PatrolPoint {
 
 impl ChunkReadWriteList for PatrolPoint {
   /// Read points from the chunk reader.
-  fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Vec<Self>> {
+  fn read_list<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Vec<Self>> {
     let mut points: Vec<Self> = Vec::new();
 
     for (index, point_reader) in ChunkIterator::from_start(reader)?.enumerate() {
-      let mut point_reader: ChunkReader = point_reader?;
+      let mut point_reader: ChunkReader<D> = point_reader?;
 
-      let mut index_reader: ChunkReader = point_reader.read_child_by_index(Self::INDEX_CHUNK_ID)?;
-      let mut data_reader: ChunkReader = point_reader.read_child_by_index(Self::DATA_CHUNK_ID)?;
+      let mut index_reader: ChunkReader<D> = point_reader.read_child_by_index(Self::INDEX_CHUNK_ID)?;
+      let mut data_reader: ChunkReader<D> = point_reader.read_child_by_index(Self::DATA_CHUNK_ID)?;
 
       assert_equal(
         index,
@@ -45,7 +45,7 @@ impl ChunkReadWriteList for PatrolPoint {
         "Expect correct patrol point index",
       )?;
 
-      points.push(Self::read::<T>(&mut data_reader)?);
+      points.push(Self::read::<T, _>(&mut data_reader)?);
 
       index_reader.assert_read("Patrol point index chunk should be read")?;
       point_reader.assert_read("Patrol point data chunk should be read")?;
@@ -79,7 +79,7 @@ impl ChunkReadWriteList for PatrolPoint {
 
 impl ChunkReadWrite for PatrolPoint {
   /// Read patrol point data from the chunk reader.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
+  fn read<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
     let point: Self = Self {
       name: reader.read_w1251_string()?,
       position: reader.read_xr::<T, _>()?,
@@ -209,7 +209,7 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 274 + 8);
     assert_eq!(
-      PatrolPoint::read_list::<XRayByteOrder>(&mut ChunkReader::from_slice(file)?.read_child_by_index(0)?)?,
+      PatrolPoint::read_list::<XRayByteOrder, _>(&mut ChunkReader::from_slice(file)?.read_child_by_index(0)?)?,
       original
     );
 
@@ -242,7 +242,7 @@ mod tests {
 
     assert_eq!(file.bytes_remaining(), 39 + 8);
     assert_eq!(
-      PatrolPoint::read::<XRayByteOrder>(&mut ChunkReader::from_slice(file)?.read_child_by_index(0)?)?,
+      PatrolPoint::read::<XRayByteOrder, _>(&mut ChunkReader::from_slice(file)?.read_child_by_index(0)?)?,
       original
     );
 

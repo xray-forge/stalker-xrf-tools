@@ -1,6 +1,6 @@
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
+use xrf_chunk::{ChunkDataSource, ChunkReadWrite, ChunkReader, ChunkWriter};
 use xrf_error::XrfResult;
 
 use crate::data::generic::vector_3d::Vector3d;
@@ -28,7 +28,7 @@ pub struct OgfBoneIkData {
 }
 
 impl ChunkReadWrite for OgfBoneIkData {
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
+  fn read<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
     // Stored as u32 even though only the low half is meaningful.
     let version: u16 = reader.read_u32::<T>()? as u16;
 
@@ -36,7 +36,7 @@ impl ChunkReadWrite for OgfBoneIkData {
       version,
       game_material: reader.read_w1251_string()?,
       shape: reader.read_xr::<T, _>()?,
-      joint: OgfJointIkData::read_versioned::<T>(reader, version)?,
+      joint: OgfJointIkData::read_versioned::<T, _>(reader, version)?,
       bind_rotation: reader.read_xr::<T, _>()?,
       bind_position: reader.read_xr::<T, _>()?,
       mass: reader.read_f32::<T>()?,

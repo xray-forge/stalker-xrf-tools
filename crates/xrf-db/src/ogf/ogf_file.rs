@@ -4,8 +4,8 @@ use std::path::Path;
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use xrf_chunk::{
-  ChunkReader, find_one_of_optional_chunk_by_id, find_one_of_required_chunks_by_id, find_optional_chunk_by_id,
-  find_required_chunk_by_id,
+  ChunkDataSource, ChunkReader, find_one_of_optional_chunk_by_id, find_one_of_required_chunks_by_id,
+  find_optional_chunk_by_id, find_required_chunk_by_id,
 };
 use xrf_error::{XrfError, XrfResult};
 
@@ -64,16 +64,16 @@ impl OgfFile {
   }
 
   pub fn read_from_file<T: ByteOrder>(file: File) -> XrfResult<Self> {
-    Self::read_from_chunk::<T>(&mut ChunkReader::from_file(file)?)
+    Self::read_from_chunk::<T, _>(&mut ChunkReader::from_file(file)?)
   }
 
-  pub fn read_from_chunk<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
-    let chunks: Vec<ChunkReader> = reader.read_children()?;
+  pub fn read_from_chunk<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
+    let chunks: Vec<ChunkReader<D>> = reader.read_children()?;
 
-    Self::read_from_chunks::<T>(&chunks)
+    Self::read_from_chunks::<T, _>(&chunks)
   }
 
-  pub fn read_from_chunks<T: ByteOrder>(chunks: &[ChunkReader]) -> XrfResult<Self> {
+  pub fn read_from_chunks<T: ByteOrder, D: ChunkDataSource>(chunks: &[ChunkReader<D>]) -> XrfResult<Self> {
     // Bones are read up front because the ik data chunk stores no count of its own and has one record
     // per bone, so it can only be read once the bone list is known.
     let bones: Option<OgfBonesChunk> = match find_optional_chunk_by_id(chunks, OgfBonesChunk::CHUNK_ID) {
@@ -82,7 +82,7 @@ impl OgfFile {
     };
 
     let ik_data: Option<OgfIkDataChunk> = match (&bones, find_optional_chunk_by_id(chunks, OgfIkDataChunk::CHUNK_ID)) {
-      (Some(bones), Some(mut it)) => Some(OgfIkDataChunk::read::<T>(&mut it, bones.bones.len())?),
+      (Some(bones), Some(mut it)) => Some(OgfIkDataChunk::read::<T, _>(&mut it, bones.bones.len())?),
       _ => None,
     };
 
@@ -111,7 +111,7 @@ impl OgfFile {
         chunks,
         &[OgfKinematicsChunk::CHUNK_ID, OgfKinematicsChunk::CHUNK_ID_OLD],
       ) {
-        Some((id, mut it)) => Some(OgfKinematicsChunk::read::<T>(&mut it, id)?),
+        Some((id, mut it)) => Some(OgfKinematicsChunk::read::<T, _>(&mut it, id)?),
         None => None,
       },
       user_data: match find_optional_chunk_by_id(chunks, OgfUserDataChunk::CHUNK_ID) {
@@ -154,7 +154,7 @@ impl OgfFile {
       &[OgfKinematicsChunk::CHUNK_ID, OgfKinematicsChunk::CHUNK_ID_OLD],
     )?;
 
-    Ok(OgfKinematicsChunk::read::<T>(&mut chunk, chunk_id)?.motion_refs)
+    Ok(OgfKinematicsChunk::read::<T, _>(&mut chunk, chunk_id)?.motion_refs)
   }
 
   /// Collect the texture reference of every nested child visual.

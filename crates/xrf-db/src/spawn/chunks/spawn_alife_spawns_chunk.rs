@@ -4,7 +4,7 @@ use std::path::Path;
 
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xrf_chunk::{ChunkIterator, ChunkReadWrite, ChunkReader, ChunkWriter};
+use xrf_chunk::{ChunkDataSource, ChunkIterator, ChunkReadWrite, ChunkReader, ChunkWriter};
 use xrf_error::XrfResult;
 use xrf_ltx::Ltx;
 use xrf_utils::{assert_equal, assert_length, open_export_file};
@@ -35,20 +35,20 @@ impl SpawnALifeSpawnsChunk {
 
 impl ChunkReadWrite for SpawnALifeSpawnsChunk {
   /// Read spawns chunk by position descriptor from the chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
+  fn read<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
     log::info!("Reading ALife spawns chunk, {} bytes", reader.read_bytes_remain());
 
-    let mut count_reader: ChunkReader = reader.read_child_by_index(Self::COUNT_CHUNK_ID)?;
-    let mut objects_reader: ChunkReader = reader.read_child_by_index(Self::OBJECTS_CHUNK_ID)?;
-    let vertex_reader: ChunkReader = reader.read_child_by_index(Self::VERTEX_CHUNK_ID)?;
+    let mut count_reader: ChunkReader<D> = reader.read_child_by_index(Self::COUNT_CHUNK_ID)?;
+    let mut objects_reader: ChunkReader<D> = reader.read_child_by_index(Self::OBJECTS_CHUNK_ID)?;
+    let vertex_reader: ChunkReader<D> = reader.read_child_by_index(Self::VERTEX_CHUNK_ID)?;
 
     let count: u32 = count_reader.read_u32::<T>()?;
     let mut objects: Vec<AlifeObject> = Vec::with_capacity(count as usize);
 
     for object_reader in ChunkIterator::from_start(&mut objects_reader)? {
-      let mut object_reader: ChunkReader = object_reader?;
+      let mut object_reader: ChunkReader<D> = object_reader?;
 
-      let mut index_reader: ChunkReader = object_reader.read_child_by_index(Self::OBJECT_INDEX_CHUNK_ID)?;
+      let mut index_reader: ChunkReader<D> = object_reader.read_child_by_index(Self::OBJECT_INDEX_CHUNK_ID)?;
       let index: u16 = index_reader.read_u16::<T>()?;
 
       assert_equal(
@@ -58,7 +58,7 @@ impl ChunkReadWrite for SpawnALifeSpawnsChunk {
       )?;
       index_reader.assert_read("Expect ALife object index to be read")?;
 
-      let mut data_reader: ChunkReader = object_reader.read_child_by_index(Self::OBJECT_DATA_CHUNK_ID)?;
+      let mut data_reader: ChunkReader<D> = object_reader.read_child_by_index(Self::OBJECT_DATA_CHUNK_ID)?;
       let data: AlifeObject = data_reader.read_xr::<T, _>()?;
 
       objects.push(data);
@@ -215,7 +215,7 @@ mod tests {
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    let read: SpawnALifeSpawnsChunk = SpawnALifeSpawnsChunk::read::<XRayByteOrder>(&mut reader)?;
+    let read: SpawnALifeSpawnsChunk = SpawnALifeSpawnsChunk::read::<XRayByteOrder, _>(&mut reader)?;
 
     assert_eq!(read.objects.len(), original.objects.len());
 
@@ -326,7 +326,7 @@ mod tests {
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    let read: SpawnALifeSpawnsChunk = SpawnALifeSpawnsChunk::read::<XRayByteOrder>(&mut reader)?;
+    let read: SpawnALifeSpawnsChunk = SpawnALifeSpawnsChunk::read::<XRayByteOrder, _>(&mut reader)?;
 
     assert_eq!(read.objects.len(), original.objects.len());
 

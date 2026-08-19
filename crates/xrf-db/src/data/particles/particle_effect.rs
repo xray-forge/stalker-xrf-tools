@@ -1,8 +1,8 @@
 use byteorder::{ByteOrder, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xrf_chunk::{
-  ChunkReadWrite, ChunkReader, ChunkWriter, find_optional_chunk_by_id, find_required_chunk_by_id, read_f32_chunk,
-  read_f32_vector_chunk, read_u16_chunk, read_u32_chunk, read_w1251_string_chunk,
+  ChunkDataSource, ChunkReadWrite, ChunkReader, ChunkWriter, find_optional_chunk_by_id, find_required_chunk_by_id,
+  read_f32_chunk, read_f32_vector_chunk, read_u16_chunk, read_u32_chunk, read_w1251_string_chunk,
 };
 use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{Ltx, Section};
@@ -87,12 +87,12 @@ impl ParticleEffect {
 impl ChunkReadWrite for ParticleEffect {
   /// Read effects by position descriptor.
   /// Parses binary data into version chunk representation object.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
-    let chunks: Vec<ChunkReader> = reader.read_children()?;
+  fn read<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
+    let chunks: Vec<ChunkReader<D>> = reader.read_children()?;
 
     let effect: Self = {
       Self {
-        version: read_u16_chunk::<T>(
+        version: read_u16_chunk::<T, _>(
           &mut find_optional_chunk_by_id(&chunks, Self::VERSION_CHUNK_ID).expect("Particle name chunk not found"),
         )
         .map_err(|error| XrfError::new_parsing_error(format!("Failed to read particle version chunk: {}", error)))?,
@@ -100,7 +100,7 @@ impl ChunkReadWrite for ParticleEffect {
           &mut find_optional_chunk_by_id(&chunks, Self::NAME_CHUNK_ID).expect("Particle name chunk not found"),
         )
         .map_err(|error| XrfError::new_parsing_error(format!("Failed to read particle name chunk: {}", error)))?,
-        max_particles: read_u32_chunk::<T>(
+        max_particles: read_u32_chunk::<T, _>(
           &mut find_optional_chunk_by_id(&chunks, Self::MAX_PARTICLES_CHUNK_ID)
             .expect("Particle max particles chunk not found"),
         )
@@ -110,7 +110,7 @@ impl ChunkReadWrite for ParticleEffect {
         actions: find_required_chunk_by_id(&chunks, Self::ACTION_LIST_CHUNK_ID)?
           .read_xr_list::<T, _>()
           .map_err(|error| XrfError::new_parsing_error(format!("Failed to read particle actions chunk: {}", error)))?,
-        flags: read_u32_chunk::<T>(
+        flags: read_u32_chunk::<T, _>(
           &mut find_optional_chunk_by_id(&chunks, Self::FLAGS_CHUNK_ID).expect("Particle flags chunk not found"),
         )
         .map_err(|error| XrfError::new_parsing_error(format!("Failed to read particle flags chunk: {}", error)))?,
@@ -121,14 +121,15 @@ impl ChunkReadWrite for ParticleEffect {
         sprite: find_required_chunk_by_id(&chunks, Self::SPRITE_CHUNK_ID)?
           .read_xr::<T, _>()
           .map_err(|error| XrfError::new_parsing_error(format!("Failed to read particle sprite chunk: {}", error)))?,
-        time_limit: find_optional_chunk_by_id(&chunks, Self::TIME_LIMIT_CHUNK_ID)
-          .map(|mut it| read_f32_chunk::<T>(&mut it).expect("Invalid frame time limit chunk data in particle effect")),
+        time_limit: find_optional_chunk_by_id(&chunks, Self::TIME_LIMIT_CHUNK_ID).map(|mut it| {
+          read_f32_chunk::<T, _>(&mut it).expect("Invalid frame time limit chunk data in particle effect")
+        }),
         collision: find_optional_chunk_by_id(&chunks, Self::COLLISION_CHUNK_ID).map(|mut it| {
           it.read_xr::<T, _>()
             .expect("Invalid collision chunk data in particle effect")
         }),
         velocity_scale: find_optional_chunk_by_id(&chunks, Self::VELOCITY_SCALE_CHUNK_ID).map(|mut it| {
-          read_f32_vector_chunk::<T>(&mut it)
+          read_f32_vector_chunk::<T, _>(&mut it)
             .expect("Invalid velocity scale chunk data in particle effect")
             .into()
         }),
@@ -137,7 +138,7 @@ impl ChunkReadWrite for ParticleEffect {
             .expect("Invalid description chunk data in particle effect")
         }),
         rotation: find_optional_chunk_by_id(&chunks, Self::ROTATION_CHUNK_ID).map(|mut it| {
-          read_f32_vector_chunk::<T>(&mut it)
+          read_f32_vector_chunk::<T, _>(&mut it)
             .expect("Invalid rotation chunk data in particle effect")
             .into()
         }),
@@ -421,7 +422,7 @@ mod tests {
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    let read: ParticleEffect = ParticleEffect::read::<XRayByteOrder>(&mut reader)?;
+    let read: ParticleEffect = ParticleEffect::read::<XRayByteOrder, _>(&mut reader)?;
 
     assert_eq!(read, original);
 

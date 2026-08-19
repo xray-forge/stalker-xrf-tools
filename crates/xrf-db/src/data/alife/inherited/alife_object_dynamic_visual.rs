@@ -1,6 +1,6 @@
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
+use xrf_chunk::{ChunkDataSource, ChunkReadWrite, ChunkReader, ChunkWriter};
 use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{Ltx, Section};
 
@@ -19,7 +19,7 @@ pub struct AlifeObjectDynamicVisual {
 
 impl ChunkReadWrite for AlifeObjectDynamicVisual {
   /// Read visual object data from the chunk reader.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
+  fn read<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
     Ok(Self {
       base: reader.read_xr::<T, _>()?,
       visual_name: reader.read_w1251_string()?,
@@ -122,7 +122,7 @@ mod tests {
     assert_eq!(file.bytes_remaining(), 51 + 8);
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
-    let read_object: AlifeObjectDynamicVisual = AlifeObjectDynamicVisual::read::<XRayByteOrder>(&mut reader)?;
+    let read_object: AlifeObjectDynamicVisual = AlifeObjectDynamicVisual::read::<XRayByteOrder, _>(&mut reader)?;
 
     assert_eq!(read_object, original);
 

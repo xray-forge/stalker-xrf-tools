@@ -1,6 +1,6 @@
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xrf_chunk::{ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkWriter};
+use xrf_chunk::{ChunkDataSource, ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkWriter};
 use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{Ltx, Section};
 use xrf_utils::assert_length;
@@ -18,7 +18,7 @@ pub enum Shape {
 
 impl ChunkReadWrite for Shape {
   /// Read shape from the chunk reader.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
+  fn read<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
     let shape_type: u8 = reader.read_u8().expect("Shape type to be read");
 
     Ok(match shape_type {
@@ -61,12 +61,12 @@ impl ChunkReadWrite for Shape {
 
 impl ChunkReadWriteList for Shape {
   /// Read list of shapes from the chunk reader.
-  fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Vec<Self>> {
+  fn read_list<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Vec<Self>> {
     let mut shapes: Vec<Self> = Vec::new();
     let count: u8 = reader.read_u8().expect("Count flag to be read");
 
     for _ in 0..count {
-      shapes.push(Self::read::<T>(reader)?);
+      shapes.push(Self::read::<T, _>(reader)?);
     }
 
     assert_length(
@@ -230,7 +230,7 @@ mod tests {
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
 
-    assert_eq!(Shape::read_list::<XRayByteOrder>(&mut reader)?, original);
+    assert_eq!(Shape::read_list::<XRayByteOrder, _>(&mut reader)?, original);
 
     Ok(())
   }
@@ -264,7 +264,7 @@ mod tests {
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
 
-    assert_eq!(Shape::read::<XRayByteOrder>(&mut reader)?, original);
+    assert_eq!(Shape::read::<XRayByteOrder, _>(&mut reader)?, original);
 
     Ok(())
   }
@@ -296,7 +296,7 @@ mod tests {
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
 
-    assert_eq!(Shape::read::<XRayByteOrder>(&mut reader)?, original);
+    assert_eq!(Shape::read::<XRayByteOrder, _>(&mut reader)?, original);
 
     Ok(())
   }

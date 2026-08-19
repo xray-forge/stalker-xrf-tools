@@ -1,7 +1,7 @@
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
+use xrf_chunk::{ChunkDataSource, ChunkReadWrite, ChunkReader, ChunkWriter};
 use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{Ltx, Section};
 
@@ -22,7 +22,7 @@ pub struct GraphHeader {
 
 impl ChunkReadWrite for GraphHeader {
   /// Read header data from the chunk reader.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
+  fn read<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
     Ok(Self {
       version: reader.read_u8()?,
       vertices_count: reader.read_u16::<T>()?,
@@ -137,7 +137,7 @@ mod tests {
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    assert_eq!(GraphHeader::read::<XRayByteOrder>(&mut reader)?, original);
+    assert_eq!(GraphHeader::read::<XRayByteOrder, _>(&mut reader)?, original);
 
     Ok(())
   }

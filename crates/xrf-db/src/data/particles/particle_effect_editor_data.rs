@@ -2,7 +2,7 @@ use std::io::Write;
 
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
-use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
+use xrf_chunk::{ChunkDataSource, ChunkReadWrite, ChunkReader, ChunkWriter};
 use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{Ltx, Section};
 use xrf_utils::{assert_equal, decode_bytes_from_base64, encode_bytes_to_base64};
@@ -23,7 +23,7 @@ impl ParticleEffectEditorData {
 
 impl ChunkReadWrite for ParticleEffectEditorData {
   /// Read particle effect editor data data from chunk redder.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
+  fn read<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
     let particle_description: Self = Self {
       value: reader.read_remaining()?,
     };

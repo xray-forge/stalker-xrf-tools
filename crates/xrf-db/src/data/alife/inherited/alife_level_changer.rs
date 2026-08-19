@@ -1,6 +1,6 @@
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
+use xrf_chunk::{ChunkDataSource, ChunkReadWrite, ChunkReader, ChunkWriter, XRayByteOrder};
 use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{Ltx, Section};
 use xrf_utils::assert_equal;
@@ -30,7 +30,7 @@ pub struct AlifeLevelChanger {
 
 impl ChunkReadWrite for AlifeLevelChanger {
   /// Read ALife level changer object data from the chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
+  fn read<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
     let object: Self = Self {
       base: reader.read_xr::<T, _>()?,
       dest_game_vertex_id: reader.read_u16::<T>()?,
@@ -211,7 +211,7 @@ mod tests {
     assert_eq!(file.bytes_remaining(), 177 + 8);
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
-    let read_object: AlifeLevelChanger = AlifeLevelChanger::read::<XRayByteOrder>(&mut reader)?;
+    let read_object: AlifeLevelChanger = AlifeLevelChanger::read::<XRayByteOrder, _>(&mut reader)?;
 
     assert_eq!(read_object, original);
 

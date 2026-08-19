@@ -1,6 +1,6 @@
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
+use xrf_chunk::{ChunkDataSource, ChunkReadWrite, ChunkReader, ChunkWriter};
 use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{Ltx, Section};
 
@@ -22,7 +22,7 @@ pub struct ParticleActionVortex {
 }
 
 impl ChunkReadWrite for ParticleActionVortex {
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
+  fn read<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
     Ok(Self {
       action_flags: reader.read_u32::<T>()?,
       action_type: reader.read_xr::<T, _>()?,
@@ -134,7 +134,7 @@ mod tests {
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
 
-    assert_eq!(ParticleActionVortex::read::<XRayByteOrder>(&mut reader)?, original);
+    assert_eq!(ParticleActionVortex::read::<XRayByteOrder, _>(&mut reader)?, original);
 
     Ok(())
   }

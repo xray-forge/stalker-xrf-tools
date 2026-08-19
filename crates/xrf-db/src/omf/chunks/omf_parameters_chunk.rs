@@ -1,6 +1,6 @@
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
+use xrf_chunk::{ChunkDataSource, ChunkReadWrite, ChunkReader, ChunkWriter};
 use xrf_error::{XrfError, XrfResult};
 
 use crate::OmfFile;
@@ -23,7 +23,7 @@ impl OmfParametersChunk {
 }
 
 impl ChunkReadWrite for OmfParametersChunk {
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
+  fn read<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
     let version: u16 = reader.read_u16::<T>()?;
 
     if !OmfFile::SUPPORTED_VERSIONS.contains(&version) {
@@ -38,7 +38,7 @@ impl ChunkReadWrite for OmfParametersChunk {
       .read_xr_list::<T, _>()
       .map_err(|error| XrfError::new_read_error(format!("Failed to read ogf parts: {}", error)))?;
 
-    let motions: Vec<OgfMotionDefinition> = OgfMotionDefinition::read_list::<T>(reader, version)
+    let motions: Vec<OgfMotionDefinition> = OgfMotionDefinition::read_list::<T, _>(reader, version)
       .map_err(|error| XrfError::new_read_error(format!("Failed to read ogf motion definitions: {}", error)))?;
 
     reader.assert_read("Expect all data to be read from omf parameters chunk")?;

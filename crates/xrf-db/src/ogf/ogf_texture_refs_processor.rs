@@ -111,7 +111,7 @@ impl OgfTextureRefsProcessor {
 
       for mut inner in nested.read_children()? {
         let payload: Vec<u8> = if inner.id == OgfTextureChunk::CHUNK_ID {
-          let texture: OgfTextureChunk = OgfTextureChunk::read::<T>(&mut inner)?;
+          let texture: OgfTextureChunk = OgfTextureChunk::read::<T, _>(&mut inner)?;
 
           let renamed: OgfTextureChunk = if texture.texture_name == from {
             *patched_count += 1;

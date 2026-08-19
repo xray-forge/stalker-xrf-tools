@@ -1,8 +1,8 @@
 use byteorder::{ByteOrder, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use xrf_chunk::{
-  ChunkReadWrite, ChunkReader, ChunkWriter, find_optional_chunk_by_id, find_required_chunk_by_id, read_f32_chunk,
-  read_u16_chunk, read_u32_chunk, read_w1251_string_chunk,
+  ChunkDataSource, ChunkReadWrite, ChunkReader, ChunkWriter, find_optional_chunk_by_id, find_required_chunk_by_id,
+  read_f32_chunk, read_u16_chunk, read_u32_chunk, read_w1251_string_chunk,
 };
 use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{Ltx, Section};
@@ -47,17 +47,17 @@ impl ParticleGroup {
 
 impl ChunkReadWrite for ParticleGroup {
   /// Read group from chunk reader binary data.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
-    let chunks: Vec<ChunkReader> = reader.read_children()?;
+  fn read<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
+    let chunks: Vec<ChunkReader<D>> = reader.read_children()?;
 
     let particle_group: Self = Self {
-      version: read_u16_chunk::<T>(&mut find_required_chunk_by_id(&chunks, Self::VERSION_CHUNK_ID)?)?,
+      version: read_u16_chunk::<T, _>(&mut find_required_chunk_by_id(&chunks, Self::VERSION_CHUNK_ID)?)?,
       name: read_w1251_string_chunk(&mut find_required_chunk_by_id(&chunks, Self::NAME_CHUNK_ID)?)?,
-      flags: read_u32_chunk::<T>(&mut find_required_chunk_by_id(&chunks, Self::FLAGS_CHUNK_ID)?)?,
+      flags: read_u32_chunk::<T, _>(&mut find_required_chunk_by_id(&chunks, Self::FLAGS_CHUNK_ID)?)?,
       effects: find_required_chunk_by_id(&chunks, Self::EFFECTS_CHUNK_ID)?.read_xr_list::<T, _>()?,
-      time_limit: read_f32_chunk::<T>(&mut find_required_chunk_by_id(&chunks, Self::TIME_LIMIT_CHUNK_ID)?)?,
+      time_limit: read_f32_chunk::<T, _>(&mut find_required_chunk_by_id(&chunks, Self::TIME_LIMIT_CHUNK_ID)?)?,
       description: find_optional_chunk_by_id(&chunks, Self::DESCRIPTION_CHUNK_ID)
-        .map(|mut it| ParticleDescription::read::<T>(&mut it).expect("Invalid description chunk data")),
+        .map(|mut it| ParticleDescription::read::<T, _>(&mut it).expect("Invalid description chunk data")),
       effects_old: find_optional_chunk_by_id(&chunks, Self::EFFECTS2_CHUNK_ID)
         .map(|mut it| it.read_xr_list::<T, _>().expect("Invalid old group effects chunk data")),
     };

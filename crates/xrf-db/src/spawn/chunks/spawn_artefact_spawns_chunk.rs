@@ -3,7 +3,7 @@ use std::path::Path;
 
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
+use xrf_chunk::{ChunkDataSource, ChunkReadWrite, ChunkReader, ChunkWriter};
 use xrf_error::XrfResult;
 use xrf_ltx::Ltx;
 use xrf_utils::{assert_length, open_export_file};
@@ -27,7 +27,7 @@ impl SpawnArtefactSpawnsChunk {
 impl ChunkReadWrite for SpawnArtefactSpawnsChunk {
   /// Read header chunk by position descriptor.
   /// Parses binary data into artefact spawns chunk representation object.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
+  fn read<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
     log::info!("Reading artefacts spawns chunk: {} bytes", reader.read_bytes_remain());
 
     let count: u32 = reader.read_u32::<T>()?;
@@ -35,7 +35,7 @@ impl ChunkReadWrite for SpawnArtefactSpawnsChunk {
 
     // Parsing CLevelPoint structure, 20 bytes per one.
     for _ in 0..count {
-      nodes.push(ArtefactSpawnPoint::read::<T>(reader)?);
+      nodes.push(ArtefactSpawnPoint::read::<T, _>(reader)?);
     }
 
     assert_length(&nodes, count as usize, "Expected defined count of nodes to be read")?;
@@ -153,7 +153,10 @@ mod tests {
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    assert_eq!(SpawnArtefactSpawnsChunk::read::<XRayByteOrder>(&mut reader)?, original);
+    assert_eq!(
+      SpawnArtefactSpawnsChunk::read::<XRayByteOrder, _>(&mut reader)?,
+      original
+    );
 
     Ok(())
   }

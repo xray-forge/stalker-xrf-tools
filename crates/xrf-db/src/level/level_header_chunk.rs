@@ -1,6 +1,6 @@
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
+use xrf_chunk::{ChunkDataSource, ChunkReadWrite, ChunkReader, ChunkWriter};
 use xrf_error::XrfResult;
 
 /// `hdrLEVEL` in c++ codebase, stored in the `fsL_HEADER` chunk of the `level` file.
@@ -17,7 +17,7 @@ impl LevelHeaderChunk {
 
 impl ChunkReadWrite for LevelHeaderChunk {
   /// Read level header data from the chunk reader.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
+  fn read<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
     Ok(Self {
       xrlc_version: reader.read_u16::<T>()?,
       xrlc_quality: reader.read_u16::<T>()?,
@@ -71,7 +71,7 @@ mod tests {
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    assert_eq!(LevelHeaderChunk::read::<XRayByteOrder>(&mut reader)?, original);
+    assert_eq!(LevelHeaderChunk::read::<XRayByteOrder, _>(&mut reader)?, original);
 
     Ok(())
   }

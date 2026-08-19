@@ -1,6 +1,6 @@
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
+use xrf_chunk::{ChunkDataSource, ChunkReadWrite, ChunkReader, ChunkWriter};
 use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{Ltx, Section};
 
@@ -24,7 +24,7 @@ pub struct AlifeGraphPoint {
 
 impl ChunkReadWrite for AlifeGraphPoint {
   /// Read graph point data from the chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
+  fn read<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
     Ok(Self {
       connection_point_name: reader.read_w1251_string()?,
       connection_level_name: reader.read_w1251_string()?,
@@ -132,7 +132,7 @@ mod tests {
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
 
-    assert_eq!(AlifeGraphPoint::read::<XRayByteOrder>(&mut reader)?, original);
+    assert_eq!(AlifeGraphPoint::read::<XRayByteOrder, _>(&mut reader)?, original);
 
     Ok(())
   }

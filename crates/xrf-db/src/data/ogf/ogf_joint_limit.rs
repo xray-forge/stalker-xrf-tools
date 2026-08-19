@@ -1,6 +1,6 @@
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
+use xrf_chunk::{ChunkDataSource, ChunkReadWrite, ChunkReader, ChunkWriter};
 use xrf_error::XrfResult;
 
 /// Range of motion of one joint axis, `SJointLimit` in the engine.
@@ -18,7 +18,7 @@ impl OgfJointLimit {
 }
 
 impl ChunkReadWrite for OgfJointLimit {
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
+  fn read<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
     Ok(Self {
       limit_from: reader.read_f32::<T>()?,
       limit_to: reader.read_f32::<T>()?,

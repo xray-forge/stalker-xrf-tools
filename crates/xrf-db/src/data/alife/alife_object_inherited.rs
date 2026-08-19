@@ -2,7 +2,7 @@ use std::ops::Deref;
 
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
-use xrf_chunk::{ChunkReader, ChunkWriter};
+use xrf_chunk::{ChunkDataSource, ChunkReader, ChunkWriter};
 use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::Ltx;
 
@@ -77,7 +77,10 @@ impl AlifeObjectInherited {
   /// Read custom save data based on serialized clsid.
   /// Represents STATE_Read of each separate object in xray implementation.
   /// Additionally, should respect script extension.
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader, alife_class: &AlifeClass) -> XrfResult<Self> {
+  pub fn read<T: ByteOrder, D: ChunkDataSource>(
+    reader: &mut ChunkReader<D>,
+    alife_class: &AlifeClass,
+  ) -> XrfResult<Self> {
     Ok(match alife_class {
       AlifeClass::SeActor => Self::SeActor(Box::new(reader.read_xr::<T, _>()?)),
       AlifeClass::CseAlifeObjectBreakable => Self::CseAlifeObjectBreakable(Box::new(reader.read_xr::<T, _>()?)),

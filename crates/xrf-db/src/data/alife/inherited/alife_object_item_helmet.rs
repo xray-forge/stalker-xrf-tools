@@ -1,6 +1,6 @@
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
-use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
+use xrf_chunk::{ChunkDataSource, ChunkReadWrite, ChunkReader, ChunkWriter};
 use xrf_error::XrfResult;
 use xrf_ltx::Ltx;
 
@@ -16,7 +16,7 @@ pub struct AlifeObjectItemHelmet {
 
 impl ChunkReadWrite for AlifeObjectItemHelmet {
   /// Read ALife item object data from the chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
+  fn read<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
     Ok(Self {
       base: reader.read_xr::<T, _>()?,
     })
@@ -109,7 +109,7 @@ mod tests {
 
     let mut reader: ChunkReader = ChunkReader::from_slice(file)?.read_child_by_index(0)?;
 
-    assert_eq!(AlifeObjectItemHelmet::read::<XRayByteOrder>(&mut reader)?, original);
+    assert_eq!(AlifeObjectItemHelmet::read::<XRayByteOrder, _>(&mut reader)?, original);
 
     Ok(())
   }

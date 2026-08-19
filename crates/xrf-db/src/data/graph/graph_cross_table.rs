@@ -4,7 +4,9 @@ use std::io::Write;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use xrf_chunk::{ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkSizePackedIterator, ChunkWriter};
+use xrf_chunk::{
+  ChunkDataSource, ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkSizePackedIterator, ChunkWriter,
+};
 use xrf_error::XrfResult;
 
 #[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
@@ -56,11 +58,11 @@ impl GraphCrossTable {
 
 impl ChunkReadWriteList for GraphCrossTable {
   /// Read cross tables list data from the chunk.
-  fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Vec<Self>> {
+  fn read_list<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Vec<Self>> {
     let mut cross_tables: Vec<Self> = Vec::new();
 
     for cross_table_reader in ChunkSizePackedIterator::from_current(reader) {
-      let mut cross_table_reader: ChunkReader = cross_table_reader?;
+      let mut cross_table_reader: ChunkReader<D> = cross_table_reader?;
 
       cross_tables.push(cross_table_reader.read_xr::<T, _>()?);
       cross_table_reader.assert_read("Expect cross table chunk to be ended")?;
@@ -85,7 +87,7 @@ impl ChunkReadWriteList for GraphCrossTable {
 
 impl ChunkReadWrite for GraphCrossTable {
   /// Read cross table data from the chunk.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
+  fn read<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
     Ok(Self {
       version: reader.read_u32::<T>()?,
       nodes_count: reader.read_u32::<T>()?,
@@ -181,7 +183,7 @@ mod tests {
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    assert_eq!(GraphCrossTable::read_list::<XRayByteOrder>(&mut reader)?, original);
+    assert_eq!(GraphCrossTable::read_list::<XRayByteOrder, _>(&mut reader)?, original);
 
     Ok(())
   }
@@ -220,7 +222,7 @@ mod tests {
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    assert_eq!(GraphCrossTable::read::<XRayByteOrder>(&mut reader)?, original);
+    assert_eq!(GraphCrossTable::read::<XRayByteOrder, _>(&mut reader)?, original);
 
     Ok(())
   }

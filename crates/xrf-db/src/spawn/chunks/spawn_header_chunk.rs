@@ -3,7 +3,7 @@ use std::path::Path;
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
+use xrf_chunk::{ChunkDataSource, ChunkReadWrite, ChunkReader, ChunkWriter};
 use xrf_error::XrfResult;
 use xrf_ltx::{Ltx, Section};
 use xrf_utils::open_export_file;
@@ -29,7 +29,7 @@ impl SpawnHeaderChunk {
 impl ChunkReadWrite for SpawnHeaderChunk {
   /// Read header chunk by position descriptor.
   /// Parses binary data into header chunk representation object.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
+  fn read<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
     log::info!("Parsing header chunk, {} bytes", reader.read_bytes_remain());
 
     let header: Self = Self {
@@ -127,7 +127,7 @@ mod tests {
     )?)?
     .read_child_by_index(0)?;
 
-    let original: XrfResult<SpawnHeaderChunk> = SpawnHeaderChunk::read::<XRayByteOrder>(&mut reader);
+    let original: XrfResult<SpawnHeaderChunk> = SpawnHeaderChunk::read::<XRayByteOrder, _>(&mut reader);
 
     assert!(original.is_err(), "Expected failure with empty chunk");
 
@@ -165,7 +165,7 @@ mod tests {
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    assert_eq!(SpawnHeaderChunk::read::<XRayByteOrder>(&mut reader)?, original);
+    assert_eq!(SpawnHeaderChunk::read::<XRayByteOrder, _>(&mut reader)?, original);
 
     Ok(())
   }

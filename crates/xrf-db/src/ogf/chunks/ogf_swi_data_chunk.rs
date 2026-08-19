@@ -1,6 +1,6 @@
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
+use xrf_chunk::{ChunkDataSource, ChunkReadWrite, ChunkReader, ChunkWriter};
 use xrf_error::XrfResult;
 
 use crate::data::ogf::ogf_slide_window::OgfSlideWindow;
@@ -19,7 +19,7 @@ impl OgfSwiDataChunk {
 }
 
 impl ChunkReadWrite for OgfSwiDataChunk {
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
+  fn read<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
     let reserved: [u32; 4] = [
       reader.read_u32::<T>()?,
       reader.read_u32::<T>()?,
@@ -88,7 +88,7 @@ mod tests {
       .next()
       .expect("expect the written chunk to be present");
 
-    OgfSwiDataChunk::read::<XRayByteOrder>(&mut reader)
+    OgfSwiDataChunk::read::<XRayByteOrder, _>(&mut reader)
   }
 
   #[test]

@@ -1,6 +1,6 @@
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xrf_chunk::{ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkWriter};
+use xrf_chunk::{ChunkDataSource, ChunkReadWrite, ChunkReadWriteList, ChunkReader, ChunkWriter};
 use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{Ltx, Section};
 use xrf_utils::{assert_equal, assert_length};
@@ -32,13 +32,13 @@ impl ParticleGroupEffect {
 
 impl ChunkReadWriteList for ParticleGroupEffect {
   /// Read list of effect groups data from chunk reader.
-  fn read_list<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Vec<Self>> {
+  fn read_list<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Vec<Self>> {
     let count: u32 = reader.read_u32::<T>()?;
 
     let mut effects: Vec<Self> = Vec::with_capacity(count as usize);
 
     for _ in 0..count {
-      effects.push(Self::read::<T>(reader)?);
+      effects.push(Self::read::<T, _>(reader)?);
     }
 
     assert_length(
@@ -65,7 +65,7 @@ impl ChunkReadWriteList for ParticleGroupEffect {
 
 impl ChunkReadWrite for ParticleGroupEffect {
   /// Read group effect from chunk reader binary data.
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
+  fn read<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
     let particle_group = Self {
       name: reader.read_w1251_string()?,
       on_play_child_name: reader.read_w1251_string()?,
@@ -248,7 +248,10 @@ mod tests {
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    assert_eq!(ParticleGroupEffect::read_list::<XRayByteOrder>(&mut reader)?, original);
+    assert_eq!(
+      ParticleGroupEffect::read_list::<XRayByteOrder, _>(&mut reader)?,
+      original
+    );
 
     Ok(())
   }
@@ -288,7 +291,7 @@ mod tests {
       .read_child_by_index(0)
       .expect("0 index chunk to exist");
 
-    assert_eq!(ParticleGroupEffect::read::<XRayByteOrder>(&mut reader)?, original);
+    assert_eq!(ParticleGroupEffect::read::<XRayByteOrder, _>(&mut reader)?, original);
 
     Ok(())
   }

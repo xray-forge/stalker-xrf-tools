@@ -1,6 +1,6 @@
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
-use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
+use xrf_chunk::{ChunkDataSource, ChunkReadWrite, ChunkReader, ChunkWriter};
 use xrf_error::XrfResult;
 
 use crate::data::ogf::ogf_bone_ik_data::OgfBoneIkData;
@@ -18,7 +18,7 @@ pub struct OgfIkDataChunk {
 impl OgfIkDataChunk {
   pub const CHUNK_ID: u32 = 16;
 
-  pub fn read<T: ByteOrder>(reader: &mut ChunkReader, bones_count: usize) -> XrfResult<Self> {
+  pub fn read<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>, bones_count: usize) -> XrfResult<Self> {
     let mut bones: Vec<OgfBoneIkData> = Vec::with_capacity(bones_count);
 
     for _ in 0..bones_count {
@@ -133,7 +133,7 @@ mod tests {
       .next()
       .expect("expect the written chunk to be present");
 
-    OgfIkDataChunk::read::<XRayByteOrder>(&mut reader, chunk.bones.len())
+    OgfIkDataChunk::read::<XRayByteOrder, _>(&mut reader, chunk.bones.len())
   }
 
   #[test]

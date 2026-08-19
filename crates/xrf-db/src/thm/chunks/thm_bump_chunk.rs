@@ -1,6 +1,6 @@
 use byteorder::{ByteOrder, ReadBytesExt, WriteBytesExt};
 use serde::{Deserialize, Serialize};
-use xrf_chunk::{ChunkReadWrite, ChunkReader, ChunkWriter};
+use xrf_chunk::{ChunkDataSource, ChunkReadWrite, ChunkReader, ChunkWriter};
 use xrf_error::XrfResult;
 
 /// Bump declaration of a texture, `THM_CHUNK_BUMP` in the engine (`ETextureParams.h:190`).
@@ -38,7 +38,7 @@ impl ThmBumpChunk {
 }
 
 impl ChunkReadWrite for ThmBumpChunk {
-  fn read<T: ByteOrder>(reader: &mut ChunkReader) -> XrfResult<Self> {
+  fn read<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
     let bump: Self = Self {
       virtual_height: reader.read_f32::<T>()?,
       mode: reader.read_u32::<T>()?,
