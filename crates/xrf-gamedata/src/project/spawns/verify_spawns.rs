@@ -43,8 +43,9 @@ impl GamedataProject {
     for relative_path in &spawn_files {
       total_spawns += 1;
 
-      if let Some(spawn_path) = self.assets.absolute_path(relative_path).ok().flatten() {
-        let spawn_findings: Vec<Finding> = self.verify_spawn_findings(options, &spawn_path);
+      // Read through the VFS, so an archived spawn file is verified rather than reported missing.
+      if self.vfs.find(&self.scope, relative_path).ok().flatten().is_some() {
+        let spawn_findings: Vec<Finding> = self.verify_spawn_findings(options, relative_path);
 
         if !spawn_findings.is_empty() {
           findings.extend(spawn_findings);
@@ -80,16 +81,20 @@ impl GamedataProject {
     })
   }
 
-  pub fn verify_spawn<P: AsRef<Path>>(&self, options: &GamedataProjectVerifyOptions, path: &P) -> XrfResult<bool> {
+  /// Whether one spawn file reads cleanly, addressed by its logical path.
+  pub fn verify_spawn(&self, options: &GamedataProjectVerifyOptions, path: &str) -> XrfResult<bool> {
     Ok(self.verify_spawn_findings(options, path).is_empty())
   }
 
-  fn verify_spawn_findings<P: AsRef<Path>>(&self, options: &GamedataProjectVerifyOptions, path: &P) -> Vec<Finding> {
-    let file_path: String = path.as_ref().display().to_string();
+  fn verify_spawn_findings(&self, options: &GamedataProjectVerifyOptions, path: &str) -> Vec<Finding> {
+    let file_path: String = path.to_string();
 
     xrf_output::verbose!(options.output, "Verify spawn file: {}", file_path);
 
-    match SpawnFile::read_from_path::<XRayByteOrder, P>(path) {
+    match self
+      .read_asset_chunks(path)
+      .and_then(|mut chunks| SpawnFile::read_from_chunk::<XRayByteOrder, _>(&mut chunks))
+    {
       Ok(_) => {
         xrf_output::verbose!(options.output, "Verify spawn file: {}", file_path);
 

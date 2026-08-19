@@ -1,4 +1,3 @@
-use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant};
 
 use rayon::prelude::*;
@@ -17,10 +16,12 @@ impl GamedataProject {
     xrf_output::heading!(options.output, "Verify particles:");
 
     let started_at: Instant = Instant::now();
-    let particle_paths: Vec<PathBuf> = self
-      .assets
-      .with_suffix("particles.xr")?
-      .map(|asset| asset.absolute_path())
+    // Enumerated through the VFS, so an installation's archived libraries are verified too.
+    let particle_paths: Vec<String> = self
+      .vfs
+      .entries_with_suffix(&self.scope, "particles.xr")?
+      .into_iter()
+      .map(|location| location.logical_path().to_string())
       .collect();
 
     let checked_particle_files_count: u32 = u32::try_from(particle_paths.len())
@@ -29,25 +30,23 @@ impl GamedataProject {
     let particle_findings: Vec<Vec<Finding>> = particle_paths
       .par_iter()
       .map(|path| {
-        xrf_output::verbose!(options.output, "Verify particles file: {}", path.display());
+        xrf_output::verbose!(options.output, "Verify particles file: {}", path);
 
-        match ParticlesFile::read_from_path::<XRayByteOrder, &PathBuf>(&path) {
+        match self
+          .read_asset_chunks(path)
+          .and_then(|mut chunks| ParticlesFile::read_from_chunk::<XRayByteOrder, _>(&mut chunks))
+        {
           Ok(particles_file) => {
             let particle_findings: Vec<Finding> = self.verify_particle(options, &particles_file, path);
 
             if !particle_findings.is_empty() {
-              xrf_output::info!(options.output, "Particle library is invalid: {}", path.display());
+              xrf_output::info!(options.output, "Particle library is invalid: {}", path);
             }
 
             particle_findings
           }
           Err(error) => {
-            xrf_output::info!(
-              options.output,
-              "Failed to read particle library '{}': {}",
-              path.display(),
-              error
-            );
+            xrf_output::info!(options.output, "Failed to read particle library '{}': {}", path, error);
 
             vec![GamedataFindingFactory::for_asset(
               GamedataVerificationRule::ParticlesLibrary,
@@ -88,7 +87,7 @@ impl GamedataProject {
     &self,
     options: &GamedataProjectVerifyOptions,
     particles_file: &ParticlesFile,
-    particle_library_path: &Path,
+    particle_library_path: &str,
   ) -> Vec<Finding> {
     let mut findings: Vec<Finding> = Vec::new();
 

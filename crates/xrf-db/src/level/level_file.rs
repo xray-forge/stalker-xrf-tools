@@ -3,7 +3,7 @@ use std::path::Path;
 
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
-use xrf_chunk::{ChunkReader, find_optional_chunk_by_id, find_required_chunk_by_id};
+use xrf_chunk::{ChunkDataSource, ChunkReader, find_optional_chunk_by_id, find_required_chunk_by_id};
 use xrf_error::{XrfError, XrfResult};
 
 use crate::level::level_header_chunk::LevelHeaderChunk;
@@ -50,13 +50,20 @@ impl LevelFile {
 
   /// Read level file from file.
   pub fn read_from_file<T: ByteOrder>(file: File) -> XrfResult<Self> {
-    let chunks: Vec<ChunkReader> = ChunkReader::from_file(file)?.read_children()?;
+    Self::read_from_chunk::<T, _>(&mut ChunkReader::from_file(file)?)
+  }
 
-    Self::read_from_chunks::<T>(&chunks)
+  /// Reads from a chunk reader over any data source.
+  ///
+  /// The route an archived entry takes: a volume holds no file to slice, only bytes.
+  pub fn read_from_chunk<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
+    let chunks: Vec<ChunkReader<D>> = reader.read_children()?;
+
+    Self::read_from_chunks::<T, _>(&chunks)
   }
 
   /// Read level file from chunks.
-  pub fn read_from_chunks<T: ByteOrder>(chunks: &[ChunkReader]) -> XrfResult<Self> {
+  pub fn read_from_chunks<T: ByteOrder, D: ChunkDataSource>(chunks: &[ChunkReader<D>]) -> XrfResult<Self> {
     Ok(Self {
       header: find_required_chunk_by_id(chunks, LevelHeaderChunk::CHUNK_ID)?.read_xr::<T, _>()?,
       shaders: match find_optional_chunk_by_id(chunks, LevelShadersChunk::CHUNK_ID) {

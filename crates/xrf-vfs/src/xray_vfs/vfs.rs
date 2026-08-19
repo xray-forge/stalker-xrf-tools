@@ -181,6 +181,26 @@ impl XrayVfs {
     )
   }
 
+  /// Returns winning entries in scope whose logical path ends with `suffix`.
+  ///
+  /// For assets named by convention rather than by extension alone — `particles.xr` libraries, a level's `level.spawn` — where
+  /// the tail of the path is the identity and no kind describes it.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when `suffix` is not a valid X-Ray logical path fragment.
+  pub fn entries_with_suffix(&self, scope: &XrayScope, suffix: &str) -> XrfResult<Vec<XrayAssetLocation>> {
+    let suffix: String = normalize(suffix)?;
+
+    Ok(
+      self
+        .entries(scope)
+        .into_iter()
+        .filter(|entry| entry.logical_path().ends_with(&suffix))
+        .collect(),
+    )
+  }
+
   /// Files any mount in scope holds but cannot reach, because another file in the same mount claims their identity.
   ///
   /// An authoring problem to report rather than a reason to refuse the VFS: nothing here affects what resolves, only what a

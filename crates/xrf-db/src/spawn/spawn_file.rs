@@ -5,7 +5,7 @@ use std::path::Path;
 
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
-use xrf_chunk::{ChunkReader, ChunkWriter, find_required_chunk_by_id};
+use xrf_chunk::{ChunkDataSource, ChunkReader, ChunkWriter, find_required_chunk_by_id};
 use xrf_error::{XrfError, XrfResult};
 use xrf_utils::{assert_equal, assert_length, open_export_file};
 
@@ -43,13 +43,20 @@ impl SpawnFile {
 
   /// Read spawn file from file.
   pub fn read_from_file<T: ByteOrder>(file: File) -> XrfResult<Self> {
-    let chunks: Vec<ChunkReader> = ChunkReader::from_file(file)?.read_children()?;
+    Self::read_from_chunk::<T, _>(&mut ChunkReader::from_file(file)?)
+  }
 
-    Self::read_from_chunks::<T>(&chunks)
+  /// Reads from a chunk reader over any data source.
+  ///
+  /// The route an archived entry takes: a volume holds no file to slice, only bytes.
+  pub fn read_from_chunk<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
+    let chunks: Vec<ChunkReader<D>> = reader.read_children()?;
+
+    Self::read_from_chunks::<T, _>(&chunks)
   }
 
   /// Read spawn file from chunks.
-  pub fn read_from_chunks<T: ByteOrder>(chunks: &[ChunkReader]) -> XrfResult<Self> {
+  pub fn read_from_chunks<T: ByteOrder, D: ChunkDataSource>(chunks: &[ChunkReader<D>]) -> XrfResult<Self> {
     assert_length(chunks, 5, "Unexpected chunks count in spawn file root, expected 5")?;
 
     let spawn_file: Self = {
