@@ -4,7 +4,7 @@ use std::path::{Path, PathBuf};
 
 use xrf_assets::{XrayScope, XrayVfs};
 use xrf_error::XrfResult;
-use xrf_utils::read_as_string_from_w1251_encoded;
+use xrf_utils::{decode_bytes_to_string, get_windows1251_encoder, read_as_string_from_w1251_encoded};
 
 use crate::Ltx;
 use crate::file::include::LtxIncludeConvertor;
@@ -79,6 +79,20 @@ impl Ltx {
   /// Load include statements from a file with options.
   pub fn read_included_from_file<P: AsRef<Path>>(filename: P) -> XrfResult<LtxIncluded> {
     Self::read_included_from(&mut File::open(filename.as_ref())?)
+  }
+
+  /// Load include statements from a config in a mounted VFS, without parsing its sections.
+  ///
+  /// Used when assembling a project: entry points are the files nothing else includes, which needs every file's include list
+  /// and none of their contents.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when the path is not in scope, its bytes are not valid Windows-1251, or the contents will not parse.
+  pub fn read_included_from_vfs(vfs: &XrayVfs, scope: &XrayScope, logical_path: &str) -> XrfResult<LtxIncluded> {
+    let bytes: Vec<u8> = vfs.read(scope, logical_path)?;
+
+    Self::read_included_from_str(&decode_bytes_to_string(&bytes, get_windows1251_encoder())?)
   }
 
   /// Load include statements from a reader.
