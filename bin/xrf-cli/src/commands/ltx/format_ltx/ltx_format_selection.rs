@@ -2,10 +2,11 @@ use std::collections::HashSet;
 use std::path::{Path, PathBuf};
 
 use walkdir::{DirEntry, WalkDir};
-use xrf_archive::mount_plan;
-use xrf_assets::{FSGAME_FILE_NAME, XrayAssetContainer, XrayAssetLocation, XrayMountPlan, XrayScope, XrayVfs};
+use xrf_assets::{XrayAssetContainer, XrayAssetLocation, XrayScope, XrayVfs};
 use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::LTX_EXTENSION;
+
+use crate::commands::ltx::ltx_installation::mount_installation;
 
 /// The files a formatting run will touch, and what it declined to.
 pub struct LtxFormatSelection {
@@ -31,10 +32,9 @@ impl LtxFormatSelection {
     let mut visited: HashSet<PathBuf> = HashSet::new();
 
     for path in paths {
-      if path.join(FSGAME_FILE_NAME).is_file() {
-        Self::select_installation(path, &mut files, &mut declined, &mut visited)?;
-      } else {
-        Self::select_path(path, &mut files, &mut visited)?;
+      match mount_installation(path)? {
+        Some(vfs) => Self::select_installation(&vfs, &mut files, &mut declined, &mut visited)?,
+        None => Self::select_path(path, &mut files, &mut visited)?,
       }
     }
 
@@ -53,15 +53,11 @@ impl LtxFormatSelection {
   /// Loose winners are formatted through their physical paths. Archived winners are declined because archive volumes
   /// cannot be rewritten in place.
   fn select_installation(
-    path: &Path,
+    vfs: &XrayVfs,
     files: &mut Vec<PathBuf>,
     declined: &mut Vec<String>,
     visited: &mut HashSet<PathBuf>,
   ) -> XrfResult<()> {
-    let mut vfs: XrayVfs = XrayVfs::new();
-
-    mount_plan(&mut vfs, &XrayMountPlan::from_fsgame(path)?)?;
-
     for location in vfs.entries(&XrayScope::all()) {
       if !Self::is_ltx(location.logical_path()) {
         continue;

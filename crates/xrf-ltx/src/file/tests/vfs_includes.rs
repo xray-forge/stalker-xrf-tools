@@ -62,3 +62,21 @@ fn a_config_outside_the_scope_is_an_error() {
 
   assert!(Ltx::read_included_from_vfs(&vfs, &textures, "configs\\system.ltx").is_err());
 }
+
+#[test]
+fn reads_include_statements_declared_after_sections() {
+  // What Anomaly's `npc_loadouts.ltx` does: sections first, then the includes naming the files whose parents it defines.
+  // Missing them makes every file they name look like nothing includes it.
+  let (vfs, scope) = mount(
+    "trailing",
+    &[(
+      "configs\\system.ltx",
+      "#include \"first.ltx\"\n[section]\nvalue = 1\n\n#include \"second.ltx\"\n",
+    )],
+  );
+
+  assert_eq!(
+    Ltx::read_included_from_vfs(&vfs, &scope, "configs\\system.ltx").expect("includes read"),
+    vec!["first.ltx", "second.ltx"]
+  );
+}

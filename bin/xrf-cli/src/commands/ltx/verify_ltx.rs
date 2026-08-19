@@ -1,10 +1,12 @@
 use std::path::PathBuf;
 
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
+use xrf_assets::XrayScope;
 use xrf_error::XrfError;
 use xrf_ltx::{LtxProject, LtxProjectOptions, LtxProjectVerifyResult, LtxVerifyOptions};
 use xrf_output::OutputOptions;
 
+use crate::commands::ltx::ltx_installation::mount_installation;
 use crate::generic_command::{CommandResult, GenericCommand};
 use crate::output::TerminalOutput;
 
@@ -22,7 +24,7 @@ impl GenericCommand for VerifyLtxCommand {
       .about("Command for verification of ltx and ini files")
       .arg(
         Arg::new("path")
-          .help("Path to ltx file or folder with ltx files")
+          .help("Path to a folder with ltx files, or to a game installation root holding fsgame.ltx")
           .short('p')
           .long("path")
           .required(true)
@@ -64,13 +66,24 @@ impl GenericCommand for VerifyLtxCommand {
 
     log::info!("Verifying ltx folder: {}", path.display());
 
-    let project: Box<LtxProject> = Box::new(LtxProject::open_at_path_opt(
-      path,
-      LtxProjectOptions {
-        is_with_schemes_check: true,
-        is_strict_check: true,
-      },
-    )?);
+    let options: LtxProjectOptions = LtxProjectOptions {
+      is_with_schemes_check: true,
+      is_strict_check: true,
+    };
+
+    // Verification only reads, so an installation is verified over every declared source. Narrowing it to loose configs
+    // would leave archived includes unresolved and report their sections as missing, so the scope a person picks is the
+    // path they name rather than a flag.
+    let project: Box<LtxProject> = Box::new(match mount_installation(path)? {
+      Some(vfs) => {
+        let project: LtxProject = LtxProject::open_at_scope_opt(path, vfs, XrayScope::all(), options)?;
+
+        Self::report_sources(&project, &output);
+
+        project
+      }
+      None => LtxProject::open_at_path_opt(path, options)?,
+    });
 
     let result: LtxProjectVerifyResult = project.verify_entries_opt(LtxVerifyOptions { output })?;
 
@@ -84,6 +97,24 @@ impl GenericCommand for VerifyLtxCommand {
         ))
         .into(),
       )
+    }
+  }
+}
+
+impl VerifyLtxCommand {
+  /// Reports the sources an installation's verification searched.
+  ///
+  /// An installation keeps nearly every config in an archive volume, so naming only the game directory would leave a report
+  /// silent about where thousands of verified files came from.
+  fn report_sources(project: &LtxProject, output: &OutputOptions) {
+    for mount in project.vfs().scoped(project.scope()) {
+      xrf_output::info!(
+        output,
+        "Source: {:?} {} ({})",
+        mount.kind(),
+        mount.source().root_path().display(),
+        mount.label()
+      );
     }
   }
 }

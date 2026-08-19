@@ -222,7 +222,11 @@ impl<'a> LtxParser<'a> {
     Ok(formatted)
   }
 
-  /// Parse only include sections from file and return list of included LTX files.
+  /// Parse only include statements from file and return list of included LTX files.
+  ///
+  /// Scans the whole file, because includes are not confined to a leading block. The full parser merges an `#include`
+  /// wherever it appears and real config trees place them after sections, so stopping at the first one would leave the files
+  /// they name looking like nothing includes them.
   pub fn parse_includes(&mut self) -> XrfResult<Vec<String>> {
     let mut included: Vec<String> = Vec::new();
 
@@ -248,8 +252,9 @@ impl<'a> LtxParser<'a> {
           }
         }
 
+        // Sections and fields are consumed rather than parsed: this pass only answers which files a config pulls in.
         _ => {
-          return Ok(included);
+          self.parse_until_eol(true)?;
         }
       }
 

@@ -59,6 +59,24 @@ fn does_not_treat_a_named_included_file_as_an_entry() -> XrfResult {
 }
 
 #[test]
+fn does_not_treat_a_file_included_after_a_section_as_an_entry() -> XrfResult {
+  // Anomaly places includes after sections, and the file they name inherits from the includer. Treated as an entry it would
+  // be read standalone and reported as inheriting an unknown section.
+  let root: PathBuf = create_root("trailing")?;
+
+  fs::write(root.join("root.ltx"), "[base]\nvalue = 1\n\n#include \"child.ltx\"\n")?;
+  fs::write(root.join("child.ltx"), "[child]:base\n")?;
+
+  let project: LtxProject = LtxProject::open_at_path(&root)?;
+
+  assert_eq!(project.ltx_file_entries, vec![PathBuf::from("root.ltx")]);
+
+  fs::remove_dir_all(root)?;
+
+  Ok(())
+}
+
+#[test]
 fn renders_a_loose_path_for_a_person_and_reads_it_through_the_project() -> XrfResult {
   // What keeps reports reading as they did before the project moved onto a VFS: a logical path is stored, an absolute one is
   // shown, and only the project knows how to open it.

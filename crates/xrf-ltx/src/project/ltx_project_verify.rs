@@ -31,7 +31,18 @@ impl LtxProject {
         result.total_files += 1;
       }
 
-      let ltx: Ltx = self.read_full(entry)?;
+      // One unreadable config must not end the run.
+      let ltx: Ltx = match self.read_full(entry) {
+        Ok(ltx) => ltx,
+        Err(error) => {
+          result.errors.push(XrfError::new_verify_error(format!(
+            "Cannot read {}: {error}",
+            reported.display()
+          )));
+
+          continue;
+        }
+      };
 
       // For each section in file:
       for (section_name, section) in &ltx {
@@ -246,6 +257,32 @@ mod tests {
     assert_eq!(result.total_files, 1);
     assert_eq!(result.total_sections, 1);
     assert!(result.errors.is_empty());
+
+    fs::remove_dir_all(root)?;
+
+    Ok(())
+  }
+
+  #[test]
+  fn reports_an_unreadable_entry_and_keeps_verifying_the_rest() -> XrfResult {
+    // A real installation holds orphan configs that inherit sections only the rest of the tree defines. Ending the run at
+    // the first one would leave every later config unverified.
+    let root: PathBuf = std::env::temp_dir().join(format!("xrf-ltx-project-unreadable-test-{}", std::process::id()));
+
+    fs::create_dir_all(&root)?;
+    fs::write(root.join("broken.ltx"), "[child]:missing\n")?;
+    fs::write(root.join("valid.ltx"), "[section]\nvalue = 1\n")?;
+
+    let project: LtxProject = LtxProject::open_at_path(&root)?;
+    let result: LtxProjectVerifyResult = project.verify_entries()?;
+
+    assert_eq!(result.total_files, 2);
+    assert_eq!(result.errors.len(), 1, "one finding rather than a failed run");
+    assert!(
+      result.errors[0].to_string().contains("broken.ltx"),
+      "the finding names the file to act on"
+    );
+    assert_eq!(result.total_sections, 1, "the readable entry is still verified");
 
     fs::remove_dir_all(root)?;
 
