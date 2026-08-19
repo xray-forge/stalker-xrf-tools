@@ -4,12 +4,14 @@ use std::path::{Path, PathBuf};
 use xrf_error::{XrfError, XrfResult};
 
 use crate::xray_path::is_component_prefix;
-use crate::{DirectoryAssetIndex, XrayAssetContainer, XrayAssetIndex, XrayAssetSource, XrayMountKind};
+use crate::{
+  DirectoryAssetIndex, XrayAssetContainer, XrayAssetIndex, XrayAssetSource, XrayMountKind, XrayPathCollision,
+};
 
 /// A directory of loose files, indexed once at mount time.
 ///
-/// Its [`XrayAssetIndex`] rejects duplicate logical paths within the directory. Shadowing is allowed only between separate
-/// VFS mounts.
+/// Two files inside it normalizing to one logical path are reported through [`XrayAssetSource::collisions`] rather than
+/// refused, since only shadowing *between* mounts has a priority order to appeal to.
 #[derive(Debug)]
 pub struct XrayDirectorySource {
   label: String,
@@ -21,13 +23,24 @@ impl XrayDirectorySource {
   ///
   /// # Errors
   ///
-  /// Returns an error when traversal fails, a path is not a valid X-Ray logical path, or two files normalize to the same
-  /// logical path.
+  /// Returns an error when traversal fails or a path is not a valid X-Ray logical path.
   pub fn read(root: impl AsRef<Path>) -> XrfResult<Self> {
+    Self::read_ignoring(root, &[])
+  }
+
+  /// Walks and indexes a directory, omitting logical prefixes.
+  ///
+  /// Ignoring belongs to one source rather than to a whole VFS: skipping `textures\wip` in an override tree while keeping it
+  /// in the installation underneath is a real thing to want, and a single list could not express it.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when traversal fails, or a prefix or path is not a valid X-Ray logical path.
+  pub fn read_ignoring(root: impl AsRef<Path>, ignored: &[String]) -> XrfResult<Self> {
     let root: &Path = root.as_ref();
 
     Ok(Self {
-      index: XrayAssetIndex::new(DirectoryAssetIndex::read(root)?, &[])?,
+      index: XrayAssetIndex::new(DirectoryAssetIndex::read(root)?, ignored)?,
       label: root
         .file_name()
         .map(|name| name.to_string_lossy().to_string())
@@ -141,6 +154,10 @@ impl XrayAssetSource for XrayDirectorySource {
         .map(|asset| asset.logical_path().to_string())
         .filter(move |path| prefix.is_none_or(|prefix| is_component_prefix(path, prefix))),
     )
+  }
+
+  fn collisions(&self) -> &[XrayPathCollision] {
+    self.index.collisions()
   }
 }
 

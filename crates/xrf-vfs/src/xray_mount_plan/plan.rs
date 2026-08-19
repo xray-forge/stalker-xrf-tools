@@ -20,6 +20,11 @@ pub struct XrayPlannedMount {
   pub kind: XrayMountKind,
   /// Caller-supplied diagnostic label, such as an `fsgame.ltx` alias.
   pub origin: String,
+  /// Logical prefixes this source omits when indexed.
+  ///
+  /// Per source rather than per VFS, so an override tree can skip `textures\wip` while the installation beneath it keeps
+  /// serving that prefix. Archives ignore it: nothing writes work-in-progress into a volume.
+  pub ignored: Vec<String>,
 }
 
 /// An ordered list of sources to mount, highest priority first.
@@ -145,10 +150,34 @@ impl XrayMountPlan {
       } else {
         normalize(base)?
       },
+      ignored: Vec::new(),
       kind,
       origin: origin.to_string(),
       path: path.as_ref().to_path_buf(),
     });
+
+    Ok(self)
+  }
+
+  /// Applies logical prefixes for every directory mount in this plan to omit.
+  ///
+  /// Set on the plan rather than passed to a mount call, so one `--ignore` reaches every source a mode planned without each
+  /// caller threading it through. Archive mounts are unaffected.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when a prefix is not a valid X-Ray logical path.
+  pub fn ignoring(mut self, ignored: &[String]) -> XrfResult<Self> {
+    let ignored: Vec<String> = ignored
+      .iter()
+      .map(|prefix| normalize(prefix))
+      .collect::<XrfResult<_>>()?;
+
+    for mount in &mut self.mounts {
+      if mount.kind == XrayMountKind::Directory {
+        mount.ignored = ignored.clone();
+      }
+    }
 
     Ok(self)
   }

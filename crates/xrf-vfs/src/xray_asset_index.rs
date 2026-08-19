@@ -5,27 +5,32 @@ use std::path::PathBuf;
 use xrf_error::{XrfError, XrfResult};
 
 use crate::xray_path::{is_component_prefix, join, normalize, normalize_host_relative};
-use crate::{DirectoryAssetIndex, XrayAsset, XrayAssetType};
+use crate::{DirectoryAssetIndex, XrayAsset, XrayAssetType, XrayPathCollision};
 
 #[derive(Debug)]
 pub struct XrayAssetIndex {
   directory: DirectoryAssetIndex,
   assets: BTreeMap<String, usize>,
+  collisions: Vec<XrayPathCollision>,
 }
 
 impl XrayAssetIndex {
-  /// Builds a strict logical-path index over a directory index.
+  /// Builds a logical-path index over a directory index.
   ///
-  /// `ignored` contains logical prefixes to omit. Paths are normalized before comparison, and two
-  /// remaining files that normalize to one X-Ray path are rejected.
+  /// `ignored` contains logical prefixes to omit, normalized before comparison.
+  ///
+  /// Two files normalizing to one X-Ray path are **recorded rather than rejected**: the first indexed is kept and the
+  /// second is reported through [`Self::collisions`]. Refusing to build would stop a tool from opening a project to explain
+  /// what is wrong with it, and an editor has to open it.
   ///
   /// # Errors
   ///
-  /// Returns an error when an ignored prefix or asset path is invalid, or when normalized paths collide.
+  /// Returns an error when an ignored prefix or an asset path is not a valid X-Ray logical path.
   pub fn new(directory: DirectoryAssetIndex, ignored: &[String]) -> XrfResult<Self> {
     let ignored: Vec<String> = ignored.iter().map(|path| normalize(path)).collect::<XrfResult<_>>()?;
 
     let mut assets: BTreeMap<String, usize> = BTreeMap::new();
+    let mut collisions: Vec<XrayPathCollision> = Vec::new();
 
     for (index, asset) in directory.assets().enumerate() {
       let logical_path = normalize_host_relative(asset.relative_path())?;
@@ -34,16 +39,30 @@ impl XrayAssetIndex {
         continue;
       }
 
-      if let Some(previous) = assets.insert(logical_path.clone(), index) {
-        return Err(XrfError::new_asset_error(format!(
-          "directory assets '{}' and '{}' have the same logical path '{logical_path}'",
-          directory.asset(previous).relative_path().display(),
-          asset.relative_path().display()
-        )));
+      // Keeping the first indexed makes the winner deterministic; replacing would make it depend on traversal order.
+      if let Some(previous) = assets.get(&logical_path) {
+        collisions.push(XrayPathCollision {
+          kept: directory.root().join(directory.asset(*previous).relative_path()),
+          logical_path,
+          unreachable: directory.root().join(asset.relative_path()),
+        });
+
+        continue;
       }
+
+      assets.insert(logical_path, index);
     }
 
-    Ok(Self { directory, assets })
+    Ok(Self {
+      assets,
+      collisions,
+      directory,
+    })
+  }
+
+  /// Files this index could not reach, because another file already claimed their engine identity.
+  pub fn collisions(&self) -> &[XrayPathCollision] {
+    &self.collisions
   }
 
   /// Returns the physical directory index used as the source of this logical index.

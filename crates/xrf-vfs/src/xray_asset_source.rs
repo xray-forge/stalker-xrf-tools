@@ -4,7 +4,7 @@ use std::path::Path;
 use serde::Serialize;
 use xrf_error::XrfResult;
 
-use crate::XrayAssetContainer;
+use crate::{XrayAssetContainer, XrayPathCollision};
 
 /// The storage kind backing a mount.
 ///
@@ -57,4 +57,12 @@ pub trait XrayAssetSource: Debug + Send + Sync {
 
   /// Enumerates source-relative logical paths, optionally restricted to a component prefix.
   fn entries<'a>(&'a self, prefix: Option<&'a str>) -> Box<dyn Iterator<Item = String> + 'a>;
+
+  /// Files this source holds but cannot reach, because another file already claims their engine identity.
+  ///
+  /// Defaults to none, which is correct for a source whose names are unique by construction: an archive volume keys entries
+  /// by name, so two entries cannot collide inside one set.
+  fn collisions(&self) -> &[XrayPathCollision] {
+    &[]
+  }
 }

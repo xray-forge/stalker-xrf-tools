@@ -28,6 +28,9 @@ pub fn mount_plan(vfs: &mut XrayVfs, plan: &XrayMountPlan) -> XrfResult<Vec<Xray
 fn mount_one(vfs: &mut XrayVfs, planned: &XrayPlannedMount) -> XrfResult<XrayMountId> {
   match planned.kind {
     XrayMountKind::Archive => vfs.mount(&planned.base, Box::new(ArchiveAssetSource::read(&planned.path)?)),
-    XrayMountKind::Directory => vfs.mount(&planned.base, Box::new(XrayDirectorySource::read(&planned.path)?)),
+    XrayMountKind::Directory => vfs.mount(
+      &planned.base,
+      Box::new(XrayDirectorySource::read_ignoring(&planned.path, &planned.ignored)?),
+    ),
   }
 }

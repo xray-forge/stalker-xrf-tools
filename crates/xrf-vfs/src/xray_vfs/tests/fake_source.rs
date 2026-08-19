@@ -13,6 +13,7 @@ pub struct FakeArchiveSource {
   label: String,
   root: PathBuf,
   entries: HashMap<String, Vec<u8>>,
+  collisions: Vec<crate::XrayPathCollision>,
 }
 
 impl FakeArchiveSource {
@@ -29,9 +30,20 @@ impl FakeArchiveSource {
           )
         })
         .collect(),
+      collisions: Vec::new(),
       label: label.to_string(),
       root: PathBuf::from(format!("C:\\install\\db\\{label}")),
     }
+  }
+
+  /// Declares a file this source holds but cannot reach.
+  ///
+  /// A real directory source derives these while indexing; a double is the only way to exercise reporting on a filesystem
+  /// that cannot hold two paths differing only by case.
+  pub fn with_collision(mut self, collision: crate::XrayPathCollision) -> Self {
+    self.collisions.push(collision);
+
+    self
   }
 }
 
@@ -86,6 +98,10 @@ impl XrayAssetSource for FakeArchiveSource {
         .filter(move |entry| prefix.is_none_or(|prefix| crate::xray_path::is_component_prefix(entry, prefix)))
         .cloned(),
     )
+  }
+
+  fn collisions(&self) -> &[crate::XrayPathCollision] {
+    &self.collisions
   }
 }
 

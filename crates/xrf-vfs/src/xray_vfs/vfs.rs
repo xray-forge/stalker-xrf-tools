@@ -6,7 +6,7 @@ use xrf_error::{XrfError, XrfResult};
 use crate::xray_path::normalize;
 use crate::{
   XrayAssetContainer, XrayAssetLocation, XrayAssetRules, XrayAssetSource, XrayAssetType, XrayDirectoryListing,
-  XrayDirectorySource, XrayMount, XrayMountId, XrayMountKind, XrayScope,
+  XrayDirectorySource, XrayMount, XrayMountId, XrayMountKind, XrayPathCollision, XrayScope,
 };
 
 /// The engine's view of assets: several mounted sources, searched in order, first hit wins.
@@ -157,6 +157,17 @@ impl XrayVfs {
     }
 
     located
+  }
+
+  /// Files any mount in scope holds but cannot reach, because another file in the same mount claims their identity.
+  ///
+  /// An authoring problem to report rather than a reason to refuse the VFS: nothing here affects what resolves, only what a
+  /// person should be told is unreachable.
+  pub fn collisions(&self, scope: &XrayScope) -> Vec<XrayPathCollision> {
+    self
+      .scoped(scope)
+      .flat_map(|mount| mount.source().collisions().iter().cloned())
+      .collect()
   }
 
   /// Returns what sits directly inside one logical directory, as a browser or a tree view needs it.

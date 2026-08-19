@@ -47,6 +47,14 @@ impl GenericCommand for ListAssetsCommand {
           .value_parser(value_parser!(String)),
       )
       .arg(
+        Arg::new("ignore")
+          .help("Logical prefixes the directory mounts omit, such as textures\\wip")
+          .short('i')
+          .long("ignore")
+          .num_args(1..)
+          .value_parser(value_parser!(String)),
+      )
+      .arg(
         Arg::new("loose")
           .help("List only loose files, ignoring archived entries")
           .long("loose")
@@ -90,8 +98,14 @@ impl GenericCommand for ListAssetsCommand {
         .as_str(),
     )?;
 
+    let ignored: Vec<String> = matches
+      .get_many::<String>("ignore")
+      .map(|values| values.cloned().collect())
+      .unwrap_or_default();
+
     let listing: AssetListing = AssetLister::new(path)
       .with_mode(mode)
+      .with_ignored(&ignored)
       .with_prefix(prefix.map(String::as_str))
       .with_loose_only(matches.get_flag("loose"))
       .with_shadowed(matches.get_flag("shadowed"))
@@ -108,6 +122,8 @@ impl GenericCommand for ListAssetsCommand {
     if matches.get_flag("shadowed") {
       Self::print_shadowed(&output, &listing);
     }
+
+    Self::print_collisions(&output, &listing);
 
     xrf_output::success!(
       output,
@@ -138,6 +154,40 @@ impl ListAssetsCommand {
         output,
         "  ... {} more not printed, narrow with --prefix",
         listing.entries.len() - PRINT_LIMIT
+      );
+    }
+  }
+
+  /// Warns about files a mount holds but cannot reach.
+  ///
+  /// Always reported rather than behind a flag: unlike a shadowed entry, which is how an override is meant to work, an
+  /// unreachable file is an authoring mistake nobody asked to see because nobody knew about it.
+  fn print_collisions(output: &OutputOptions, listing: &AssetListing) {
+    if listing.collisions.is_empty() {
+      return;
+    }
+
+    xrf_output::warning!(
+      output,
+      "{} file(s) cannot be reached, another file claims their path:",
+      listing.collisions.len()
+    );
+
+    for collision in listing.collisions.iter().take(PRINT_LIMIT) {
+      xrf_output::warning!(
+        output,
+        "  {} is unreachable, {} answers '{}'",
+        collision.unreachable.display(),
+        collision.kept.display(),
+        collision.logical_path
+      );
+    }
+
+    if listing.collisions.len() > PRINT_LIMIT {
+      xrf_output::warning!(
+        output,
+        "  ... {} more not printed",
+        listing.collisions.len() - PRINT_LIMIT
       );
     }
   }

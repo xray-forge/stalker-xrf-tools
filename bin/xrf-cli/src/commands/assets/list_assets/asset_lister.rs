@@ -2,7 +2,7 @@ use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant};
 
 use xrf_error::XrfResult;
-use xrf_vfs::{XrayAssetLocation, XrayMountKind, XrayMountMode, XrayScope, XrayVfs, open_vfs};
+use xrf_vfs::{XrayAssetLocation, XrayMountKind, XrayMountMode, XrayPathCollision, XrayScope, XrayVfs, open_plan};
 
 /// Resolved assets and source metadata for one listing.
 pub struct AssetListing {
@@ -14,6 +14,8 @@ pub struct AssetListing {
   pub entries: Vec<XrayAssetLocation>,
   /// Entries shadowed by a higher-priority mount, absent unless asked for.
   pub shadowed: Vec<XrayAssetLocation>,
+  /// Files a mount holds but cannot reach, because another file in it claims their identity.
+  pub collisions: Vec<XrayPathCollision>,
   /// Time spent planning, mounting, and enumerating.
   pub duration: Duration,
 }
@@ -25,6 +27,7 @@ pub struct AssetLister {
   path: PathBuf,
   mode: XrayMountMode,
   prefix: Option<String>,
+  ignored: Vec<String>,
   is_loose_only: bool,
   is_shadowed_included: bool,
 }
@@ -36,10 +39,18 @@ impl AssetLister {
       is_shadowed_included: false,
       // A listing exists to show what resolves, so it looks for a containing installation by default; its archives are
       // invisible to a directory walk and omitting them would answer with a fraction of the tree.
+      ignored: Vec::new(),
       mode: XrayMountMode::ContainingInstallation,
       path: path.to_path_buf(),
       prefix: None,
     }
+  }
+
+  /// Logical prefixes the directory mounts omit, as `verify-gamedata --ignore` means them.
+  pub fn with_ignored(mut self, ignored: &[String]) -> Self {
+    self.ignored = ignored.to_vec();
+
+    self
   }
 
   /// Sets how the path is interpreted when planning its mounts.
@@ -78,7 +89,7 @@ impl AssetLister {
   /// a valid X-Ray logical path.
   pub fn run(&self) -> XrfResult<AssetListing> {
     let started: Instant = Instant::now();
-    let vfs: XrayVfs = open_vfs(self.mode, &self.path)?;
+    let vfs: XrayVfs = open_plan(&self.mode.plan(&self.path)?.ignoring(&self.ignored)?)?;
     let scope: XrayScope = self.scope()?;
     let entries: Vec<XrayAssetLocation> = vfs.entries(&scope);
     let shadowed: Vec<XrayAssetLocation> = if self.is_shadowed_included {
@@ -88,6 +99,7 @@ impl AssetLister {
     };
 
     Ok(AssetListing {
+      collisions: vfs.collisions(&scope),
       duration: started.elapsed(),
       entries,
       mounts: vfs
