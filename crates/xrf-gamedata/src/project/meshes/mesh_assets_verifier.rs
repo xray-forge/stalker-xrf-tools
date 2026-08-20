@@ -1,5 +1,4 @@
 use std::collections::{HashMap, HashSet};
-use std::path::{Path, PathBuf};
 
 use rayon::prelude::*;
 use xrf_db::{OgfFile, OmfFile, ShaderLibraryFile, XRayByteOrder};
@@ -32,11 +31,13 @@ impl<'a> MeshAssetsVerifier<'a> {
   pub(crate) fn verify(&self) -> XrfResult<GamedataMeshAssetsVerificationResult> {
     let options = self.options;
     let shader_library = self.shader_library;
+    // Enumerated through the VFS, so an installation's archived meshes are verified too.
     let mesh_paths: Vec<String> = self
       .project
-      .assets
-      .with_type(AssetType::Ogf)
-      .map(|asset| asset.logical_path().to_string())
+      .vfs
+      .entries_of_type(&self.project.scope, AssetType::Ogf)
+      .into_iter()
+      .map(|location| location.logical_path().to_string())
       .collect();
 
     let checked_meshes_count: u32 = u32::try_from(mesh_paths.len())
@@ -47,50 +48,37 @@ impl<'a> MeshAssetsVerifier<'a> {
       .map(|relative_path| {
         xrf_output::verbose!(options.output, "Verify mesh: {relative_path}");
 
-        let Some(path) = self.project.assets.absolute_path(relative_path).ok().flatten() else {
-          xrf_output::error!(options.output, "Mesh path not found: {relative_path}");
+        // Read through the VFS, so a mesh inside an archive volume is verified rather than reported missing.
+        let path: &str = relative_path;
 
-          return vec![GamedataFindingFactory::for_asset(
-            GamedataVerificationRule::MeshesPath,
-            Path::new(relative_path),
-            "Mesh path was not found in gamedata roots",
-          )];
-        };
-
-        match OgfFile::read_from_path::<XRayByteOrder, _>(&path) {
-          Ok(ogf) => match self.verify_mesh_findings(options, shader_library, &ogf, Some(&path), None) {
+        match self
+          .project
+          .read_asset_chunks(path)
+          .and_then(|mut chunks| OgfFile::read_from_chunk::<XRayByteOrder, _>(&mut chunks))
+        {
+          Ok(ogf) => match self.verify_mesh_findings(options, shader_library, &ogf, Some(path), None) {
             Ok(findings) if findings.is_empty() => Vec::new(),
             Ok(findings) => {
-              xrf_output::error!(options.output, "Mesh is not valid: {}", path.display());
+              xrf_output::error!(options.output, "Mesh is not valid: {}", path);
 
               findings
             }
             Err(error) => {
-              xrf_output::error!(
-                options.output,
-                "Mesh verification failed: {} - {}",
-                path.display(),
-                error
-              );
+              xrf_output::error!(options.output, "Mesh verification failed: {} - {}", path, error);
 
               vec![GamedataFindingFactory::for_asset(
                 GamedataVerificationRule::MeshesValidation,
-                &path,
+                path,
                 format!("Failed to verify mesh: {error}"),
               )]
             }
           },
           Err(error) => {
-            xrf_output::error!(
-              options.output,
-              "Mesh verification failed: {} - {}",
-              path.display(),
-              error
-            );
+            xrf_output::error!(options.output, "Mesh verification failed: {} - {}", path, error);
 
             vec![GamedataFindingFactory::for_asset(
               GamedataVerificationRule::MeshesRead,
-              &path,
+              path,
               format!("Failed to read mesh: {error}"),
             )]
           }
@@ -118,7 +106,7 @@ impl<'a> MeshAssetsVerifier<'a> {
     options: &GamedataProjectVerifyOptions,
     shader_library: &ShaderLibraryFile,
     ogf: &OgfFile,
-    mesh_path: Option<&Path>,
+    mesh_path: Option<&str>,
     inherited_bones_count: Option<usize>,
   ) -> XrfResult<Vec<Finding>> {
     let bones_count: Option<usize> = ogf
@@ -143,12 +131,12 @@ impl<'a> MeshAssetsVerifier<'a> {
     // Verify all motion refs injected in OGF file.
     if let Some(kinematics) = &ogf.kinematics {
       for motion_ref in &kinematics.motion_refs {
-        let motion_paths: Vec<PathBuf> = self
+        let motion_paths: Vec<String> = self
           .project
-          .assets
-          .omfs(motion_ref)?
+          .vfs
+          .resolve_all(&self.project.scope, AssetType::Omf, motion_ref)?
           .into_iter()
-          .map(|asset| asset.absolute_path())
+          .map(|location| location.logical_path().to_string())
           .collect();
 
         if motion_paths.is_empty() {
@@ -161,14 +149,18 @@ impl<'a> MeshAssetsVerifier<'a> {
           ));
         } else {
           for motion_path in motion_paths {
-            match OmfFile::read_from_path::<XRayByteOrder, _>(&motion_path) {
+            match self
+              .project
+              .read_asset_chunks(&motion_path)
+              .and_then(|mut chunks| OmfFile::read_from_chunk::<XRayByteOrder, _>(&mut chunks))
+            {
               Ok(omf) => match self.verify_mesh_motion_findings(options, ogf, &omf, Some(&motion_path)) {
                 Ok(motion_findings) => findings.extend(motion_findings),
                 Err(error) => {
                   xrf_output::error!(
                     options.output,
                     "Mesh motion verification failed: {}, error: {}",
-                    motion_path.display(),
+                    motion_path,
                     error
                   );
 
@@ -183,7 +175,7 @@ impl<'a> MeshAssetsVerifier<'a> {
                 xrf_output::error!(
                   options.output,
                   "Mesh motion file failed to read: {}, error: {}",
-                  motion_path.display(),
+                  motion_path,
                   error
                 );
 
@@ -208,15 +200,15 @@ impl<'a> MeshAssetsVerifier<'a> {
     &self,
     options: &GamedataProjectVerifyOptions,
     ogf: &OgfFile,
-    mesh_path: Option<&Path>,
+    mesh_path: Option<&str>,
   ) -> Vec<Finding> {
     let mut findings: Vec<Finding> = Vec::new();
 
     if let Some(texture) = &ogf.texture
       && self
         .project
-        .assets
-        .dds_texture(&texture.texture_name)
+        .vfs
+        .dds_texture(&self.project.scope, &texture.texture_name)
         .ok()
         .flatten()
         .is_none()
@@ -238,7 +230,7 @@ impl<'a> MeshAssetsVerifier<'a> {
     options: &GamedataProjectVerifyOptions,
     shader_library: &ShaderLibraryFile,
     ogf: &OgfFile,
-    mesh_path: Option<&Path>,
+    mesh_path: Option<&str>,
   ) -> Vec<Finding> {
     let Some(texture) = &ogf.texture else {
       return Vec::new();
@@ -264,7 +256,7 @@ impl<'a> MeshAssetsVerifier<'a> {
     )]
   }
 
-  fn verify_mesh_skeleton_findings(&self, ogf: &OgfFile, mesh_path: Option<&Path>) -> Vec<Finding> {
+  fn verify_mesh_skeleton_findings(&self, ogf: &OgfFile, mesh_path: Option<&str>) -> Vec<Finding> {
     let Some(bones) = &ogf.bones else {
       return Vec::new();
     };
@@ -283,7 +275,7 @@ impl<'a> MeshAssetsVerifier<'a> {
   fn verify_mesh_geometry_findings(
     &self,
     ogf: &OgfFile,
-    mesh_path: Option<&Path>,
+    mesh_path: Option<&str>,
     bones_count: Option<usize>,
   ) -> Vec<Finding> {
     let Some(geometry) = &ogf.geometry else {
@@ -428,7 +420,7 @@ impl<'a> MeshAssetsVerifier<'a> {
     options: &GamedataProjectVerifyOptions,
     ogf: &OgfFile,
     omf: &OmfFile,
-    motion_path: Option<&Path>,
+    motion_path: Option<&str>,
   ) -> XrfResult<Vec<Finding>> {
     let mut findings: Vec<Finding> = Vec::new();
 
@@ -489,14 +481,14 @@ impl<'a> MeshAssetsVerifier<'a> {
     Ok(findings)
   }
 
-  fn new_mesh_finding(rule: GamedataVerificationRule, mesh_path: Option<&Path>, message: String) -> Finding {
+  fn new_mesh_finding(rule: GamedataVerificationRule, mesh_path: Option<&str>, message: String) -> Finding {
     match mesh_path {
       Some(path) => GamedataFindingFactory::for_asset(rule, path, message),
       None => GamedataFindingFactory::without_asset(rule, message),
     }
   }
 
-  fn new_motion_finding(rule: GamedataVerificationRule, motion_path: Option<&Path>, message: String) -> Finding {
+  fn new_motion_finding(rule: GamedataVerificationRule, motion_path: Option<&str>, message: String) -> Finding {
     match motion_path {
       Some(path) => GamedataFindingFactory::for_asset(rule, path, message),
       None => GamedataFindingFactory::without_asset(rule, message),

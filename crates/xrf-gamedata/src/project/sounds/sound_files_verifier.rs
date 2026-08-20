@@ -37,24 +37,32 @@ impl<'a> SoundFilesVerifier<'a> {
       .filter_map(|relative_path| {
         xrf_output::verbose!(self.options.output, "Verify sound: {relative_path}");
 
-        let Some(path) = self.project.assets.absolute_path(relative_path).ok().flatten() else {
-          return Some(GamedataFindingFactory::for_asset(
-            GamedataVerificationRule::SoundsFiles,
-            Path::new(relative_path),
-            "Sound path was not found in gamedata roots",
-          ));
+        // Read through the VFS, so an archived sound is decoded rather than reported missing.
+        let bytes: Vec<u8> = match self.project.read_asset(relative_path) {
+          Ok(bytes) => bytes,
+          Err(_) => {
+            return Some(GamedataFindingFactory::for_asset(
+              GamedataVerificationRule::SoundsFiles,
+              Path::new(relative_path),
+              "Sound path was not found in gamedata roots",
+            ));
+          }
         };
 
         let sound: XrfResult<SoundFile> = if self.options.is_strict {
-          SoundFile::read_strictly_from_path(&path)
+          SoundFile::read_strictly_from_bytes(&bytes)
         } else {
-          SoundFile::read_from_path(&path)
+          SoundFile::read_from_bytes(&bytes)
         };
 
         sound.err().map(|error| {
-          xrf_output::error!(self.options.output, "Sound is not valid: {} - {error}", path.display());
+          xrf_output::error!(self.options.output, "Sound is not valid: {relative_path} - {error}");
 
-          GamedataFindingFactory::for_asset(GamedataVerificationRule::SoundsFiles, path, error.to_string())
+          GamedataFindingFactory::for_asset(
+            GamedataVerificationRule::SoundsFiles,
+            Path::new(relative_path),
+            error.to_string(),
+          )
         })
       })
       .collect();

@@ -100,7 +100,7 @@ impl GamedataProject {
           .dds_texture(texture_relative_path)
           .ok()
           .flatten()
-          .map(|asset| asset.absolute_path())
+          .map(|asset| asset.logical_path().to_string())
         {
           match self.verify_texture_by_path(options, &texture) {
             Ok(result) => {

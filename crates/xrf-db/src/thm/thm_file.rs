@@ -3,7 +3,7 @@ use std::path::Path;
 
 use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
-use xrf_chunk::{ChunkReader, find_optional_chunk_by_id};
+use xrf_chunk::{ChunkDataSource, ChunkReader, find_optional_chunk_by_id};
 use xrf_error::{XrfError, XrfResult};
 
 use crate::thm::chunks::thm_bump_chunk::ThmBumpChunk;
@@ -31,7 +31,14 @@ impl ThmFile {
   }
 
   pub fn read_from_file<T: ByteOrder>(file: File) -> XrfResult<Self> {
-    let chunks: Vec<ChunkReader> = ChunkReader::from_file(file)?.read_children()?;
+    Self::read_from_chunk::<T, _>(&mut ChunkReader::from_file(file)?)
+  }
+
+  /// Reads a descriptor from a chunk reader over any data source.
+  ///
+  /// The route an archived descriptor takes: a volume holds no file to slice, only bytes.
+  pub fn read_from_chunk<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
+    let chunks: Vec<ChunkReader<D>> = reader.read_children()?;
 
     Ok(Self {
       bump: match find_optional_chunk_by_id(&chunks, ThmBumpChunk::CHUNK_ID) {

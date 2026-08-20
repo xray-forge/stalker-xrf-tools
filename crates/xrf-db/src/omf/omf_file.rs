@@ -33,12 +33,19 @@ impl OmfFile {
   }
 
   pub fn read_from_file<T: ByteOrder>(file: File) -> XrfResult<Self> {
-    let chunks: Vec<ChunkReader> = ChunkReader::from_file(file)?.read_children()?;
-
-    Self::read_from_chunks::<T>(&chunks)
+    Self::read_from_chunk::<T, _>(&mut ChunkReader::from_file(file)?)
   }
 
-  pub fn read_from_chunks<T: ByteOrder>(chunks: &[ChunkReader]) -> XrfResult<Self> {
+  /// Reads from a chunk reader over any data source.
+  ///
+  /// The route an archived omf takes: a volume holds no file to slice, only bytes.
+  pub fn read_from_chunk<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
+    let chunks: Vec<ChunkReader<D>> = reader.read_children()?;
+
+    Self::read_from_chunks::<T, _>(&chunks)
+  }
+
+  pub fn read_from_chunks<T: ByteOrder, D: ChunkDataSource>(chunks: &[ChunkReader<D>]) -> XrfResult<Self> {
     assert_equal(chunks.len(), 2, "Unexpected chunks count in omf file, expected 2")?;
 
     let parameters: OmfParametersChunk = find_required_chunk_by_id(chunks, OmfParametersChunk::CHUNK_ID)?
@@ -214,7 +221,7 @@ mod tests {
 
     let file: FileSlice = open_generated_test_resource_as_slice(&filename)?;
     let chunks: Vec<ChunkReader> = ChunkReader::from_slice(file)?.read_children()?;
-    let read: OmfFile = OmfFile::read_from_chunks::<XRayByteOrder>(&chunks)?;
+    let read: OmfFile = OmfFile::read_from_chunks::<XRayByteOrder, _>(&chunks)?;
 
     assert_eq!(read.parameters.version, original.parameters.version);
     assert_eq!(read.parameters.parts, original.parameters.parts);
@@ -241,7 +248,7 @@ mod tests {
     let chunks: Vec<ChunkReader> = Vec::new();
 
     assert!(
-      OmfFile::read_from_chunks::<XRayByteOrder>(&chunks).is_err(),
+      OmfFile::read_from_chunks::<XRayByteOrder, _>(&chunks).is_err(),
       "Expect read to reject an unexpected OMF chunks count"
     );
   }

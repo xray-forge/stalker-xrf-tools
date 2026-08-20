@@ -1,4 +1,4 @@
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::time::{Duration, Instant};
 
 use rayon::prelude::*;
@@ -21,9 +21,10 @@ impl GamedataProject {
     let started_at: Instant = Instant::now();
 
     let texture_paths: Vec<String> = self
-      .assets
-      .with_type(AssetType::Dds)
-      .map(|asset| asset.logical_path().to_string())
+      .vfs
+      .entries_of_type(&self.scope, AssetType::Dds)
+      .into_iter()
+      .map(|location| location.logical_path().to_string())
       .collect();
 
     let checked_textures_count: u32 = u32::try_from(texture_paths.len())
@@ -34,38 +35,25 @@ impl GamedataProject {
       .filter_map(|relative_path| {
         xrf_output::verbose!(options.output, "Verify texture: {relative_path}");
 
-        let Some(path) = self.assets.absolute_path(relative_path).ok().flatten() else {
-          xrf_output::info!(options.output, "Texture path not found: {relative_path}");
+        let path: &String = relative_path;
 
-          return Some(GamedataFindingFactory::for_asset(
-            GamedataVerificationRule::TexturesPath,
-            Path::new(relative_path),
-            "Texture path was not found in gamedata roots",
-          ));
-        };
-
-        match self.verify_texture_by_path(options, &path) {
+        match self.verify_texture_by_path(options, path) {
           Ok(true) => None,
           Ok(false) => {
-            xrf_output::info!(options.output, "Texture is not valid: {}", path.display());
+            xrf_output::info!(options.output, "Texture is not valid: {}", path);
 
             Some(GamedataFindingFactory::for_asset(
               GamedataVerificationRule::TexturesValidation,
-              &path,
+              path,
               "Texture uses an unsupported format",
             ))
           }
           Err(error) => {
-            xrf_output::info!(
-              options.output,
-              "Texture verification failed: {} - {}",
-              path.display(),
-              error
-            );
+            xrf_output::info!(options.output, "Texture verification failed: {} - {}", path, error);
 
             Some(GamedataFindingFactory::for_asset(
               GamedataVerificationRule::TexturesRead,
-              &path,
+              path,
               error.to_string(),
             ))
           }
@@ -118,17 +106,19 @@ impl GamedataProject {
   /// Returns the findings and how many descriptors declared a bump at all.
   fn verify_texture_bumps(&self, options: &GamedataProjectVerifyOptions) -> XrfResult<(Vec<Finding>, u32)> {
     let descriptor_paths: Vec<String> = self
-      .assets
-      .with_type(AssetType::Thm)
-      .map(|asset| asset.logical_path().to_string())
+      .vfs
+      .entries_of_type(&self.scope, AssetType::Thm)
+      .into_iter()
+      .map(|location| location.logical_path().to_string())
       .collect();
 
     let declarations: Vec<(String, String)> = descriptor_paths
       .par_iter()
       .filter_map(|relative_path| {
-        let path: PathBuf = self.assets.absolute_path(relative_path).ok().flatten()?;
-
-        match ThmFile::read_from_path::<XRayByteOrder, _>(&path) {
+        match self
+          .read_asset_chunks(relative_path)
+          .and_then(|mut chunks| ThmFile::read_from_chunk::<XRayByteOrder, _>(&mut chunks))
+        {
           Ok(descriptor) => descriptor
             .used_bump_name()
             .map(|bump_name| (relative_path.clone(), bump_name.to_owned())),
@@ -152,7 +142,7 @@ impl GamedataProject {
     let findings: Vec<Finding> = declarations
       .par_iter()
       .filter_map(|(relative_path, bump_name)| {
-        if self.assets.dds_texture(bump_name).ok().flatten().is_some() {
+        if self.vfs.dds_texture(&self.scope, bump_name).ok().flatten().is_some() {
           return None;
         }
 
@@ -172,7 +162,14 @@ impl GamedataProject {
     Ok((findings, checked_bumps_count))
   }
 
-  pub(crate) fn verify_texture_by_path(&self, _options: &GamedataProjectVerifyOptions, path: &Path) -> XrfResult<bool> {
-    Ok(DdsFile::read_from_path(path)?.is_xray_compatible())
+  /// Whether one texture reads as an X-Ray compatible DDS, addressed by its logical path.
+  ///
+  /// Reads through the VFS, so an archived texture is inspected rather than skipped.
+  pub(crate) fn verify_texture_by_path(
+    &self,
+    _options: &GamedataProjectVerifyOptions,
+    logical_path: &str,
+  ) -> XrfResult<bool> {
+    Ok(DdsFile::read_from_bytes(&self.read_asset(logical_path)?)?.is_xray_compatible())
   }
 }

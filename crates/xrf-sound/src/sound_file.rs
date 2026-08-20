@@ -43,6 +43,14 @@ impl SoundFile {
     Self::read_from_path_with_strictness(path, true)
   }
 
+  /// Read and fully decode a sound held in memory.
+  ///
+  /// The strict counterpart of [`Self::read_from_bytes`], for an archived sound: a volume entry has no file to open.
+  pub fn read_strictly_from_bytes(bytes: &[u8]) -> XrfResult<Self> {
+    read_xrf_sound_from(Cursor::new(bytes), true)
+      .map_err(|error| XrfError::new_verify_error(format!("Failed to read sound from memory: {error}")))
+  }
+
   fn read_from_path_with_strictness<P>(path: P, is_strict: bool) -> XrfResult<Self>
   where
     P: AsRef<Path>,
