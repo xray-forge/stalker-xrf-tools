@@ -1,4 +1,3 @@
-use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::ffi::OsString;
 use std::path::{Path, PathBuf};
@@ -14,7 +13,7 @@ use crate::archive::reader::ArchiveReader;
 
 // todo: Add reading from fsgame.ltx file.
 #[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
-#[derive(Clone, Serialize)]
+#[derive(Clone, Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ArchiveProject {
   pub archives: Vec<ArchiveDescriptor>,
@@ -112,27 +111,24 @@ impl ArchiveProject {
   }
 
   /// Sort archives list to maintain overriding of files in a correct way.
-  /// Patches are exceptional case and should override all the files.
+  /// Patches are exceptional case and should override all the files, so they sort last and win the name-table merge.
   fn sort_archives(archives: &mut [ArchiveDescriptor]) {
     archives.sort_by(|first, second| {
-      let first: &str = first.path.to_str().unwrap();
-      let second: &str = second.path.to_str().unwrap();
-
-      if first.contains("patches") {
-        if second.contains("patches") {
-          first.cmp(second)
-        } else {
-          Ordering::Greater
-        }
-      } else {
-        // Handle second path:
-        if second.contains("patches") {
-          Ordering::Less
-        } else {
-          first.cmp(second)
-        }
-      }
+      Self::is_patch_volume(&first.path)
+        .cmp(&Self::is_patch_volume(&second.path))
+        .then_with(|| first.path.cmp(&second.path))
     });
+  }
+
+  /// Whether a volume sits inside a `patches` directory.
+  ///
+  /// Matched as a path component rather than a substring, so a directory merely containing the word — `mypatches`, a
+  /// user folder named `patches_backup` — does not get patch priority. Component comparison also works for non-UTF-8
+  /// paths, where the previous string conversion panicked.
+  fn is_patch_volume(path: &Path) -> bool {
+    path
+      .components()
+      .any(|component| component.as_os_str().eq_ignore_ascii_case("patches"))
   }
 
   fn root_from_archives(archives: &[ArchiveDescriptor]) -> PathBuf {
@@ -176,6 +172,39 @@ mod tests {
   use crate::archive::archive_descriptor::ArchiveDescriptor;
 
   use super::ArchiveProject;
+
+  #[test]
+  fn patches_sort_last_by_component_rather_than_by_substring() {
+    // Later wins the name-table merge, so `patches` must sort last — and only a real `patches` directory counts,
+    // not a name that merely contains the word.
+    let mut archives = [
+      archive("/game/db/patches/xpatch_1.db"),
+      archive("/game/db/mypatches_mod/data.db0"),
+      archive("/game/db/configs.db0"),
+    ];
+
+    ArchiveProject::sort_archives(&mut archives);
+
+    let order: Vec<&str> = archives.iter().map(|it| it.path.to_str().expect("utf-8")).collect();
+
+    assert_eq!(
+      order,
+      vec![
+        "/game/db/configs.db0",
+        "/game/db/mypatches_mod/data.db0",
+        "/game/db/patches/xpatch_1.db",
+      ]
+    );
+  }
+
+  #[test]
+  fn recognizes_volume_extensions_without_case() {
+    assert!(ArchiveDescriptor::is_valid_db_path(&Path::new("game.db0")));
+    assert!(ArchiveDescriptor::is_valid_db_path(&Path::new("GAME.DB0")));
+    assert!(ArchiveDescriptor::is_valid_db_path(&Path::new("mod.xdb1")));
+    assert!(!ArchiveDescriptor::is_valid_db_path(&Path::new("readme.txt")));
+    assert!(!ArchiveDescriptor::is_valid_db_path(&Path::new("noextension")));
+  }
 
   #[test]
   fn project_root_is_the_common_parent_of_all_archives() {

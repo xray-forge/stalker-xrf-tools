@@ -195,10 +195,11 @@ impl XrayVfs {
       .collect()
   }
 
-  /// Returns winning entries in scope whose logical path ends with `suffix`.
+  /// Returns winning entries in scope whose logical path ends with `suffix` on a component boundary.
   ///
   /// For assets named by convention rather than by extension alone — `particles.xr` libraries, a level's `level.spawn` — where
-  /// the tail of the path is the identity and no kind describes it.
+  /// the tail of the path is the identity and no kind describes it. The boundary matters: a suffix of `particles.xr`
+  /// names that file anywhere in the tree, and must not also match a neighbour named `old_particles.xr`.
   ///
   /// # Errors
   ///
@@ -210,7 +211,13 @@ impl XrayVfs {
       self
         .entries(scope)
         .into_iter()
-        .filter(|entry| entry.logical_path().as_str().ends_with(&suffix))
+        .filter(|entry| {
+          entry
+            .logical_path()
+            .as_str()
+            .strip_suffix(&suffix)
+            .is_some_and(|rest| rest.is_empty() || rest.ends_with('\\'))
+        })
         .collect(),
     )
   }

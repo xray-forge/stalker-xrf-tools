@@ -206,3 +206,31 @@ fn enumeration_dedupes_across_mounts_and_reports_shadowed_copies_separately() {
   assert_eq!(vfs.entries(&scope).len(), 2, "winners only");
   assert_eq!(vfs.entries_all(&scope).len(), 3, "including the shadowed copy");
 }
+
+#[test]
+fn suffix_enumeration_matches_on_component_boundaries() {
+  // `particles.xr` names that file anywhere in the tree; a neighbour that merely ends with the same characters is a
+  // different asset and must not be counted as a second library.
+  let mut vfs: XrayVfs = XrayVfs::new();
+
+  vfs
+    .mount(
+      "",
+      Box::new(FakeArchiveSource::new(
+        "suffixes",
+        &["particles.xr", "mods\\particles.xr", "mods\\old_particles.xr"],
+      )),
+    )
+    .expect("mounts");
+
+  let mut found: Vec<String> = vfs
+    .entries_with_suffix(&XrayLookupScope::all(), "particles.xr")
+    .expect("suffix is a valid fragment")
+    .into_iter()
+    .map(|entry| entry.logical_path().to_string())
+    .collect();
+
+  found.sort();
+
+  assert_eq!(found, vec!["mods\\particles.xr", "particles.xr"]);
+}

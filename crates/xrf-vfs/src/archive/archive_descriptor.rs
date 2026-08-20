@@ -6,7 +6,7 @@ use serde::Serialize;
 use crate::archive::archive_file_descriptor::ArchiveFileDescriptor;
 
 #[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
-#[derive(Clone, Serialize)]
+#[derive(Clone, Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ArchiveDescriptor {
   pub created_at: Option<u64>,
@@ -17,15 +17,20 @@ pub struct ArchiveDescriptor {
 }
 
 impl ArchiveDescriptor {
+  /// Whether a path names an archive volume by extension, matching `.db*` and `.xdb*` without case.
+  ///
+  /// Case-insensitive to agree with the mount planner's volume detection; a non-UTF-8 extension is not a volume rather
+  /// than a panic.
   pub fn is_valid_db_path<P: AsRef<Path>>(path: &P) -> bool {
-    match path.as_ref().extension() {
-      None => false,
-      Some(ext) => {
-        let ext: &str = ext.to_str().unwrap();
+    path
+      .as_ref()
+      .extension()
+      .and_then(|extension| extension.to_str())
+      .is_some_and(|extension| {
+        let extension: String = extension.to_ascii_lowercase();
 
-        ext.starts_with("db") || ext.starts_with("xdb")
-      }
-    }
+        extension.starts_with("db") || extension.starts_with("xdb")
+      })
   }
 }
 

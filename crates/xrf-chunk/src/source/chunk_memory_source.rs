@@ -21,7 +21,9 @@ impl InMemoryChunkDataSource {
   /// The seam for reading assets out of a mounted VFS, where the read already produced an owned buffer per entry and a
   /// copy would double the allocation of every archived mesh and level read.
   pub fn from_vec(buf: Vec<u8>) -> Self {
-    Self { cursor: Cursor::new(buf) }
+    Self {
+      cursor: Cursor::new(buf),
+    }
   }
 
   /// Count of bytes left to read from the current cursor position.

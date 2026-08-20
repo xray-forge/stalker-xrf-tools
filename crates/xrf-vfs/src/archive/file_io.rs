@@ -10,13 +10,28 @@ use crate::archive::archive_file_descriptor::ArchiveFileDescriptor;
 /// Bytes held in memory at a time while copying a stored entry out.
 const COPY_BUFFER_SIZE: usize = 256 * 1024;
 
+/// Allocates a buffer for a size a volume declared, failing instead of aborting when it cannot be satisfied.
+///
+/// Sizes read out of an archive are untrusted: a corrupt descriptor can claim gigabytes, and a plain `vec![0; n]` would
+/// abort the whole process on allocation failure. `try_reserve` turns that into an error the caller reports.
+pub(crate) fn allocate_declared(size: usize, what: &str) -> XrfResult<Vec<u8>> {
+  let mut buffer: Vec<u8> = Vec::new();
+
+  buffer
+    .try_reserve_exact(size)
+    .map_err(|error| XrfError::new_read_error(format!("cannot allocate {size} bytes for {what}: {error}")))?;
+  buffer.resize(size, 0u8);
+
+  Ok(buffer)
+}
+
 /// Read one archived entry into memory, decompressing it when it is stored compressed.
 ///
 /// The caller holds the whole entry, so a caller that cannot afford to should use
 /// [`write_descriptor_contents`] instead, which streams a stored entry straight through.
 pub(crate) fn read_descriptor_bytes(descriptor: &ArchiveFileDescriptor) -> XrfResult<Vec<u8>> {
   let mut source: File = open_at_descriptor(descriptor)?;
-  let mut raw: Vec<u8> = vec![0u8; descriptor.size_compressed as usize];
+  let mut raw: Vec<u8> = allocate_declared(descriptor.size_compressed as usize, "an archived entry")?;
 
   source.read_exact(raw.as_mut_slice())?;
 
@@ -36,7 +51,7 @@ pub fn write_descriptor_contents(target: &mut File, descriptor: &ArchiveFileDesc
   let mut source: File = open_at_descriptor(descriptor)?;
 
   if descriptor.size_real != descriptor.size_compressed {
-    let mut raw: Vec<u8> = vec![0u8; descriptor.size_compressed as usize];
+    let mut raw: Vec<u8> = allocate_declared(descriptor.size_compressed as usize, "an archived entry")?;
 
     source.read_exact(raw.as_mut_slice())?;
     target.write_all(&decompress_descriptor(&raw, descriptor)?)?;
@@ -52,11 +67,11 @@ pub fn write_descriptor_contents(target: &mut File, descriptor: &ArchiveFileDesc
       assert(read <= remaining, "Must not read more bytes than remaining")?;
       assert_not_equal(read, 0, "Unexpected End Of File")?;
 
-      let written: usize = target.write(&buffer[..read])?;
+      // `write_all`, not `write`: a short write would otherwise drop the tail of this block silently, and the
+      // `set_len` below would pad the file to the right length, hiding the corruption.
+      target.write_all(&buffer[..read])?;
 
       remaining -= read;
-
-      assert_not_equal(written, 0, "Unable to write bytes")?;
     }
   }
 
@@ -68,8 +83,19 @@ pub fn write_descriptor_contents(target: &mut File, descriptor: &ArchiveFileDesc
 /// Open the volume holding an entry, positioned at its payload.
 fn open_at_descriptor(descriptor: &ArchiveFileDescriptor) -> XrfResult<File> {
   let mut source: File = File::open(descriptor.source.as_path())?;
+  let volume_size: u64 = source.metadata()?.len();
+  let end: u64 = u64::from(descriptor.offset) + u64::from(descriptor.size_compressed);
 
-  source.seek(SeekFrom::Start(descriptor.offset as u64))?;
+  // A descriptor pointing past its volume is corrupt; failing here bounds every later read and allocation by
+  // what the volume can actually hold.
+  if end > volume_size {
+    return Err(XrfError::new_read_error(format!(
+      "entry '{}' declares bytes {}..{end}, beyond its volume's {volume_size}-byte end",
+      descriptor.name, descriptor.offset
+    )));
+  }
+
+  source.seek(SeekFrom::Start(u64::from(descriptor.offset)))?;
 
   Ok(source)
 }
@@ -79,7 +105,7 @@ fn open_at_descriptor(descriptor: &ArchiveFileDescriptor) -> XrfResult<File> {
 /// The decoder is bounds checked and writes into a buffer sized from the descriptor, so a corrupt entry
 /// is an error rather than a read past the end of it.
 fn decompress_descriptor(raw: &[u8], descriptor: &ArchiveFileDescriptor) -> XrfResult<Vec<u8>> {
-  let mut decompressed: Vec<u8> = vec![0u8; descriptor.size_real as usize];
+  let mut decompressed: Vec<u8> = allocate_declared(descriptor.size_real as usize, "a decompressed archive entry")?;
 
   let written: usize = lzokay::decompress::decompress(raw, &mut decompressed).map_err(|error| {
     XrfError::new_read_error(format!(
