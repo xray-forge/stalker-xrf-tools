@@ -48,8 +48,15 @@ impl ChunkReader<FileSlice> {
 
 impl ChunkReader<InMemoryChunkDataSource> {
   /// Creates a reader over a copied in-memory byte buffer.
+  ///
+  /// Prefer [`Self::from_vec`] when the bytes are already owned — this copies them.
   pub fn from_bytes(buf: &[u8]) -> XrfResult<Self> {
     Self::from_source(InMemoryChunkDataSource::from_buffer(buf))
+  }
+
+  /// Creates a reader over owned bytes without copying them.
+  pub fn from_vec(buf: Vec<u8>) -> XrfResult<Self> {
+    Self::from_source(InMemoryChunkDataSource::from_vec(buf))
   }
 
   /// Creates a reader over an in-memory chunk data source.

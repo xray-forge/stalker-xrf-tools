@@ -10,10 +10,18 @@ pub struct InMemoryChunkDataSource {
 
 impl InMemoryChunkDataSource {
   /// Copies `buf` into a seekable in-memory source.
+  ///
+  /// Prefer [`Self::from_vec`] when the bytes are already owned — this copies them.
   pub fn from_buffer(buf: &[u8]) -> Self {
-    Self {
-      cursor: Cursor::new(buf.to_vec()),
-    }
+    Self::from_vec(buf.to_vec())
+  }
+
+  /// Wraps owned bytes without copying.
+  ///
+  /// The seam for reading assets out of a mounted VFS, where the read already produced an owned buffer per entry and a
+  /// copy would double the allocation of every archived mesh and level read.
+  pub fn from_vec(buf: Vec<u8>) -> Self {
+    Self { cursor: Cursor::new(buf) }
   }
 
   /// Count of bytes left to read from the current cursor position.
