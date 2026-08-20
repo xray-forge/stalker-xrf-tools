@@ -239,6 +239,21 @@ fn read_file_as_string_accepts_a_compressed_entry() {
 }
 
 #[test]
+fn read_file_as_string_decodes_windows_1251_text() {
+  // Archive text is Windows-1251; these bytes spell `Прицел`, which a lossy UTF-8 read used to turn into replacement
+  // characters in the archive explorer.
+  const CYRILLIC_W1251: &[u8] = b"[wpn]\r\nname = \xCF\xF0\xE8\xF6\xE5\xEB\r\n";
+
+  let directory: PathBuf = create_temporary_directory("w1251-string");
+  let project: ArchiveProject = create_project(&directory, &[Entry::stored("configs\\weapon.ltx", CYRILLIC_W1251)]);
+
+  let result = project.read_file_as_string("configs\\weapon.ltx").expect("read");
+
+  assert_eq!(result.content, "[wpn]\r\nname = Прицел\r\n");
+  assert!(!result.content.contains('\u{FFFD}'), "no replacement characters");
+}
+
+#[test]
 fn extract_file_writes_a_compressed_entry_decompressed() {
   let directory: PathBuf = create_temporary_directory("compressed-extract");
   let project: ArchiveProject = create_project(&directory, &[Entry::compressed("configs\\system.ltx", COMPRESSIBLE)]);

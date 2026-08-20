@@ -1,4 +1,5 @@
 use xrf_error::{XrfError, XrfResult};
+use xrf_utils::encode_w1251_bytes_to_string;
 
 use crate::ArchiveProject;
 use crate::archive::archive_file_descriptor::ArchiveFileDescriptor;
@@ -45,9 +46,11 @@ impl ArchiveProject {
 
     let bytes: Vec<u8> = self.read_file_bytes(filename)?;
 
+    // Archive text is Windows-1251, like every engine text format: a lossy UTF-8 read here turned Cyrillic configs
+    // into replacement characters in the archive explorer.
     Ok(ProjectReadResult::new(
       filename,
-      &String::from_utf8_lossy(&bytes),
+      &encode_w1251_bytes_to_string(&bytes)?,
       descriptor.size_real,
     ))
   }

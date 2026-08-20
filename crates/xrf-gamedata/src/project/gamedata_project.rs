@@ -61,6 +61,9 @@ impl GamedataProject {
     let scope: XrayLookupScope = XrayLookupScope::all();
 
     // The gate is what the project resolves, not what sits on disk: an installation keeps its configs inside `db\configs`.
+    // todo: The ignore list is an inspection filter, so applying it to the vfs before this gate lets
+    //   ignoring any prefix holding system.ltx abort every check, including ones that never read
+    //   configs. Resolve the gate against an unfiltered view, or filter only what checks enumerate.
     if vfs.find(&scope, SYSTEM_LTX_LOGICAL_PATH)?.is_none() {
       return Err(
         io::Error::new(
@@ -126,7 +129,7 @@ impl GamedataProject {
   ///
   /// Returns an error when the asset cannot be read or holds no chunk.
   pub(crate) fn read_asset_chunks(&self, logical_path: &str) -> XrfResult<ChunkReader<InMemoryChunkDataSource>> {
-    ChunkReader::from_bytes(&self.read_asset(logical_path)?)
+    ChunkReader::from_vec(self.read_asset(logical_path)?)
   }
 
   /// Files any mount holds but cannot reach, because another file in the same mount claims their engine identity.
