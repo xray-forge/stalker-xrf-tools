@@ -18,7 +18,7 @@ impl GamedataProject {
     let started_at: Instant = Instant::now();
     // Enumerated through the VFS, so an installation's archived libraries are verified too.
     let particle_paths: Vec<String> = self
-      .vfs
+      .vfs()
       .entries_with_suffix(&self.scope, "particles.xr")?
       .into_iter()
       .map(|location| location.logical_path().to_string())
@@ -96,8 +96,8 @@ impl GamedataProject {
 
       for texture_relative_path in particle.sprite.texture_name.split(",") {
         if let Some(texture) = self
-          .assets
-          .dds_texture(texture_relative_path)
+          .vfs()
+          .dds_texture(self.scope(), texture_relative_path)
           .ok()
           .flatten()
           .map(|asset| asset.logical_path().to_string())

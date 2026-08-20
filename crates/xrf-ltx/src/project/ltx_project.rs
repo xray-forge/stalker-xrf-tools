@@ -270,13 +270,19 @@ impl LtxProject {
     Ltx::read_from_vfs_full(&self.vfs, &self.scope, logical_path.as_str())
   }
 
-  /// The engine identity of `system.ltx`, which is what reads it.
+  /// The engine identity of `system.ltx`, within this project's scope.
+  ///
+  /// A project mounted at a configs directory answers `system.ltx`; one scoped to `configs` inside a wider VFS answers
+  /// `configs\system.ltx`. The path is relative to what the project can see, so the scope's prefix belongs in it.
   ///
   /// # Errors
   ///
-  /// Returns an error only if the constant name stops being a valid logical path.
+  /// Returns an error only if the resulting name stops being a valid logical path.
   pub fn system_ltx_path(&self) -> XrfResult<XrayPath> {
-    XrayPath::new(SYSTEM_LTX_FILENAME)
+    match self.scope.prefix() {
+      Some(prefix) => XrayPath::new(prefix)?.join(SYSTEM_LTX_FILENAME),
+      None => XrayPath::new(SYSTEM_LTX_FILENAME),
+    }
   }
 
   /// The user-facing path of `system.ltx`, for findings that name it.

@@ -1,5 +1,5 @@
 use std::collections::BTreeMap;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 use rayon::prelude::*;
 use xrf_db::{OgfFile, OmfFile, XRayByteOrder};
@@ -86,11 +86,12 @@ impl<'a> HudMotionCollisionsVerifier<'a> {
       return Vec::new();
     };
 
+    // Resolved and read through the VFS, so an archived visual and its animation banks are checked too.
     let Ok(Some(visual_path)) = self
       .project
-      .assets
-      .ogf(visual)
-      .map(|it| it.map(|asset| asset.absolute_path()))
+      .vfs()
+      .ogf(self.project.scope(), visual)
+      .map(|it| it.map(|location| location.logical_path().to_string()))
     else {
       return Vec::new();
     };
@@ -103,14 +104,16 @@ impl<'a> HudMotionCollisionsVerifier<'a> {
     let mut owners: BTreeMap<String, Vec<String>> = BTreeMap::new();
 
     for bank in &banks {
-      let Ok(motions) = OmfFile::read_motions_from_path::<XRayByteOrder, &PathBuf>(bank) else {
+      let Ok(motions) = self
+        .project
+        .read_asset_chunks(bank)
+        .and_then(|mut chunks| OmfFile::read_motions_from_chunk::<XRayByteOrder, _>(&mut chunks))
+      else {
         continue;
       };
 
-      let bank_name: String = bank
-        .file_name()
-        .map(|it| it.to_string_lossy().into_owned())
-        .unwrap_or_else(|| bank.display().to_string());
+      // The bank's file name, taken from the logical path: reports name the omf, not its whole path.
+      let bank_name: String = bank.rsplit('\\').next().unwrap_or(bank).to_string();
 
       for motion in motions {
         owners.entry(motion).or_default().push(bank_name.clone());
@@ -133,13 +136,18 @@ impl<'a> HudMotionCollisionsVerifier<'a> {
   }
 
   /// Resolve omf assets linked by the model motion refs, wildcards included.
-  fn read_motion_refs<P: AsRef<Path>>(&self, path: &P) -> XrfResult<Vec<PathBuf>> {
-    let mut assets: Vec<PathBuf> = Vec::new();
+  fn read_motion_refs(&self, path: &str) -> XrfResult<Vec<String>> {
+    let mut assets: Vec<String> = Vec::new();
+    let mut chunks = self.project.read_asset_chunks(path)?;
 
-    for motion_ref in &OgfFile::read_motion_refs_from_path::<XRayByteOrder, P>(path)? {
-      for asset in self.project.assets.omfs(motion_ref)? {
-        if asset.is_type(AssetType::Omf) {
-          assets.push(asset.absolute_path());
+    for motion_ref in &OgfFile::read_motion_refs_from_chunk::<XRayByteOrder, _>(&mut chunks)? {
+      for location in self
+        .project
+        .vfs()
+        .resolve_all(self.project.scope(), AssetType::Omf, motion_ref)?
+      {
+        if location.is_type(AssetType::Omf) {
+          assets.push(location.logical_path().to_string());
         }
       }
     }

@@ -27,7 +27,7 @@ impl<'a> SoundsVerifier<'a> {
     // directory.
     let sound_paths: Vec<String> = self
       .project
-      .vfs
+      .vfs()
       .entries_of_type(&self.project.scope, AssetType::Ogg)
       .into_iter()
       .map(|location| location.logical_path().to_string())

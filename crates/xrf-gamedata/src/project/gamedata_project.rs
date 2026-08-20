@@ -5,27 +5,44 @@ use std::path::{Path, PathBuf};
 use xrf_chunk::{ChunkReader, InMemoryChunkDataSource};
 use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{LtxProject, LtxProjectOptions};
-use xrf_vfs::{DirectoryAssetIndex, XrayAssetIndex, XrayMountPlan, XrayPathCollision, XrayScope, XrayVfs, open_plan};
+use xrf_vfs::{XrayMountMode, XrayPathCollision, XrayScope, XrayVfs, open_plan};
 
 use crate::project::gamedata_project_options::GamedataProjectReadOptions;
 
+/// Logical directory holding a project's configs.
+const CONFIGS_DIRECTORY: &str = "configs";
+
+/// Root config the engine loads, and the one asset whose absence means this is not a usable project.
+const SYSTEM_LTX_LOGICAL_PATH: &str = "configs\\system.ltx";
+
 pub struct GamedataProject {
-  pub(crate) assets: XrayAssetIndex,
-  pub(crate) ltx_project: LtxProject,
-  /// Mounted sources the project resolves through.
+  /// Owns the mounted sources, since a config project needs them for the same reasons a check does.
   ///
-  /// Present alongside `assets` while checks migrate onto it one at a time. The index only ever sees one loose directory, so
-  /// a check still reading through it cannot see an installation's archives; the VFS is what makes that possible.
-  pub(crate) vfs: XrayVfs,
+  /// The project resolves assets through the same mounts under a wider scope: `ltx_project` narrows to `configs`, while an
+  /// asset lookup spans the whole tree. One VFS, two scopes, rather than mounting an installation twice.
+  pub(crate) ltx_project: LtxProject,
   pub(crate) scope: XrayScope,
+  /// Location shown in output, which for an installation is the game directory rather than any one mount.
+  pub(crate) root: PathBuf,
 }
 
 impl GamedataProject {
   pub fn root(&self) -> &Path {
-    self.assets.root()
+    &self.root
   }
 
-  pub fn open(options: &GamedataProjectReadOptions) -> XrfResult<Self> {
+  /// Opens a project at a path, reading it the way `mode` says.
+  ///
+  /// A gamedata tree and a game installation are both accepted: an installation mounts its `fsgame.ltx` sources, so the
+  /// checks see assets inside `db\` volumes. Every check resolves and reads through the VFS, which is what makes that
+  /// honest — while any of them still read a single loose directory, an installation would have reported success over
+  /// assets it never looked at.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when the path is not a directory, when the mode cannot plan it, or when the project holds no
+  /// `configs\system.ltx`.
+  pub fn open_with_mode(mode: XrayMountMode, options: &GamedataProjectReadOptions) -> XrfResult<Self> {
     if !Self::is_valid_gamedata_dir(&options.root) {
       return Err(
         io::Error::new(
@@ -39,39 +56,50 @@ impl GamedataProject {
       );
     }
 
-    let configs: PathBuf = options.root.join("configs");
+    let vfs: XrayVfs = open_plan(&mode.plan(&options.root)?.ignoring(&options.ignored)?)?;
+    let scope: XrayScope = XrayScope::all();
 
-    if !Self::is_valid_configs_dir(&configs) {
+    // The gate is what the project resolves, not what sits on disk: an installation keeps its configs inside `db\configs`.
+    if vfs.find(&scope, SYSTEM_LTX_LOGICAL_PATH)?.is_none() {
       return Err(
         io::Error::new(
           ErrorKind::NotFound,
           format!(
-            "Invalid gamedata configs directory provided: {}, existing directory with system.ltx is required",
-            configs.display()
+            "Invalid gamedata provided: {}, nothing resolves '{SYSTEM_LTX_LOGICAL_PATH}'",
+            options.root.display()
           ),
         )
         .into(),
       );
     }
 
+    let ltx_project: LtxProject = LtxProject::open_at_scope_opt(
+      // The configs directory, not the game root: this project *is* the config tree, and callers join onto its root.
+      options.root.join(CONFIGS_DIRECTORY),
+      vfs,
+      scope.clone().with_prefix(CONFIGS_DIRECTORY)?,
+      LtxProjectOptions {
+        is_with_schemes_check: true,
+        is_strict_check: false,
+      },
+    )
+    .map_err(|error| XrfError::new_asset_error(format!("Failed to open gamedata project ltx configs: {}", error)))?;
+
     Ok(Self {
-      assets: XrayAssetIndex::new(DirectoryAssetIndex::read(&options.root)?, &options.ignored)?,
-      ltx_project: LtxProject::open_at_path_opt(
-        &configs,
-        LtxProjectOptions {
-          is_with_schemes_check: true,
-          is_strict_check: false,
-        },
-      )
-      .map_err(|error| XrfError::new_asset_error(format!("Failed to open gamedata project ltx configs: {}", error)))?,
-      scope: XrayScope::all(),
-      vfs: open_plan(&XrayMountPlan::root(&options.root)?.ignoring(&options.ignored)?)?,
+      ltx_project,
+      root: options.root.clone(),
+      scope,
     })
   }
 
-  /// Mounted sources this project resolves through.
+  /// Opens a project, treating the path as an installation only when it declares one.
+  pub fn open(options: &GamedataProjectReadOptions) -> XrfResult<Self> {
+    Self::open_with_mode(XrayMountMode::Auto, options)
+  }
+
+  /// Mounted sources this project resolves through, owned by its config project.
   pub(crate) fn vfs(&self) -> &XrayVfs {
-    &self.vfs
+    self.ltx_project.vfs()
   }
 
   /// Mounts and subtree the project's operations apply to.
@@ -85,7 +113,7 @@ impl GamedataProject {
   ///
   /// Returns an error when nothing in scope holds the path, or the source cannot read it.
   pub(crate) fn read_asset(&self, logical_path: &str) -> XrfResult<Vec<u8>> {
-    self.vfs.read(&self.scope, logical_path)
+    self.vfs().read(&self.scope, logical_path)
   }
 
   /// Opens a chunk reader over an asset's bytes.
@@ -104,16 +132,12 @@ impl GamedataProject {
   ///
   /// Reported rather than refused at open time: a tool has to be able to load a project and say what is wrong with it.
   pub fn collisions(&self) -> Vec<XrayPathCollision> {
-    self.vfs.collisions(&self.scope)
+    self.vfs().collisions(&self.scope)
   }
 }
 
 impl GamedataProject {
   pub fn is_valid_gamedata_dir<P: AsRef<Path>>(path: P) -> bool {
     path.as_ref().exists() && path.as_ref().is_dir()
-  }
-
-  pub fn is_valid_configs_dir<P: AsRef<Path>>(path: P) -> bool {
-    path.as_ref().exists() && path.as_ref().is_dir() && path.as_ref().join("system.ltx").exists()
   }
 }

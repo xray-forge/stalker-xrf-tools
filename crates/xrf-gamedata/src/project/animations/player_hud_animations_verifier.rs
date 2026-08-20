@@ -1,5 +1,5 @@
 use std::collections::HashSet;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 use rayon::prelude::*;
 use xrf_db::{OgfFile, OmfFile, XRayByteOrder};
@@ -81,20 +81,21 @@ impl<'a> PlayerHudAnimationsVerifier<'a> {
     let mut is_valid: bool = true;
     let mut hud_motions: HashSet<String> = HashSet::new();
 
+    // Resolved and read through the VFS, so an archived hands visual and its banks are checked too.
     if let Some(visual_path) = &section.get("visual").and_then(|it| {
       self
         .project
-        .assets
-        .ogf(it)
+        .vfs()
+        .ogf(self.project.scope(), it)
         .ok()
         .flatten()
-        .map(|asset| asset.absolute_path())
+        .map(|location| location.logical_path().to_string())
     }) {
       xrf_output::verbose!(
         self.options.output,
         "Read player hud motion refs - [{}] {}",
         section_name,
-        visual_path.display()
+        visual_path
       );
 
       match self.read_motion_refs(visual_path) {
@@ -102,19 +103,23 @@ impl<'a> PlayerHudAnimationsVerifier<'a> {
           xrf_output::verbose!(
             self.options.output,
             "Player hud ogf [{} contains {} linked omf files to check",
-            visual_path.display(),
+            visual_path,
             linked_visuals.len()
           );
 
           for linked_visual in &linked_visuals {
-            match OmfFile::read_motions_from_path::<XRayByteOrder, &PathBuf>(linked_visual) {
+            match self
+              .project
+              .read_asset_chunks(linked_visual)
+              .and_then(|mut chunks| OmfFile::read_motions_from_chunk::<XRayByteOrder, _>(&mut chunks))
+            {
               Ok(motions) => {
                 if motions.is_empty() {
                   xrf_output::error!(
                     self.options.output,
                     "No motions in visual: [{}] - {}",
                     section_name,
-                    linked_visual.display()
+                    linked_visual
                   );
 
                   is_valid = false;
@@ -129,7 +134,7 @@ impl<'a> PlayerHudAnimationsVerifier<'a> {
                   self.options.output,
                   "Failed to read linked visual: [{}] - {} - {}",
                   section_name,
-                  linked_visual.display(),
+                  linked_visual,
                   error
                 );
 
@@ -143,7 +148,7 @@ impl<'a> PlayerHudAnimationsVerifier<'a> {
             self.options.output,
             "Failed to read linked visuals: [{}] - {} - {}",
             section_name,
-            visual_path.display(),
+            visual_path,
             error
           );
 
@@ -227,14 +232,19 @@ impl<'a> PlayerHudAnimationsVerifier<'a> {
     Ok(is_valid)
   }
 
-  fn read_motion_refs<P: AsRef<Path>>(&self, path: &P) -> XrfResult<HashSet<PathBuf>> {
-    let motion_refs: Vec<String> = OgfFile::read_motion_refs_from_path::<XRayByteOrder, P>(path)?;
-    let mut assets: HashSet<PathBuf> = HashSet::new();
+  fn read_motion_refs(&self, path: &str) -> XrfResult<HashSet<String>> {
+    let mut chunks = self.project.read_asset_chunks(path)?;
+    let motion_refs: Vec<String> = OgfFile::read_motion_refs_from_chunk::<XRayByteOrder, _>(&mut chunks)?;
+    let mut assets: HashSet<String> = HashSet::new();
 
     for motion_ref in &motion_refs {
-      for asset in self.project.assets.omfs(motion_ref)? {
-        if asset.is_type(AssetType::Omf) {
-          assets.insert(asset.absolute_path());
+      for location in self
+        .project
+        .vfs()
+        .resolve_all(self.project.scope(), AssetType::Omf, motion_ref)?
+      {
+        if location.is_type(AssetType::Omf) {
+          assets.insert(location.logical_path().to_string());
         }
       }
     }

@@ -1,4 +1,4 @@
-use std::fs::File;
+use std::io::Cursor;
 use std::path::Path;
 use std::time::{Duration, Instant};
 
@@ -20,11 +20,10 @@ impl GamedataProject {
 
     let started_at: Instant = Instant::now();
     let script_paths: Vec<String> = self
-      .assets
-      .with_type(AssetType::Script)
-      .map(|asset| asset.logical_path().to_string())
-      .collect::<Vec<_>>()
+      .vfs()
+      .entries_of_type(self.scope(), AssetType::Script)
       .into_iter()
+      .map(|location| location.logical_path().to_string())
       .filter(|path| is_runtime_script(path))
       .collect();
 
@@ -36,7 +35,13 @@ impl GamedataProject {
       .filter_map(|relative_path| {
         xrf_output::verbose!(options.output, "Verify script: {relative_path}");
 
-        let Some(path) = self.assets.absolute_path(relative_path).ok().flatten() else {
+        let Some(path) = self
+          .vfs()
+          .find(self.scope(), relative_path)
+          .ok()
+          .flatten()
+          .map(|location| location.logical_path().to_string())
+        else {
           xrf_output::info!(options.output, "Script path not found: {relative_path}");
 
           return Some(GamedataFindingFactory::for_asset(
@@ -49,7 +54,7 @@ impl GamedataProject {
         match self.verify_script(options, &path) {
           Ok(true) => None,
           Ok(false) => {
-            xrf_output::info!(options.output, "Script is not valid: {}", path.display());
+            xrf_output::info!(options.output, "Script is not valid: {}", path);
 
             Some(GamedataFindingFactory::for_asset(
               GamedataVerificationRule::ScriptsSyntax,
@@ -100,10 +105,14 @@ impl GamedataProject {
     })
   }
 
-  pub fn verify_script(&self, _options: &GamedataProjectVerifyOptions, path: &Path) -> XrfResult<bool> {
-    let code: String = read_as_string_from_w1251_encoded(&mut File::open(path)?)?;
+  /// Parses one script, addressed by its logical path.
+  ///
+  /// Read through the VFS, so an archived script is parsed rather than reported missing.
+  pub fn verify_script(&self, _options: &GamedataProjectVerifyOptions, logical_path: &str) -> XrfResult<bool> {
+    let bytes: Vec<u8> = self.read_asset(logical_path)?;
+    let code: String = read_as_string_from_w1251_encoded(&mut Cursor::new(bytes))?;
 
-    verify_luajit_script(&code, path)?;
+    verify_luajit_script(&code, Path::new(logical_path))?;
 
     Ok(true)
   }

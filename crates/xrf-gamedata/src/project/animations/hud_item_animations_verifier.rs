@@ -153,7 +153,7 @@ impl<'a> HudItemAnimationsVerifier<'a> {
     // Resolved and read through the VFS, so a visual and its animations inside archive volumes are checked too.
     let Some(visual_path) = self
       .project
-      .vfs
+      .vfs()
       .ogf(&self.project.scope, visual)?
       .map(|location| location.logical_path().to_string())
     else {
@@ -195,7 +195,7 @@ impl<'a> HudItemAnimationsVerifier<'a> {
     for motion_ref in &motion_refs {
       for location in self
         .project
-        .vfs
+        .vfs()
         .resolve_all(&self.project.scope, AssetType::Omf, motion_ref)?
       {
         if location.is_type(AssetType::Omf) {

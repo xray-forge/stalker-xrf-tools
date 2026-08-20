@@ -88,7 +88,7 @@ impl<'a> SoundReferencesVerifier<'a> {
   ) {
     // Enumerated and read through the VFS, so an installation's archived UI XML is inspected too. Reported by the path a
     // person can act on, which for an archived entry is its logical path.
-    for location in self.project.vfs.entries(&self.project.scope) {
+    for location in self.project.vfs().entries(&self.project.scope) {
       let logical_path: &str = location.logical_path();
 
       if !logical_path.starts_with("configs\\") || !logical_path.ends_with(".xml") {
@@ -99,7 +99,7 @@ impl<'a> SoundReferencesVerifier<'a> {
         .physical_path()
         .unwrap_or_else(|| PathBuf::from(location.logical_path()));
 
-      let contents: Vec<u8> = match self.project.vfs.read(&self.project.scope, location.logical_path()) {
+      let contents: Vec<u8> = match self.project.vfs().read(&self.project.scope, location.logical_path()) {
         Ok(contents) => contents,
         Err(error) => {
           result.checked_references_count += 1;

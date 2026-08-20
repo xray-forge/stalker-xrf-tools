@@ -34,7 +34,7 @@ impl<'a> MeshAssetsVerifier<'a> {
     // Enumerated through the VFS, so an installation's archived meshes are verified too.
     let mesh_paths: Vec<String> = self
       .project
-      .vfs
+      .vfs()
       .entries_of_type(&self.project.scope, AssetType::Ogf)
       .into_iter()
       .map(|location| location.logical_path().to_string())
@@ -133,7 +133,7 @@ impl<'a> MeshAssetsVerifier<'a> {
       for motion_ref in &kinematics.motion_refs {
         let motion_paths: Vec<String> = self
           .project
-          .vfs
+          .vfs()
           .resolve_all(&self.project.scope, AssetType::Omf, motion_ref)?
           .into_iter()
           .map(|location| location.logical_path().to_string())
@@ -207,7 +207,7 @@ impl<'a> MeshAssetsVerifier<'a> {
     if let Some(texture) = &ogf.texture
       && self
         .project
-        .vfs
+        .vfs()
         .dds_texture(&self.project.scope, &texture.texture_name)
         .ok()
         .flatten()

@@ -40,21 +40,17 @@ mod tests {
   use std::path::PathBuf;
 
   use xrf_ltx::LtxProject;
-  use xrf_vfs::{DirectoryAssetIndex, XrayAssetIndex, XrayScope, XrayVfs};
+  use xrf_vfs::XrayScope;
 
   use super::GamedataProject;
   use crate::{GamedataProjectVerifyOptions, GamedataVerificationStatus, GamedataVerificationType};
 
+  /// A project with nothing mounted, for asserting which checks run rather than what they find.
   fn empty_project() -> GamedataProject {
     GamedataProject {
-      assets: XrayAssetIndex::new(
-        DirectoryAssetIndex::read(env!("CARGO_MANIFEST_DIR")).expect("read test assets"),
-        &[],
-      )
-      .expect("create test assets"),
       ltx_project: LtxProject::empty(PathBuf::new()),
+      root: PathBuf::new(),
       scope: XrayScope::all(),
-      vfs: XrayVfs::new(),
     }
   }
 

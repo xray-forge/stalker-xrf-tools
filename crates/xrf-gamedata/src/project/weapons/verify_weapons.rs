@@ -1,9 +1,9 @@
-use std::path::Path;
 use std::time::{Duration, Instant};
 
 use xrf_db::{OgfFile, OmfFile, XRayByteOrder};
 use xrf_error::XrfResult;
 use xrf_ltx::{LTX_SYMBOL_SCHEME, Ltx, Section};
+use xrf_vfs::XrayAssetType;
 use xrf_vfs::sound::ogg_logical_path;
 
 use crate::GamedataFindingFactory;
@@ -177,7 +177,7 @@ impl GamedataProject {
     // Resolved and read through the VFS, so a visual inside an archive volume is checked too.
     if let Some(visual) = &section.get("visual").and_then(|it| {
       self
-        .vfs
+        .vfs()
         .ogf(&self.scope, it)
         .ok()
         .flatten()
@@ -224,7 +224,7 @@ impl GamedataProject {
 
     if let Some(visual_path) = &hud_section.get("item_visual").and_then(|it| {
       self
-        .vfs
+        .vfs()
         .ogf(&self.scope, it)
         .ok()
         .flatten()
@@ -240,13 +240,16 @@ impl GamedataProject {
 
             for motion_ref in &motion_refs {
               if let Some(motion_file_path) = self
-                .assets
-                .omf(motion_ref)
+                .vfs()
+                .omf(self.scope(), motion_ref)
                 .ok()
                 .flatten()
-                .map(|asset| asset.absolute_path())
+                .map(|location| location.logical_path().to_string())
               {
-                match OmfFile::read_motions_from_path::<XRayByteOrder, &Path>(&motion_file_path) {
+                match self
+                  .read_asset_chunks(&motion_file_path)
+                  .and_then(|mut chunks| OmfFile::read_motions_from_chunk::<XRayByteOrder, _>(&mut chunks))
+                {
                   Ok(motions) => ref_animations.extend(motions),
                   Err(error) => {
                     xrf_output::error!(
@@ -462,21 +465,20 @@ impl GamedataProject {
     // Sounds field is 1-3 comma separated values, and may name the sound with or without its extension.
     let sound_object_value: String = ogg_logical_path(&get_weapon_animation_name(field_value));
 
-    // todo: Check OGG file, check existing.
-    if let Some(sound_path) = self
-      .assets
-      .absolute_path_in("sounds", &sound_object_value)
+    // Resolving through the VFS *is* the existence check, loose or archived, so there is no second filesystem probe to make.
+    //
+    // todo: Check the OGG contents, not only that the sound resolves.
+    if self
+      .vfs()
+      .resolve(self.scope(), XrayAssetType::Ogg, &sound_object_value)
       .ok()
       .flatten()
+      .is_some()
     {
-      if sound_path.is_file() && sound_path.exists() {
-        xrf_output::verbose!(
-          options.output,
-          "Sound verified in section: [{section_name}] : {field_name} -> {sound_object_value}"
-        );
-      } else {
-        is_valid = false
-      }
+      xrf_output::verbose!(
+        options.output,
+        "Sound verified in section: [{section_name}] : {field_name} -> {sound_object_value}"
+      );
     } else {
       xrf_output::error!(
         options.output,

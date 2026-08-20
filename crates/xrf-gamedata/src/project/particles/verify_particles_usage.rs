@@ -55,12 +55,9 @@ impl GamedataProject {
   fn read_particle_names(&self) -> XrfResult<HashSet<String>> {
     let mut names: HashSet<String> = HashSet::new();
 
-    for path in self
-      .assets
-      .with_suffix("particles.xr")?
-      .map(|asset| asset.absolute_path())
-    {
-      let particles_file: ParticlesFile = ParticlesFile::read_from_path::<XRayByteOrder, _>(&path)?;
+    for location in self.vfs().entries_with_suffix(self.scope(), "particles.xr")? {
+      let mut chunks = self.read_asset_chunks(location.logical_path())?;
+      let particles_file: ParticlesFile = ParticlesFile::read_from_chunk::<XRayByteOrder, _>(&mut chunks)?;
 
       for effect in &particles_file.effects.effects {
         names.insert(Self::normalize_particle_name(&effect.name));
@@ -112,16 +109,23 @@ impl GamedataProject {
     result: &mut GamedataParticlesUsageVerificationResult,
   ) {
     let spawn_files: Vec<String> = self
-      .assets
-      .with_type(AssetType::Spawn)
-      .filter(|asset| asset.logical_path().starts_with("spawns\\"))
-      .map(|asset| asset.logical_path().to_string())
+      .vfs()
+      .entries_of_type(self.scope(), AssetType::Spawn)
+      .into_iter()
+      .filter(|location| location.logical_path().starts_with("spawns\\"))
+      .map(|location| location.logical_path().to_string())
       .collect();
 
     for relative_path in &spawn_files {
       result.checked_spawn_files_count += 1;
 
-      let Some(spawn_path) = self.assets.absolute_path(relative_path).ok().flatten() else {
+      let Some(spawn_path) = self
+        .vfs()
+        .find(self.scope(), relative_path)
+        .ok()
+        .flatten()
+        .map(|location| location.logical_path().to_string())
+      else {
         xrf_output::error!(
           options.output,
           "Spawn path not found for particle usage check: {relative_path}"
@@ -136,13 +140,16 @@ impl GamedataProject {
         continue;
       };
 
-      let spawn_file: SpawnFile = match SpawnFile::read_from_path::<XRayByteOrder, PathBuf>(&spawn_path) {
+      let spawn_file: SpawnFile = match self
+        .read_asset_chunks(&spawn_path)
+        .and_then(|mut chunks| SpawnFile::read_from_chunk::<XRayByteOrder, _>(&mut chunks))
+      {
         Ok(spawn_file) => spawn_file,
         Err(error) => {
           xrf_output::error!(
             options.output,
             "Could not inspect spawn file for particle usage: {} - {}",
-            spawn_path.display(),
+            spawn_path,
             error
           );
 
@@ -167,13 +174,13 @@ impl GamedataProject {
 
         match Ltx::read_from_str(custom_data) {
           Ok(ltx) => {
-            self.verify_particles_usage_in_ltx(options, particle_names, &ltx, &spawn_path, result);
+            self.verify_particles_usage_in_ltx(options, particle_names, &ltx, Path::new(&spawn_path), result);
           }
           Err(error) => {
             xrf_output::error!(
               options.output,
               "Could not parse spawn custom data for particle usage: {} - {}",
-              spawn_path.display(),
+              spawn_path,
               error
             );
 
