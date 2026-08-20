@@ -7,7 +7,7 @@ use xrf_error::{XrfError, XrfResult};
 ///
 /// This is an engine identity, not a location on disk. The asset it names may sit inside an archive and have no file at
 /// all, so the type deliberately does not implement `AsRef<Path>` — handing one to host I/O must not compile. Read it
-/// through an [`crate::XrayVfs`], and ask [`crate::XrayAssetLocation::physical_path`] when a real file is genuinely
+/// through an [`crate::XrayVfs`], and ask [`crate::XrayAsset::physical_path`] when a real file is genuinely
 /// required.
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct XrayPath(String);

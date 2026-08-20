@@ -8,7 +8,7 @@ import {
 } from "three";
 
 import { SubmeshTexture } from "@/core/bindings/xrf-app-visuals";
-import { XrayAssetLocation } from "@/core/bindings/xrf-assets";
+import { XrayAsset } from "@/core/bindings/xrf-vfs";
 import {
   createDdsTexture,
   EVisualTextureState,
@@ -23,7 +23,7 @@ import { Nullable } from "@/lib/types/general";
 describe("isLoadableResolution", () => {
   it("counts a substituted reference as loadable", () => {
     // The engine's dummy is a real file and rendering it is what the game does, so it is fetched like any other.
-    const location: XrayAssetLocation = {
+    const location: XrayAsset = {
       container: {
         kind: "directory",
         relativePath: "textures\\ed\\ed_not_existing_texture.dds",

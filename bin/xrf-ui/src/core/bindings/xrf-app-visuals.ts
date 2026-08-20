@@ -59,7 +59,7 @@ export type SubmeshTexture = {
  * The outcome of resolving one submesh texture reference.
  *
  * Separate variants distinguish an omitted reference, an unavailable search root, a missing texture, and a located
- * asset. Located assets use `XrayAssetLocation` to describe either a directory or archive container.
+ * asset. Located assets use `XrayAsset` to describe either a directory or archive container.
  */
 export type SubmeshTextureResolution =
   /** The submesh declares no texture, as is normal for a skeleton root record. */
@@ -67,9 +67,9 @@ export type SubmeshTextureResolution =
   /** No visual or fallback root was available, so no lookup was attempted. */
   | { kind: "noRoot" }
   /** The reference resolved within the search scope. */
-  | { kind: "resolved"; location: XrayAssetLocation }
+  | { kind: "resolved"; location: XrayAsset }
   /** The reference was absent, but the engine's fallback texture resolved. */
-  | { kind: "substituted"; location: XrayAssetLocation }
+  | { kind: "substituted"; location: XrayAsset }
   /**
    * Neither the reference nor the engine's fallback texture resolved.
    *
@@ -254,6 +254,19 @@ export type VisualSubmeshContent =
   | { kind: "skipped"; cause: VisualSkipCause; reason: string };
 
 /**
+ * One asset a mount resolved: its engine identity plus the container it came out of.
+ *
+ * Owned rather than borrowed, so it can be stored, sorted or sent over IPC — which is what an editor that mounts and
+ * writes needs, and why nothing borrowed reaches past this crate.
+ */
+export type XrayAsset = {
+  /** Lower-case, backslash-separated engine identity, including the mount's logical base. */
+  logicalPath: string;
+  /** Physical container reported by the source that resolved the asset. */
+  container: XrayAssetContainer;
+};
+
+/**
  * The physical container of a located asset.
  *
  * Separate variants prevent callers from treating an archived entry as a loose file with a usable filesystem path.
@@ -263,16 +276,3 @@ export type XrayAssetContainer =
   | { kind: "directory"; root: string; relativePath: string }
   /** An entry inside the archive volume set at `path`. */
   | { kind: "archive"; path: string };
-
-/**
- * An owned result of locating an asset.
- *
- * Unlike `XrayAsset`, this type can be stored or sent over IPC. It preserves the engine path and source-reported
- * container for either a loose or archived asset.
- */
-export type XrayAssetLocation = {
-  /** Lower-case, backslash-separated engine identity, including the mount's logical base. */
-  logicalPath: string;
-  /** Physical container reported by the source that resolved the asset. */
-  container: XrayAssetContainer;
-};

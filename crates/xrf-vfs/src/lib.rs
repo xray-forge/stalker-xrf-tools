@@ -3,6 +3,7 @@
 mod directory_asset;
 mod directory_asset_index;
 mod fsgame;
+mod indexed_asset;
 mod open;
 pub mod shader;
 pub mod sound;
@@ -10,7 +11,6 @@ pub mod sound;
 mod typescript_bindings;
 mod xray_asset;
 mod xray_asset_index;
-mod xray_asset_location;
 mod xray_asset_source;
 mod xray_asset_type;
 mod xray_directory_source;
@@ -25,16 +25,16 @@ mod xray_vfs;
 
 #[cfg(feature = "typescript-bindings")]
 pub use crate::typescript_bindings::typescript_bindings;
-pub use directory_asset::DirectoryAsset;
-pub use directory_asset_index::DirectoryAssetIndex;
+pub(crate) use directory_asset::DirectoryAsset;
+pub(crate) use directory_asset_index::DirectoryAssetIndex;
 pub use fsgame::{FS_ROOT_ALIAS, FSGAME_FILE_NAME, FsgameDeclaration, FsgameFile};
+pub(crate) use indexed_asset::IndexedAsset;
 pub use open::{open_plan, open_vfs};
-pub use xray_asset::XrayAsset;
-pub use xray_asset_index::XrayAssetIndex;
-pub use xray_asset_location::{XrayAssetContainer, XrayAssetLocation};
+pub use xray_asset::{XrayAsset, XrayAssetContainer};
+pub(crate) use xray_asset_index::XrayAssetIndex;
 pub use xray_asset_source::{XrayAssetSource, XrayMountKind};
 pub use xray_asset_type::{XrayAssetRules, XrayAssetType};
-pub use xray_directory_source::XrayDirectorySource;
+pub(crate) use xray_directory_source::XrayDirectorySource;
 pub use xray_mount::{XrayMount, XrayMountId};
 pub use xray_mount_mode::XrayMountMode;
 pub use xray_mount_plan::{XrayMountPlan, XrayPlannedMount};

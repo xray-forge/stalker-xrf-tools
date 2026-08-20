@@ -2,7 +2,7 @@ use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant};
 
 use xrf_error::XrfResult;
-use xrf_vfs::{XrayAssetLocation, XrayMountKind, XrayMountMode, XrayPathCollision, XrayScope, XrayVfs, open_plan};
+use xrf_vfs::{XrayAsset, XrayMountKind, XrayMountMode, XrayPathCollision, XrayScope, XrayVfs, open_plan};
 
 /// Resolved assets and source metadata for one listing.
 pub struct AssetListing {
@@ -11,9 +11,9 @@ pub struct AssetListing {
   /// One line per mount, in search order.
   pub mounts: Vec<String>,
   /// Winning entries, one per logical path.
-  pub entries: Vec<XrayAssetLocation>,
+  pub entries: Vec<XrayAsset>,
   /// Entries shadowed by a higher-priority mount, absent unless asked for.
-  pub shadowed: Vec<XrayAssetLocation>,
+  pub shadowed: Vec<XrayAsset>,
   /// Files a mount holds but cannot reach, because another file in it claims their identity.
   pub collisions: Vec<XrayPathCollision>,
   /// Time spent planning, mounting, and enumerating.
@@ -91,8 +91,8 @@ impl AssetLister {
     let started: Instant = Instant::now();
     let vfs: XrayVfs = open_plan(&self.mode.plan(&self.path)?.ignoring(&self.ignored)?)?;
     let scope: XrayScope = self.scope()?;
-    let entries: Vec<XrayAssetLocation> = vfs.entries(&scope);
-    let shadowed: Vec<XrayAssetLocation> = if self.is_shadowed_included {
+    let entries: Vec<XrayAsset> = vfs.entries(&scope);
+    let shadowed: Vec<XrayAsset> = if self.is_shadowed_included {
       Self::shadowed(&vfs, &scope, &entries)
     } else {
       Vec::new()
@@ -134,8 +134,8 @@ impl AssetLister {
   /// Returns entries hidden by a higher-priority mount.
   ///
   /// The result removes winning path and container pairs from the complete enumeration.
-  fn shadowed(vfs: &XrayVfs, scope: &XrayScope, winners: &[XrayAssetLocation]) -> Vec<XrayAssetLocation> {
-    let mut shadowed: Vec<XrayAssetLocation> = vfs.entries_all(scope);
+  fn shadowed(vfs: &XrayVfs, scope: &XrayScope, winners: &[XrayAsset]) -> Vec<XrayAsset> {
+    let mut shadowed: Vec<XrayAsset> = vfs.entries_all(scope);
 
     shadowed.retain(|entry| {
       !winners

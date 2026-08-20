@@ -4,7 +4,7 @@ use std::path::{Path, PathBuf};
 use walkdir::{DirEntry, WalkDir};
 use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::LTX_EXTENSION;
-use xrf_vfs::{XrayAssetContainer, XrayAssetLocation, XrayScope, XrayVfs};
+use xrf_vfs::{XrayAsset, XrayAssetContainer, XrayScope, XrayVfs};
 
 use crate::commands::ltx::ltx_installation::mount_installation;
 
@@ -120,7 +120,7 @@ impl LtxFormatSelection {
     logical_path.ends_with(&format!(".{LTX_EXTENSION}"))
   }
 
-  fn describe_declined(location: &XrayAssetLocation) -> String {
+  fn describe_declined(location: &XrayAsset) -> String {
     format!("{} in {}", location.logical_path(), location.describe_container())
   }
 }

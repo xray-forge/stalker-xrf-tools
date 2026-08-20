@@ -2,7 +2,7 @@ use std::fs;
 use std::path::PathBuf;
 
 use crate::xray_vfs::tests::fake_source::{FakeArchiveSource, directory};
-use crate::{XrayAssetLocation, XrayMountId, XrayScope, XrayVfs};
+use crate::{XrayAsset, XrayMountId, XrayScope, XrayVfs};
 
 #[test]
 fn an_override_creates_a_loose_file_that_then_wins() {
@@ -26,7 +26,7 @@ fn an_override_creates_a_loose_file_that_then_wins() {
     "the archived winner refuses a plain write"
   );
 
-  let location: XrayAssetLocation = vfs
+  let location: XrayAsset = vfs
     .write_override(&scope, "configs\\system.ltx", b"overridden")
     .expect("override is created");
 
@@ -122,7 +122,7 @@ fn an_override_lands_in_the_highest_priority_writable_mount() {
   vfs.mount_directory("", &front).expect("front mounts");
   vfs.mount_directory("", &back).expect("back mounts");
 
-  let location: XrayAssetLocation = vfs
+  let location: XrayAsset = vfs
     .write_override(&XrayScope::all(), "configs\\system.ltx", b"overridden")
     .expect("override is created");
 

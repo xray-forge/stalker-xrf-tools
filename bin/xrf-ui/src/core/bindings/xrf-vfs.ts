@@ -45,6 +45,19 @@ export type ProjectReadResult = {
 };
 
 /**
+ * One asset a mount resolved: its engine identity plus the container it came out of.
+ *
+ * Owned rather than borrowed, so it can be stored, sorted or sent over IPC — which is what an editor that mounts and
+ * writes needs, and why nothing borrowed reaches past this crate.
+ */
+export type XrayAsset = {
+  /** Lower-case, backslash-separated engine identity, including the mount's logical base. */
+  logicalPath: string;
+  /** Physical container reported by the source that resolved the asset. */
+  container: XrayAssetContainer;
+};
+
+/**
  * The physical container of a located asset.
  *
  * Separate variants prevent callers from treating an archived entry as a loose file with a usable filesystem path.
@@ -54,16 +67,3 @@ export type XrayAssetContainer =
   | { kind: "directory"; root: string; relativePath: string }
   /** An entry inside the archive volume set at `path`. */
   | { kind: "archive"; path: string };
-
-/**
- * An owned result of locating an asset.
- *
- * Unlike `XrayAsset`, this type can be stored or sent over IPC. It preserves the engine path and source-reported
- * container for either a loose or archived asset.
- */
-export type XrayAssetLocation = {
-  /** Lower-case, backslash-separated engine identity, including the mount's logical base. */
-  logicalPath: string;
-  /** Physical container reported by the source that resolved the asset. */
-  container: XrayAssetContainer;
-};

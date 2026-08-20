@@ -1,7 +1,7 @@
 use std::path::{Path, PathBuf};
 
 use crate::xray_vfs::tests::fake_source::{FakeArchiveSource, directory};
-use crate::{XrayAssetLocation, XrayScope, XrayVfs};
+use crate::{XrayAsset, XrayScope, XrayVfs};
 
 #[test]
 fn resolves_a_texture_reference_against_a_mounted_root() {
@@ -11,7 +11,7 @@ fn resolves_a_texture_reference_against_a_mounted_root() {
     .mount_directory("", directory("texture", &["textures/wpn/wpn_ak74.dds"]))
     .expect("root mounts");
 
-  let location: XrayAssetLocation = vfs
+  let location: XrayAsset = vfs
     .dds_texture(&XrayScope::all(), "wpn\\wpn_ak74")
     .expect("lookup succeeds")
     .expect("texture resolves");
@@ -81,7 +81,7 @@ fn an_archived_entry_resolves_and_reads_but_offers_no_physical_path() {
     .expect("archive mounts");
 
   let scope: XrayScope = XrayScope::all();
-  let location: XrayAssetLocation = vfs
+  let location: XrayAsset = vfs
     .find(&scope, "textures\\wpn\\wpn_ak74.dds")
     .unwrap()
     .expect("entry resolves");

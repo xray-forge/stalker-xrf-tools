@@ -51,11 +51,6 @@ impl XrayDirectorySource {
   pub fn root(&self) -> &Path {
     self.index.root()
   }
-
-  /// Returns the strict logical-path index backing this source.
-  pub fn index(&self) -> &XrayAssetIndex {
-    &self.index
-  }
 }
 
 impl XrayAssetSource for XrayDirectorySource {

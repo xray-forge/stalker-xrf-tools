@@ -106,7 +106,7 @@ impl VisualTextureResolver {
       .unwrap_or_default()
   }
 
-  fn lookup(&self, scope: &XrayScope, reference: &str) -> Option<xrf_vfs::XrayAssetLocation> {
+  fn lookup(&self, scope: &XrayScope, reference: &str) -> Option<xrf_vfs::XrayAsset> {
     self
       .vfs
       .dds_texture(scope, reference)

@@ -7,5 +7,5 @@ pub fn typescript_bindings() -> Types {
     .register::<crate::ArchiveProject>()
     .register::<crate::ArchiveProjectReadPolicy>()
     .register::<crate::ProjectReadResult>()
-    .register::<crate::XrayAssetLocation>()
+    .register::<crate::XrayAsset>()
 }

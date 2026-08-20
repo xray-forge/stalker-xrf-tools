@@ -1,5 +1,5 @@
 use serde::Serialize;
-use xrf_vfs::XrayAssetLocation;
+use xrf_vfs::XrayAsset;
 
 /// The texture the engine substitutes for an unresolved reference.
 ///
@@ -10,7 +10,7 @@ pub const MISSING_TEXTURE_REFERENCE: &str = "ed\\ed_not_existing_texture";
 /// The outcome of resolving one submesh texture reference.
 ///
 /// Separate variants distinguish an omitted reference, an unavailable search root, a missing texture, and a located
-/// asset. Located assets use `XrayAssetLocation` to describe either a directory or archive container.
+/// asset. Located assets use `XrayAsset` to describe either a directory or archive container.
 #[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
 #[derive(Clone, Debug, PartialEq, Eq, Serialize)]
 #[serde(tag = "kind", rename_all = "camelCase")]
@@ -20,9 +20,9 @@ pub enum SubmeshTextureResolution {
   /// No visual or fallback root was available, so no lookup was attempted.
   NoRoot,
   /// The reference resolved within the search scope.
-  Resolved { location: XrayAssetLocation },
+  Resolved { location: XrayAsset },
   /// The reference was absent, but the engine's fallback texture resolved.
-  Substituted { location: XrayAssetLocation },
+  Substituted { location: XrayAsset },
   /// Neither the reference nor the engine's fallback texture resolved.
   ///
   /// `roots` lists every source searched by the scope.
@@ -31,7 +31,7 @@ pub enum SubmeshTextureResolution {
 
 impl SubmeshTextureResolution {
   /// Returns the located texture for resolved and substituted outcomes.
-  pub fn location(&self) -> Option<&XrayAssetLocation> {
+  pub fn location(&self) -> Option<&XrayAsset> {
     match self {
       Self::Resolved { location } | Self::Substituted { location } => Some(location),
       Self::None | Self::NoRoot | Self::Missing { .. } => None,

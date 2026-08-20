@@ -1,4 +1,4 @@
-use crate::XrayAssetLocation;
+use crate::XrayAsset;
 
 /// What sits directly inside one logical directory.
 ///
@@ -9,7 +9,7 @@ pub struct XrayDirectoryListing {
   /// Names of the directories directly inside, sorted, without their parent path.
   pub directories: Vec<String>,
   /// Winning entries sitting directly inside, sorted by logical path.
-  pub files: Vec<XrayAssetLocation>,
+  pub files: Vec<XrayAsset>,
 }
 
 impl XrayDirectoryListing {
