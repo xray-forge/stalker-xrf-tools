@@ -1,19 +1,33 @@
-use std::fs;
 use std::path::Path;
 
 use xrf_error::{XrfError, XrfResult};
 use xrf_shaders::XRayShaderSourceLoader;
+use xrf_vfs::{XrayScope, XrayVfs};
 
-pub struct GamedataShaderSourceLoader;
+/// Loads shader sources through mounted sources, so an installation's `db\shaders` volume reads like a loose tree.
+pub struct GamedataShaderSourceLoader<'a> {
+  scope: &'a XrayScope,
+  vfs: &'a XrayVfs,
+}
 
-impl XRayShaderSourceLoader for GamedataShaderSourceLoader {
+impl<'a> GamedataShaderSourceLoader<'a> {
+  pub fn new(vfs: &'a XrayVfs, scope: &'a XrayScope) -> Self {
+    Self { scope, vfs }
+  }
+}
+
+impl XRayShaderSourceLoader for GamedataShaderSourceLoader<'_> {
   fn load_source(&self, path: &Path) -> XrfResult<Option<Vec<u8>>> {
-    if !path.is_file() {
+    let logical_path: &str = path.to_str().ok_or_else(|| {
+      XrfError::new_read_error(format!("Shader source path is not valid unicode: {}", path.display()))
+    })?;
+
+    // Absence is not an error here: a missing include is reported by the caller as a finding against the shader that names
+    // it, which is more useful than a read failure with no context.
+    if self.vfs.find(self.scope, logical_path)?.is_none() {
       return Ok(None);
     }
 
-    fs::read(path)
-      .map(Some)
-      .map_err(|error| XrfError::new_read_error(format!("Failed to read shader source {}: {error}", path.display())))
+    self.vfs.read(self.scope, logical_path).map(Some)
   }
 }

@@ -15,6 +15,7 @@ const CONFIGS_DIRECTORY: &str = "configs";
 /// Root config the engine loads, and the one asset whose absence means this is not a usable project.
 const SYSTEM_LTX_LOGICAL_PATH: &str = "configs\\system.ltx";
 
+#[derive(Debug)]
 pub struct GamedataProject {
   /// Owns the mounted sources, since a config project needs them for the same reasons a check does.
   ///

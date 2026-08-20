@@ -1,3 +1,4 @@
+use std::fs;
 use std::path::PathBuf;
 use std::time::Instant;
 
@@ -12,13 +13,62 @@ pub struct LtxFilesFormatter {}
 
 impl LtxFilesFormatter {
   /// Format provided LTX files, rewriting the ones that are not formatted yet.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when a file cannot be read, parsed, or rewritten.
   pub fn format_opt(files: &[PathBuf], options: LtxFormatOptions) -> XrfResult<LtxProjectFormatResult> {
-    Self::process(files, options, true)
+    let mut result: LtxProjectFormatResult = LtxProjectFormatResult::new();
+    let started_at: Instant = Instant::now();
+
+    xrf_output::heading!(options.output, "Formatting {} file(s)", files.len());
+
+    for file in files {
+      if Ltx::format_file(file, true)? {
+        result.invalid_files += 1;
+        result.to_format.push(file.clone());
+
+        xrf_output::info!(options.output, "Formatted: {}", file.display());
+      } else {
+        result.valid_files += 1;
+      }
+
+      result.total_files += 1;
+    }
+
+    result.duration = started_at.elapsed().as_millis();
+
+    xrf_output::info!(
+      options.output,
+      "Formatted {}/{} files in {} sec",
+      result.invalid_files,
+      result.total_files,
+      (result.duration as f64) / 1000.0
+    );
+
+    Ok(result)
   }
 
   /// Check format of provided LTX files without rewriting any of them.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when a file cannot be read or parsed.
   pub fn check_format_opt(files: &[PathBuf], options: LtxFormatOptions) -> XrfResult<LtxProjectFormatResult> {
-    Self::process(files, options, false)
+    let mut result: LtxProjectFormatResult = LtxProjectFormatResult::new();
+    let started_at: Instant = Instant::now();
+
+    xrf_output::heading!(options.output, "Checking {} file(s)", files.len());
+
+    for file in files {
+      result.record_checked(file.clone(), Ltx::is_formatted(&fs::read(file)?)?, &options);
+    }
+
+    result.duration = started_at.elapsed().as_millis();
+
+    Self::report_check(&result, &options);
+
+    Ok(result)
   }
 
   /// Format provided LTX files with default options.
@@ -33,55 +83,14 @@ impl LtxFilesFormatter {
 }
 
 impl LtxFilesFormatter {
-  /// Format or check provided LTX files, writing the formatted output only when requested.
-  fn process(files: &[PathBuf], options: LtxFormatOptions, is_write: bool) -> XrfResult<LtxProjectFormatResult> {
-    let mut result: LtxProjectFormatResult = LtxProjectFormatResult::new();
-    let started_at: Instant = Instant::now();
-
-    if is_write {
-      xrf_output::heading!(options.output, "Formatting {} file(s)", files.len());
-    } else {
-      xrf_output::heading!(options.output, "Checking {} file(s)", files.len());
-    }
-
-    for file in files {
-      if Ltx::format_file(file, is_write)? {
-        result.invalid_files += 1;
-        result.to_format.push(file.clone());
-
-        xrf_output::info!(
-          options.output,
-          "{}: {}",
-          if is_write { "Formatted" } else { "Not formatted" },
-          file.display()
-        );
-      } else {
-        result.valid_files += 1;
-      }
-
-      result.total_files += 1;
-    }
-
-    result.duration = started_at.elapsed().as_millis();
-
-    Self::report(&result, &options, is_write);
-
-    Ok(result)
-  }
-
-  /// Report resulting statistics of format or check run.
-  fn report(result: &LtxProjectFormatResult, options: &LtxFormatOptions, is_write: bool) {
+  /// Report resulting statistics of a check run.
+  ///
+  /// Shared with [`crate::LtxProject::check_format_all_files_opt`], which reads its configs through a VFS rather than from
+  /// files but reports the same way.
+  pub(crate) fn report_check(result: &LtxProjectFormatResult, options: &LtxFormatOptions) {
     let duration: f64 = (result.duration as f64) / 1000.0;
 
-    if is_write {
-      xrf_output::info!(
-        options.output,
-        "Formatted {}/{} files in {} sec",
-        result.invalid_files,
-        result.total_files,
-        duration
-      );
-    } else if result.invalid_files == 0 {
+    if result.invalid_files == 0 {
       xrf_output::success!(
         options.output,
         "All {} files are formatted, checked in {} sec",

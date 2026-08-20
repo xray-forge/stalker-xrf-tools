@@ -1,25 +1,35 @@
 use std::collections::HashSet;
-use std::fs;
 use std::path::{Path, PathBuf};
 use std::time::Instant;
 
-use walkdir::{DirEntry, WalkDir};
-use xrf_error::XrfError;
+use xrf_error::{XrfError, XrfResult};
 use xrf_shaders::{SHADER_SCRIPT_FILE_EXTENSION, ShaderRenderer, XRayShader, XRayShaderScript, is_shader_source_path};
+use xrf_vfs::{XrayScope, XrayVfs};
 
 use crate::GamedataFindingFactory;
 use crate::project::shaders::gamedata_shader_source_loader::GamedataShaderSourceLoader;
 use crate::project::shaders::verify_shaders_result::GamedataShadersVerificationResult;
 use crate::{GamedataCheckResult, GamedataProjectVerifyOptions, GamedataVerificationRule};
 
+/// Logical directory holding the renderer shader trees.
+pub(crate) const SHADERS_DIRECTORY: &str = "shaders";
+
 pub(crate) struct ShadersVerifier<'a> {
   options: &'a GamedataProjectVerifyOptions,
+  /// Logical root of the shader trees, not a filesystem path: sources resolve through the VFS.
   shaders_root: PathBuf,
+  scope: &'a XrayScope,
+  vfs: &'a XrayVfs,
 }
 
 impl<'a> ShadersVerifier<'a> {
-  pub(crate) fn new(shaders_root: PathBuf, options: &'a GamedataProjectVerifyOptions) -> Self {
-    Self { options, shaders_root }
+  pub(crate) fn new(vfs: &'a XrayVfs, scope: &'a XrayScope, options: &'a GamedataProjectVerifyOptions) -> Self {
+    Self {
+      options,
+      scope,
+      shaders_root: PathBuf::from(SHADERS_DIRECTORY),
+      vfs,
+    }
   }
 
   pub(crate) fn verify(&self) -> GamedataShadersVerificationResult {
@@ -55,8 +65,24 @@ impl<'a> ShadersVerifier<'a> {
     );
 
     let renderer_root: PathBuf = self.shaders_root.join(renderer.directory_name());
+    let renderer_prefix: String = renderer_root.to_string_lossy().to_string();
 
-    if !renderer_root.is_dir() {
+    let entries: Vec<String> = match self.renderer_entries(&renderer_prefix) {
+      Ok(entries) => entries,
+      Err(error) => {
+        result.add_finding(GamedataFindingFactory::for_asset(
+          GamedataVerificationRule::ShadersSourceRead,
+          &renderer_root,
+          format!("Failed to enumerate renderer shaders: {error}"),
+        ));
+
+        return;
+      }
+    };
+
+    // A VFS has no empty directories — they are derived from entries — so "nothing resolves here" is the only detectable
+    // form of an absent renderer root, and it covers both a missing tree and an empty one.
+    if entries.is_empty() {
       // Specific to OpenXray
       if renderer == ShaderRenderer::OpenGl {
         xrf_output::verbose!(
@@ -76,29 +102,50 @@ impl<'a> ShadersVerifier<'a> {
       return;
     }
 
-    self.verify_root_shader_scripts(&renderer_root, result);
+    self.verify_root_shader_scripts(&renderer_root, &renderer_prefix, result);
 
-    let source_loader: GamedataShaderSourceLoader = GamedataShaderSourceLoader;
+    let source_loader: GamedataShaderSourceLoader<'_> = GamedataShaderSourceLoader::new(self.vfs, self.scope);
     let mut checked_sources: HashSet<PathBuf> = HashSet::new();
 
-    for entry in WalkDir::new(&renderer_root) {
-      match entry {
-        Ok(entry) if Self::is_shader_source_file(&entry) => {
-          self.verify_shader_source(entry.path(), renderer, result, &source_loader, &mut checked_sources)
-        }
-        Ok(_) => {}
-        Err(error) => result.add_finding(GamedataFindingFactory::for_asset(
-          GamedataVerificationRule::ShadersSourceRead,
-          error.path().unwrap_or(&renderer_root),
-          format!("Failed to traverse renderer shader sources: {error}"),
-        )),
-      }
+    // Scripts and sources are different sets: a `.s` script is Lua the renderer runs, so a renderer holding only scripts is
+    // still checked rather than reported absent.
+    for source in entries.iter().filter(|path| is_shader_source_path(Path::new(path))) {
+      self.verify_shader_source(
+        Path::new(source),
+        renderer,
+        result,
+        &source_loader,
+        &mut checked_sources,
+      );
     }
   }
 
-  fn verify_root_shader_scripts(&self, renderer_root: &Path, result: &mut GamedataShadersVerificationResult) {
-    let entries = match fs::read_dir(renderer_root) {
-      Ok(entries) => entries,
+  /// Every entry under one renderer root, whether loose or inside a volume.
+  ///
+  /// Sorted so a run reports in a stable order, which a single directory walk gave for free and enumeration across mounts does not.
+  fn renderer_entries(&self, renderer_prefix: &str) -> XrfResult<Vec<String>> {
+    let scope: XrayScope = self.scope.clone().with_prefix(renderer_prefix)?;
+    let mut entries: Vec<String> = self
+      .vfs
+      .entries(&scope)
+      .into_iter()
+      .map(|location| location.logical_path().to_string())
+      .collect();
+
+    entries.sort();
+
+    Ok(entries)
+  }
+
+  fn verify_root_shader_scripts(
+    &self,
+    renderer_root: &Path,
+    renderer_prefix: &str,
+    result: &mut GamedataShadersVerificationResult,
+  ) {
+    // Scripts sit directly in the renderer root, so this is a directory listing rather than a walk.
+    let listing = match self.vfs.children(self.scope, renderer_prefix) {
+      Ok(listing) => listing,
       Err(error) => {
         result.add_finding(GamedataFindingFactory::for_asset(
           GamedataVerificationRule::ShadersSourceRead,
@@ -110,27 +157,16 @@ impl<'a> ShadersVerifier<'a> {
       }
     };
 
-    for entry in entries {
-      let entry = match entry {
-        Ok(entry) => entry,
-        Err(error) => {
-          result.add_finding(GamedataFindingFactory::for_asset(
-            GamedataVerificationRule::ShadersSourceRead,
-            renderer_root,
-            format!("Failed to read renderer shader entry: {error}"),
-          ));
-          continue;
-        }
-      };
-      let path: PathBuf = entry.path();
+    for file in listing.files {
+      let path: PathBuf = PathBuf::from(file.logical_path());
 
-      if !path.is_file() || !Self::has_extension(&path, SHADER_SCRIPT_FILE_EXTENSION) {
+      if !Self::has_extension(&path, SHADER_SCRIPT_FILE_EXTENSION) {
         continue;
       }
 
       result.increment_checked_scripts_count();
 
-      match fs::read_to_string(&path) {
+      match self.read_script(file.logical_path()) {
         Ok(source) => {
           if let Err(error) = XRayShaderScript::parse(&path, &source) {
             result.add_finding(GamedataFindingFactory::for_asset(
@@ -147,6 +183,13 @@ impl<'a> ShadersVerifier<'a> {
         )),
       }
     }
+  }
+
+  /// Reads one shader script as text, through the same mounts its sources come from.
+  fn read_script(&self, logical_path: &str) -> Result<String, XrfError> {
+    let bytes: Vec<u8> = self.vfs.read(self.scope, logical_path)?;
+
+    String::from_utf8(bytes).map_err(|error| XrfError::new_read_error(format!("not valid utf-8: {error}")))
   }
 
   fn verify_shader_source(
@@ -173,10 +216,6 @@ impl<'a> ShadersVerifier<'a> {
         ));
       }
     }
-  }
-
-  fn is_shader_source_file(entry: &DirEntry) -> bool {
-    entry.file_type().is_file() && is_shader_source_path(entry.path())
   }
 
   fn has_extension(path: &Path, extension: &str) -> bool {
@@ -219,26 +258,41 @@ mod tests {
   use std::path::{Path, PathBuf};
 
   use xrf_error::{XrfError, XrfResult};
+  use xrf_vfs::{XrayScope, XrayVfs};
 
-  use super::ShadersVerifier;
+  use super::{SHADERS_DIRECTORY, ShadersVerifier};
   use crate::{GamedataCheckResult, GamedataProjectVerifyOptions, GamedataVerificationRule};
+
+  /// Mounts a gamedata tree, since the verifier addresses shaders by engine identity rather than by filesystem path.
+  ///
+  /// A directory mount rather than a packed volume: what these check is enumeration and include resolution over logical
+  /// paths, which a directory source exercises identically while staying fast.
+  fn mount(root: &Path) -> XrfResult<(XrayVfs, XrayScope)> {
+    let mut vfs: XrayVfs = XrayVfs::new();
+
+    vfs.mount_directory("", root)?;
+
+    Ok((vfs, XrayScope::all()))
+  }
 
   #[test]
   fn validates_d3d11_scripts_and_renderer_then_root_includes() -> XrfResult {
-    let root: PathBuf = create_shader_root("d3d11")?;
+    let root: PathBuf = create_gamedata_root("d3d11")?;
+    let shaders: PathBuf = root.join(SHADERS_DIRECTORY);
     let options: GamedataProjectVerifyOptions = GamedataProjectVerifyOptions {
       output: xrf_output::OutputOptions::default(),
       ..Default::default()
     };
 
     write_file(
-      &root.join("r3/basic.s"),
+      &shaders.join("r3/basic.s"),
       "function normal(shader, t_base, t_second, t_detail) end\n",
     )?;
-    write_file(&root.join("r3/main.ps"), "#include \"shared/common.h\"\n")?;
-    write_file(&root.join("shared/common.h"), "float value;\n")?;
+    write_file(&shaders.join("r3/main.ps"), "#include \"shared/common.h\"\n")?;
+    write_file(&shaders.join("shared/common.h"), "float value;\n")?;
 
-    let result = ShadersVerifier::new(root.clone(), &options).verify();
+    let (vfs, scope) = mount(&root)?;
+    let result = ShadersVerifier::new(&vfs, &scope, &options).verify();
 
     assert_eq!(
       result.failure_message(),
@@ -253,21 +307,27 @@ mod tests {
 
   #[test]
   fn skips_a_missing_open_gl_renderer_root() -> XrfResult {
-    let root: PathBuf = create_shader_root("missing-open-gl")?;
+    let root: PathBuf = create_gamedata_root("missing-open-gl")?;
     let options: GamedataProjectVerifyOptions = GamedataProjectVerifyOptions {
       output: xrf_output::OutputOptions::default(),
       ..Default::default()
     };
 
-    fs::remove_dir(root.join("gl"))?;
+    fs::remove_dir(root.join(SHADERS_DIRECTORY).join("gl"))?;
     write_file(
-      &root.join("r3/basic.s"),
+      &root.join(SHADERS_DIRECTORY).join("r3/basic.s"),
       "function normal(shader, t_base, t_second, t_detail) end\n",
     )?;
 
-    let result = ShadersVerifier::new(root.clone(), &options).verify();
+    let (vfs, scope) = mount(&root)?;
+    let result = ShadersVerifier::new(&vfs, &scope, &options).verify();
 
     assert!(result.findings().is_empty());
+    assert_eq!(
+      result.failure_message(),
+      "1 shader scripts and 0 shader sources checked, 0 problems",
+      "a renderer holding only scripts is still checked, not reported absent"
+    );
 
     fs::remove_dir_all(root)?;
 
@@ -276,18 +336,21 @@ mod tests {
 
   #[test]
   fn reports_lua_include_and_cycle_problems_together() -> XrfResult {
-    let root: PathBuf = create_shader_root("static-problems")?;
+    let root: PathBuf = create_gamedata_root("static-problems")?;
+    let shaders: PathBuf = root.join(SHADERS_DIRECTORY);
     let options: GamedataProjectVerifyOptions = GamedataProjectVerifyOptions {
       output: xrf_output::OutputOptions::default(),
       ..Default::default()
     };
 
-    write_file(&root.join("gl/invalid.s"), "function normal(\n")?;
-    write_file(&root.join("gl/missing.ps"), "#include \"missing.h\"\n")?;
-    write_file(&root.join("gl/first.h"), "#include \"second.h\"\n")?;
-    write_file(&root.join("gl/second.h"), "#include \"first.h\"\n")?;
+    write_file(&shaders.join("r3/basic.s"), "function normal(s) end\n")?;
+    write_file(&shaders.join("gl/invalid.s"), "function normal(\n")?;
+    write_file(&shaders.join("gl/missing.ps"), "#include \"missing.h\"\n")?;
+    write_file(&shaders.join("gl/first.h"), "#include \"second.h\"\n")?;
+    write_file(&shaders.join("gl/second.h"), "#include \"first.h\"\n")?;
 
-    let result = ShadersVerifier::new(root.clone(), &options).verify();
+    let (vfs, scope) = mount(&root)?;
+    let result = ShadersVerifier::new(&vfs, &scope, &options).verify();
     let rule_ids: Vec<String> = result
       .findings()
       .iter()
@@ -303,15 +366,19 @@ mod tests {
     Ok(())
   }
 
-  fn create_shader_root(test_name: &str) -> XrfResult<PathBuf> {
+  /// Creates a gamedata root holding an empty `shaders` tree, returning the gamedata root.
+  ///
+  /// The verifier looks under the logical `shaders` directory, so the tree has to sit where a real one does rather than
+  /// being the root itself.
+  fn create_gamedata_root(test_name: &str) -> XrfResult<PathBuf> {
     let root: PathBuf = std::env::temp_dir().join("xrf-gamedata-shader-tests").join(test_name);
 
     if root.exists() {
       fs::remove_dir_all(&root)?;
     }
 
-    fs::create_dir_all(root.join("r3"))?;
-    fs::create_dir_all(root.join("gl"))?;
+    fs::create_dir_all(root.join(SHADERS_DIRECTORY).join("r3"))?;
+    fs::create_dir_all(root.join(SHADERS_DIRECTORY).join("gl"))?;
 
     Ok(root)
   }

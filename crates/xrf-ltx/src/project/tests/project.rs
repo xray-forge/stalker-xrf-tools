@@ -7,7 +7,7 @@ use std::fs;
 use std::path::PathBuf;
 
 use xrf_error::XrfResult;
-use xrf_vfs::XrayPath;
+use xrf_vfs::{XrayPath, XrayScope, XrayVfs};
 
 use crate::project::ltx_project::LtxProject;
 
@@ -95,6 +95,51 @@ fn renders_a_loose_path_for_a_person_and_reads_it_through_the_project() -> XrfRe
     project.read_full(entry)?.get_from("section", "value"),
     Some("1"),
     "the project reads its own files"
+  );
+
+  fs::remove_dir_all(root)?;
+
+  Ok(())
+}
+
+#[test]
+fn places_config_names_in_whichever_scope_the_project_has() -> XrfResult {
+  // The same check body reads a configs directory and a game root, so a config-relative name has to carry the scope's
+  // prefix. A bare `system.ltx` resolves in the first project and nothing at all in the second.
+  let root: PathBuf = create_root("scoped")?;
+  let configs: PathBuf = root.join("configs");
+
+  fs::create_dir_all(&configs)?;
+  fs::write(configs.join("system.ltx"), "[section]\nvalue = 1\n")?;
+
+  let at_configs: LtxProject = LtxProject::open_at_path(&configs)?;
+
+  assert_eq!(at_configs.system_ltx_path()?, XrayPath::new("system.ltx")?);
+  assert_eq!(
+    at_configs.config_path("environment\\suns.ltx")?,
+    XrayPath::new("environment\\suns.ltx")?
+  );
+
+  let mut vfs: XrayVfs = XrayVfs::new();
+
+  vfs.mount_directory("", &root)?;
+
+  let at_game_root: LtxProject = LtxProject::open_at_scope_opt(
+    &configs,
+    vfs,
+    XrayScope::all().with_prefix("configs")?,
+    Default::default(),
+  )?;
+
+  assert_eq!(at_game_root.system_ltx_path()?, XrayPath::new("configs\\system.ltx")?);
+  assert_eq!(
+    at_game_root.config_path("environment\\suns.ltx")?,
+    XrayPath::new("configs\\environment\\suns.ltx")?
+  );
+  assert_eq!(
+    at_game_root.system_ltx()?.get_from("section", "value"),
+    Some("1"),
+    "the scoped path is the one that reads"
   );
 
   fs::remove_dir_all(root)?;

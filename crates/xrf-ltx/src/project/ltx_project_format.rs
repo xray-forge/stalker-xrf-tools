@@ -1,10 +1,11 @@
 use std::path::PathBuf;
+use std::time::Instant;
 
 use xrf_error::{XrfError, XrfResult};
 
 use crate::project::ltx_files_formatter::LtxFilesFormatter;
 use crate::project::ltx_project_format_result::LtxProjectFormatResult;
-use crate::{LtxFormatOptions, LtxProject};
+use crate::{Ltx, LtxFormatOptions, LtxProject};
 
 impl LtxProject {
   /// Formats every project LTX file with explicit options.
@@ -14,11 +15,32 @@ impl LtxProject {
     LtxFilesFormatter::format_opt(&self.writable_files()?, options)
   }
 
-  /// Checks every project LTX file with explicit options.
+  /// Checks every project LTX file with explicit options, reading each one through the project.
   ///
-  /// Returns an error when any config is archived, matching [`Self::format_all_files_opt`].
+  /// Unlike [`Self::format_all_files_opt`] this accepts archived configs: a formatting verdict needs content, and only
+  /// rewriting needs a file. Findings name the loose path where there is one and the engine identity otherwise, so an
+  /// installation reports every config it holds rather than refusing the whole check on the first archived one.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when a config cannot be read or parsed.
   pub fn check_format_all_files_opt(&self, options: LtxFormatOptions) -> XrfResult<LtxProjectFormatResult> {
-    LtxFilesFormatter::check_format_opt(&self.writable_files()?, options)
+    let mut result: LtxProjectFormatResult = LtxProjectFormatResult::new();
+    let started_at: Instant = Instant::now();
+
+    xrf_output::heading!(options.output, "Checking {} file(s)", self.ltx_files.len());
+
+    for logical_path in &self.ltx_files {
+      let contents: Vec<u8> = self.vfs().read(self.scope(), logical_path.as_str())?;
+
+      result.record_checked(self.path_of(logical_path), Ltx::is_formatted(&contents)?, &options);
+    }
+
+    result.duration = started_at.elapsed().as_millis();
+
+    LtxFilesFormatter::report_check(&result, &options);
+
+    Ok(result)
   }
 
   /// Returns physical paths for every project file, refusing when one is not loose.

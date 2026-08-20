@@ -555,7 +555,7 @@ fn unreadable_legacy_fallback_is_reported_once_when_missing_names_consult_it() {
   let weather: String = format!("{}{}", missing_references, repeated_missing_references);
   let (root, project): (PathBuf, GamedataProject) =
     semantic_weather_project_files_with_system(&[("test.ltx", &weather)], None, UNREADABLE_SYSTEM_LTX);
-  let definitions: WeatherDefinitions = WeatherDefinitions::read(&project.ltx_project.root);
+  let definitions: WeatherDefinitions = WeatherDefinitions::read(&project.ltx_project);
   // A logical path now, since the project addresses its files that way and reads them itself.
   let config_path: XrayPath = XrayPath::new("configs\\environment\\weathers\\test.ltx").expect("valid logical path");
   let mut definition_load_errors: BTreeSet<String> = BTreeSet::new();

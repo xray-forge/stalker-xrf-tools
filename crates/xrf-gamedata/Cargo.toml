@@ -9,7 +9,6 @@ rust-version.workspace = true
 derive_more = { workspace = true, features = ["display"] }
 rayon = { workspace = true }
 uuid = { workspace = true, features = ["v4"] }
-walkdir = { workspace = true }
 xrf-chunk = { workspace = true }
 xrf-db = { workspace = true }
 xrf-dds = { workspace = true }
@@ -23,6 +22,9 @@ xrf-shaders = { workspace = true }
 xrf-sound = { workspace = true }
 xrf-utils = { workspace = true }
 xrf-xml = { workspace = true }
+
+[dev-dependencies]
+xrf-test-utils = { workspace = true }
 
 [lints]
 workspace = true

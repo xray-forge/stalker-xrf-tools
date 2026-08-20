@@ -18,3 +18,6 @@ pub(crate) mod spawns;
 pub(crate) mod textures;
 pub(crate) mod weapons;
 pub(crate) mod weathers;
+
+#[cfg(test)]
+mod tests;

@@ -270,19 +270,29 @@ impl LtxProject {
     Ltx::read_from_vfs_full(&self.vfs, &self.scope, logical_path.as_str())
   }
 
-  /// The engine identity of `system.ltx`, within this project's scope.
+  /// The engine identity of a config named relative to this project.
   ///
-  /// A project mounted at a configs directory answers `system.ltx`; one scoped to `configs` inside a wider VFS answers
-  /// `configs\system.ltx`. The path is relative to what the project can see, so the scope's prefix belongs in it.
+  /// A project mounted at a configs directory answers `environment\suns.ltx`; one scoped to `configs` inside a wider VFS
+  /// answers `configs\environment\suns.ltx`. Callers name configs the way the config tree does and let the scope place
+  /// them, which is what lets the same check read a loose gamedata tree and an installation's `db\configs`.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when the resulting path is not a valid logical path.
+  pub fn config_path(&self, relative_path: &str) -> XrfResult<XrayPath> {
+    match self.scope.prefix() {
+      Some(prefix) => XrayPath::new(prefix)?.join(relative_path),
+      None => XrayPath::new(relative_path),
+    }
+  }
+
+  /// The engine identity of `system.ltx`, within this project's scope.
   ///
   /// # Errors
   ///
   /// Returns an error only if the resulting name stops being a valid logical path.
   pub fn system_ltx_path(&self) -> XrfResult<XrayPath> {
-    match self.scope.prefix() {
-      Some(prefix) => XrayPath::new(prefix)?.join(SYSTEM_LTX_FILENAME),
-      None => XrayPath::new(SYSTEM_LTX_FILENAME),
-    }
+    self.config_path(SYSTEM_LTX_FILENAME)
   }
 
   /// The user-facing path of `system.ltx`, for findings that name it.

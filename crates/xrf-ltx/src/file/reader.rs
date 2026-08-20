@@ -3,7 +3,9 @@ use std::io::Read;
 use std::path::{Path, PathBuf};
 
 use xrf_error::XrfResult;
-use xrf_utils::{decode_bytes_to_string, get_windows1251_encoder, read_as_string_from_w1251_encoded};
+use xrf_utils::{
+  decode_bytes_to_string, encode_w1251_bytes_to_string, get_windows1251_encoder, read_as_string_from_w1251_encoded,
+};
 use xrf_vfs::{XrayScope, XrayVfs};
 
 use crate::Ltx;
@@ -115,6 +117,20 @@ impl Ltx {
   /// Load formatted LTX as string from reader.
   pub fn format_from<R: Read>(reader: &mut R) -> XrfResult<String> {
     LtxParser::new(read_as_string_from_w1251_encoded(reader)?.chars()).parse_into_formatted()
+  }
+
+  /// Whether the given LTX bytes are already formatted canonically.
+  ///
+  /// Content is all a formatting verdict needs, so this answers for an archived config too — only rewriting one needs a
+  /// file, which is why [`Self::format_file`] stays separate.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when the bytes cannot be decoded or parsed.
+  pub fn is_formatted(bytes: &[u8]) -> XrfResult<bool> {
+    let existing: String = encode_w1251_bytes_to_string(bytes)?;
+
+    Ok(existing == Self::format_from_str(&existing)?)
   }
 }
 

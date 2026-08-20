@@ -1,7 +1,7 @@
 use std::collections::{HashMap, HashSet};
-use std::path::{Path, PathBuf};
 
-use xrf_ltx::Ltx;
+use xrf_ltx::{Ltx, LtxProject};
+use xrf_vfs::XrayPath;
 
 /// Definitions that weather sections may reference.
 ///
@@ -21,16 +21,19 @@ pub struct WeatherDefinitions {
 }
 
 impl WeatherDefinitions {
-  /// Reads weather definitions from an assembled `configs` directory.
+  /// Reads weather definitions through the project that holds them.
+  ///
+  /// Read through the project rather than the host filesystem, so an installation's definitions are read from its `db\`
+  /// volumes instead of reported unreadable.
   ///
   /// The returned value retains definition-family errors so validation can continue and report
   /// every affected weather cycle in one run.
-  pub fn read(configs_root: &Path) -> Self {
+  pub fn read(project: &LtxProject) -> Self {
     Self {
-      ambient_sections: Self::read_sections(&configs_root.join("environment").join("ambients.ltx")),
-      sun_sections: Self::read_sections(&configs_root.join("environment").join("suns.ltx")),
-      thunderbolt_collections: Self::read_thunderbolt_collections(configs_root),
-      legacy_system: Self::read_ltx(&configs_root.join("system.ltx")),
+      ambient_sections: Self::read_sections(project, "environment\\ambients.ltx"),
+      sun_sections: Self::read_sections(project, "environment\\suns.ltx"),
+      thunderbolt_collections: Self::read_thunderbolt_collections(project),
+      legacy_system: Self::read_ltx(project, "system.ltx"),
     }
   }
 
@@ -73,8 +76,8 @@ impl WeatherDefinitions {
     Ok(Some(missing_definitions))
   }
 
-  fn read_sections(path: &Path) -> Result<HashSet<String>, String> {
-    Self::read_ltx(path).map(|ltx| {
+  fn read_sections(project: &LtxProject, relative_path: &str) -> Result<HashSet<String>, String> {
+    Self::read_ltx(project, relative_path).map(|ltx| {
       ltx
         .iter()
         .map(|(section_name, _)| section_name.to_string())
@@ -83,15 +86,26 @@ impl WeatherDefinitions {
     })
   }
 
-  fn read_ltx(path: &Path) -> Result<Ltx, String> {
-    Ltx::read_from_file_full(path)
-      .map_err(|error| format!("Could not read weather definitions from {}: {error}", path.display()))
+  /// Reads one definition config named relative to the project's configs.
+  ///
+  /// Failures name the path a person can act on, which for a loose config is its file and for an archived one its engine
+  /// identity.
+  fn read_ltx(project: &LtxProject, relative_path: &str) -> Result<Ltx, String> {
+    let logical_path: XrayPath = project
+      .config_path(relative_path)
+      .map_err(|error| format!("Could not address weather definitions at {relative_path}: {error}"))?;
+
+    project.read_full(&logical_path).map_err(|error| {
+      format!(
+        "Could not read weather definitions from {}: {error}",
+        project.path_of(&logical_path).display()
+      )
+    })
   }
 
-  fn read_thunderbolt_collections(configs_root: &Path) -> Result<HashMap<String, Vec<String>>, String> {
-    let environment_root: PathBuf = configs_root.join("environment");
-    let collections: Ltx = Self::read_ltx(&environment_root.join("thunderbolt_collections.ltx"))?;
-    let thunderbolts: Ltx = Self::read_ltx(&environment_root.join("thunderbolts.ltx"))?;
+  fn read_thunderbolt_collections(project: &LtxProject) -> Result<HashMap<String, Vec<String>>, String> {
+    let collections: Ltx = Self::read_ltx(project, "environment\\thunderbolt_collections.ltx")?;
+    let thunderbolts: Ltx = Self::read_ltx(project, "environment\\thunderbolts.ltx")?;
 
     let mut result: HashMap<String, Vec<String>> = HashMap::new();
 
