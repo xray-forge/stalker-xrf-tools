@@ -2,16 +2,16 @@ use std::path::Path;
 
 use xrf_error::{XrfError, XrfResult};
 use xrf_shaders::XRayShaderSourceLoader;
-use xrf_vfs::{XrayScope, XrayVfs};
+use xrf_vfs::{XrayLookupScope, XrayVfs};
 
 /// Loads shader sources through mounted sources, so an installation's `db\shaders` volume reads like a loose tree.
 pub struct GamedataShaderSourceLoader<'a> {
-  scope: &'a XrayScope,
+  scope: &'a XrayLookupScope,
   vfs: &'a XrayVfs,
 }
 
 impl<'a> GamedataShaderSourceLoader<'a> {
-  pub fn new(vfs: &'a XrayVfs, scope: &'a XrayScope) -> Self {
+  pub fn new(vfs: &'a XrayVfs, scope: &'a XrayLookupScope) -> Self {
     Self { scope, vfs }
   }
 }

@@ -8,7 +8,7 @@ use std::path::PathBuf;
 
 use xrf_test_utils::utils::get_absolute_generated_test_resource_path;
 use xrf_vfs::ArchiveAssetSource;
-use xrf_vfs::{XrayAssetContainer, XrayAssetSource, XrayMountKind, XrayScope, XrayVfs};
+use xrf_vfs::{XrayAssetContainer, XrayAssetSource, XrayLookupScope, XrayMountKind, XrayVfs};
 
 use crate::pack::archive_pack_config::{ArchivePackConfig, ArchivePackFolder};
 use crate::pack::archive_packer::ArchivePacker;
@@ -101,7 +101,7 @@ fn resolves_a_texture_reference_once_mounted_in_a_vfs() {
 
   vfs.mount("", Box::new(source)).expect("archive mounts");
 
-  let scope: XrayScope = XrayScope::all();
+  let scope: XrayLookupScope = XrayLookupScope::all();
   let location = vfs
     .dds_texture(&scope, "wpn\\wpn_ak74")
     .expect("lookup succeeds")
@@ -129,7 +129,7 @@ fn a_loose_file_wins_over_the_same_name_in_an_archive() {
   vfs.mount_directory("", &loose).expect("directory mounts");
   vfs.mount("", Box::new(archived)).expect("archive mounts");
 
-  let scope: XrayScope = XrayScope::all();
+  let scope: XrayLookupScope = XrayLookupScope::all();
 
   assert_eq!(vfs.read(&scope, "textures\\wpn\\wpn_ak74.dds").unwrap(), b"loose");
   assert_eq!(

@@ -1,7 +1,7 @@
 use std::path::{Path, PathBuf};
 
 use crate::vfs::tests::fake_source::{FakeArchiveSource, directory};
-use crate::{XrayAsset, XrayScope, XrayVfs};
+use crate::{XrayAsset, XrayLookupScope, XrayVfs};
 
 #[test]
 fn resolves_a_texture_reference_against_a_mounted_root() {
@@ -12,7 +12,7 @@ fn resolves_a_texture_reference_against_a_mounted_root() {
     .expect("root mounts");
 
   let location: XrayAsset = vfs
-    .dds_texture(&XrayScope::all(), "wpn\\wpn_ak74")
+    .dds_texture(&XrayLookupScope::all(), "wpn\\wpn_ak74")
     .expect("lookup succeeds")
     .expect("texture resolves");
 
@@ -30,7 +30,7 @@ fn the_first_mount_holding_a_name_wins_and_the_shadowed_copy_stays_visible() {
   vfs.mount_directory("", &overlay).expect("overlay mounts");
   vfs.mount_directory("", &base).expect("base mounts");
 
-  let scope: XrayScope = XrayScope::all();
+  let scope: XrayLookupScope = XrayLookupScope::all();
 
   assert_eq!(
     vfs
@@ -56,7 +56,7 @@ fn a_subtree_mount_carries_engine_identity_through_its_base() {
     .mount_directory("configs\\weapons", directory("subtree", &["ak74.ltx"]))
     .expect("subtree mounts");
 
-  let scope: XrayScope = XrayScope::all();
+  let scope: XrayLookupScope = XrayLookupScope::all();
 
   assert!(vfs.find(&scope, "configs\\weapons\\ak74.ltx").unwrap().is_some());
   assert!(
@@ -80,7 +80,7 @@ fn an_archived_entry_resolves_and_reads_but_offers_no_physical_path() {
     )
     .expect("archive mounts");
 
-  let scope: XrayScope = XrayScope::all();
+  let scope: XrayLookupScope = XrayLookupScope::all();
   let location: XrayAsset = vfs
     .find(&scope, "textures\\wpn\\wpn_ak74.dds")
     .unwrap()
@@ -106,7 +106,9 @@ fn a_loose_file_overrides_an_archived_one() {
     .expect("archive mounts");
 
   assert_eq!(
-    vfs.read(&XrayScope::all(), "textures\\wpn\\wpn_ak74.dds").unwrap(),
+    vfs
+      .read(&XrayLookupScope::all(), "textures\\wpn\\wpn_ak74.dds")
+      .unwrap(),
     b"loose_wins"
   );
 }
@@ -123,7 +125,7 @@ fn writing_an_archived_winner_is_refused_and_names_the_archive() {
     .expect("archive mounts");
 
   let error: String = vfs
-    .write(&XrayScope::all(), "configs\\system.ltx", b"formatted")
+    .write(&XrayLookupScope::all(), "configs\\system.ltx", b"formatted")
     .expect_err("write is refused")
     .to_string();
 
@@ -143,7 +145,7 @@ fn a_writable_scope_skips_an_archive_entirely() {
     .expect("archive mounts");
   vfs.mount_directory("", &loose).expect("directory mounts");
 
-  let writable: XrayScope = XrayScope::writable();
+  let writable: XrayLookupScope = XrayLookupScope::writable();
 
   vfs
     .write(&writable, "configs\\system.ltx", b"formatted")
@@ -167,7 +169,7 @@ fn a_prefix_scope_cannot_answer_outside_its_subtree() {
     )
     .expect("root mounts");
 
-  let configs: XrayScope = XrayScope::all().with_prefix("configs").expect("prefix is valid");
+  let configs: XrayLookupScope = XrayLookupScope::all().with_prefix("configs").expect("prefix is valid");
 
   assert!(vfs.find(&configs, "configs\\system.ltx").unwrap().is_some());
   assert!(
@@ -199,7 +201,7 @@ fn enumeration_dedupes_across_mounts_and_reports_shadowed_copies_separately() {
   vfs.mount_directory("", &overlay).expect("overlay mounts");
   vfs.mount_directory("", &base).expect("base mounts");
 
-  let scope: XrayScope = XrayScope::all();
+  let scope: XrayLookupScope = XrayLookupScope::all();
 
   assert_eq!(vfs.entries(&scope).len(), 2, "winners only");
   assert_eq!(vfs.entries_all(&scope).len(), 3, "including the shadowed copy");

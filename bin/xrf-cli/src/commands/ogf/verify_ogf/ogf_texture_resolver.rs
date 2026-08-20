@@ -7,7 +7,7 @@ use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
 use xrf_dds::{DdsFile, DdsFormat, DdsMetadata};
-use xrf_vfs::{XrayScope, XrayVfs, implied_asset_root};
+use xrf_vfs::{XrayLookupScope, XrayVfs, implied_asset_root};
 
 /// The outcome of resolving and reading one texture reference.
 pub enum TextureResolution {
@@ -52,7 +52,7 @@ impl OgfTextureResolver {
     //
     // Do not widen this scope to installation archives: archive reads load complete entries, while verification needs
     // only DDS metadata. Add header-only archive reads before including them.
-    let scope: XrayScope = XrayScope::only([mount]);
+    let scope: XrayLookupScope = XrayLookupScope::only([mount]);
 
     let located: Option<PathBuf> = self
       .vfs

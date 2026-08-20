@@ -6,7 +6,7 @@ use xrf_error::XrfResult;
 use xrf_utils::{
   decode_bytes_to_string, encode_w1251_bytes_to_string, get_windows1251_encoder, read_as_string_from_w1251_encoded,
 };
-use xrf_vfs::{XrayScope, XrayVfs};
+use xrf_vfs::{XrayLookupScope, XrayVfs};
 
 use crate::Ltx;
 use crate::file::include::LtxIncludeConvertor;
@@ -41,7 +41,7 @@ impl Ltx {
   /// # Errors
   ///
   /// Returns an error when the path is not in scope, its bytes are not valid Windows-1251, or the contents will not parse.
-  pub fn read_from_vfs(vfs: &XrayVfs, scope: &XrayScope, logical_path: &str) -> XrfResult<Self> {
+  pub fn read_from_vfs(vfs: &XrayVfs, scope: &XrayLookupScope, logical_path: &str) -> XrfResult<Self> {
     let source: LtxIncludeVfsSource = LtxIncludeVfsSource::new(vfs, scope);
 
     LtxIncludeConvertor::convert_with(source.read_ltx(logical_path)?, &source)
@@ -52,7 +52,7 @@ impl Ltx {
   /// # Errors
   ///
   /// Returns an error when reading fails, or when an inherited section cannot be resolved.
-  pub fn read_from_vfs_full(vfs: &XrayVfs, scope: &XrayScope, logical_path: &str) -> XrfResult<Self> {
+  pub fn read_from_vfs_full(vfs: &XrayVfs, scope: &XrayLookupScope, logical_path: &str) -> XrfResult<Self> {
     Self::read_from_vfs(vfs, scope, logical_path)?.into_inherited()
   }
 
@@ -91,7 +91,7 @@ impl Ltx {
   /// # Errors
   ///
   /// Returns an error when the path is not in scope, its bytes are not valid Windows-1251, or the contents will not parse.
-  pub fn read_included_from_vfs(vfs: &XrayVfs, scope: &XrayScope, logical_path: &str) -> XrfResult<LtxIncluded> {
+  pub fn read_included_from_vfs(vfs: &XrayVfs, scope: &XrayLookupScope, logical_path: &str) -> XrfResult<LtxIncluded> {
     let bytes: Vec<u8> = vfs.read(scope, logical_path)?;
 
     Self::read_included_from_str(&decode_bytes_to_string(&bytes, get_windows1251_encoder())?)

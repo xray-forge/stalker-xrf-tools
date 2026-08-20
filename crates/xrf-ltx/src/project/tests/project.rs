@@ -7,7 +7,7 @@ use std::fs;
 use std::path::PathBuf;
 
 use xrf_error::XrfResult;
-use xrf_vfs::{XrayPath, XrayScope, XrayVfs};
+use xrf_vfs::{XrayLookupScope, XrayPath, XrayVfs};
 
 use crate::project::ltx_project::LtxProject;
 
@@ -127,7 +127,7 @@ fn places_config_names_in_whichever_scope_the_project_has() -> XrfResult {
   let at_game_root: LtxProject = LtxProject::open_at_scope_opt(
     &configs,
     vfs,
-    XrayScope::all().with_prefix("configs")?,
+    XrayLookupScope::all().with_prefix("configs")?,
     Default::default(),
   )?;
 

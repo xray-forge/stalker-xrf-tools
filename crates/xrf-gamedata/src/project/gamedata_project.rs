@@ -5,7 +5,7 @@ use std::path::{Path, PathBuf};
 use xrf_chunk::{ChunkReader, InMemoryChunkDataSource};
 use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{LtxProject, LtxProjectOptions};
-use xrf_vfs::{XrayMountMode, XrayPathCollision, XrayScope, XrayVfs, open_plan};
+use xrf_vfs::{XrayLookupScope, XrayMountMode, XrayPathCollision, XrayVfs, open_plan};
 
 use crate::project::gamedata_project_options::GamedataProjectReadOptions;
 
@@ -22,7 +22,7 @@ pub struct GamedataProject {
   /// The project resolves assets through the same mounts under a wider scope: `ltx_project` narrows to `configs`, while an
   /// asset lookup spans the whole tree. One VFS, two scopes, rather than mounting an installation twice.
   pub(crate) ltx_project: LtxProject,
-  pub(crate) scope: XrayScope,
+  pub(crate) scope: XrayLookupScope,
   /// Location shown in output, which for an installation is the game directory rather than any one mount.
   pub(crate) root: PathBuf,
 }
@@ -58,7 +58,7 @@ impl GamedataProject {
     }
 
     let vfs: XrayVfs = open_plan(&mode.plan(&options.root)?.ignoring(&options.ignored)?)?;
-    let scope: XrayScope = XrayScope::all();
+    let scope: XrayLookupScope = XrayLookupScope::all();
 
     // The gate is what the project resolves, not what sits on disk: an installation keeps its configs inside `db\configs`.
     if vfs.find(&scope, SYSTEM_LTX_LOGICAL_PATH)?.is_none() {
@@ -104,7 +104,7 @@ impl GamedataProject {
   }
 
   /// Mounts and subtree the project's operations apply to.
-  pub(crate) fn scope(&self) -> &XrayScope {
+  pub(crate) fn scope(&self) -> &XrayLookupScope {
     &self.scope
   }
 

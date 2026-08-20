@@ -7,12 +7,12 @@ use std::fs;
 use std::path::PathBuf;
 
 use xrf_test_utils::utils::get_absolute_generated_test_resource_path;
-use xrf_vfs::{XrayScope, XrayVfs};
+use xrf_vfs::{XrayLookupScope, XrayVfs};
 
 use crate::Ltx;
 
 /// Builds a config tree and mounts it, returning the VFS and an all-mounts scope.
-fn mount(name: &str, files: &[(&str, &str)]) -> (XrayVfs, XrayScope) {
+fn mount(name: &str, files: &[(&str, &str)]) -> (XrayVfs, XrayLookupScope) {
   let root: PathBuf = get_absolute_generated_test_resource_path(&format!("ltx_vfs_read/{name}"));
 
   let _ = fs::remove_dir_all(&root);
@@ -28,7 +28,7 @@ fn mount(name: &str, files: &[(&str, &str)]) -> (XrayVfs, XrayScope) {
 
   vfs.mount_directory("", &root).expect("root mounts");
 
-  (vfs, XrayScope::all())
+  (vfs, XrayLookupScope::all())
 }
 
 #[test]
@@ -139,7 +139,7 @@ fn an_include_the_vfs_does_not_hold_is_nothing_to_merge() {
 #[test]
 fn a_config_outside_the_scope_is_an_error_rather_than_an_empty_result() {
   let (vfs, scope) = mount("out_of_scope", &[("configs\\system.ltx", "[section]\nvalue = 1\n")]);
-  let textures: XrayScope = scope.with_prefix("textures").expect("prefix is valid");
+  let textures: XrayLookupScope = scope.with_prefix("textures").expect("prefix is valid");
 
   assert!(Ltx::read_from_vfs(&vfs, &textures, "configs\\system.ltx").is_err());
 }
@@ -194,7 +194,7 @@ fn a_loose_config_overrides_one_lower_in_the_mount_order() {
   vfs.mount_directory("", &overlay).expect("overlay mounts");
   vfs.mount_directory("", &base).expect("base mounts");
 
-  let ltx: Ltx = Ltx::read_from_vfs(&vfs, &XrayScope::all(), "configs\\system.ltx").expect("config reads");
+  let ltx: Ltx = Ltx::read_from_vfs(&vfs, &XrayLookupScope::all(), "configs\\system.ltx").expect("config reads");
 
   assert_eq!(ltx.get_from("section", "value"), Some("overridden"));
 }

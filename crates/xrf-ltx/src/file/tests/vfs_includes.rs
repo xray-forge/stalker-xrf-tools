@@ -7,11 +7,11 @@ use std::fs;
 use std::path::PathBuf;
 
 use xrf_test_utils::utils::get_absolute_generated_test_resource_path;
-use xrf_vfs::{XrayScope, XrayVfs};
+use xrf_vfs::{XrayLookupScope, XrayVfs};
 
 use crate::Ltx;
 
-fn mount(name: &str, files: &[(&str, &str)]) -> (XrayVfs, XrayScope) {
+fn mount(name: &str, files: &[(&str, &str)]) -> (XrayVfs, XrayLookupScope) {
   let root: PathBuf = get_absolute_generated_test_resource_path(&format!("ltx_vfs_includes/{name}"));
 
   let _ = fs::remove_dir_all(&root);
@@ -27,7 +27,7 @@ fn mount(name: &str, files: &[(&str, &str)]) -> (XrayVfs, XrayScope) {
 
   vfs.mount_directory("", &root).expect("root mounts");
 
-  (vfs, XrayScope::all())
+  (vfs, XrayLookupScope::all())
 }
 
 #[test]
@@ -58,7 +58,7 @@ fn answers_an_empty_list_for_a_config_including_nothing() {
 #[test]
 fn a_config_outside_the_scope_is_an_error() {
   let (vfs, scope) = mount("out_of_scope", &[("configs\\system.ltx", "[a]\n")]);
-  let textures: XrayScope = scope.with_prefix("textures").expect("prefix is valid");
+  let textures: XrayLookupScope = scope.with_prefix("textures").expect("prefix is valid");
 
   assert!(Ltx::read_included_from_vfs(&vfs, &textures, "configs\\system.ltx").is_err());
 }

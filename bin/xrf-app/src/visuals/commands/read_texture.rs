@@ -3,7 +3,7 @@ use std::sync::MutexGuard;
 
 use tauri::State;
 use tauri::ipc::Response;
-use xrf_vfs::XrayScope;
+use xrf_vfs::XrayLookupScope;
 use xrf_visual::VisualPackage;
 
 use crate::types::TauriResult;
@@ -35,7 +35,7 @@ pub async fn visuals_read_texture(
     .lock()
     .map_err(|error| format!("Failed to read texture - texture resolver is unavailable: {error}"))?;
 
-  let scope: XrayScope = resolver.scope_for(source.physical_path(), fallback_root.as_deref());
+  let scope: XrayLookupScope = resolver.scope_for(source.physical_path(), fallback_root.as_deref());
   let bytes: Vec<u8> = resolver.read(&scope, &reference)?;
 
   log::info!("Serving {} bytes for '{reference}'", bytes.len());

@@ -2,7 +2,7 @@ use std::fs;
 use std::path::PathBuf;
 
 use crate::vfs::tests::fake_source::{FakeArchiveSource, directory};
-use crate::{XrayAsset, XrayMountId, XrayScope, XrayVfs};
+use crate::{XrayAsset, XrayLookupScope, XrayMountId, XrayVfs};
 
 #[test]
 fn an_override_creates_a_loose_file_that_then_wins() {
@@ -19,7 +19,7 @@ fn an_override_creates_a_loose_file_that_then_wins() {
     )
     .expect("archive mounts");
 
-  let scope: XrayScope = XrayScope::all();
+  let scope: XrayLookupScope = XrayLookupScope::all();
 
   assert!(
     vfs.write(&scope, "configs\\system.ltx", b"formatted").is_err(),
@@ -55,7 +55,7 @@ fn an_override_is_refused_when_no_writable_mount_is_in_scope() {
     .expect("archive mounts");
 
   let error: String = vfs
-    .write_override(&XrayScope::all(), "configs\\system.ltx", b"overridden")
+    .write_override(&XrayLookupScope::all(), "configs\\system.ltx", b"overridden")
     .expect_err("override is refused")
     .to_string();
 
@@ -73,7 +73,7 @@ fn an_override_refuses_to_replace_a_file_the_writable_mount_already_holds() {
 
   assert!(
     vfs
-      .write_override(&XrayScope::all(), "configs\\system.ltx", b"overridden")
+      .write_override(&XrayLookupScope::all(), "configs\\system.ltx", b"overridden")
       .is_err()
   );
 }
@@ -87,7 +87,7 @@ fn an_override_outside_the_writable_mount_base_is_refused() {
     .expect("subtree mounts");
 
   let error: String = vfs
-    .write_override(&XrayScope::all(), "textures\\wpn\\wpn_ak74.dds", b"bytes")
+    .write_override(&XrayLookupScope::all(), "textures\\wpn\\wpn_ak74.dds", b"bytes")
     .expect_err("override is refused")
     .to_string();
 
@@ -104,11 +104,21 @@ fn remounting_a_directory_picks_up_a_file_written_behind_the_vfs() {
 
   fs::write(root.join("configs/weather.ltx"), b"weather").expect("file written outside the vfs");
 
-  assert!(vfs.find(&XrayScope::all(), "configs\\weather.ltx").unwrap().is_none());
+  assert!(
+    vfs
+      .find(&XrayLookupScope::all(), "configs\\weather.ltx")
+      .unwrap()
+      .is_none()
+  );
 
   vfs.remount(id).expect("directory remounts");
 
-  assert!(vfs.find(&XrayScope::all(), "configs\\weather.ltx").unwrap().is_some());
+  assert!(
+    vfs
+      .find(&XrayLookupScope::all(), "configs\\weather.ltx")
+      .unwrap()
+      .is_some()
+  );
 }
 
 #[test]
@@ -123,12 +133,12 @@ fn an_override_lands_in_the_highest_priority_writable_mount() {
   vfs.mount_directory("", &back).expect("back mounts");
 
   let location: XrayAsset = vfs
-    .write_override(&XrayScope::all(), "configs\\system.ltx", b"overridden")
+    .write_override(&XrayLookupScope::all(), "configs\\system.ltx", b"overridden")
     .expect("override is created");
 
   assert_eq!(location.root(), Some(front.as_path()));
   assert_eq!(
-    vfs.read(&XrayScope::all(), "configs\\system.ltx").unwrap(),
+    vfs.read(&XrayLookupScope::all(), "configs\\system.ltx").unwrap(),
     b"overridden"
   );
 }

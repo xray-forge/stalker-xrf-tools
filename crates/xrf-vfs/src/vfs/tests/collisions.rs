@@ -9,7 +9,7 @@ use std::path::PathBuf;
 use xrf_test_utils::utils::get_absolute_generated_test_resource_path;
 
 use crate::vfs::tests::fake_source::FakeArchiveSource;
-use crate::{XrayMountPlan, XrayPathCollision, XrayScope, XrayVfs, open_plan};
+use crate::{XrayLookupScope, XrayMountPlan, XrayPathCollision, XrayVfs, open_plan};
 
 /// Writes a tree whose file names differ only by case, which normalize to one logical path.
 fn tree(name: &str, files: &[&str]) -> PathBuf {
@@ -50,13 +50,13 @@ fn reports_collisions_from_every_mount_in_scope() {
     )
     .expect("clashing mounts");
 
-  let collisions: Vec<XrayPathCollision> = vfs.collisions(&XrayScope::all());
+  let collisions: Vec<XrayPathCollision> = vfs.collisions(&XrayLookupScope::all());
 
   assert_eq!(collisions.len(), 1, "reported once, from the mount that holds it");
   assert_eq!(collisions[0].logical_path, "textures\\wpn\\wpn_ak74.dds");
   assert!(
     vfs
-      .find(&XrayScope::all(), "textures\\wpn\\wpn_ak74.dds")
+      .find(&XrayLookupScope::all(), "textures\\wpn\\wpn_ak74.dds")
       .expect("lookup")
       .is_some(),
     "resolution is unaffected: one of the two still answers"
@@ -68,7 +68,7 @@ fn a_clean_mount_reports_nothing() {
   let root: PathBuf = tree("clean", &["textures/wpn/wpn_ak74.dds", "configs/system.ltx"]);
   let vfs: XrayVfs = open_plan(&XrayMountPlan::root(&root).expect("plan")).expect("mounts");
 
-  assert!(vfs.collisions(&XrayScope::all()).is_empty());
+  assert!(vfs.collisions(&XrayLookupScope::all()).is_empty());
 
   let _ = fs::remove_dir_all(root);
 }
@@ -89,7 +89,7 @@ fn an_ignored_prefix_is_absent_from_the_mount() {
     .ignoring(&[String::from("textures\\wip")])
     .expect("prefix is valid");
   let vfs: XrayVfs = open_plan(&plan).expect("mounts");
-  let scope: XrayScope = XrayScope::all();
+  let scope: XrayLookupScope = XrayLookupScope::all();
 
   assert!(vfs.find(&scope, "textures\\wip\\draft.dds").expect("lookup").is_none());
   assert!(
@@ -120,7 +120,7 @@ fn ignoring_matches_on_component_boundaries() {
 
   assert_eq!(
     vfs
-      .entries(&XrayScope::all())
+      .entries(&XrayLookupScope::all())
       .iter()
       .map(|entry| entry.logical_path().to_string())
       .collect::<Vec<_>>(),

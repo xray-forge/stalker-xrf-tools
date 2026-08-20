@@ -4,7 +4,7 @@ use std::time::Instant;
 
 use xrf_error::{XrfError, XrfResult};
 use xrf_shaders::{SHADER_SCRIPT_FILE_EXTENSION, ShaderRenderer, XRayShader, XRayShaderScript, is_shader_source_path};
-use xrf_vfs::{XrayScope, XrayVfs};
+use xrf_vfs::{XrayLookupScope, XrayVfs};
 
 use crate::GamedataFindingFactory;
 use crate::project::shaders::gamedata_shader_source_loader::GamedataShaderSourceLoader;
@@ -18,12 +18,12 @@ pub(crate) struct ShadersVerifier<'a> {
   options: &'a GamedataProjectVerifyOptions,
   /// Logical root of the shader trees, not a filesystem path: sources resolve through the VFS.
   shaders_root: PathBuf,
-  scope: &'a XrayScope,
+  scope: &'a XrayLookupScope,
   vfs: &'a XrayVfs,
 }
 
 impl<'a> ShadersVerifier<'a> {
-  pub(crate) fn new(vfs: &'a XrayVfs, scope: &'a XrayScope, options: &'a GamedataProjectVerifyOptions) -> Self {
+  pub(crate) fn new(vfs: &'a XrayVfs, scope: &'a XrayLookupScope, options: &'a GamedataProjectVerifyOptions) -> Self {
     Self {
       options,
       scope,
@@ -126,7 +126,7 @@ impl<'a> ShadersVerifier<'a> {
   ///
   /// Sorted so a run reports in a stable order, which a single directory walk gave for free and enumeration across mounts does not.
   fn renderer_entries(&self, renderer_prefix: &str) -> XrfResult<Vec<String>> {
-    let scope: XrayScope = self.scope.clone().with_prefix(renderer_prefix)?;
+    let scope: XrayLookupScope = self.scope.clone().with_prefix(renderer_prefix)?;
     let mut entries: Vec<String> = self
       .vfs
       .entries(&scope)
@@ -264,7 +264,7 @@ mod tests {
   use std::path::{Path, PathBuf};
 
   use xrf_error::{XrfError, XrfResult};
-  use xrf_vfs::{XrayScope, XrayVfs};
+  use xrf_vfs::{XrayLookupScope, XrayVfs};
 
   use super::{SHADERS_DIRECTORY, ShadersVerifier};
   use crate::{GamedataCheckResult, GamedataProjectVerifyOptions, GamedataVerificationRule};
@@ -273,12 +273,12 @@ mod tests {
   ///
   /// A directory mount rather than a packed volume: what these check is enumeration and include resolution over logical
   /// paths, which a directory source exercises identically while staying fast.
-  fn mount(root: &Path) -> XrfResult<(XrayVfs, XrayScope)> {
+  fn mount(root: &Path) -> XrfResult<(XrayVfs, XrayLookupScope)> {
     let mut vfs: XrayVfs = XrayVfs::new();
 
     vfs.mount_directory("", root)?;
 
-    Ok((vfs, XrayScope::all()))
+    Ok((vfs, XrayLookupScope::all()))
   }
 
   #[test]

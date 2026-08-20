@@ -4,7 +4,7 @@ use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use xrf_error::XrfError;
 use xrf_ltx::{LtxProject, LtxProjectOptions, LtxProjectVerifyResult, LtxVerifyOptions};
 use xrf_output::OutputOptions;
-use xrf_vfs::XrayScope;
+use xrf_vfs::XrayLookupScope;
 
 use crate::commands::ltx::ltx_installation::mount_installation;
 use crate::generic_command::{CommandResult, GenericCommand};
@@ -76,7 +76,7 @@ impl GenericCommand for VerifyLtxCommand {
     // path they name rather than a flag.
     let project: Box<LtxProject> = Box::new(match mount_installation(path)? {
       Some(vfs) => {
-        let project: LtxProject = LtxProject::open_at_scope_opt(path, vfs, XrayScope::all(), options)?;
+        let project: LtxProject = LtxProject::open_at_scope_opt(path, vfs, XrayLookupScope::all(), options)?;
 
         Self::report_sources(&project, &output);
 

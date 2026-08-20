@@ -37,7 +37,7 @@ pub use mount::{
 };
 pub use path::{XrayPath, XrayPathCollision, is_component_prefix, normalize_logical};
 pub use source::{ArchiveAssetSource, XrayAssetSource, XrayMountKind};
-pub use vfs::{XrayDirectoryListing, XrayScope, XrayVfs};
+pub use vfs::{XrayDirectoryListing, XrayLookupScope, XrayVfs};
 
 pub use crate::archive::archive_descriptor::ArchiveDescriptor;
 pub use crate::archive::archive_file_descriptor::ArchiveFileDescriptor;

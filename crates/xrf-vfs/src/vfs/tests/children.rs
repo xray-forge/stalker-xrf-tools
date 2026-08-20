@@ -4,7 +4,7 @@
 //! deliberately not `entries` with a prefix, which answers everything below.
 
 use crate::vfs::tests::fake_source::{FakeArchiveSource, directory};
-use crate::{XrayDirectoryListing, XrayScope, XrayVfs};
+use crate::{XrayDirectoryListing, XrayLookupScope, XrayVfs};
 
 fn mounted(name: &str, files: &[&str]) -> XrayVfs {
   let mut vfs: XrayVfs = XrayVfs::new();
@@ -26,7 +26,7 @@ fn separates_folders_from_files_directly_inside() {
     ],
   );
 
-  let listing: XrayDirectoryListing = vfs.children(&XrayScope::all(), "configs").expect("listing");
+  let listing: XrayDirectoryListing = vfs.children(&XrayLookupScope::all(), "configs").expect("listing");
 
   assert_eq!(listing.directories, vec!["environment", "weapons"]);
   assert_eq!(
@@ -48,13 +48,13 @@ fn does_not_answer_with_everything_below_the_directory() {
     &["textures/wpn/wpn_ak74.dds", "textures/wpn/scopes/scope.dds"],
   );
 
-  let listing: XrayDirectoryListing = vfs.children(&XrayScope::all(), "textures").expect("listing");
+  let listing: XrayDirectoryListing = vfs.children(&XrayLookupScope::all(), "textures").expect("listing");
 
   assert_eq!(listing.directories, vec!["wpn"]);
   assert!(listing.files.is_empty());
   assert_eq!(
     vfs
-      .entries(&XrayScope::all().with_prefix("textures").expect("prefix"))
+      .entries(&XrayLookupScope::all().with_prefix("textures").expect("prefix"))
       .len(),
     2,
     "entries still answers the whole subtree"
@@ -65,7 +65,7 @@ fn does_not_answer_with_everything_below_the_directory() {
 fn lists_the_logical_root_for_an_empty_directory() {
   let vfs: XrayVfs = mounted("children_root", &["configs/system.ltx", "textures/wpn/wpn_ak74.dds"]);
 
-  let listing: XrayDirectoryListing = vfs.children(&XrayScope::all(), "").expect("listing");
+  let listing: XrayDirectoryListing = vfs.children(&XrayLookupScope::all(), "").expect("listing");
 
   assert_eq!(listing.directories, vec!["configs", "textures"]);
   assert!(listing.files.is_empty());
@@ -82,7 +82,7 @@ fn merges_children_across_mounts_and_dedupes_folders() {
     )
     .expect("base mounts");
 
-  let listing: XrayDirectoryListing = vfs.children(&XrayScope::all(), "configs").expect("listing");
+  let listing: XrayDirectoryListing = vfs.children(&XrayLookupScope::all(), "configs").expect("listing");
 
   assert_eq!(listing.directories, vec!["weapons"], "one folder, not one per mount");
   assert_eq!(listing.files.len(), 1);
@@ -105,7 +105,7 @@ fn sees_archived_children_beside_loose_ones() {
     )
     .expect("archive mounts");
 
-  let listing: XrayDirectoryListing = vfs.children(&XrayScope::all(), "configs").expect("listing");
+  let listing: XrayDirectoryListing = vfs.children(&XrayLookupScope::all(), "configs").expect("listing");
 
   assert_eq!(listing.directories, vec!["weapons"]);
   assert_eq!(listing.files.len(), 1);
@@ -115,12 +115,17 @@ fn sees_archived_children_beside_loose_ones() {
 fn answers_an_empty_listing_for_a_directory_nothing_holds() {
   let vfs: XrayVfs = mounted("children_absent", &["configs/system.ltx"]);
 
-  assert!(vfs.children(&XrayScope::all(), "meshes").expect("listing").is_empty());
+  assert!(
+    vfs
+      .children(&XrayLookupScope::all(), "meshes")
+      .expect("listing")
+      .is_empty()
+  );
 }
 
 #[test]
 fn rejects_a_directory_that_is_not_a_logical_path() {
   let vfs: XrayVfs = mounted("children_invalid", &["configs/system.ltx"]);
 
-  assert!(vfs.children(&XrayScope::all(), "configs\\..\\textures").is_err());
+  assert!(vfs.children(&XrayLookupScope::all(), "configs\\..\\textures").is_err());
 }

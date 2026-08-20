@@ -3,7 +3,7 @@ use xrf_error::XrfResult;
 use crate::path::normalize;
 use crate::{XrayMount, XrayMountId, XrayMountKind};
 
-/// A mount filter for one VFS operation.
+/// Which mounts a lookup scope admits.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub(crate) enum XrayMountSelection {
   /// Every mount, in mount order.
@@ -17,14 +17,18 @@ pub(crate) enum XrayMountSelection {
   OfKind(XrayMountKind),
 }
 
-/// A mount selection optionally restricted to one logical subtree.
+/// Where one [`crate::XrayVfs`] operation is allowed to look: which mounts, and which logical subtree of them.
+///
+/// Both halves narrow the same search. `all()` is every mount and the whole tree; `with_prefix("configs")` keeps the mounts
+/// and restricts the paths; `writable()` keeps the tree and restricts the mounts. Passing one of these instead of
+/// hand-filtering results is what lets a config project and an asset lookup share one VFS — they differ only in scope.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
-pub struct XrayScope {
+pub struct XrayLookupScope {
   selection: XrayMountSelection,
   prefix: Option<String>,
 }
 
-impl XrayScope {
+impl XrayLookupScope {
   /// Selects every mount in priority order.
   pub fn all() -> Self {
     Self::default()
@@ -88,17 +92,17 @@ impl XrayScope {
 #[cfg(test)]
 mod tests {
   use super::XrayMountSelection;
-  use crate::{XrayMountKind, XrayScope};
+  use crate::{XrayLookupScope, XrayMountKind};
 
   #[test]
   fn defaults_to_everything() {
-    assert_eq!(XrayScope::all().selection(), &XrayMountSelection::All);
-    assert_eq!(XrayScope::all().prefix(), None);
+    assert_eq!(XrayLookupScope::all().selection(), &XrayMountSelection::All);
+    assert_eq!(XrayLookupScope::all().prefix(), None);
   }
 
   #[test]
   fn normalizes_a_prefix_the_way_a_logical_path_is_normalized() {
-    let scope: XrayScope = XrayScope::all()
+    let scope: XrayLookupScope = XrayLookupScope::all()
       .with_prefix("Configs/Weapons")
       .expect("prefix is valid");
 
@@ -107,13 +111,13 @@ mod tests {
 
   #[test]
   fn rejects_an_ambiguous_prefix() {
-    assert!(XrayScope::all().with_prefix("configs/../textures").is_err());
+    assert!(XrayLookupScope::all().with_prefix("configs/../textures").is_err());
   }
 
   #[test]
   fn selects_by_kind() {
     assert_eq!(
-      XrayScope::of_kind(XrayMountKind::Archive).selection(),
+      XrayLookupScope::of_kind(XrayMountKind::Archive).selection(),
       &XrayMountSelection::OfKind(XrayMountKind::Archive)
     );
   }

@@ -2,7 +2,7 @@ use std::path::{Path, PathBuf};
 
 use xrf_error::XrfResult;
 use xrf_utils::{decode_bytes_to_string, get_windows1251_encoder};
-use xrf_vfs::{XrayPath, XrayScope, XrayVfs, normalize_logical};
+use xrf_vfs::{XrayLookupScope, XrayPath, XrayVfs, normalize_logical};
 
 use crate::Ltx;
 use crate::file::include::LtxIncludeConvertor;
@@ -15,11 +15,11 @@ use crate::file::include_source::LtxIncludeSource;
 /// of a logical tree rather than a directory.
 pub(crate) struct LtxIncludeVfsSource<'a> {
   vfs: &'a XrayVfs,
-  scope: &'a XrayScope,
+  scope: &'a XrayLookupScope,
 }
 
 impl<'a> LtxIncludeVfsSource<'a> {
-  pub fn new(vfs: &'a XrayVfs, scope: &'a XrayScope) -> Self {
+  pub fn new(vfs: &'a XrayVfs, scope: &'a XrayLookupScope) -> Self {
     Self { scope, vfs }
   }
 

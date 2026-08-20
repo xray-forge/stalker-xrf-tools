@@ -1,7 +1,7 @@
 use std::path::{Path, PathBuf};
 
 use xrf_error::{XrfError, XrfResult};
-use xrf_vfs::{XrayPath, XrayScope, XrayVfs};
+use xrf_vfs::{XrayLookupScope, XrayPath, XrayVfs};
 
 use crate::Ltx;
 use crate::file::file_configuration::constants::{
@@ -34,7 +34,7 @@ pub struct LtxProject {
   pub ltx_scheme_declarations: LtxSectionSchemes,
   /// Mounted sources that resolve project files.
   vfs: XrayVfs,
-  scope: XrayScope,
+  scope: XrayLookupScope,
 }
 
 impl LtxProject {
@@ -49,7 +49,7 @@ impl LtxProject {
 
     vfs.mount_directory("", root)?;
 
-    Self::assemble(root.to_path_buf(), vfs, XrayScope::all(), options)
+    Self::assemble(root.to_path_buf(), vfs, XrayLookupScope::all(), options)
   }
 
   /// Opens a directory-backed project with default options.
@@ -67,7 +67,7 @@ impl LtxProject {
   pub fn open_at_scope_opt(
     root: impl AsRef<Path>,
     vfs: XrayVfs,
-    scope: XrayScope,
+    scope: XrayLookupScope,
     options: LtxProjectOptions,
   ) -> XrfResult<Self> {
     Self::assemble(root.as_ref().to_path_buf(), vfs, scope, options)
@@ -82,7 +82,7 @@ impl LtxProject {
       ltx_scheme_file_entries: Vec::new(),
       ltx_scheme_files: Vec::new(),
       root: root.as_ref().to_path_buf(),
-      scope: XrayScope::all(),
+      scope: XrayLookupScope::all(),
       vfs: XrayVfs::new(),
     }
   }
@@ -91,7 +91,7 @@ impl LtxProject {
   ///
   /// An entry point is a file nothing else includes, which is why every file's include list is read before any of their
   /// contents.
-  fn assemble(root: PathBuf, vfs: XrayVfs, scope: XrayScope, options: LtxProjectOptions) -> XrfResult<Self> {
+  fn assemble(root: PathBuf, vfs: XrayVfs, scope: XrayLookupScope, options: LtxProjectOptions) -> XrfResult<Self> {
     let source: LtxIncludeVfsSource = LtxIncludeVfsSource::new(&vfs, &scope);
 
     let mut ltx_files: Vec<XrayPath> = Vec::new();
@@ -190,7 +190,7 @@ impl LtxProject {
   /// # Errors
   ///
   /// Returns an error when a mounted entry is not a valid X-Ray logical path.
-  fn collect_logical_paths(vfs: &XrayVfs, scope: &XrayScope) -> XrfResult<Vec<XrayPath>> {
+  fn collect_logical_paths(vfs: &XrayVfs, scope: &XrayLookupScope) -> XrfResult<Vec<XrayPath>> {
     let mut paths: Vec<XrayPath> = Vec::new();
 
     for location in vfs.entries(scope) {
@@ -231,7 +231,7 @@ impl LtxProject {
     &self.vfs
   }
 
-  pub fn scope(&self) -> &XrayScope {
+  pub fn scope(&self) -> &XrayLookupScope {
     &self.scope
   }
 

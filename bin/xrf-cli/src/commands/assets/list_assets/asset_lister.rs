@@ -2,7 +2,7 @@ use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant};
 
 use xrf_error::XrfResult;
-use xrf_vfs::{XrayAsset, XrayMountKind, XrayMountMode, XrayPathCollision, XrayScope, XrayVfs, open_plan};
+use xrf_vfs::{XrayAsset, XrayLookupScope, XrayMountKind, XrayMountMode, XrayPathCollision, XrayVfs, open_plan};
 
 /// Resolved assets and source metadata for one listing.
 pub struct AssetListing {
@@ -90,7 +90,7 @@ impl AssetLister {
   pub fn run(&self) -> XrfResult<AssetListing> {
     let started: Instant = Instant::now();
     let vfs: XrayVfs = open_plan(&self.mode.plan(&self.path)?.ignoring(&self.ignored)?)?;
-    let scope: XrayScope = self.scope()?;
+    let scope: XrayLookupScope = self.scope()?;
     let entries: Vec<XrayAsset> = vfs.entries(&scope);
     let shadowed: Vec<XrayAsset> = if self.is_shadowed_included {
       Self::shadowed(&vfs, &scope, &entries)
@@ -118,11 +118,11 @@ impl AssetLister {
     })
   }
 
-  fn scope(&self) -> XrfResult<XrayScope> {
-    let scope: XrayScope = if self.is_loose_only {
-      XrayScope::of_kind(XrayMountKind::Directory)
+  fn scope(&self) -> XrfResult<XrayLookupScope> {
+    let scope: XrayLookupScope = if self.is_loose_only {
+      XrayLookupScope::of_kind(XrayMountKind::Directory)
     } else {
-      XrayScope::all()
+      XrayLookupScope::all()
     };
 
     match self.prefix.as_deref() {
@@ -134,7 +134,7 @@ impl AssetLister {
   /// Returns entries hidden by a higher-priority mount.
   ///
   /// The result removes winning path and container pairs from the complete enumeration.
-  fn shadowed(vfs: &XrayVfs, scope: &XrayScope, winners: &[XrayAsset]) -> Vec<XrayAsset> {
+  fn shadowed(vfs: &XrayVfs, scope: &XrayLookupScope, winners: &[XrayAsset]) -> Vec<XrayAsset> {
     let mut shadowed: Vec<XrayAsset> = vfs.entries_all(scope);
 
     shadowed.retain(|entry| {

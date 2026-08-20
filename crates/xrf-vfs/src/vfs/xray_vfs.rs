@@ -7,8 +7,8 @@ use crate::path::{XrayPath, normalize};
 use crate::source::XrayDirectorySource;
 use crate::vfs::XrayDirectoryListing;
 use crate::{
-  XrayAsset, XrayAssetContainer, XrayAssetRules, XrayAssetSource, XrayAssetType, XrayMount, XrayMountId, XrayMountKind,
-  XrayPathCollision, XrayScope,
+  XrayAsset, XrayAssetContainer, XrayAssetRules, XrayAssetSource, XrayAssetType, XrayLookupScope, XrayMount,
+  XrayMountId, XrayMountKind, XrayPathCollision,
 };
 
 /// The engine's view of assets: several mounted sources, searched in order, first hit wins.
@@ -82,12 +82,12 @@ impl XrayVfs {
   }
 
   /// Iterates over mounts selected by a scope, preserving priority order.
-  pub fn scoped(&self, scope: &XrayScope) -> impl Iterator<Item = &XrayMount> {
+  pub fn scoped(&self, scope: &XrayLookupScope) -> impl Iterator<Item = &XrayMount> {
     self.mounts.iter().filter(move |mount| scope.includes(mount))
   }
 
   /// The winning location for a logical path, or `None` when no mount in scope holds it.
-  pub fn find(&self, scope: &XrayScope, logical_path: &str) -> XrfResult<Option<XrayAsset>> {
+  pub fn find(&self, scope: &XrayLookupScope, logical_path: &str) -> XrfResult<Option<XrayAsset>> {
     let logical_path: String = normalize(logical_path)?;
 
     if !Self::within_prefix(scope, &logical_path) {
@@ -100,7 +100,7 @@ impl XrayVfs {
   /// Every mount in scope holding a logical path, winner first.
   ///
   /// Includes shadowed copies for override auditing.
-  pub fn find_all(&self, scope: &XrayScope, logical_path: &str) -> XrfResult<Vec<XrayAsset>> {
+  pub fn find_all(&self, scope: &XrayLookupScope, logical_path: &str) -> XrfResult<Vec<XrayAsset>> {
     let logical_path: String = normalize(logical_path)?;
 
     if !Self::within_prefix(scope, &logical_path) {
@@ -116,7 +116,7 @@ impl XrayVfs {
   }
 
   /// Reads bytes from the winning entry for a logical path.
-  pub fn read(&self, scope: &XrayScope, logical_path: &str) -> XrfResult<Vec<u8>> {
+  pub fn read(&self, scope: &XrayLookupScope, logical_path: &str) -> XrfResult<Vec<u8>> {
     let logical_path: String = normalize(logical_path)?;
 
     if Self::within_prefix(scope, &logical_path) {
@@ -139,7 +139,7 @@ impl XrayVfs {
   ///
   /// For a size gate that exists to avoid parsing a truncated asset: reading the bytes to measure them would defeat it, and
   /// for an archived entry would decompress the whole thing.
-  pub fn size(&self, scope: &XrayScope, logical_path: &str) -> Option<u64> {
+  pub fn size(&self, scope: &XrayLookupScope, logical_path: &str) -> Option<u64> {
     let logical_path: String = normalize(logical_path).ok()?;
 
     if !Self::within_prefix(scope, &logical_path) {
@@ -155,7 +155,7 @@ impl XrayVfs {
   }
 
   /// Returns winning entries in scope, one per logical path.
-  pub fn entries(&self, scope: &XrayScope) -> Vec<XrayAsset> {
+  pub fn entries(&self, scope: &XrayLookupScope) -> Vec<XrayAsset> {
     let mut seen: HashSet<String> = HashSet::new();
     let mut located: Vec<XrayAsset> = Vec::new();
 
@@ -187,7 +187,7 @@ impl XrayVfs {
   /// enumeration that means "every texture in this project".
   ///
   /// Narrow with a scope prefix when a caller wants one subtree.
-  pub fn entries_of_type(&self, scope: &XrayScope, asset_type: XrayAssetType) -> Vec<XrayAsset> {
+  pub fn entries_of_type(&self, scope: &XrayLookupScope, asset_type: XrayAssetType) -> Vec<XrayAsset> {
     self
       .entries(scope)
       .into_iter()
@@ -203,7 +203,7 @@ impl XrayVfs {
   /// # Errors
   ///
   /// Returns an error when `suffix` is not a valid X-Ray logical path fragment.
-  pub fn entries_with_suffix(&self, scope: &XrayScope, suffix: &str) -> XrfResult<Vec<XrayAsset>> {
+  pub fn entries_with_suffix(&self, scope: &XrayLookupScope, suffix: &str) -> XrfResult<Vec<XrayAsset>> {
     let suffix: String = normalize(suffix)?;
 
     Ok(
@@ -219,7 +219,7 @@ impl XrayVfs {
   ///
   /// An authoring problem to report rather than a reason to refuse the VFS: nothing here affects what resolves, only what a
   /// person should be told is unreachable.
-  pub fn collisions(&self, scope: &XrayScope) -> Vec<XrayPathCollision> {
+  pub fn collisions(&self, scope: &XrayLookupScope) -> Vec<XrayPathCollision> {
     self
       .scoped(scope)
       .flat_map(|mount| mount.source().collisions().iter().cloned())
@@ -239,14 +239,14 @@ impl XrayVfs {
   /// # Errors
   ///
   /// Returns an error when `directory` is not a valid X-Ray logical path. An empty `directory` lists the logical root.
-  pub fn children(&self, scope: &XrayScope, directory: &str) -> XrfResult<XrayDirectoryListing> {
+  pub fn children(&self, scope: &XrayLookupScope, directory: &str) -> XrfResult<XrayDirectoryListing> {
     let directory: String = if directory.is_empty() {
       String::new()
     } else {
       normalize(directory)?
     };
 
-    let scope: XrayScope = if directory.is_empty() {
+    let scope: XrayLookupScope = if directory.is_empty() {
       scope.clone()
     } else {
       scope.clone().with_prefix(&directory)?
@@ -288,7 +288,7 @@ impl XrayVfs {
   }
 
   /// Returns every entry in scope, including shadowed copies.
-  pub fn entries_all(&self, scope: &XrayScope) -> Vec<XrayAsset> {
+  pub fn entries_all(&self, scope: &XrayLookupScope) -> Vec<XrayAsset> {
     let mut located: Vec<XrayAsset> = Vec::new();
 
     for mount in self.scoped(scope) {
@@ -311,7 +311,7 @@ impl XrayVfs {
   /// Writes bytes to the winning entry.
   ///
   /// The operation refuses read-only winners and absent paths instead of creating a loose override.
-  pub fn write(&self, scope: &XrayScope, logical_path: &str, bytes: &[u8]) -> XrfResult<()> {
+  pub fn write(&self, scope: &XrayLookupScope, logical_path: &str, bytes: &[u8]) -> XrfResult<()> {
     let logical_path: String = normalize(logical_path)?;
 
     if Self::within_prefix(scope, &logical_path) {
@@ -353,7 +353,7 @@ impl XrayVfs {
   ///
   /// Returns an error when the path is invalid or out of scope, no writable mount can contain it, the target is already
   /// indexed there, creation or remounting fails, or the new entry does not resolve.
-  pub fn write_override(&mut self, scope: &XrayScope, logical_path: &str, bytes: &[u8]) -> XrfResult<XrayAsset> {
+  pub fn write_override(&mut self, scope: &XrayLookupScope, logical_path: &str, bytes: &[u8]) -> XrfResult<XrayAsset> {
     let logical_path: String = normalize(logical_path)?;
 
     if !Self::within_prefix(scope, &logical_path) {
@@ -419,7 +419,12 @@ impl XrayVfs {
   /// # Errors
   ///
   /// Returns an error when `asset_type` has no canonical home, or when the reference cannot be normalized as an X-Ray path.
-  pub fn resolve(&self, scope: &XrayScope, asset_type: XrayAssetType, reference: &str) -> XrfResult<Option<XrayAsset>> {
+  pub fn resolve(
+    &self,
+    scope: &XrayLookupScope,
+    asset_type: XrayAssetType,
+    reference: &str,
+  ) -> XrfResult<Option<XrayAsset>> {
     let rules: XrayAssetRules = asset_type.rules().ok_or_else(|| {
       XrfError::new_asset_error(format!(
         "asset kind {asset_type:?} has no single directory to resolve under"
@@ -441,7 +446,7 @@ impl XrayVfs {
   /// than one `*`.
   pub fn resolve_all(
     &self,
-    scope: &XrayScope,
+    scope: &XrayLookupScope,
     asset_type: XrayAssetType,
     reference: &str,
   ) -> XrfResult<Vec<XrayAsset>> {
@@ -484,7 +489,7 @@ impl XrayVfs {
   /// # Errors
   ///
   /// Returns an error when the reference cannot be normalized as an X-Ray path.
-  pub fn dds_texture(&self, scope: &XrayScope, reference: &str) -> XrfResult<Option<XrayAsset>> {
+  pub fn dds_texture(&self, scope: &XrayLookupScope, reference: &str) -> XrfResult<Option<XrayAsset>> {
     self.resolve(scope, XrayAssetType::Dds, reference)
   }
 
@@ -493,7 +498,7 @@ impl XrayVfs {
   /// # Errors
   ///
   /// Returns an error when the reference cannot be normalized as an X-Ray path.
-  pub fn ogf(&self, scope: &XrayScope, reference: &str) -> XrfResult<Option<XrayAsset>> {
+  pub fn ogf(&self, scope: &XrayLookupScope, reference: &str) -> XrfResult<Option<XrayAsset>> {
     self.resolve(scope, XrayAssetType::Ogf, reference)
   }
 
@@ -502,22 +507,22 @@ impl XrayVfs {
   /// # Errors
   ///
   /// Returns an error when the reference cannot be normalized as an X-Ray path.
-  pub fn omf(&self, scope: &XrayScope, reference: &str) -> XrfResult<Option<XrayAsset>> {
+  pub fn omf(&self, scope: &XrayLookupScope, reference: &str) -> XrfResult<Option<XrayAsset>> {
     self.resolve(scope, XrayAssetType::Omf, reference)
   }
 
-  fn find_in(&self, scope: &XrayScope, prefix: &str, path: &str) -> XrfResult<Option<XrayAsset>> {
+  fn find_in(&self, scope: &XrayLookupScope, prefix: &str, path: &str) -> XrfResult<Option<XrayAsset>> {
     self.find(scope, &crate::path::join(prefix, path)?)
   }
 
   /// Checks whether a logical path falls inside the scope's subtree.
-  fn within_prefix(scope: &XrayScope, logical_path: &str) -> bool {
+  fn within_prefix(scope: &XrayLookupScope, logical_path: &str) -> bool {
     scope
       .prefix()
       .is_none_or(|prefix| crate::path::is_component_prefix(logical_path, prefix))
   }
 
-  fn locate(&self, scope: &XrayScope, logical_path: &str) -> Option<XrayAsset> {
+  fn locate(&self, scope: &XrayLookupScope, logical_path: &str) -> Option<XrayAsset> {
     self
       .scoped(scope)
       .find_map(|mount| Self::locate_in(mount, logical_path))

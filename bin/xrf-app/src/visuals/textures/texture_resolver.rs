@@ -2,7 +2,7 @@ use std::path::Path;
 
 use xrf_error::XrfResult;
 use xrf_vfs::mount_plan;
-use xrf_vfs::{XrayAssetType, XrayMountPlan, XrayScope, XrayVfs};
+use xrf_vfs::{XrayAssetType, XrayLookupScope, XrayMountPlan, XrayVfs};
 use xrf_visual::VisualSubmesh;
 
 use crate::types::TauriResult;
@@ -26,7 +26,7 @@ impl VisualTextureResolver {
     fallback_root: Option<&Path>,
     submeshes: &[VisualSubmesh],
   ) -> Vec<SubmeshTexture> {
-    let scope: XrayScope = self.scope_for(visual, fallback_root);
+    let scope: XrayLookupScope = self.scope_for(visual, fallback_root);
 
     submeshes
       .iter()
@@ -42,7 +42,7 @@ impl VisualTextureResolver {
   }
 
   /// Resolves one reference and applies the engine's missing-texture substitution.
-  pub fn resolve(&self, scope: &XrayScope, reference: &str) -> SubmeshTextureResolution {
+  pub fn resolve(&self, scope: &XrayLookupScope, reference: &str) -> SubmeshTextureResolution {
     if self.mounts_in(scope) == 0 {
       return SubmeshTextureResolution::NoRoot;
     }
@@ -62,7 +62,7 @@ impl VisualTextureResolver {
   /// Reads a texture from the winning mount.
   ///
   /// Reading through the VFS avoids exposing the winning mount's physical path to the caller.
-  pub fn read(&self, scope: &XrayScope, reference: &str) -> TauriResult<Vec<u8>> {
+  pub fn read(&self, scope: &XrayLookupScope, reference: &str) -> TauriResult<Vec<u8>> {
     let logical_path: String = XrayAssetType::Dds
       .rules()
       .expect("dds has rules")
@@ -78,10 +78,10 @@ impl VisualTextureResolver {
   ///
   /// Search order is the visual's implied loose root, its containing installation, then `fallback_root`. An empty scope
   /// means no source could be planned or mounted.
-  pub fn scope_for(&mut self, visual: Option<&Path>, fallback_root: Option<&Path>) -> XrayScope {
+  pub fn scope_for(&mut self, visual: Option<&Path>, fallback_root: Option<&Path>) -> XrayLookupScope {
     let plan: XrayMountPlan = self.plan_for(visual, fallback_root);
 
-    XrayScope::only(mount_plan(&mut self.vfs, &plan).unwrap_or_default())
+    XrayLookupScope::only(mount_plan(&mut self.vfs, &plan).unwrap_or_default())
   }
 
   /// Builds a priority-ordered plan from the visual root, containing installation, and fallback root.
@@ -106,7 +106,7 @@ impl VisualTextureResolver {
       .unwrap_or_default()
   }
 
-  fn lookup(&self, scope: &XrayScope, reference: &str) -> Option<xrf_vfs::XrayAsset> {
+  fn lookup(&self, scope: &XrayLookupScope, reference: &str) -> Option<xrf_vfs::XrayAsset> {
     self
       .vfs
       .dds_texture(scope, reference)
@@ -115,12 +115,12 @@ impl VisualTextureResolver {
       .flatten()
   }
 
-  fn mounts_in(&self, scope: &XrayScope) -> usize {
+  fn mounts_in(&self, scope: &XrayLookupScope) -> usize {
     self.vfs.scoped(scope).count()
   }
 
   /// Describes every mount searched by a failed lookup.
-  fn described_mounts(&self, scope: &XrayScope) -> Vec<String> {
+  fn described_mounts(&self, scope: &XrayLookupScope) -> Vec<String> {
     self
       .vfs
       .scoped(scope)

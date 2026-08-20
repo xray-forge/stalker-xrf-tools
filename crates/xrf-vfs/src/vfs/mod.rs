@@ -1,11 +1,12 @@
-//! The virtual file system: ordered mounts searched first-hit-wins, and the scope that narrows them.
+//! The virtual file system: ordered mounts searched first-hit-wins, and the lookup scope that narrows a search to some of
+//! them.
 
 mod directory_listing;
 #[cfg(test)]
 mod tests;
-mod xray_scope;
+mod xray_lookup_scope;
 mod xray_vfs;
 
 pub use directory_listing::XrayDirectoryListing;
-pub use xray_scope::XrayScope;
+pub use xray_lookup_scope::XrayLookupScope;
 pub use xray_vfs::XrayVfs;

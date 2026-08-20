@@ -40,7 +40,7 @@ mod tests {
   use std::path::PathBuf;
 
   use xrf_ltx::LtxProject;
-  use xrf_vfs::XrayScope;
+  use xrf_vfs::XrayLookupScope;
 
   use super::GamedataProject;
   use crate::{GamedataProjectVerifyOptions, GamedataVerificationStatus, GamedataVerificationType};
@@ -50,7 +50,7 @@ mod tests {
     GamedataProject {
       ltx_project: LtxProject::empty(PathBuf::new()),
       root: PathBuf::new(),
-      scope: XrayScope::all(),
+      scope: XrayLookupScope::all(),
     }
   }
 
