@@ -1,5 +1,3 @@
-use std::path::PathBuf;
-
 use xrf_db::ShaderLibraryFile;
 
 use crate::GamedataFindingFactory;
@@ -16,13 +14,14 @@ impl<'a> ShaderLibraryVerifier<'a> {
   }
 
   pub(crate) fn verify(&self) -> GamedataShaderLibraryVerificationResult {
-    let path: PathBuf = self
-      .project
-      .assets
-      .expected_absolute_path(xrf_vfs::shader::SHADER_LIBRARY_LOGICAL_PATH)
-      .expect("fixed shader library path is valid");
+    // The logical path is the identity to report, since an archived library has no file to name.
+    let path: &str = xrf_vfs::shader::SHADER_LIBRARY_LOGICAL_PATH;
 
-    match ShaderLibraryFile::read_from_path(&path) {
+    match self
+      .project
+      .read_asset_chunks(path)
+      .and_then(|mut chunks| ShaderLibraryFile::read_from_chunk(&mut chunks))
+    {
       Ok(library) => GamedataShaderLibraryVerificationResult::passed(library),
       Err(error) => GamedataShaderLibraryVerificationResult::failed(GamedataFindingFactory::for_asset(
         GamedataVerificationRule::MeshesShaderLibrary,

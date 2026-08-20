@@ -69,6 +69,16 @@ impl GamedataProject {
     })
   }
 
+  /// Mounted sources this project resolves through.
+  pub(crate) fn vfs(&self) -> &XrayVfs {
+    &self.vfs
+  }
+
+  /// Mounts and subtree the project's operations apply to.
+  pub(crate) fn scope(&self) -> &XrayScope {
+    &self.scope
+  }
+
   /// Reads an asset's bytes through the VFS, whether it is loose or inside an archive volume.
   ///
   /// # Errors

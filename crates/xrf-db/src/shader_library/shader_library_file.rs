@@ -34,9 +34,9 @@ impl ShaderLibraryFile {
     Self::read_from_chunk(&mut ChunkReader::from_file(file)?)
   }
 
-  pub fn read_from_chunk(reader: &mut ChunkReader) -> XrfResult<Self> {
-    let chunks: Vec<ChunkReader> = reader.read_children()?;
-    let mut blenders: ChunkReader = find_required_chunk_by_id(&chunks, Self::BLENDERS_CHUNK_ID)?;
+  pub fn read_from_chunk<D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
+    let chunks: Vec<ChunkReader<D>> = reader.read_children()?;
+    let mut blenders: ChunkReader<D> = find_required_chunk_by_id(&chunks, Self::BLENDERS_CHUNK_ID)?;
 
     Self::read_blender_names(&mut blenders)
   }

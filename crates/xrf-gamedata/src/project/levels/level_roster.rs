@@ -47,22 +47,22 @@ impl LevelRoster {
     };
 
     let sources: Vec<String> = project
-      .assets
-      .with_type(AssetType::Spawn)
-      .filter(|asset| asset.logical_path().starts_with(&format!("{SPAWNS_DIRECTORY}\\")))
-      .map(|asset| asset.logical_path().to_string())
+      .vfs()
+      .entries_of_type(project.scope(), AssetType::Spawn)
+      .into_iter()
+      .filter(|location| location.logical_path().starts_with(&format!("{SPAWNS_DIRECTORY}\\")))
+      .map(|location| location.logical_path().to_string())
       .collect();
 
     for source in &sources {
-      let Some(path) = project.assets.absolute_path(source).ok().flatten() else {
-        return Err(XrfError::new_verify_error(format!(
-          "Spawn path was not found in gamedata root while reading level roster: {source}"
-        )));
-      };
+      let path: &String = source;
 
-      let graphs: SpawnGraphsChunk = SpawnFile::read_graphs_from_path::<XRayByteOrder, _>(&path).map_err(|error| {
-        XrfError::new_verify_error(format!("Failed to read level roster from spawn file {source}: {error}"))
-      })?;
+      let graphs: SpawnGraphsChunk = project
+        .read_asset_chunks(path)
+        .and_then(|mut chunks| SpawnFile::read_graphs_from_chunk::<XRayByteOrder, _>(&mut chunks))
+        .map_err(|error| {
+          XrfError::new_verify_error(format!("Failed to read level roster from spawn file {source}: {error}"))
+        })?;
 
       roster.sources_count += 1;
       roster.add_graph(source, &graphs);

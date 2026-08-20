@@ -156,6 +156,16 @@ impl XrayAssetSource for XrayDirectorySource {
     )
   }
 
+  fn size(&self, path: &str) -> Option<u64> {
+    self
+      .index
+      .find(path)
+      .ok()
+      .flatten()
+      .and_then(|asset| fs::metadata(asset.absolute_path()).ok())
+      .map(|metadata| metadata.len())
+  }
+
   fn collisions(&self) -> &[XrayPathCollision] {
     self.index.collisions()
   }

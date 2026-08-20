@@ -94,13 +94,24 @@ impl SpawnFile {
 
   /// Read only the game graphs chunk of the spawn file from file.
   pub fn read_graphs_from_file<T: ByteOrder>(file: File) -> XrfResult<SpawnGraphsChunk> {
-    let chunks: Vec<ChunkReader> = ChunkReader::from_file(file)?.read_children()?;
+    Self::read_graphs_from_chunk::<T, _>(&mut ChunkReader::from_file(file)?)
+  }
 
-    Self::read_graphs_from_chunks::<T>(&chunks)
+  /// Read only the game graphs chunk from a reader over any data source.
+  ///
+  /// The route an archived spawn file takes: a volume holds no file to slice, only bytes.
+  pub fn read_graphs_from_chunk<T: ByteOrder, D: ChunkDataSource>(
+    reader: &mut ChunkReader<D>,
+  ) -> XrfResult<SpawnGraphsChunk> {
+    let chunks: Vec<ChunkReader<D>> = reader.read_children()?;
+
+    Self::read_graphs_from_chunks::<T, _>(&chunks)
   }
 
   /// Read only the game graphs chunk of the spawn file from chunks.
-  pub fn read_graphs_from_chunks<T: ByteOrder>(chunks: &[ChunkReader]) -> XrfResult<SpawnGraphsChunk> {
+  pub fn read_graphs_from_chunks<T: ByteOrder, D: ChunkDataSource>(
+    chunks: &[ChunkReader<D>],
+  ) -> XrfResult<SpawnGraphsChunk> {
     find_required_chunk_by_id(chunks, SpawnGraphsChunk::CHUNK_ID)?.read_xr::<T, _>()
   }
 

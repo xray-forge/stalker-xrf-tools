@@ -1,5 +1,3 @@
-use std::path::PathBuf;
-
 use xrf_ltx::Ltx;
 
 use crate::GamedataFindingFactory;
@@ -92,12 +90,13 @@ impl<'a> LevelManifestVerifier<'a> {
   }
 
   fn verify_level_ltx(&self) -> Vec<Finding> {
-    let Some(path): Option<PathBuf> = self.bundle.file_on_disk(LEVEL_LTX_FILE) else {
+    let Some(path): Option<String> = self.bundle.resolved_file(LEVEL_LTX_FILE) else {
       // Absence is already reported by the required files rule.
       return Vec::new();
     };
 
-    let ltx: Ltx = match Ltx::read_from_file_full(&path) {
+    // Read through the project's VFS, so an archived level config is parsed rather than skipped.
+    let ltx: Ltx = match Ltx::read_from_vfs_full(self.bundle.project().vfs(), self.bundle.project().scope(), &path) {
       Ok(ltx) => ltx,
       Err(error) => {
         return vec![GamedataFindingFactory::for_asset(

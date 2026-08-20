@@ -1,5 +1,3 @@
-use std::path::PathBuf;
-
 use xrf_db::{
   LevelAiFile, LevelAiHeader, LevelCformFile, LevelCformHeader, LevelFile, LevelShadersChunk, XRayByteOrder,
 };
@@ -45,13 +43,18 @@ impl<'a> LevelBinariesVerifier<'a> {
   /// `R_ASSERT2(XRCL_PRODUCTION_VERSION == H.XRLC_version, "Incompatible level version.")` and
   /// `R_ASSERT2(chunk, "Level doesn't builded correctly.")`.
   fn verify_level_file(&self) -> LevelBinariesOutcome {
-    let Some(path): Option<PathBuf> = self.bundle.file_on_disk(LEVEL_FILE) else {
+    let Some(path): Option<String> = self.bundle.resolved_file(LEVEL_FILE) else {
       return LevelBinariesOutcome::default();
     };
 
     let asset_path: String = self.bundle.file_path(LEVEL_FILE);
 
-    let level_file: LevelFile = match LevelFile::read_from_path::<XRayByteOrder, _>(&path) {
+    let level_file: LevelFile = match self
+      .bundle
+      .project()
+      .read_asset_chunks(&path)
+      .and_then(|mut chunks| LevelFile::read_from_chunk::<XRayByteOrder, _>(&mut chunks))
+    {
       Ok(level_file) => level_file,
       Err(error) => {
         return LevelBinariesOutcome {
@@ -94,7 +97,7 @@ impl<'a> LevelBinariesVerifier<'a> {
 
   /// `R_ASSERT(CFORM_CURRENT_VERSION == H.version)`.
   fn verify_cform(&self) -> Vec<Finding> {
-    let Some(path): Option<PathBuf> = self.bundle.file_on_disk(LEVEL_CFORM_FILE) else {
+    let Some(path): Option<String> = self.bundle.resolved_file(LEVEL_CFORM_FILE) else {
       return Vec::new();
     };
 
@@ -109,7 +112,12 @@ impl<'a> LevelBinariesVerifier<'a> {
       )];
     }
 
-    let cform: LevelCformFile = match LevelCformFile::read_from_path::<XRayByteOrder, _>(&path) {
+    let cform: LevelCformFile = match self
+      .bundle
+      .project()
+      .read_asset_chunks(&path)
+      .and_then(|mut chunks| LevelCformFile::read_from_chunk::<XRayByteOrder, _>(&mut chunks))
+    {
       Ok(cform) => cform,
       Err(error) => {
         return vec![GamedataFindingFactory::for_asset(
@@ -136,7 +144,7 @@ impl<'a> LevelBinariesVerifier<'a> {
 
   /// `ASSERT_XRAI_VERSION_MATCH` plus the three guid assertions raised by `AISpaceBase::Load`.
   fn verify_ai_map(&self, level: Option<&RosterLevel>) -> Vec<Finding> {
-    let Some(path): Option<PathBuf> = self.bundle.file_on_disk(LEVEL_AI_FILE) else {
+    let Some(path): Option<String> = self.bundle.resolved_file(LEVEL_AI_FILE) else {
       return Vec::new();
     };
 
@@ -148,7 +156,12 @@ impl<'a> LevelBinariesVerifier<'a> {
       )];
     }
 
-    let ai: LevelAiFile = match LevelAiFile::read_from_path::<XRayByteOrder, _>(&path) {
+    let ai: LevelAiFile = match self
+      .bundle
+      .project()
+      .read_asset_chunks(&path)
+      .and_then(|mut chunks| LevelAiFile::read_from_chunk::<XRayByteOrder, _>(&mut chunks))
+    {
       Ok(ai) => ai,
       Err(error) => {
         return vec![GamedataFindingFactory::for_asset(

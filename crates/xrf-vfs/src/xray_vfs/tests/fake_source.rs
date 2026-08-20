@@ -100,6 +100,10 @@ impl XrayAssetSource for FakeArchiveSource {
     )
   }
 
+  fn size(&self, path: &str) -> Option<u64> {
+    self.entries.get(path).map(|bytes| bytes.len() as u64)
+  }
+
   fn collisions(&self) -> &[crate::XrayPathCollision] {
     &self.collisions
   }

@@ -30,10 +30,9 @@ impl<'a> LevelReferencesVerifier<'a> {
   /// simply left unresolved rather than reported twice.
   pub(crate) fn read_library(project: &GamedataProject) -> Option<ShaderLibraryFile> {
     project
-      .assets
-      .expected_absolute_path(xrf_vfs::shader::SHADER_LIBRARY_LOGICAL_PATH)
+      .read_asset_chunks(xrf_vfs::shader::SHADER_LIBRARY_LOGICAL_PATH)
+      .and_then(|mut chunks| ShaderLibraryFile::read_from_chunk(&mut chunks))
       .ok()
-      .and_then(|path| ShaderLibraryFile::read_from_path(&path).ok())
   }
 
   pub(crate) fn verify(&self, shaders: &LevelShadersChunk) -> LevelReferencesOutcome {

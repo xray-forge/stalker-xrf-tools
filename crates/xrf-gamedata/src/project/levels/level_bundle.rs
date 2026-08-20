@@ -1,6 +1,3 @@
-use std::fs;
-use std::path::PathBuf;
-
 use xrf_vfs::XrayAssetType;
 
 use crate::GamedataProject;
@@ -43,15 +40,22 @@ impl<'a> LevelBundle<'a> {
     format!("{LEVELS_DIRECTORY}\\{name}")
   }
 
-  pub(crate) fn file_on_disk(&self, file: &str) -> Option<PathBuf> {
-    self.project.assets.absolute_path(&self.file_path(file)).ok().flatten()
+  /// Logical path of a bundle file the project actually holds, loose or archived.
+  pub(crate) fn resolved_file(&self, file: &str) -> Option<String> {
+    let logical: String = self.file_path(file);
+
+    self
+      .project
+      .vfs()
+      .find(self.project.scope(), &logical)
+      .ok()
+      .flatten()
+      .map(|_| logical)
   }
 
+  /// Size of a bundle file without reading it, so a truncated asset is caught before parsing.
   pub(crate) fn file_size(&self, file: &str) -> Option<u64> {
-    self
-      .file_on_disk(file)
-      .and_then(|path| fs::metadata(path).ok())
-      .map(|metadata| metadata.len())
+    self.project.vfs().size(self.project.scope(), &self.file_path(file))
   }
 
   pub(crate) fn contains(&self, file: &str) -> bool {
@@ -71,12 +75,19 @@ impl<'a> LevelBundle<'a> {
 
     let in_bundle: bool = self
       .project
-      .assets
-      .find_in(&self.path(), &logical)
+      .vfs()
+      .find(self.project.scope(), &format!("{}\\{logical}", self.path()))
       .ok()
       .flatten()
       .is_some();
 
-    in_bundle || self.project.assets.dds_texture(reference).ok().flatten().is_some()
+    in_bundle
+      || self
+        .project
+        .vfs()
+        .dds_texture(self.project.scope(), reference)
+        .ok()
+        .flatten()
+        .is_some()
   }
 }

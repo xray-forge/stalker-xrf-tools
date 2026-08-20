@@ -133,6 +133,25 @@ impl XrayVfs {
     )))
   }
 
+  /// Size in bytes of the winning entry, without reading it.
+  ///
+  /// For a size gate that exists to avoid parsing a truncated asset: reading the bytes to measure them would defeat it, and
+  /// for an archived entry would decompress the whole thing.
+  pub fn size(&self, scope: &XrayScope, logical_path: &str) -> Option<u64> {
+    let logical_path: String = normalize(logical_path).ok()?;
+
+    if !Self::within_prefix(scope, &logical_path) {
+      return None;
+    }
+
+    self.scoped(scope).find_map(|mount| {
+      mount
+        .to_source_path(&logical_path)
+        .filter(|source_path| mount.source().contains(source_path))
+        .and_then(|source_path| mount.source().size(&source_path))
+    })
+  }
+
   /// Returns winning entries in scope, one per logical path.
   pub fn entries(&self, scope: &XrayScope) -> Vec<XrayAssetLocation> {
     let mut seen: HashSet<String> = HashSet::new();

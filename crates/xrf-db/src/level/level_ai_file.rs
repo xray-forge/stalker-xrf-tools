@@ -83,8 +83,15 @@ impl LevelAiFile {
 
   /// Read level AI-map file from file.
   pub fn read_from_file<T: ByteOrder>(file: File) -> XrfResult<Self> {
+    Self::read_from_chunk::<T, _>(&mut ChunkReader::from_file(file)?)
+  }
+
+  /// Reads the header from a chunk reader over any data source.
+  ///
+  /// The route an archived level file takes: a volume holds no file to slice, only bytes.
+  pub fn read_from_chunk<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
     Ok(Self {
-      header: ChunkReader::from_file(file)?.read_xr::<T, _>()?,
+      header: reader.read_xr::<T, _>()?,
     })
   }
 }

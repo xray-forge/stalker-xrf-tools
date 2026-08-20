@@ -58,6 +58,13 @@ pub trait XrayAssetSource: Debug + Send + Sync {
   /// Enumerates source-relative logical paths, optionally restricted to a component prefix.
   fn entries<'a>(&'a self, prefix: Option<&'a str>) -> Box<dyn Iterator<Item = String> + 'a>;
 
+  /// Size in bytes of an entry this source holds, without reading it.
+  ///
+  /// Answered from metadata rather than from a read, because the callers are size gates: a level's cform is checked against
+  /// its header size precisely to avoid parsing a truncated file. An archive knows this from its name table, so neither
+  /// container has to decompress anything.
+  fn size(&self, path: &str) -> Option<u64>;
+
   /// Files this source holds but cannot reach, because another file already claims their engine identity.
   ///
   /// Defaults to none, which is correct for a source whose names are unique by construction: an archive volume keys entries

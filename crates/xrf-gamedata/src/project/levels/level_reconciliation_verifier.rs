@@ -1,5 +1,4 @@
 use std::collections::BTreeSet;
-use std::path::PathBuf;
 
 use xrf_error::XrfResult;
 use xrf_ltx::Ltx;
@@ -28,20 +27,15 @@ impl<'a> LevelReconciliationVerifier<'a> {
   ///
   /// Files stored directly under the levels root, such as `root.ltx`, are not bundles.
   pub(crate) fn bundle_names(&self) -> XrfResult<BTreeSet<String>> {
-    let prefix: String = format!("{LEVELS_DIRECTORY}\\");
-
+    // The directories directly inside the levels root are the bundles; a file sitting there, such as `root.ltx`, is not one.
+    // `children` answers exactly that distinction, where a prefix enumeration would have to rediscover it.
     Ok(
       self
         .project
-        .assets
-        .with_prefix(LEVELS_DIRECTORY)?
-        .filter_map(|asset| {
-          asset
-            .logical_path()
-            .strip_prefix(&prefix)
-            .and_then(|rest| rest.split_once('\\'))
-            .map(|(directory, _)| directory.to_string())
-        })
+        .vfs()
+        .children(self.project.scope(), LEVELS_DIRECTORY)?
+        .directories
+        .into_iter()
         .collect(),
     )
   }
@@ -100,15 +94,14 @@ impl<'a> LevelReconciliationVerifier<'a> {
       (SINGLE_PLAYER_MAPS_FILE, SINGLE_PLAYER_MAPS_SECTION),
       (MULTIPLAYER_MAPS_FILE, MULTIPLAYER_MAPS_SECTION),
     ] {
-      for asset in self.project.assets.with_suffix(file)? {
-        let path: PathBuf = asset.absolute_path();
+      for location in self.project.vfs().entries_with_suffix(self.project.scope(), file)? {
+        let path: &str = location.logical_path();
 
         // Malformed configurations are reported by the ltx check, not this one.
-        let Ok(ltx) = Ltx::read_from_file_full(&path) else {
+        let Ok(ltx) = Ltx::read_from_vfs_full(self.project.vfs(), self.project.scope(), path) else {
           xrf_output::verbose!(
             self.options.output,
-            "Skipping unreadable level maps configuration: {}",
-            path.display()
+            "Skipping unreadable level maps configuration: {path}"
           );
 
           continue;

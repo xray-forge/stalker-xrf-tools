@@ -127,6 +127,15 @@ impl XrayAssetSource for ArchiveAssetSource {
     self.project.read_file_bytes(name)
   }
 
+  /// Answers from the volume's name table, so no entry is decompressed to learn its size.
+  fn size(&self, path: &str) -> Option<u64> {
+    self
+      .entries
+      .get(path)
+      .and_then(|name| self.project.files.get(name))
+      .map(|descriptor| u64::from(descriptor.size_real))
+  }
+
   fn write(&self, path: &str, _bytes: &[u8]) -> XrfResult<()> {
     Err(XrfError::new_read_error(format!(
       "cannot write '{path}': archive '{}' is read only",
