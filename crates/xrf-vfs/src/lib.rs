@@ -1,62 +1,49 @@
 //! Indexes X-Ray assets and layers their physical sources in a virtual file system.
+//!
+//! The crate is grouped by the question each part answers:
+//!
+//! - [`path`] — what an engine identity is, and the only place separators and case are decided.
+//! - [`asset`] — what a resolved asset is, plus the per-kind rules that turn a reference into one.
+//! - [`source`] — the mountable surface, and the two sources the engine itself has.
+//! - [`mount`] — composing sources into a searchable order, and planning one from a path.
+//! - [`vfs`] — resolving and reading through that order.
+//! - [`fsgame`] — the declaration file an installation describes its own layout with.
+//! - `archive` — reading `.db` volume sets, which the archive source above is built on.
+//!
+//! Everything a consumer needs is re-exported here, so `use xrf_vfs::XrayVfs` stays the import regardless of how the inside
+//! is arranged.
 
-mod directory_asset;
-mod directory_asset_index;
-mod fsgame;
-mod indexed_asset;
-mod open;
-pub mod shader;
-pub mod sound;
+pub mod asset;
+pub mod fsgame;
+pub mod mount;
+pub mod path;
+pub mod source;
+pub mod vfs;
+
+pub(crate) mod archive;
 #[cfg(feature = "typescript-bindings")]
 mod typescript_bindings;
-mod xray_asset;
-mod xray_asset_index;
-mod xray_asset_source;
-mod xray_asset_type;
-mod xray_directory_source;
-mod xray_mount;
-mod xray_mount_mode;
-mod xray_mount_plan;
-pub mod xray_path;
-mod xray_path_collision;
-mod xray_root;
-mod xray_scope;
-mod xray_vfs;
 
 #[cfg(feature = "typescript-bindings")]
 pub use crate::typescript_bindings::typescript_bindings;
-pub(crate) use directory_asset::DirectoryAsset;
-pub(crate) use directory_asset_index::DirectoryAssetIndex;
-pub use fsgame::{FS_ROOT_ALIAS, FSGAME_FILE_NAME, FsgameDeclaration, FsgameFile};
-pub(crate) use indexed_asset::IndexedAsset;
-pub use open::{open_plan, open_vfs};
-pub use xray_asset::{XrayAsset, XrayAssetContainer};
-pub(crate) use xray_asset_index::XrayAssetIndex;
-pub use xray_asset_source::{XrayAssetSource, XrayMountKind};
-pub use xray_asset_type::{XrayAssetRules, XrayAssetType};
-pub(crate) use xray_directory_source::XrayDirectorySource;
-pub use xray_mount::{XrayMount, XrayMountId};
-pub use xray_mount_mode::XrayMountMode;
-pub use xray_mount_plan::{XrayMountPlan, XrayPlannedMount};
-pub use xray_path::XrayPath;
-pub use xray_path_collision::XrayPathCollision;
-pub use xray_root::implied_asset_root;
-pub use xray_scope::XrayScope;
-pub use xray_vfs::{XrayDirectoryListing, XrayVfs};
 
-pub(crate) mod archive;
-pub(crate) mod project;
-pub(crate) mod types;
+pub use asset::{XrayAsset, XrayAssetContainer, XrayAssetRules, XrayAssetType};
+pub use fsgame::{FS_ROOT_ALIAS, FSGAME_FILE_NAME, FsgameDeclaration, FsgameFile};
+pub use mount::{
+  XrayMount, XrayMountId, XrayMountMode, XrayMountPlan, XrayPlannedMount, implied_asset_root, mount_plan, open_plan,
+  open_vfs,
+};
+pub use path::{XrayPath, XrayPathCollision};
+pub use source::{ArchiveAssetSource, XrayAssetSource, XrayMountKind};
+pub use vfs::{XrayDirectoryListing, XrayScope, XrayVfs};
 
 pub use crate::archive::archive_descriptor::ArchiveDescriptor;
 pub use crate::archive::archive_file_descriptor::ArchiveFileDescriptor;
-pub use crate::project::archive_asset_source::ArchiveAssetSource;
-pub use crate::project::archive_project::ArchiveProject;
-pub use crate::project::archive_project_read_policy::ArchiveProjectReadPolicy;
-pub use crate::project::archive_project_read_result::ProjectReadResult;
-pub use crate::project::plan_mount::mount_plan;
+pub use crate::archive::project::archive_project::ArchiveProject;
+pub use crate::archive::project::archive_project_read_policy::ArchiveProjectReadPolicy;
+pub use crate::archive::project::archive_project_read_result::ProjectReadResult;
 
 // Format internals the archive tooling in `xrf-archive` needs to build and extract volumes. Reading a set is this crate's
 // job; the two write directions are not, and they cannot be expressed without these.
-pub use crate::archive::archive_constants::CHUNK_ID_COMPRESSED_MASK;
-pub use crate::archive::archive_file_io::write_descriptor_contents;
+pub use crate::archive::constants::CHUNK_ID_COMPRESSED_MASK;
+pub use crate::archive::file_io::write_descriptor_contents;

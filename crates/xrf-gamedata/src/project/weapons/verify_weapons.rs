@@ -4,7 +4,7 @@ use xrf_db::{OgfFile, OmfFile, XRayByteOrder};
 use xrf_error::XrfResult;
 use xrf_ltx::{LTX_SYMBOL_SCHEME, Ltx, Section};
 use xrf_vfs::XrayAssetType;
-use xrf_vfs::sound::ogg_logical_path;
+use xrf_vfs::asset::sound::ogg_logical_path;
 
 use crate::GamedataFindingFactory;
 use crate::constants::NO_SOUND;

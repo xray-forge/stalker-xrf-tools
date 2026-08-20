@@ -2,7 +2,8 @@ use std::path::{Path, PathBuf};
 
 use xrf_error::XrfResult;
 use xrf_utils::{decode_bytes_to_string, get_windows1251_encoder};
-use xrf_vfs::{XrayPath, XrayScope, XrayVfs, xray_path};
+use xrf_vfs::path::xray_path;
+use xrf_vfs::{XrayPath, XrayScope, XrayVfs};
 
 use crate::Ltx;
 use crate::file::include::LtxIncludeConvertor;

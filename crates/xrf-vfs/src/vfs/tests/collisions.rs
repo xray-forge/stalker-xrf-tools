@@ -1,0 +1,145 @@
+//! Two files in one mount claiming one engine identity, and prefixes a mount omits.
+//!
+//! Both are properties of a single source: a collision has no priority order to appeal to inside one mount, and ignoring is
+//! per source so an override tree can skip what the installation beneath it still serves.
+
+use std::fs;
+use std::path::PathBuf;
+
+use xrf_test_utils::utils::get_absolute_generated_test_resource_path;
+
+use crate::vfs::tests::fake_source::FakeArchiveSource;
+use crate::{XrayMountPlan, XrayPathCollision, XrayScope, XrayVfs, open_plan};
+
+/// Writes a tree whose file names differ only by case, which normalize to one logical path.
+fn tree(name: &str, files: &[&str]) -> PathBuf {
+  let root: PathBuf = get_absolute_generated_test_resource_path(&format!("xray_vfs_collisions/{name}"));
+
+  let _ = fs::remove_dir_all(&root);
+
+  for file in files {
+    let path: PathBuf = root.join(file);
+
+    fs::create_dir_all(path.parent().expect("file sits in a directory")).expect("tree is creatable");
+    fs::write(&path, b"payload").expect("file is writable");
+  }
+
+  root
+}
+
+#[test]
+fn reports_collisions_from_every_mount_in_scope() {
+  // A real directory collision needs two paths that differ only by case, which a case-insensitive filesystem cannot hold —
+  // so it is a *cross-platform* authoring lint: authored on Windows, surfaced when the tree is read on Linux. That makes a
+  // source double the only way to exercise the reporting path here, and the aggregation is what this crate owns.
+  let mut vfs: XrayVfs = XrayVfs::new();
+
+  vfs
+    .mount("", Box::new(FakeArchiveSource::new("clean", &["configs/system.ltx"])))
+    .expect("clean mounts");
+  vfs
+    .mount(
+      "",
+      Box::new(
+        FakeArchiveSource::new("clashing", &["textures/wpn/wpn_ak74.dds"]).with_collision(XrayPathCollision {
+          kept: PathBuf::from("C:\\tree\\textures\\wpn\\wpn_ak74.dds"),
+          logical_path: String::from("textures\\wpn\\wpn_ak74.dds"),
+          unreachable: PathBuf::from("C:\\tree\\textures\\Wpn\\wpn_ak74.dds"),
+        }),
+      ),
+    )
+    .expect("clashing mounts");
+
+  let collisions: Vec<XrayPathCollision> = vfs.collisions(&XrayScope::all());
+
+  assert_eq!(collisions.len(), 1, "reported once, from the mount that holds it");
+  assert_eq!(collisions[0].logical_path, "textures\\wpn\\wpn_ak74.dds");
+  assert!(
+    vfs
+      .find(&XrayScope::all(), "textures\\wpn\\wpn_ak74.dds")
+      .expect("lookup")
+      .is_some(),
+    "resolution is unaffected: one of the two still answers"
+  );
+}
+
+#[test]
+fn a_clean_mount_reports_nothing() {
+  let root: PathBuf = tree("clean", &["textures/wpn/wpn_ak74.dds", "configs/system.ltx"]);
+  let vfs: XrayVfs = open_plan(&XrayMountPlan::root(&root).expect("plan")).expect("mounts");
+
+  assert!(vfs.collisions(&XrayScope::all()).is_empty());
+
+  let _ = fs::remove_dir_all(root);
+}
+
+#[test]
+fn an_ignored_prefix_is_absent_from_the_mount() {
+  let root: PathBuf = tree(
+    "ignored",
+    &[
+      "textures/wpn/wpn_ak74.dds",
+      "textures/wip/draft.dds",
+      "configs/system.ltx",
+    ],
+  );
+
+  let plan: XrayMountPlan = XrayMountPlan::root(&root)
+    .expect("plan")
+    .ignoring(&[String::from("textures\\wip")])
+    .expect("prefix is valid");
+  let vfs: XrayVfs = open_plan(&plan).expect("mounts");
+  let scope: XrayScope = XrayScope::all();
+
+  assert!(vfs.find(&scope, "textures\\wip\\draft.dds").expect("lookup").is_none());
+  assert!(
+    vfs
+      .find(&scope, "textures\\wpn\\wpn_ak74.dds")
+      .expect("lookup")
+      .is_some(),
+    "only the named prefix is omitted"
+  );
+  assert_eq!(vfs.entries(&scope).len(), 2);
+
+  let _ = fs::remove_dir_all(root);
+}
+
+#[test]
+fn ignoring_matches_on_component_boundaries() {
+  // `textures\wip` must not omit `textures\wipers`, or an ignore list would silently hide neighbours.
+  let root: PathBuf = tree(
+    "ignored_boundary",
+    &["textures/wip/draft.dds", "textures/wipers/blade.dds"],
+  );
+
+  let plan: XrayMountPlan = XrayMountPlan::root(&root)
+    .expect("plan")
+    .ignoring(&[String::from("textures\\wip")])
+    .expect("prefix is valid");
+  let vfs: XrayVfs = open_plan(&plan).expect("mounts");
+
+  assert_eq!(
+    vfs
+      .entries(&XrayScope::all())
+      .iter()
+      .map(|entry| entry.logical_path().to_string())
+      .collect::<Vec<_>>(),
+    vec![String::from("textures\\wipers\\blade.dds")]
+  );
+
+  let _ = fs::remove_dir_all(root);
+}
+
+#[test]
+fn rejects_an_ignored_prefix_that_is_not_a_logical_path() {
+  let root: PathBuf = tree("ignored_invalid", &["configs/system.ltx"]);
+
+  assert!(
+    XrayMountPlan::root(&root)
+      .expect("plan")
+      .ignoring(&[String::from("configs\\..\\textures")])
+      .is_err()
+  );
+
+  let _ = fs::remove_dir_all(root);
+}

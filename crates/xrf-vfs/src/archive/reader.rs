@@ -13,11 +13,11 @@ use xrf_utils::{
   XRayEncoding, assert, decode_bytes_to_string_without_bom_handling, get_utf8_encoder, get_windows1251_encoder,
 };
 
-use crate::archive::archive_constants::{CHUNK_ID_COMPRESSED_MASK, CHUNK_ID_MASK};
 use crate::archive::archive_descriptor::ArchiveDescriptor;
 use crate::archive::archive_file_descriptor::ArchiveFileDescriptor;
 use crate::archive::archive_header::ArchiveHeader;
-use crate::types::XRayByteOrder;
+use crate::archive::byte_order::XRayByteOrder;
+use crate::archive::constants::{CHUNK_ID_COMPRESSED_MASK, CHUNK_ID_MASK};
 
 pub struct ArchiveReader {
   pub path: PathBuf,
