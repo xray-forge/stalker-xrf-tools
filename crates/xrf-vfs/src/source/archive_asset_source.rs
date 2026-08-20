@@ -118,7 +118,8 @@ impl XrayAssetSource for ArchiveAssetSource {
 
   fn read(&self, path: &str) -> XrfResult<Vec<u8>> {
     let Some(name) = self.entries.get(path) else {
-      return Err(XrfError::new_read_error(format!(
+      // Absent, not unreadable: the distinction lets a caller fall back rather than fail.
+      return Err(XrfError::new_not_found_error(format!(
         "no archive entry '{path}' in {}",
         self.label
       )));

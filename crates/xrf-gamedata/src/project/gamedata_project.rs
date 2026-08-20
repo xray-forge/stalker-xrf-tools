@@ -5,7 +5,7 @@ use std::path::{Path, PathBuf};
 use xrf_chunk::{ChunkReader, InMemoryChunkDataSource};
 use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{LtxProject, LtxProjectOptions};
-use xrf_vfs::{XrayLookupScope, XrayMountMode, XrayPathCollision, XrayVfs, open_plan};
+use xrf_vfs::{XrayLookupScope, XrayMountMode, XrayPath, XrayPathCollision, XraySkippedMount, XrayVfs, open_plan};
 
 use crate::project::gamedata_project_options::GamedataProjectReadOptions;
 
@@ -57,13 +57,23 @@ impl GamedataProject {
       );
     }
 
+    // An ignored prefix covering the root config would make the gate below fail for a perfectly good project, aborting
+    // every check — including ones that never read configs. Named explicitly rather than left as a puzzling "nothing
+    // resolves", since the cause is the caller's own filter.
+    if let Some(ignored) = options
+      .ignored
+      .iter()
+      .find(|prefix| Self::hides_system_ltx(prefix).unwrap_or(false))
+    {
+      return Err(XrfError::new_invalid_error(format!(
+        "Ignored prefix '{ignored}' hides '{SYSTEM_LTX_LOGICAL_PATH}', which every check needs"
+      )));
+    }
+
     let vfs: XrayVfs = open_plan(&mode.plan(&options.root)?.ignoring(&options.ignored)?)?;
     let scope: XrayLookupScope = XrayLookupScope::all();
 
     // The gate is what the project resolves, not what sits on disk: an installation keeps its configs inside `db\configs`.
-    // todo: The ignore list is an inspection filter, so applying it to the vfs before this gate lets
-    //   ignoring any prefix holding system.ltx abort every check, including ones that never read
-    //   configs. Resolve the gate against an unfiltered view, or filter only what checks enumerate.
     if vfs.find(&scope, SYSTEM_LTX_LOGICAL_PATH)?.is_none() {
       return Err(
         io::Error::new(
@@ -137,6 +147,23 @@ impl GamedataProject {
   /// Reported rather than refused at open time: a tool has to be able to load a project and say what is wrong with it.
   pub fn collisions(&self) -> Vec<XrayPathCollision> {
     self.vfs().collisions(&self.scope)
+  }
+
+  /// Sources this project's installation declared that could not be opened.
+  ///
+  /// Every check runs over what mounted, so a skipped source silently shrinks what verification covers — its assets are
+  /// reported missing, or simply never counted. Any report of this project's results has to state these alongside them.
+  pub fn skipped_mounts(&self) -> &[XraySkippedMount] {
+    self.vfs().skipped_mounts()
+  }
+
+  /// Whether an ignored prefix would hide the root config every check reads.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when the prefix is not a valid X-Ray logical path.
+  fn hides_system_ltx(prefix: &str) -> XrfResult<bool> {
+    XrayPath::new(SYSTEM_LTX_LOGICAL_PATH)?.is_under(prefix)
   }
 }
 

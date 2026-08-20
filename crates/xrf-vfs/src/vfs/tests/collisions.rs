@@ -9,7 +9,7 @@ use std::path::PathBuf;
 use xrf_test_utils::utils::get_absolute_generated_test_resource_path;
 
 use crate::vfs::tests::fake_source::FakeArchiveSource;
-use crate::{XrayLookupScope, XrayMountPlan, XrayPathCollision, XrayVfs, open_plan};
+use crate::{XrayLookupScope, XrayMountKind, XrayMountPlan, XrayPathCollision, XrayVfs, open_plan};
 
 /// Writes a tree whose file names differ only by case, which normalize to one logical path.
 fn tree(name: &str, files: &[&str]) -> PathBuf {
@@ -142,4 +142,74 @@ fn rejects_an_ignored_prefix_that_is_not_a_logical_path() {
   );
 
   let _ = fs::remove_dir_all(root);
+}
+
+#[test]
+fn a_source_that_cannot_be_opened_is_recorded_rather_than_silently_dropped() {
+  // Tolerance is only honest if it is visible: a check enumerating a mount that never opened would report its assets
+  // as missing content rather than as an unread source.
+  let root: PathBuf = tree("skipped", &["configs/system.ltx"]);
+  let absent: PathBuf = root.join("nonexistent-volumes");
+
+  let plan: XrayMountPlan = XrayMountPlan::root(&root)
+    .expect("plan")
+    .with_kind(&absent, "", "$arch_dir$", XrayMountKind::Archive)
+    .expect("archive planned");
+
+  let vfs: XrayVfs = open_plan(&plan).expect("the readable mount still opens");
+
+  assert_eq!(vfs.mount_count(), 1, "only the directory mounted");
+  assert_eq!(vfs.skipped_mounts().len(), 1);
+  assert_eq!(vfs.skipped_mounts()[0].origin, "$arch_dir$");
+  assert_eq!(vfs.skipped_mounts()[0].path, absent);
+  assert!(
+    !vfs.skipped_mounts()[0].reason.is_empty(),
+    "the reason is what a report shows a person"
+  );
+
+  // The rest of the installation still resolves, which is why skipping rather than failing is the right default.
+  assert!(
+    vfs
+      .find(&XrayLookupScope::all(), "configs\\system.ltx")
+      .expect("lookup")
+      .is_some()
+  );
+
+  let _ = fs::remove_dir_all(root);
+}
+
+#[test]
+fn enumeration_is_ordered_by_logical_path() {
+  // Archive sources key their name tables by hash, so without this the order differs between runs and every consumer
+  // that prints or diffs a listing has to remember to sort.
+  let mut vfs: XrayVfs = XrayVfs::new();
+
+  vfs
+    .mount(
+      "",
+      Box::new(FakeArchiveSource::new(
+        "unordered",
+        &[
+          "textures\\wpn\\wpn_ak74.dds",
+          "configs\\system.ltx",
+          "meshes\\actors\\stalker.ogf",
+        ],
+      )),
+    )
+    .expect("mounts");
+
+  let ordered: Vec<String> = vfs
+    .entries(&XrayLookupScope::all())
+    .into_iter()
+    .map(|entry| entry.logical_path().to_string())
+    .collect();
+
+  assert_eq!(
+    ordered,
+    vec![
+      "configs\\system.ltx",
+      "meshes\\actors\\stalker.ogf",
+      "textures\\wpn\\wpn_ak74.dds",
+    ]
+  );
 }

@@ -73,6 +73,37 @@ fn auto_opens_an_installation_that_declares_itself() {
 }
 
 #[test]
+fn names_an_ignored_prefix_that_would_hide_the_root_config() {
+  // Ignoring `configs` removes `system.ltx` from the VFS, so the validity gate would fail and abort every check —
+  // including ones that never read a config. The caller's own filter is the cause, so the error has to say so.
+  let root: PathBuf = install("ignored_configs");
+  let error = GamedataProject::open(&GamedataProjectReadOptions {
+    ignored: vec![String::from("configs")],
+    output: xrf_output::OutputOptions::default(),
+    root: root.clone(),
+    ..Default::default()
+  })
+  .expect_err("an ignore list hiding the root config is refused by name");
+
+  assert!(
+    error.to_string().contains("Ignored prefix 'configs' hides"),
+    "the refusal names the prefix responsible, got: {error}"
+  );
+
+  // A prefix that hides something else is none of the gate's business.
+  let project = GamedataProject::open(&GamedataProjectReadOptions {
+    ignored: vec![String::from("textures\\wip")],
+    output: xrf_output::OutputOptions::default(),
+    root: root.clone(),
+    ..Default::default()
+  });
+
+  assert!(project.is_ok(), "an unrelated ignored prefix still opens");
+
+  fs::remove_dir_all(root).expect("cleanup");
+}
+
+#[test]
 fn refuses_a_directory_that_resolves_no_system_ltx() {
   let root: PathBuf = get_absolute_generated_test_resource_path("gamedata_opening/empty");
 

@@ -20,6 +20,26 @@ impl GamedataProject {
       checks.iter().map(ToString::to_string).collect::<Vec<_>>().join("\n  -")
     );
 
+    // Stated before any result, because every count below is measured over what actually mounted: a source that failed
+    // to open makes its assets look missing rather than unread.
+    if !self.skipped_mounts().is_empty() {
+      xrf_output::warning!(
+        options.output,
+        "{} declared source(s) could not be opened, so results below do not cover them:",
+        self.skipped_mounts().len()
+      );
+
+      for skipped in self.skipped_mounts() {
+        xrf_output::warning!(
+          options.output,
+          "  - {} at {}: {}",
+          skipped.origin,
+          skipped.path.display(),
+          skipped.reason
+        );
+      }
+    }
+
     xrf_output::info!(options.output, "");
 
     let started_at: Instant = Instant::now();

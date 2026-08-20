@@ -17,9 +17,13 @@ impl DirectoryAssetIndex {
   ///
   /// Directory paths and symbolic links to directories are not added as assets.
   ///
+  /// An entry the walk cannot read — a permission-denied subdirectory, a broken link — is warned about and skipped
+  /// rather than failing the index. Aborting would discard the whole mount over one unreadable corner of a tree, and the
+  /// mount being absent then reads downstream as content that is missing.
+  ///
   /// # Errors
   ///
-  /// Returns an error when the tree cannot be traversed or a file path cannot be made relative to `root`.
+  /// Returns an error when a file path cannot be made relative to `root`, which would mean the walk left its own root.
   pub fn read(root: impl AsRef<Path>) -> XrfResult<Self> {
     let root: &Path = root.as_ref();
 
@@ -28,8 +32,14 @@ impl DirectoryAssetIndex {
     let mut assets: Vec<DirectoryAsset> = Vec::new();
 
     for entry in WalkDir::new(root).follow_links(false) {
-      let entry =
-        entry.map_err(|error| XrfError::new_asset_error(format!("failed to read directory asset entry: {error}")))?;
+      let entry = match entry {
+        Ok(entry) => entry,
+        Err(error) => {
+          log::warn!("Skipping unreadable directory entry under {}: {error}", root.display());
+
+          continue;
+        }
+      };
 
       if !entry.file_type().is_file() {
         continue;

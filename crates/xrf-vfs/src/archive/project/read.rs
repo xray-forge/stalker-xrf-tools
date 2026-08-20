@@ -32,10 +32,9 @@ impl ArchiveProject {
       )));
     }
 
-    let descriptor: &ArchiveFileDescriptor = self
-      .files
-      .get(filename)
-      .ok_or_else(|| XrfError::new_read_error(format!("File '{}' is not found in the archive project", filename)))?;
+    let descriptor: &ArchiveFileDescriptor = self.files.get(filename).ok_or_else(|| {
+      XrfError::new_not_found_error(format!("File '{}' is not found in the archive project", filename))
+    })?;
 
     if descriptor.size_real > self.read_policy.maximum_size {
       return Err(XrfError::new_read_error(format!(

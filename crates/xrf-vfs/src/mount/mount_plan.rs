@@ -2,24 +2,35 @@ use xrf_error::XrfResult;
 
 use crate::source::ArchiveAssetSource;
 use crate::source::XrayDirectorySource;
-use crate::{XrayMountId, XrayMountKind, XrayMountPlan, XrayPlannedMount, XrayVfs};
+use crate::{XrayMountId, XrayMountKind, XrayMountPlan, XrayPlannedMount, XraySkippedMount, XrayVfs};
 
 /// Mounts each planned source that can be opened, in plan order.
 ///
 /// Planning is a decision about the filesystem; this is the construction of the sources it named.
 ///
-/// Sources that fail to open or mount are logged and omitted. The returned mount IDs preserve plan order.
+/// A source that fails to open is omitted rather than fatal, so one corrupt volume does not stop a tool from reading the
+/// rest of an installation. Each omission is recorded on the VFS through [`XrayVfs::skipped_mounts`] — reporting it is
+/// the caller's job, because a check enumerating a mount that never opened would otherwise present a read failure as
+/// missing content. The returned mount IDs preserve plan order.
 pub fn mount_plan(vfs: &mut XrayVfs, plan: &XrayMountPlan) -> XrfResult<Vec<XrayMountId>> {
   let mut mounted: Vec<XrayMountId> = Vec::with_capacity(plan.len());
 
   for planned in plan.mounts() {
     match mount_one(vfs, planned) {
       Ok(id) => mounted.push(id),
-      Err(error) => log::warn!(
-        "Skipping planned mount {} at {}: {error}",
-        planned.origin,
-        planned.path.display()
-      ),
+      Err(error) => {
+        log::warn!(
+          "Skipping planned mount {} at {}: {error}",
+          planned.origin,
+          planned.path.display()
+        );
+
+        vfs.record_skipped(XraySkippedMount {
+          origin: planned.origin.clone(),
+          path: planned.path.clone(),
+          reason: error.to_string(),
+        });
+      }
     }
   }
 

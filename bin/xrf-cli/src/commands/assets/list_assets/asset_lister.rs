@@ -2,7 +2,9 @@ use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant};
 
 use xrf_error::XrfResult;
-use xrf_vfs::{XrayAsset, XrayLookupScope, XrayMountKind, XrayMountMode, XrayPathCollision, XrayVfs, open_plan};
+use xrf_vfs::{
+  XrayAsset, XrayLookupScope, XrayMountKind, XrayMountMode, XrayPathCollision, XraySkippedMount, XrayVfs, open_plan,
+};
 
 /// Resolved assets and source metadata for one listing.
 pub struct AssetListing {
@@ -16,6 +18,8 @@ pub struct AssetListing {
   pub shadowed: Vec<XrayAsset>,
   /// Files a mount holds but cannot reach, because another file in it claims their identity.
   pub collisions: Vec<XrayPathCollision>,
+  /// Declared sources that could not be opened, so the listing does not cover them.
+  pub skipped: Vec<XraySkippedMount>,
   /// Time spent planning, mounting, and enumerating.
   pub duration: Duration,
 }
@@ -115,6 +119,7 @@ impl AssetLister {
         .collect(),
       origin: format!("{} {}", self.mode, self.path.display()),
       shadowed,
+      skipped: vfs.skipped_mounts().to_vec(),
     })
   }
 

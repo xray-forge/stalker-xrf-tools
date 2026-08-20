@@ -87,7 +87,8 @@ impl XrayAssetSource for XrayDirectorySource {
 
   fn read(&self, path: &str) -> XrfResult<Vec<u8>> {
     let Some(asset) = self.index.find(path)? else {
-      return Err(XrfError::new_asset_error(format!(
+      // Absent, not unreadable: the distinction lets a caller fall back rather than fail.
+      return Err(XrfError::new_not_found_error(format!(
         "no asset '{path}' under root {}",
         self.root().display()
       )));

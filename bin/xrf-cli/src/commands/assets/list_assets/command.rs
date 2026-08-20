@@ -124,6 +124,7 @@ impl GenericCommand for ListAssetsCommand {
     }
 
     Self::print_collisions(&output, &listing);
+    Self::print_skipped(&output, &listing);
 
     xrf_output::success!(
       output,
@@ -188,6 +189,32 @@ impl ListAssetsCommand {
         output,
         "  ... {} more not printed",
         listing.collisions.len() - PRINT_LIMIT
+      );
+    }
+  }
+
+  /// Warns about declared sources that could not be opened.
+  ///
+  /// Always reported: the count above is measured over what mounted, so an unopened source makes the listing quietly
+  /// incomplete rather than wrong in a way anyone would notice.
+  fn print_skipped(output: &OutputOptions, listing: &AssetListing) {
+    if listing.skipped.is_empty() {
+      return;
+    }
+
+    xrf_output::warning!(
+      output,
+      "{} declared source(s) could not be opened and are not listed:",
+      listing.skipped.len()
+    );
+
+    for skipped in &listing.skipped {
+      xrf_output::warning!(
+        output,
+        "  {} at {}: {}",
+        skipped.origin,
+        skipped.path.display(),
+        skipped.reason
       );
     }
   }

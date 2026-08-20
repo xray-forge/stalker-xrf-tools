@@ -8,7 +8,7 @@ use crate::source::XrayDirectorySource;
 use crate::vfs::XrayDirectoryListing;
 use crate::{
   XrayAsset, XrayAssetContainer, XrayAssetRules, XrayAssetSource, XrayAssetType, XrayLookupScope, XrayMount,
-  XrayMountId, XrayMountKind, XrayPathCollision,
+  XrayMountId, XrayMountKind, XrayPathCollision, XraySkippedMount,
 };
 
 /// The engine's view of assets: several mounted sources, searched in order, first hit wins.
@@ -21,12 +21,27 @@ use crate::{
 #[derive(Debug, Default)]
 pub struct XrayVfs {
   mounts: Vec<XrayMount>,
+  skipped: Vec<XraySkippedMount>,
 }
 
 impl XrayVfs {
   /// Creates an empty VFS with no searchable mounts.
   pub fn new() -> Self {
     Self::default()
+  }
+
+  /// Sources a plan named that could not be opened.
+  ///
+  /// Empty for a VFS assembled by hand. Populated by [`crate::mount_plan`], which is tolerant of a source that fails to
+  /// open — so a caller that reports on what this VFS holds must report these too, or a mount that silently vanished
+  /// looks like content that is silently missing.
+  pub fn skipped_mounts(&self) -> &[XraySkippedMount] {
+    &self.skipped
+  }
+
+  /// Records a source that a plan named but could not open.
+  pub(crate) fn record_skipped(&mut self, skipped: XraySkippedMount) {
+    self.skipped.push(skipped);
   }
 
   /// Appends a source at a logical base with lower priority than existing mounts.
@@ -129,7 +144,9 @@ impl XrayVfs {
       }
     }
 
-    Err(XrfError::new_asset_error(format!(
+    // Absence is `NotFound` throughout this crate, so a consumer can tell "the asset is not here" from "the source
+    // holding it failed" without reading the message.
+    Err(XrfError::new_not_found_error(format!(
       "no asset '{logical_path}' in scope across {} mount(s)",
       self.scoped(scope).count()
     )))
@@ -154,7 +171,12 @@ impl XrayVfs {
     })
   }
 
-  /// Returns winning entries in scope, one per logical path.
+  /// Returns winning entries in scope, one per logical path, ordered by that path.
+  ///
+  /// Sorted here rather than left to callers: an archive source keys its name table by hash, so enumeration order is
+  /// otherwise arbitrary and unstable between runs. Every consumer that shows or diffs a listing needs a deterministic
+  /// order, and two shipped defects came from a caller forgetting to impose one. Sorting ~47,000 entries costs
+  /// milliseconds against the enumeration itself.
   pub fn entries(&self, scope: &XrayLookupScope) -> Vec<XrayAsset> {
     let mut seen: HashSet<String> = HashSet::new();
     let mut located: Vec<XrayAsset> = Vec::new();
@@ -176,6 +198,8 @@ impl XrayVfs {
         }
       }
     }
+
+    located.sort_by(|first, second| first.logical_path().cmp(second.logical_path()));
 
     located
   }
@@ -294,7 +318,9 @@ impl XrayVfs {
       .and_then(|rest| rest.strip_prefix('\\'))
   }
 
-  /// Returns every entry in scope, including shadowed copies.
+  /// Returns every entry in scope, including shadowed copies, ordered by logical path.
+  ///
+  /// Copies of one path stay in mount priority order, so the winner precedes the entries it shadows.
   pub fn entries_all(&self, scope: &XrayLookupScope) -> Vec<XrayAsset> {
     let mut located: Vec<XrayAsset> = Vec::new();
 
@@ -311,6 +337,9 @@ impl XrayVfs {
         }
       }
     }
+
+    // Stable, so copies of one logical path keep the mount order they were enumerated in.
+    located.sort_by(|first, second| first.logical_path().cmp(second.logical_path()));
 
     located
   }
