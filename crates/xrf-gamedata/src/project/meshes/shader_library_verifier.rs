@@ -15,7 +15,7 @@ impl<'a> ShaderLibraryVerifier<'a> {
 
   pub(crate) fn verify(&self) -> GamedataShaderLibraryVerificationResult {
     // The logical path is the identity to report, since an archived library has no file to name.
-    let path: &str = xrf_vfs::asset::shader::SHADER_LIBRARY_LOGICAL_PATH;
+    let path: &str = xrf_vfs::SHADER_LIBRARY_LOGICAL_PATH;
 
     match self
       .project

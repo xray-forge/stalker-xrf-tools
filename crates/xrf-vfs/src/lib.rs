@@ -27,13 +27,15 @@ mod typescript_bindings;
 #[cfg(feature = "typescript-bindings")]
 pub use crate::typescript_bindings::typescript_bindings;
 
-pub use asset::{XrayAsset, XrayAssetContainer, XrayAssetRules, XrayAssetType};
+pub use asset::{
+  SHADER_LIBRARY_LOGICAL_PATH, XrayAsset, XrayAssetContainer, XrayAssetRules, XrayAssetType, sound_reference_name,
+};
 pub use fsgame::{FS_ROOT_ALIAS, FSGAME_FILE_NAME, FsgameDeclaration, FsgameFile};
 pub use mount::{
   XrayMount, XrayMountId, XrayMountMode, XrayMountPlan, XrayPlannedMount, implied_asset_root, mount_plan, open_plan,
   open_vfs,
 };
-pub use path::{XrayPath, XrayPathCollision};
+pub use path::{XrayPath, XrayPathCollision, is_component_prefix, normalize_logical};
 pub use source::{ArchiveAssetSource, XrayAssetSource, XrayMountKind};
 pub use vfs::{XrayDirectoryListing, XrayScope, XrayVfs};
 

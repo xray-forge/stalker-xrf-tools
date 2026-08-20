@@ -4,7 +4,7 @@ use std::path::{Path, PathBuf};
 use xrf_error::XrfResult;
 use xrf_ltx::{Ltx, LtxProject};
 use xrf_vfs::XrayPath;
-use xrf_vfs::asset::sound::sound_reference_name;
+use xrf_vfs::sound_reference_name;
 use xrf_xml::{XmlDocument, XmlParseOptions};
 
 use crate::GamedataFindingFactory;

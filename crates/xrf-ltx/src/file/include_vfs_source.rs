@@ -2,8 +2,7 @@ use std::path::{Path, PathBuf};
 
 use xrf_error::XrfResult;
 use xrf_utils::{decode_bytes_to_string, get_windows1251_encoder};
-use xrf_vfs::path::xray_path;
-use xrf_vfs::{XrayPath, XrayScope, XrayVfs};
+use xrf_vfs::{XrayPath, XrayScope, XrayVfs, normalize_logical};
 
 use crate::Ltx;
 use crate::file::include::LtxIncludeConvertor;
@@ -64,10 +63,10 @@ impl LtxIncludeSource for LtxIncludeVfsSource<'_> {
     };
 
     if !statement.contains('*') {
-      return Ok(vec![PathBuf::from(xray_path::normalize_logical(&joined)?)]);
+      return Ok(vec![PathBuf::from(normalize_logical(&joined)?)]);
     }
 
-    let normalized: String = xray_path::normalize_logical(&joined)?;
+    let normalized: String = normalize_logical(&joined)?;
     let (prefix, mask) = match normalized.rsplit_once('\\') {
       Some((prefix, mask)) => (prefix.to_string(), mask.to_string()),
       None => (String::new(), normalized.clone()),

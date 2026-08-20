@@ -170,6 +170,15 @@ mod tests {
   fn appends_the_extension_when_a_reference_omits_it() {
     assert_eq!(rules(XrayAssetType::Dds).logical_path("pfx\\smoke"), "pfx\\smoke.dds");
     assert_eq!(
+      rules(XrayAssetType::Ogg).logical_path("weapons\\ak74_shot"),
+      "weapons\\ak74_shot.ogg"
+    );
+    assert_eq!(
+      rules(XrayAssetType::Ogg).logical_path("weapons\\ak74_shot.OGG"),
+      "weapons\\ak74_shot.OGG",
+      "an uppercase extension is not doubled"
+    );
+    assert_eq!(
       rules(XrayAssetType::Ogf).logical_path("actors\\stalker"),
       "actors\\stalker.ogf"
     );

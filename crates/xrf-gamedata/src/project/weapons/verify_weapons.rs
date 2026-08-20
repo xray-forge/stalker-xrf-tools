@@ -4,7 +4,6 @@ use xrf_db::{OgfFile, OmfFile, XRayByteOrder};
 use xrf_error::XrfResult;
 use xrf_ltx::{LTX_SYMBOL_SCHEME, Ltx, Section};
 use xrf_vfs::XrayAssetType;
-use xrf_vfs::asset::sound::ogg_logical_path;
 
 use crate::GamedataFindingFactory;
 use crate::constants::NO_SOUND;
@@ -462,8 +461,8 @@ impl GamedataProject {
   ) -> XrfResult<bool> {
     let mut is_valid: bool = true;
 
-    // Sounds field is 1-3 comma separated values, and may name the sound with or without its extension.
-    let sound_object_value: String = ogg_logical_path(&get_weapon_animation_name(field_value));
+    // Sounds field is 1-3 comma separated values. The reference may name the sound with or without its extension, which
+    let sound_object_value: String = get_weapon_animation_name(field_value);
 
     // Resolving through the VFS *is* the existence check, loose or archived, so there is no second filesystem probe to make.
     //
