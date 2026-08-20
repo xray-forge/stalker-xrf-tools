@@ -3,10 +3,12 @@ use std::path::{Path, PathBuf};
 
 use xrf_error::XrfResult;
 use xrf_ltx::{Ltx, LtxProject};
+use xrf_vfs::XrayPath;
 use xrf_vfs::sound::sound_reference_name;
 use xrf_xml::{XmlDocument, XmlParseOptions};
 
 use crate::GamedataFindingFactory;
+use crate::project::gamedata_project::CONFIGS_DIRECTORY;
 use crate::project::sounds::sound_references_verification_result::GamedataSoundReferencesVerificationResult;
 use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationRule};
 
@@ -89,17 +91,17 @@ impl<'a> SoundReferencesVerifier<'a> {
     // Enumerated and read through the VFS, so an installation's archived UI XML is inspected too. Reported by the path a
     // person can act on, which for an archived entry is its logical path.
     for location in self.project.vfs().entries(&self.project.scope) {
-      let logical_path: &str = location.logical_path();
+      let logical_path: &XrayPath = location.logical_path();
 
-      if !logical_path.starts_with("configs\\") || !logical_path.ends_with(".xml") {
+      if !logical_path.is_under(CONFIGS_DIRECTORY).unwrap_or(false) || !logical_path.has_extension(".xml") {
         continue;
       }
 
       let path: PathBuf = location
         .physical_path()
-        .unwrap_or_else(|| PathBuf::from(location.logical_path()));
+        .unwrap_or_else(|| PathBuf::from(logical_path.as_str()));
 
-      let contents: Vec<u8> = match self.project.vfs().read(&self.project.scope, location.logical_path()) {
+      let contents: Vec<u8> = match self.project.vfs().read(&self.project.scope, logical_path.as_str()) {
         Ok(contents) => contents,
         Err(error) => {
           result.checked_references_count += 1;

@@ -10,7 +10,7 @@ use xrf_vfs::{XrayMountMode, XrayPathCollision, XrayScope, XrayVfs, open_plan};
 use crate::project::gamedata_project_options::GamedataProjectReadOptions;
 
 /// Logical directory holding a project's configs.
-const CONFIGS_DIRECTORY: &str = "configs";
+pub(crate) const CONFIGS_DIRECTORY: &str = "configs";
 
 /// Root config the engine loads, and the one asset whose absence means this is not a usable project.
 const SYSTEM_LTX_LOGICAL_PATH: &str = "configs\\system.ltx";

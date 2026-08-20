@@ -194,10 +194,9 @@ impl LtxProject {
     let mut paths: Vec<XrayPath> = Vec::new();
 
     for location in vfs.entries(scope) {
-      let path: XrayPath = XrayPath::new(location.logical_path())?;
-
-      if path.has_extension(&format!(".{LTX_EXTENSION}")) {
-        paths.push(path);
+      // Already an engine identity, so nothing is re-validated here.
+      if location.logical_path().has_extension(&format!(".{LTX_EXTENSION}")) {
+        paths.push(location.logical_path().clone());
       }
     }
 

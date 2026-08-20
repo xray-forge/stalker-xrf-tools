@@ -261,7 +261,7 @@ export type VisualSubmeshContent =
  */
 export type XrayAsset = {
   /** Lower-case, backslash-separated engine identity, including the mount's logical base. */
-  logicalPath: string;
+  logicalPath: XrayPath;
   /** Physical container reported by the source that resolved the asset. */
   container: XrayAssetContainer;
 };
@@ -276,3 +276,19 @@ export type XrayAssetContainer =
   | { kind: "directory"; root: string; relativePath: string }
   /** An entry inside the archive volume set at `path`. */
   | { kind: "archive"; path: string };
+
+/**
+ * An X-Ray logical path: lower case, backslash separated, with no empty, `.` or `..` component.
+ *
+ * This is an engine identity, not a location on disk. The asset it names may sit inside an archive and have no file at
+ * all, so the type deliberately does not implement `AsRef<Path>` — handing one to host I/O must not compile. Read it
+ * through an [`crate::XrayVfs`], and ask [`crate::XrayAsset::physical_path`] when a real file is genuinely
+ * required.
+ *
+ * Being separator-explicit is what makes it portable: it splits on `\` itself rather than deferring to
+ * `std::path`, so `parent` and `file_name` answer the same on Linux as on Windows, where a `std::path::Path`
+ * would treat the whole thing as one component.
+ *
+ * Serialized and typed transparently as its string form, so an engine path crosses IPC as the text the engine uses.
+ */
+export type XrayPath = string;

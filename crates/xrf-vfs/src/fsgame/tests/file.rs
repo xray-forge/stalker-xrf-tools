@@ -1,4 +1,4 @@
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 use crate::fsgame::file::FsgameFile;
 
@@ -13,8 +13,17 @@ $game_meshes$           = true  | true  | $game_data$    | meshes\\     | *.ogf;
 $downloads$             = false | false | $app_data_root$
 ";
 
+/// A platform-neutral installation root.
+///
+/// Alias resolution builds paths with `PathBuf::push`, which inserts the platform separator — so a `C:\install\gamedata`
+/// literal would compare unequal to the pushed result on Linux while passing on Windows. These tests are about alias
+/// chains, not host path syntax.
+fn root() -> PathBuf {
+  PathBuf::from("install")
+}
+
 fn file() -> FsgameFile {
-  FsgameFile::parse(Path::new("C:\\install"), CONTENTS).expect("contents parse")
+  FsgameFile::parse(root(), CONTENTS).expect("contents parse")
 }
 
 #[test]
@@ -38,30 +47,24 @@ fn keeps_declarations_in_the_order_the_file_lists_them() {
 
 #[test]
 fn resolves_an_alias_against_the_installation_root() {
-  assert_eq!(
-    file().resolve("$game_data$"),
-    Some(PathBuf::from("C:\\install\\gamedata"))
-  );
+  assert_eq!(file().resolve("$game_data$"), Some(root().join("gamedata")));
 }
 
 #[test]
 fn resolves_a_chain_of_aliases() {
   assert_eq!(
     file().resolve("$arch_dir_textures$"),
-    Some(PathBuf::from("C:\\install\\db\\textures"))
+    Some(root().join("db").join("textures"))
   );
   assert_eq!(
     file().resolve("$game_meshes$"),
-    Some(PathBuf::from("C:\\install\\gamedata\\meshes"))
+    Some(root().join("gamedata").join("meshes"))
   );
 }
 
 #[test]
 fn an_alias_that_only_names_its_root_resolves_to_that_root() {
-  assert_eq!(
-    file().resolve("$downloads$"),
-    Some(PathBuf::from("C:\\install\\appdata"))
-  );
+  assert_eq!(file().resolve("$downloads$"), Some(root().join("appdata")));
 }
 
 #[test]
@@ -72,7 +75,7 @@ fn answers_none_for_an_undeclared_alias() {
 #[test]
 fn a_cycle_terminates_instead_of_recursing() {
   let file: FsgameFile = FsgameFile::parse(
-    Path::new("C:\\install"),
+    root(),
     "$first$ = false | false | $second$ | a\\\n$second$ = false | false | $first$ | b\\\n",
   )
   .expect("contents parse");
@@ -85,10 +88,17 @@ fn resolves_every_declared_alias_at_once() {
   let resolved = file().resolve_paths();
 
   assert_eq!(resolved.len(), 6);
-  assert_eq!(resolved.get("$arch_dir$"), Some(&PathBuf::from("C:\\install\\db")));
+  assert_eq!(resolved.get("$arch_dir$"), Some(&root().join("db")));
 }
 
 #[test]
 fn rejects_contents_declaring_nothing() {
-  assert!(FsgameFile::parse(Path::new("C:\\install"), ";only a comment\n").is_err());
+  assert!(
+    FsgameFile::parse(
+      root(),
+      ";only a comment
+"
+    )
+    .is_err()
+  );
 }

@@ -16,7 +16,7 @@ fn resolves_a_texture_reference_against_a_mounted_root() {
     .expect("lookup succeeds")
     .expect("texture resolves");
 
-  assert_eq!(location.logical_path(), "textures\\wpn\\wpn_ak74.dds");
+  assert_eq!(location.logical_path().as_str(), "textures\\wpn\\wpn_ak74.dds");
 }
 
 #[test]

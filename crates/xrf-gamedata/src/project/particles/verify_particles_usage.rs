@@ -8,6 +8,7 @@ use xrf_ltx::{Ltx, LtxProject};
 use xrf_vfs::XrayAssetType as AssetType;
 
 use crate::GamedataFindingFactory;
+use crate::project::levels::level_engine_constants::SPAWNS_DIRECTORY;
 use crate::project::particles::verify_particles_usage_result::GamedataParticlesUsageVerificationResult;
 use crate::{GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationRule};
 
@@ -56,7 +57,7 @@ impl GamedataProject {
     let mut names: HashSet<String> = HashSet::new();
 
     for location in self.vfs().entries_with_suffix(self.scope(), "particles.xr")? {
-      let mut chunks = self.read_asset_chunks(location.logical_path())?;
+      let mut chunks = self.read_asset_chunks(location.logical_path().as_str())?;
       let particles_file: ParticlesFile = ParticlesFile::read_from_chunk::<XRayByteOrder, _>(&mut chunks)?;
 
       for effect in &particles_file.effects.effects {
@@ -112,7 +113,7 @@ impl GamedataProject {
       .vfs()
       .entries_of_type(self.scope(), AssetType::Spawn)
       .into_iter()
-      .filter(|location| location.logical_path().starts_with("spawns\\"))
+      .filter(|location| location.logical_path().is_under(SPAWNS_DIRECTORY).unwrap_or(false))
       .map(|location| location.logical_path().to_string())
       .collect();
 

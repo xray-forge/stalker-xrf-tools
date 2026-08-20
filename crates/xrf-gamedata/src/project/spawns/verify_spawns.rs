@@ -6,6 +6,7 @@ use xrf_error::XrfResult;
 use xrf_vfs::XrayAssetType as AssetType;
 
 use crate::GamedataFindingFactory;
+use crate::project::levels::level_engine_constants::SPAWNS_DIRECTORY;
 use crate::project::spawns::verify_spawns_result::GamedataSpawnsVerificationResult;
 use crate::{Finding, GamedataProject, GamedataProjectVerifyOptions, GamedataVerificationRule};
 
@@ -18,7 +19,7 @@ impl GamedataProject {
       .vfs()
       .entries_of_type(self.scope(), AssetType::Spawn)
       .into_iter()
-      .filter(|location| location.logical_path().starts_with("spawns\\"))
+      .filter(|location| location.logical_path().is_under(SPAWNS_DIRECTORY).unwrap_or(false))
       .map(|location| location.logical_path().to_string())
       .collect();
 

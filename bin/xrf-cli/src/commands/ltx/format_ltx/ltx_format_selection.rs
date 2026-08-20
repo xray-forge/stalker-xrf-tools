@@ -59,7 +59,7 @@ impl LtxFormatSelection {
     visited: &mut HashSet<PathBuf>,
   ) -> XrfResult<()> {
     for location in vfs.entries(&XrayScope::all()) {
-      if !Self::is_ltx(location.logical_path()) {
+      if !location.logical_path().has_extension(&format!(".{LTX_EXTENSION}")) {
         continue;
       }
 
@@ -114,10 +114,6 @@ impl LtxFormatSelection {
     }
 
     Ok(())
-  }
-
-  fn is_ltx(logical_path: &str) -> bool {
-    logical_path.ends_with(&format!(".{LTX_EXTENSION}"))
   }
 
   fn describe_declined(location: &XrayAsset) -> String {

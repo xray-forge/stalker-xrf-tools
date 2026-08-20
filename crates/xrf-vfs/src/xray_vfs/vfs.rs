@@ -3,7 +3,7 @@ use std::path::{Path, PathBuf};
 
 use xrf_error::{XrfError, XrfResult};
 
-use crate::xray_path::normalize;
+use crate::xray_path::{XrayPath, normalize};
 use crate::{
   XrayAsset, XrayAssetContainer, XrayAssetRules, XrayAssetSource, XrayAssetType, XrayDirectoryListing,
   XrayDirectorySource, XrayMount, XrayMountId, XrayMountKind, XrayPathCollision, XrayScope,
@@ -208,7 +208,7 @@ impl XrayVfs {
       self
         .entries(scope)
         .into_iter()
-        .filter(|entry| entry.logical_path().ends_with(&suffix))
+        .filter(|entry| entry.logical_path().as_str().ends_with(&suffix))
         .collect(),
     )
   }
@@ -254,7 +254,7 @@ impl XrayVfs {
     let mut directories: HashSet<String> = HashSet::new();
 
     for entry in self.entries(&scope) {
-      let Some(remainder) = Self::remainder_under(entry.logical_path(), &directory) else {
+      let Some(remainder) = Self::remainder_under(entry.logical_path().as_str(), &directory) else {
         continue;
       };
 
@@ -468,7 +468,11 @@ impl XrayVfs {
       self
         .entries(&scope.clone().with_prefix(rules.directory)?)
         .into_iter()
-        .filter(|entry| entry.logical_path().starts_with(start) && entry.logical_path().ends_with(end))
+        .filter(|entry| {
+          let path: &str = entry.logical_path().as_str();
+
+          path.starts_with(start) && path.ends_with(end)
+        })
         .collect(),
     )
   }
@@ -522,6 +526,9 @@ impl XrayVfs {
     let source_path: String = mount.to_source_path(logical_path)?;
     let container: XrayAssetContainer = mount.source().locate(&source_path)?;
 
-    Some(XrayAsset::new(logical_path.to_string(), container))
+    Some(XrayAsset::new(
+      XrayPath::from_normalized(logical_path.to_string()),
+      container,
+    ))
   }
 }

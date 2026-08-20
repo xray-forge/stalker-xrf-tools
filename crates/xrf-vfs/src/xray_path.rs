@@ -1,6 +1,7 @@
 use std::fmt::{Display, Formatter, Result as FormatResult};
 use std::path::Path;
 
+use serde::Serialize;
 use xrf_error::{XrfError, XrfResult};
 
 /// An X-Ray logical path: lower case, backslash separated, with no empty, `.` or `..` component.
@@ -9,7 +10,16 @@ use xrf_error::{XrfError, XrfResult};
 /// all, so the type deliberately does not implement `AsRef<Path>` — handing one to host I/O must not compile. Read it
 /// through an [`crate::XrayVfs`], and ask [`crate::XrayAsset::physical_path`] when a real file is genuinely
 /// required.
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+///
+/// Being separator-explicit is what makes it portable: it splits on `\` itself rather than deferring to
+/// `std::path`, so `parent` and `file_name` answer the same on Linux as on Windows, where a `std::path::Path`
+/// would treat the whole thing as one component.
+///
+/// Serialized and typed transparently as its string form, so an engine path crosses IPC as the text the engine uses.
+#[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[serde(transparent)]
+#[cfg_attr(feature = "typescript-bindings", specta(transparent))]
 pub struct XrayPath(String);
 
 impl XrayPath {
@@ -20,6 +30,20 @@ impl XrayPath {
   /// Returns an error when the path is empty or holds an empty, `.` or `..` component.
   pub fn new(path: &str) -> XrfResult<Self> {
     Ok(Self(normalize(path)?))
+  }
+
+  /// Wraps a string [`normalize`] already produced.
+  ///
+  /// Crate-internal, because only the mount layer knows a path came out of normalization. It exists so enumerating tens of
+  /// thousands of entries does not re-validate each one to say what the source already guaranteed.
+  pub(crate) fn from_normalized(path: String) -> Self {
+    debug_assert_eq!(
+      normalize(&path).ok().as_deref(),
+      Some(path.as_str()),
+      "from_normalized was handed a path normalization would have changed"
+    );
+
+    Self(path)
   }
 
   /// The normalized path, for lookups and messages.
@@ -150,7 +174,7 @@ pub(crate) fn with_extension(path: &str, extension: &str) -> String {
 
 #[cfg(test)]
 mod tests {
-  use std::path::PathBuf;
+  use std::path::{Path, PathBuf};
 
   use super::{XrayPath, has_extension, join, normalize, normalize_host_relative, with_extension};
 
@@ -247,5 +271,34 @@ mod tests {
       directory.join("w_ak74.ltx").expect("valid").as_str(),
       "configs\\weapons\\w_ak74.ltx"
     );
+  }
+
+  #[test]
+  fn answers_the_same_on_every_platform_where_std_path_would_not() {
+    // The portability contract. On Linux `std::path` treats `configs\weapons\w_ak74.ltx` as one component.
+    let path: XrayPath = XrayPath::new("configs\\weapons\\w_ak74.ltx").expect("valid");
+    let as_host_path: &Path = Path::new(path.as_str());
+
+    assert_eq!(path.file_name(), "w_ak74.ltx");
+    assert_eq!(
+      path.parent().expect("nested path has a parent").as_str(),
+      "configs\\weapons"
+    );
+    assert!(path.is_under("configs").expect("valid prefix"));
+
+    // Separators come in either way and leave as `\`, so a host path built with `/` addresses the same asset.
+    assert_eq!(
+      XrayPath::new("configs/weapons/w_ak74.ltx").expect("valid"),
+      path,
+      "a forward-slash reference names the same engine asset"
+    );
+    assert_eq!(
+      normalize_host_relative(&PathBuf::from("configs").join("weapons").join("w_ak74.ltx")).expect("valid"),
+      path.as_str(),
+      "a host relative path indexes to the same identity whichever separator the platform used"
+    );
+
+    // Left as a marker of why the type exists: on Windows these agree, on Linux they do not.
+    assert_eq!(as_host_path.extension().and_then(|value| value.to_str()), Some("ltx"));
   }
 }

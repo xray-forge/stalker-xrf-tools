@@ -107,7 +107,7 @@ fn resolves_a_texture_reference_once_mounted_in_a_vfs() {
     .expect("lookup succeeds")
     .expect("texture resolves");
 
-  assert_eq!(location.logical_path(), "textures\\wpn\\wpn_ak74.dds");
+  assert_eq!(location.logical_path().as_str(), "textures\\wpn\\wpn_ak74.dds");
   assert_eq!(location.physical_path(), None);
   assert_eq!(vfs.read(&scope, "textures\\wpn\\wpn_ak74.dds").unwrap(), TEXTURE);
 }

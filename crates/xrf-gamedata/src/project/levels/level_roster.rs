@@ -50,7 +50,7 @@ impl LevelRoster {
       .vfs()
       .entries_of_type(project.scope(), AssetType::Spawn)
       .into_iter()
-      .filter(|location| location.logical_path().starts_with(&format!("{SPAWNS_DIRECTORY}\\")))
+      .filter(|location| location.logical_path().is_under(SPAWNS_DIRECTORY).unwrap_or(false))
       .map(|location| location.logical_path().to_string())
       .collect();
 

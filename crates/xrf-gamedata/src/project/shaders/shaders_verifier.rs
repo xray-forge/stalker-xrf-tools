@@ -64,8 +64,10 @@ impl<'a> ShadersVerifier<'a> {
       renderer.display_name()
     );
 
-    let renderer_root: PathBuf = self.shaders_root.join(renderer.directory_name());
-    let renderer_prefix: String = renderer_root.to_string_lossy().to_string();
+    // Built with `\` rather than by joining host paths, so the prefix and every finding path read the same on Linux as on
+    // Windows. `xrf-shaders` wants a `Path`, but the value inside it is an engine identity.
+    let renderer_prefix: String = format!("{SHADERS_DIRECTORY}\\{}", renderer.directory_name());
+    let renderer_root: PathBuf = PathBuf::from(&renderer_prefix);
 
     let entries: Vec<String> = match self.renderer_entries(&renderer_prefix) {
       Ok(entries) => entries,
@@ -158,15 +160,19 @@ impl<'a> ShadersVerifier<'a> {
     };
 
     for file in listing.files {
-      let path: PathBuf = PathBuf::from(file.logical_path());
-
-      if !Self::has_extension(&path, SHADER_SCRIPT_FILE_EXTENSION) {
+      if !file
+        .logical_path()
+        .has_extension(&format!(".{SHADER_SCRIPT_FILE_EXTENSION}"))
+      {
         continue;
       }
 
+      // `xrf-shaders` keys sources by path, and for this project those keys are engine identities.
+      let path: PathBuf = PathBuf::from(file.logical_path().as_str());
+
       result.increment_checked_scripts_count();
 
-      match self.read_script(file.logical_path()) {
+      match self.read_script(file.logical_path().as_str()) {
         Ok(source) => {
           if let Err(error) = XRayShaderScript::parse(&path, &source) {
             result.add_finding(GamedataFindingFactory::for_asset(
