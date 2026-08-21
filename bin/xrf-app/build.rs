@@ -3,15 +3,15 @@ use std::fs;
 use std::io;
 use std::path::PathBuf;
 
-#[path = "src/tauri_command_registry/build.rs"]
-mod tauri_command_registry;
+#[path = "src/registry/build.rs"]
+mod registry;
 
 use tauri_build::{Attributes, WindowsAttributes};
 
 fn main() {
   clear_stale_inline_plugin_permissions().expect("failed to clear stale inline-plugin permissions");
 
-  tauri_build::try_build(tauri_command_registry::configure(
+  tauri_build::try_build(registry::configure(
     Attributes::new()
       .codegen(tauri_build::CodegenContext::new())
       .windows_attributes(WindowsAttributes::new()),
