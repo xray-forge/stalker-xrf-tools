@@ -62,7 +62,7 @@ fn pack(
 }
 
 fn open(destination: &Path) -> ArchiveProject {
-  ArchiveProject::new(&destination).expect("written archive opens")
+  ArchiveProject::new(destination).expect("written archive opens")
 }
 
 fn read(project: &ArchiveProject, name: &str) -> Vec<u8> {

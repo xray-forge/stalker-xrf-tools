@@ -131,11 +131,11 @@ impl XrayVfs {
   pub fn find(&self, scope: &XrayLookupScope, logical_path: &str) -> XrfResult<Option<XrayAsset>> {
     let logical_path: Cow<str> = normalize(logical_path)?;
 
-    if !Self::within_prefix(scope, &logical_path) {
-      return Ok(None);
-    }
-
-    Ok(self.locate(scope, &logical_path))
+    Ok(
+      self
+        .winner_in_scope(scope, &logical_path)
+        .and_then(|(mount, source_path)| Self::locate_at(mount, &logical_path, &source_path)),
+    )
   }
 
   /// Every mount in scope holding a logical path, winner first.
@@ -171,22 +171,15 @@ impl XrayVfs {
   pub fn read(&self, scope: &XrayLookupScope, logical_path: &str) -> XrfResult<Vec<u8>> {
     let logical_path: Cow<str> = normalize(logical_path)?;
 
-    if Self::within_prefix(scope, &logical_path) {
-      for mount in self.scoped(scope) {
-        if let Some(source_path) = mount.to_source_path(&logical_path)
-          && mount.source().contains(&source_path)
-        {
-          return mount.source().read(&source_path);
-        }
-      }
+    match self.winner_in_scope(scope, &logical_path) {
+      Some((mount, source_path)) => mount.source().read(&source_path),
+      // Absence is `NotFound` throughout this crate, so a consumer can tell "the asset is not here" from "the source
+      // holding it failed" without reading the message.
+      None => Err(XrfError::new_not_found_error(format!(
+        "no asset '{logical_path}' in scope across {} mount(s)",
+        self.scoped(scope).count()
+      ))),
     }
-
-    // Absence is `NotFound` throughout this crate, so a consumer can tell "the asset is not here" from "the source
-    // holding it failed" without reading the message.
-    Err(XrfError::new_not_found_error(format!(
-      "no asset '{logical_path}' in scope across {} mount(s)",
-      self.scoped(scope).count()
-    )))
   }
 
   /// Reads the bytes of an asset this VFS already resolved.
@@ -206,6 +199,10 @@ impl XrayVfs {
       XrayAssetContainer::Archive { path } => path,
     };
 
+    // todo: A container names a source by its root, and an archive source's root is the common parent of its volumes,
+    //   so two mounts planned from single volumes in one directory are indistinguishable here and the first one wins.
+    //   No plan constructor produces that today — `from_fsgame` plans directories — but disambiguating needs the
+    //   container to carry the mount, or this find to prefer a root-matching mount that also holds the path.
     let Some(mount) = self
       .mounts
       .iter()
@@ -237,17 +234,9 @@ impl XrayVfs {
   /// useful to do with the difference, and every caller would discard it.
   pub fn size(&self, scope: &XrayLookupScope, logical_path: &str) -> Option<u64> {
     let logical_path: Cow<str> = normalize(logical_path).ok()?;
+    let (mount, source_path) = self.winner_in_scope(scope, &logical_path)?;
 
-    if !Self::within_prefix(scope, &logical_path) {
-      return None;
-    }
-
-    self.scoped(scope).find_map(|mount| {
-      mount
-        .to_source_path(&logical_path)
-        .filter(|source_path| mount.source().contains(source_path))
-        .and_then(|source_path| mount.source().size(&source_path))
-    })
+    mount.source().size(&source_path)
   }
 
   /// Returns winning entries in scope, one per logical path, ordered by that path.
@@ -413,34 +402,24 @@ impl XrayVfs {
   pub fn write(&self, scope: &XrayLookupScope, logical_path: &str, bytes: &[u8]) -> XrfResult<()> {
     let logical_path: Cow<str> = normalize(logical_path)?;
 
-    if Self::within_prefix(scope, &logical_path) {
-      for mount in self.scoped(scope) {
-        let Some(source_path) = mount.to_source_path(&logical_path) else {
-          continue;
-        };
+    let Some((mount, source_path)) = self.winner_in_scope(scope, &logical_path) else {
+      return Err(XrfError::new_asset_error(format!(
+        "cannot write '{logical_path}': no mount in scope holds it"
+      )));
+    };
 
-        if !mount.source().contains(&source_path) {
-          continue;
-        }
-
-        if !mount.is_writable() {
-          return Err(XrfError::new_asset_error(format!(
-            "cannot write '{logical_path}': it is held by {} '{}', which is read only",
-            match mount.kind() {
-              XrayMountKind::Archive => "archive",
-              XrayMountKind::Directory => "directory",
-            },
-            mount.label()
-          )));
-        }
-
-        return mount.source().write(&source_path, bytes);
-      }
+    if !mount.is_writable() {
+      return Err(XrfError::new_asset_error(format!(
+        "cannot write '{logical_path}': it is held by {} '{}', which is read only",
+        match mount.kind() {
+          XrayMountKind::Archive => "archive",
+          XrayMountKind::Directory => "directory",
+        },
+        mount.label()
+      )));
     }
 
-    Err(XrfError::new_asset_error(format!(
-      "cannot write '{logical_path}': no mount in scope holds it"
-    )))
+    mount.source().write(&source_path, bytes)
   }
 
   /// Creates a loose override in the highest-priority writable mount in scope.
@@ -524,11 +503,7 @@ impl XrayVfs {
     asset_type: XrayAssetType,
     reference: &str,
   ) -> XrfResult<Option<XrayAsset>> {
-    let rules: XrayAssetRules = asset_type.rules().ok_or_else(|| {
-      XrfError::new_asset_error(format!(
-        "asset kind {asset_type:?} has no single directory to resolve under"
-      ))
-    })?;
+    let rules: XrayAssetRules = Self::rules_of(asset_type)?;
 
     self.find_in(scope, rules.directory, &rules.logical_path(reference))
   }
@@ -553,11 +528,7 @@ impl XrayVfs {
       return Ok(self.resolve(scope, asset_type, reference)?.into_iter().collect());
     }
 
-    let rules: XrayAssetRules = asset_type.rules().ok_or_else(|| {
-      XrfError::new_asset_error(format!(
-        "asset kind {asset_type:?} has no single directory to resolve under"
-      ))
-    })?;
+    let rules: XrayAssetRules = Self::rules_of(asset_type)?;
 
     let mask: String = crate::path::join(rules.directory, &rules.logical_path(reference))?;
     let Some((start, end)) = mask.split_once('*') else {
@@ -614,6 +585,19 @@ impl XrayVfs {
     self.find(scope, &crate::path::join(prefix, path)?)
   }
 
+  /// The resolution rules of a kind that has a canonical home.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error naming the kind when it has no single directory to resolve under.
+  fn rules_of(asset_type: XrayAssetType) -> XrfResult<XrayAssetRules> {
+    asset_type.rules().ok_or_else(|| {
+      XrfError::new_asset_error(format!(
+        "asset kind {asset_type:?} has no single directory to resolve under"
+      ))
+    })
+  }
+
   /// Checks whether a logical path falls inside the scope's subtree.
   fn within_prefix(scope: &XrayLookupScope, logical_path: &str) -> bool {
     scope
@@ -621,16 +605,38 @@ impl XrayVfs {
       .is_none_or(|prefix| crate::path::is_component_prefix(logical_path, prefix))
   }
 
-  fn locate(&self, scope: &XrayLookupScope, logical_path: &str) -> Option<XrayAsset> {
-    self
-      .scoped(scope)
-      .find_map(|mount| Self::locate_in(mount, logical_path))
+  /// The highest-priority mount in scope holding a logical path, with that path in the mount's own namespace.
+  ///
+  /// The one place a path-keyed operation picks a winner. [`Self::find`], [`Self::read`], [`Self::size`] and
+  /// [`Self::write`] each used to walk the mounts themselves and apply the scope's subtree guard inline — four copies of
+  /// one decision, two of which asked `locate` where the others asked `contains`. A source answering those two
+  /// differently would have sent a read to a mount the preceding lookup did not choose;
+  /// [`XrayAssetSource::contains`] now derives from `locate` by default so it cannot.
+  ///
+  /// `logical_path` must already be normalized.
+  fn winner_in_scope<'a>(&self, scope: &XrayLookupScope, logical_path: &'a str) -> Option<(&XrayMount, Cow<'a, str>)> {
+    if !Self::within_prefix(scope, logical_path) {
+      return None;
+    }
+
+    self.scoped(scope).find_map(|mount| {
+      mount
+        .to_source_path(logical_path)
+        .filter(|source_path| mount.source().contains(source_path))
+        .map(|source_path| (mount, source_path))
+    })
   }
 
   /// Pairs a logical path with the physical container reported by the mount's source.
   fn locate_in(mount: &XrayMount, logical_path: &str) -> Option<XrayAsset> {
     let source_path: Cow<'_, str> = mount.to_source_path(logical_path)?;
-    let container: XrayAssetContainer = mount.source().locate(&source_path)?;
+
+    Self::locate_at(mount, logical_path, &source_path)
+  }
+
+  /// Pairs a logical path with its container, for a mount already known to hold the source path.
+  fn locate_at(mount: &XrayMount, logical_path: &str, source_path: &str) -> Option<XrayAsset> {
+    let container: XrayAssetContainer = mount.source().locate(source_path)?;
 
     Some(XrayAsset::new(
       XrayPath::from_normalized(logical_path.to_string()),

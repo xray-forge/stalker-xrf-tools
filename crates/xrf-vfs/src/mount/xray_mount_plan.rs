@@ -5,7 +5,7 @@ use std::path::{Path, PathBuf};
 use xrf_error::XrfResult;
 
 use crate::mount::xray_root::implied_install_root;
-use crate::path::normalize;
+use crate::path::{normalize, normalize_base};
 use crate::{FsgameFile, XrayMountKind, implied_asset_root};
 
 /// One source to mount before it is opened or indexed.
@@ -146,11 +146,7 @@ impl XrayMountPlan {
   /// Returns an error when `base` is not a valid X-Ray logical path.
   pub fn with_kind(mut self, path: impl AsRef<Path>, base: &str, origin: &str, kind: XrayMountKind) -> XrfResult<Self> {
     self.mounts.push(XrayPlannedMount {
-      base: if base.is_empty() {
-        String::new()
-      } else {
-        normalize(base)?.into_owned()
-      },
+      base: normalize_base(base)?,
       ignored: Vec::new(),
       kind,
       origin: origin.to_string(),

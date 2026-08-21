@@ -5,8 +5,9 @@ use std::path::Path;
 
 use xrf_error::{XrfError, XrfResult};
 
-use crate::archive::project::archive_project::ArchiveProject;
+use crate::archive::ArchiveProject;
 use crate::path::{is_component_prefix, normalize_logical};
+use crate::source::xray_asset_source::label_from_path;
 use crate::{XrayAssetContainer, XrayAssetSource, XrayMountKind};
 
 /// Mounts an archive volume set as a read-only asset source.
@@ -47,10 +48,7 @@ impl ArchiveAssetSource {
 
     Ok(Self {
       entries,
-      label: path
-        .file_name()
-        .map(|name| name.to_string_lossy().to_string())
-        .unwrap_or_else(|| path.display().to_string()),
+      label: label_from_path(path),
       project,
     })
   }

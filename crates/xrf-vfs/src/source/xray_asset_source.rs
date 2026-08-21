@@ -19,6 +19,16 @@ pub enum XrayMountKind {
   Archive,
 }
 
+/// Names a source after the directory or volume set it was opened from, for [`XrayAssetSource::label`].
+///
+/// The crate's answer for both of its own sources, so a diagnostic reads `textures` rather than a whole install path.
+/// Falls back to the path itself for a root with no final component, the one case `file_name` declines.
+pub(crate) fn label_from_path(path: &Path) -> String {
+  path
+    .file_name()
+    .map_or_else(|| path.display().to_string(), |name| name.to_string_lossy().to_string())
+}
+
 /// An asset source addressed by normalized paths relative to itself.
 ///
 /// [`crate::XrayMount`] strips its logical base before calling the source, allowing the same source type to back a root or
@@ -37,7 +47,14 @@ pub trait XrayAssetSource: Debug + Send + Sync {
   fn root_path(&self) -> &Path;
 
   /// Checks whether the source contains a source-relative logical path.
-  fn contains(&self, path: &str) -> bool;
+  ///
+  /// Must answer exactly when [`Self::locate`] does. [`crate::XrayVfs`] picks a winning mount with this and then reads,
+  /// sizes or locates through that same mount, so a source answering the two differently would send a read to a mount
+  /// the preceding lookup did not choose. The default derives it from `locate` so they cannot drift; override it when
+  /// membership can be answered without building a container, as both of this crate's sources do.
+  fn contains(&self, path: &str) -> bool {
+    self.locate(path).is_some()
+  }
 
   /// Locates an entry in its physical container.
   ///

@@ -96,18 +96,16 @@ impl ArchiveProject {
 }
 
 impl ArchiveProject {
+  /// Bytes the merged name table's entries occupy once unpacked.
+  ///
+  /// Summed over the merged table rather than over the volumes, so an entry a later volume overrides is counted once.
   pub fn get_real_size(&self) -> u64 {
     self.size_real
   }
 
+  /// Bytes the merged name table's entries occupy as stored.
   pub fn get_compressed_size(&self) -> u64 {
-    let mut total: u64 = 0;
-
-    for file in self.files.values() {
-      total += file.size_compressed as u64;
-    }
-
-    total
+    self.files.values().map(|file| u64::from(file.size_compressed)).sum()
   }
 
   /// Sort archives list to maintain overriding of files in a correct way.

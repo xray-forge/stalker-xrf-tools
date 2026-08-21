@@ -1,5 +1,7 @@
-pub(crate) mod declaration;
-pub(crate) mod file;
+//! `fsgame.ltx`: the file an installation describes its own directory layout with, parsed and resolved to host paths.
+
+mod declaration;
+mod file;
 #[cfg(test)]
 mod tests;
 

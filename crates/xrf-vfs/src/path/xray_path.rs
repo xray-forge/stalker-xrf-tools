@@ -1,6 +1,6 @@
 use std::borrow::Cow;
 use std::fmt::{Display, Formatter, Result as FormatResult};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use serde::Serialize;
 use xrf_error::{XrfError, XrfResult};
@@ -169,6 +169,22 @@ fn validate_components(normalized: &str, original: &str) -> XrfResult<()> {
   Ok(())
 }
 
+/// Normalizes a mount's logical base, where empty means the whole root rather than an invalid path.
+///
+/// The one place that exception lives. A mount and the plan that describes it both have to agree on it, and
+/// [`normalize`] cannot answer it: an empty path is exactly what it rejects.
+///
+/// # Errors
+///
+/// Returns an error when a non-empty base is not a valid logical path.
+pub(crate) fn normalize_base(base: &str) -> XrfResult<String> {
+  if base.is_empty() {
+    return Ok(String::new());
+  }
+
+  Ok(normalize(base)?.into_owned())
+}
+
 /// Converts a root-relative host path into the canonical X-Ray logical path used for indexing.
 ///
 /// Named for the domain it crosses: the input is a host path fragment, the output an engine identity.
@@ -178,6 +194,15 @@ pub(crate) fn normalize_host_relative(path: &Path) -> XrfResult<String> {
     .ok_or_else(|| XrfError::new_asset_error(format!("directory asset path is not valid UTF-8: {}", path.display())))?;
 
   Ok(normalize(path)?.into_owned())
+}
+
+/// Converts an engine identity into a host path relative to a source root.
+///
+/// The deliberate crossing out of the engine domain, and the inverse of [`normalize_host_relative`]. Built from
+/// components so the platform inserts its own separator: a `\`-joined literal is one component on Linux, which is how a
+/// created file lands with a backslash in its name instead of in a subdirectory.
+pub(crate) fn to_host_relative(logical_path: &str) -> PathBuf {
+  logical_path.split('\\').collect()
 }
 
 pub(crate) fn join(prefix: &str, path: &str) -> XrfResult<String> {
@@ -203,7 +228,7 @@ pub(crate) fn has_extension(path: &str, extension: &str) -> bool {
 mod tests {
   use std::path::{Path, PathBuf};
 
-  use super::{XrayPath, has_extension, join, normalize, normalize_host_relative};
+  use super::{XrayPath, has_extension, join, normalize, normalize_host_relative, to_host_relative};
 
   #[test]
   fn does_not_treat_a_bare_extension_as_a_named_asset() {
@@ -228,6 +253,22 @@ mod tests {
     assert_eq!(join("configs", "system.ltx").expect("valid"), "configs\\system.ltx");
     assert_eq!(join("", "system.ltx").expect("valid"), "system.ltx");
     assert_eq!(join("configs", "").expect("valid"), "configs");
+  }
+
+  #[test]
+  fn converts_an_identity_into_a_host_relative_path() {
+    // Built from components, so the platform inserts its own separator. A `\`-joined literal is one filename on Linux,
+    // which would create a file called `configs\system.ltx` instead of one inside `configs`.
+    assert_eq!(
+      to_host_relative("configs\\system.ltx"),
+      Path::new("configs").join("system.ltx")
+    );
+    assert_eq!(to_host_relative("system.ltx"), Path::new("system.ltx"));
+    assert_eq!(
+      normalize_host_relative(&to_host_relative("configs\\weapons\\ak74.ltx")).expect("valid"),
+      "configs\\weapons\\ak74.ltx",
+      "crossing to a host path and back is lossless"
+    );
   }
 
   #[test]

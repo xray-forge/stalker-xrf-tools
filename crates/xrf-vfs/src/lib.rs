@@ -39,13 +39,10 @@ pub use path::{XrayPath, XrayPathCollision, is_component_prefix, normalize_logic
 pub use source::{ArchiveAssetSource, XrayAssetSource, XrayMountKind};
 pub use vfs::{XrayDirectoryListing, XrayLookupScope, XrayVfs};
 
-pub use crate::archive::archive_descriptor::ArchiveDescriptor;
-pub use crate::archive::archive_file_descriptor::ArchiveFileDescriptor;
-pub use crate::archive::project::archive_project::ArchiveProject;
-pub use crate::archive::project::archive_project_read_policy::ArchiveProjectReadPolicy;
-pub use crate::archive::project::archive_project_read_result::ProjectReadResult;
+pub use crate::archive::{
+  ArchiveDescriptor, ArchiveFileDescriptor, ArchiveProject, ArchiveProjectReadPolicy, ProjectReadResult,
+};
 
 // Format internals the archive tooling in `xrf-archive` needs to build and extract volumes. Reading a set is this crate's
 // job; the two write directions are not, and they cannot be expressed without these.
-pub use crate::archive::constants::CHUNK_ID_COMPRESSED_MASK;
-pub use crate::archive::file_io::write_descriptor_contents;
+pub use crate::archive::{CHUNK_ID_COMPRESSED_MASK, write_descriptor_contents};

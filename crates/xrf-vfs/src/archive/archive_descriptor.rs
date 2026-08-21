@@ -35,23 +35,13 @@ impl ArchiveDescriptor {
 }
 
 impl ArchiveDescriptor {
+  /// Bytes this volume's entries occupy once unpacked.
   pub fn get_real_size(&self) -> u64 {
-    let mut total: u64 = 0;
-
-    for file in self.files.values() {
-      total += file.size_real as u64;
-    }
-
-    total
+    self.files.values().map(|file| u64::from(file.size_real)).sum()
   }
 
+  /// Bytes this volume's entries occupy as stored.
   pub fn get_compressed_size(&self) -> u64 {
-    let mut total: u64 = 0;
-
-    for file in self.files.values() {
-      total += file.size_compressed as u64;
-    }
-
-    total
+    self.files.values().map(|file| u64::from(file.size_compressed)).sum()
   }
 }

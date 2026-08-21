@@ -3,7 +3,7 @@ use std::borrow::Cow;
 use serde::Serialize;
 use xrf_error::XrfResult;
 
-use crate::path::{is_component_prefix, join, normalize};
+use crate::path::{is_component_prefix, join, normalize, normalize_base};
 use crate::{XrayAssetSource, XrayMountKind};
 
 /// Stable identity of a mount within one VFS.
@@ -32,11 +32,7 @@ impl XrayMount {
   /// Returns an error when a non-empty base is not a valid X-Ray logical path.
   pub fn new(id: XrayMountId, base: &str, source: Box<dyn XrayAssetSource>) -> XrfResult<Self> {
     Ok(Self {
-      base: if base.is_empty() {
-        String::new()
-      } else {
-        normalize(base)?.into_owned()
-      },
+      base: normalize_base(base)?,
       id,
       source,
     })

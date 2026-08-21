@@ -1,5 +1,11 @@
-pub(crate) mod archive_project;
-pub(crate) mod archive_project_read_policy;
-pub(crate) mod archive_project_read_result;
-pub(crate) mod constants;
-pub(crate) mod read;
+//! A volume set merged into one name table, and the policy for reading an entry out of it.
+
+mod archive_project;
+mod archive_project_read_policy;
+mod archive_project_read_result;
+mod constants;
+mod read;
+
+pub use archive_project::ArchiveProject;
+pub use archive_project_read_policy::ArchiveProjectReadPolicy;
+pub use archive_project_read_result::ProjectReadResult;

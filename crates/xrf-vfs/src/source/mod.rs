@@ -5,12 +5,12 @@
 //! [`crate::XrayVfs`] alone.
 
 mod archive_asset_source;
-pub(crate) mod directory_asset;
-pub(crate) mod directory_asset_index;
-pub(crate) mod indexed_asset;
-pub(crate) mod xray_asset_index;
+mod directory_asset;
+mod directory_asset_index;
+mod indexed_asset;
+mod xray_asset_index;
 mod xray_asset_source;
-pub(crate) mod xray_directory_source;
+mod xray_directory_source;
 
 pub use archive_asset_source::ArchiveAssetSource;
 pub(crate) use directory_asset::DirectoryAsset;

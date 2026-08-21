@@ -3,7 +3,8 @@ use std::path::{Path, PathBuf};
 
 use xrf_error::{XrfError, XrfResult};
 
-use crate::path::is_component_prefix;
+use crate::path::{is_component_prefix, to_host_relative};
+use crate::source::xray_asset_source::label_from_path;
 use crate::source::{DirectoryAssetIndex, XrayAssetIndex};
 use crate::{XrayAssetContainer, XrayAssetSource, XrayMountKind, XrayPathCollision};
 
@@ -40,10 +41,7 @@ impl XrayDirectorySource {
 
     Ok(Self {
       index: XrayAssetIndex::new(DirectoryAssetIndex::read(root)?, ignored)?,
-      label: root
-        .file_name()
-        .map(|name| name.to_string_lossy().to_string())
-        .unwrap_or_else(|| root.display().to_string()),
+      label: label_from_path(root),
     })
   }
 
@@ -130,7 +128,7 @@ impl XrayAssetSource for XrayDirectorySource {
       )));
     }
 
-    let absolute: PathBuf = self.root().join(path.replace('\\', "/"));
+    let absolute: PathBuf = self.root().join(to_host_relative(path));
 
     if let Some(parent) = absolute.parent() {
       fs::create_dir_all(parent)
