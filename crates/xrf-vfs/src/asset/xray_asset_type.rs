@@ -75,33 +75,7 @@ impl XrayAssetType {
       extension,
     })
   }
-}
 
-impl XrayAssetRules {
-  /// Converts a raw engine reference into the logical path below the kind's directory.
-  ///
-  /// An authoring extension is replaced rather than appended, and a reference already carrying the loaded extension is
-  /// left alone. Both comparisons ignore case, because a reference authored as `wpn\wpn_ak74.OGF` names the same asset.
-  pub fn logical_path(&self, reference: &str) -> String {
-    if let Some((stem, extension)) = reference.rsplit_once('.') {
-      if self
-        .authoring_extensions
-        .iter()
-        .any(|known| extension.eq_ignore_ascii_case(known))
-      {
-        return format!("{stem}{}", self.extension);
-      }
-
-      if extension.eq_ignore_ascii_case(self.extension.trim_start_matches('.')) {
-        return reference.to_string();
-      }
-    }
-
-    format!("{reference}{}", self.extension)
-  }
-}
-
-impl XrayAssetType {
   pub(crate) fn from_logical_path(path: &str) -> Option<Self> {
     match path.rsplit_once('.').map(|(_, extension)| extension) {
       Some("ai") => Some(Self::Ai),
@@ -139,6 +113,30 @@ impl XrayAssetType {
       _ if path.ends_with("level") => Some(Self::Level),
       _ => None,
     }
+  }
+}
+
+impl XrayAssetRules {
+  /// Converts a raw engine reference into the logical path below the kind's directory.
+  ///
+  /// An authoring extension is replaced rather than appended, and a reference already carrying the loaded extension is
+  /// left alone. Both comparisons ignore case, because a reference authored as `wpn\wpn_ak74.OGF` names the same asset.
+  pub fn logical_path(&self, reference: &str) -> String {
+    if let Some((stem, extension)) = reference.rsplit_once('.') {
+      if self
+        .authoring_extensions
+        .iter()
+        .any(|known| extension.eq_ignore_ascii_case(known))
+      {
+        return format!("{stem}{}", self.extension);
+      }
+
+      if extension.eq_ignore_ascii_case(self.extension.trim_start_matches('.')) {
+        return reference.to_string();
+      }
+    }
+
+    format!("{reference}{}", self.extension)
   }
 }
 

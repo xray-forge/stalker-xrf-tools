@@ -37,24 +37,24 @@ impl XrayLookupScope {
   /// Selects only writable mounts.
   pub fn writable() -> Self {
     Self {
-      prefix: None,
       selection: XrayMountSelection::Writable,
+      ..Self::default()
     }
   }
 
   /// Selects the named mounts while preserving VFS priority order.
   pub fn only(mounts: impl IntoIterator<Item = XrayMountId>) -> Self {
     Self {
-      prefix: None,
       selection: XrayMountSelection::Only(mounts.into_iter().collect()),
+      ..Self::default()
     }
   }
 
   /// Selects mounts of one storage kind.
   pub fn of_kind(kind: XrayMountKind) -> Self {
     Self {
-      prefix: None,
       selection: XrayMountSelection::OfKind(kind),
+      ..Self::default()
     }
   }
 

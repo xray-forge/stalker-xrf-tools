@@ -32,9 +32,7 @@ impl ArchiveDescriptor {
         extension.starts_with("db") || extension.starts_with("xdb")
       })
   }
-}
 
-impl ArchiveDescriptor {
   /// Bytes this volume's entries occupy once unpacked.
   pub fn get_real_size(&self) -> u64 {
     self.files.values().map(|file| u64::from(file.size_real)).sum()

@@ -16,7 +16,9 @@ use crate::archive::archive_descriptor::ArchiveDescriptor;
 use crate::archive::archive_file_descriptor::ArchiveFileDescriptor;
 use crate::archive::archive_header::ArchiveHeader;
 use crate::archive::byte_order::XRayByteOrder;
-use crate::archive::constants::{CHUNK_ID_COMPRESSED_MASK, CHUNK_ID_MASK};
+use crate::archive::constants::{
+  CHUNK_ID_COMPRESSED_MASK, CHUNK_ID_FILE_DESCRIPTORS, CHUNK_ID_MASK, CHUNK_ID_METADATA, MAXIMUM_ENTRY_NAME_SIZE,
+};
 use crate::archive::file_io::allocate_declared;
 
 /// Patterns of the `[header]` metadata chunk, compiled once.
@@ -55,15 +57,12 @@ impl ArchiveReader {
         path: path.into(),
       }),
       Err(error) => Err(XrfError::new_read_error(format!(
-        "Failed to read archive file {}, {}",
-        path.display(),
-        error
+        "Failed to read archive file {}, {error}",
+        path.display()
       ))),
     }
   }
-}
 
-impl ArchiveReader {
   /// Encoding of a volume's header strings.
   ///
   /// A property of the format, not a caller's choice: the engine writes the archive header and entry names in the system
@@ -114,9 +113,7 @@ impl ArchiveReader {
       .ok()
       .and_then(|duration| u64::try_from(duration.as_millis()).ok())
   }
-}
 
-impl ArchiveReader {
   fn read_archive_header(&mut self) -> XrfResult<Option<ArchiveHeader>> {
     let mut file_descriptors = None;
     let mut root_path: String = String::new();
@@ -131,7 +128,7 @@ impl ArchiveReader {
       };
       let chunk_size: u32 = self.file.read_u32::<XRayByteOrder>()?;
       let chunk_usize: usize = usize::try_from(chunk_size)
-        .map_err(|error| XrfError::new_read_error(format!("Failed to read archive header chunk size: {}", error)))?;
+        .map_err(|error| XrfError::new_read_error(format!("Failed to read archive header chunk size: {error}")))?;
 
       // A chunk's payload lives in this file, so a declared size beyond it is corruption — checked before the size can
       // reach an allocation.
@@ -147,29 +144,23 @@ impl ArchiveReader {
       let chunk_id: u32 = raw_chunk_id & CHUNK_ID_MASK;
       let compressed: bool = (raw_chunk_id & CHUNK_ID_COMPRESSED_MASK) != 0;
 
-      match chunk_id {
-        // File descriptors list
-        0x1 | 0x86 => {
-          let chunk_data: Vec<u8> = Self::read_chunk(&mut self.file, chunk_usize, compressed)?;
-          let mut reader: Cursor<&[u8]> = Cursor::new(chunk_data.as_slice());
+      if CHUNK_ID_FILE_DESCRIPTORS.contains(&chunk_id) {
+        let chunk_data: Vec<u8> = Self::read_chunk(&mut self.file, chunk_usize, compressed)?;
+        let mut reader: Cursor<&[u8]> = Cursor::new(chunk_data.as_slice());
 
-          file_descriptors = Some(Self::read_file_descriptors(&mut reader)?);
-        }
-        // Metadata header
-        666 | 1337 => {
-          let chunk_data: Vec<u8> = Self::read_chunk(&mut self.file, chunk_usize, compressed)?;
+        file_descriptors = Some(Self::read_file_descriptors(&mut reader)?);
+      } else if CHUNK_ID_METADATA.contains(&chunk_id) {
+        let chunk_data: Vec<u8> = Self::read_chunk(&mut self.file, chunk_usize, compressed)?;
 
-          root_path = self.read_root_path(chunk_data.as_slice())?.ok_or_else(|| {
-            XrfError::new_read_error(format!(
-              "archive {} has a metadata chunk without an [header] entry_point",
-              self.path.display()
-            ))
-          })?;
-        }
-        _ => {
-          // Skip
-          self.file.seek(SeekFrom::Current(i64::from(chunk_size)))?;
-        }
+        root_path = self.read_root_path(chunk_data.as_slice())?.ok_or_else(|| {
+          XrfError::new_read_error(format!(
+            "archive {} has a metadata chunk without an [header] entry_point",
+            self.path.display()
+          ))
+        })?;
+      } else {
+        // A volume may carry chunks this reader has no use for; skipping keeps an unknown one from ending the walk.
+        self.file.seek(SeekFrom::Current(i64::from(chunk_size)))?;
       }
     }
 
@@ -216,7 +207,7 @@ impl ArchiveReader {
 
   fn read_file_descriptors<T: Read>(reader: &mut T) -> XrfResult<HashMap<String, ArchiveFileDescriptor>> {
     let mut file_descriptors: HashMap<String, ArchiveFileDescriptor> = HashMap::new();
-    let mut name_buf: [u8; 520] = [0u8; 520];
+    let mut name_buf: [u8; MAXIMUM_ENTRY_NAME_SIZE] = [0u8; MAXIMUM_ENTRY_NAME_SIZE];
 
     loop {
       let header_size: u16 = match reader.read_u16::<XRayByteOrder>() {

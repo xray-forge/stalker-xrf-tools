@@ -11,7 +11,13 @@ use crate::archive::archive_file_descriptor::ArchiveFileDescriptor;
 use crate::archive::project::archive_project_read_policy::ArchiveProjectReadPolicy;
 use crate::archive::reader::ArchiveReader;
 
-// todo: Add reading from fsgame.ltx file.
+/// One volume set at a path the caller names, merged into a single name table.
+///
+/// Scoped to a path on purpose: which directories of an installation hold volumes is a question
+/// [`crate::XrayMountPlan::from_fsgame`] answers, and answering it here too would put `fsgame.ltx` knowledge in the
+/// volume-format layer and give the same declaration two readers.
+///
+/// Later volumes win the merge, so a patch volume shadows the entry it replaces.
 #[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
 #[derive(Clone, Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -93,9 +99,7 @@ impl ArchiveProject {
       size_real,
     })
   }
-}
 
-impl ArchiveProject {
   /// Bytes the merged name table's entries occupy once unpacked.
   ///
   /// Summed over the merged table rather than over the volumes, so an entry a later volume overrides is counted once.

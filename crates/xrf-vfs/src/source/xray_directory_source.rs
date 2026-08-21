@@ -44,10 +44,6 @@ impl XrayDirectorySource {
       label: label_from_path(root),
     })
   }
-
-  pub fn root(&self) -> &Path {
-    self.index.root()
-  }
 }
 
 impl XrayAssetSource for XrayDirectorySource {
@@ -88,7 +84,7 @@ impl XrayAssetSource for XrayDirectorySource {
       // Absent, not unreadable: the distinction lets a caller fall back rather than fail.
       return Err(XrfError::new_not_found_error(format!(
         "no asset '{path}' under root {}",
-        self.root().display()
+        self.root_path().display()
       )));
     };
 
@@ -105,7 +101,7 @@ impl XrayAssetSource for XrayDirectorySource {
     let Some(absolute) = self.index.find(path).ok().flatten().map(|asset| asset.absolute_path()) else {
       return Err(XrfError::new_asset_error(format!(
         "no asset '{path}' under root {} to write",
-        self.root().display()
+        self.root_path().display()
       )));
     };
 
@@ -124,11 +120,11 @@ impl XrayAssetSource for XrayDirectorySource {
     if self.contains(path) {
       return Err(XrfError::new_asset_error(format!(
         "asset '{path}' already exists under root {}",
-        self.root().display()
+        self.root_path().display()
       )));
     }
 
-    let absolute: PathBuf = self.root().join(to_host_relative(path));
+    let absolute: PathBuf = self.root_path().join(to_host_relative(path));
 
     if let Some(parent) = absolute.parent() {
       fs::create_dir_all(parent)

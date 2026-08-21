@@ -21,25 +21,33 @@ impl ArchiveProject {
     read_descriptor_bytes(descriptor)
   }
 
-  /// Read single file from project as string.
+  /// Read one archived file as text, subject to the project's read policy.
+  ///
+  /// Unlike [`Self::read_file_bytes`], the extension and size gates apply: this exists for a viewer that shows a config,
+  /// so refusing a binary or an enormous entry by name is the point rather than a limitation.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when the extension is not one the policy reads as text, the entry is absent, it exceeds the
+  /// policy's size limit, or its bytes cannot be read or decoded.
   pub fn read_file_as_string(&self, filename: &str) -> XrfResult<ProjectReadResult> {
-    log::info!("Trying to read file from archive: {}", filename);
+    log::info!("Trying to read file from archive: {filename}");
 
     if !self.read_policy.supports_file(filename) {
       return Err(XrfError::new_read_error(format!(
-        "File '{}' cannot be read, file extension is not allowed to be read",
-        filename
+        "File '{filename}' cannot be read, file extension is not allowed to be read"
       )));
     }
 
-    let descriptor: &ArchiveFileDescriptor = self.files.get(filename).ok_or_else(|| {
-      XrfError::new_not_found_error(format!("File '{}' is not found in the archive project", filename))
-    })?;
+    let descriptor: &ArchiveFileDescriptor = self
+      .files
+      .get(filename)
+      .ok_or_else(|| XrfError::new_not_found_error(format!("File '{filename}' is not found in the archive project")))?;
 
     if descriptor.size_real > self.read_policy.maximum_size {
       return Err(XrfError::new_read_error(format!(
-        "File '{}' is too big to be read - {}, {} is maximum allowed",
-        filename, descriptor.size_real, self.read_policy.maximum_size
+        "File '{filename}' is too big to be read - {}, {} is maximum allowed",
+        descriptor.size_real, self.read_policy.maximum_size
       )));
     }
 
