@@ -134,7 +134,7 @@ impl XrayVfs {
   ///
   /// Returns an error when the path is not a valid X-Ray logical path. Absence is `Ok(None)`, not an error.
   pub fn find(&self, scope: &XrayLookupScope, logical_path: &str) -> XrfResult<Option<XrayAsset>> {
-    let logical_path: String = normalize(logical_path)?;
+    let logical_path: Cow<str> = normalize(logical_path)?;
 
     if !Self::within_prefix(scope, &logical_path) {
       return Ok(None);
@@ -151,7 +151,7 @@ impl XrayVfs {
   ///
   /// Returns an error when the path is not a valid X-Ray logical path.
   pub fn find_all(&self, scope: &XrayLookupScope, logical_path: &str) -> XrfResult<Vec<XrayAsset>> {
-    let logical_path: String = normalize(logical_path)?;
+    let logical_path: Cow<str> = normalize(logical_path)?;
 
     if !Self::within_prefix(scope, &logical_path) {
       return Ok(Vec::new());
@@ -174,7 +174,7 @@ impl XrayVfs {
   /// Returns a not-found error when nothing in scope holds the path, an invalid-path error when it is not a valid X-Ray
   /// logical path, or the source's own error when the bytes cannot be read.
   pub fn read(&self, scope: &XrayLookupScope, logical_path: &str) -> XrfResult<Vec<u8>> {
-    let logical_path: String = normalize(logical_path)?;
+    let logical_path: Cow<str> = normalize(logical_path)?;
 
     if Self::within_prefix(scope, &logical_path) {
       for mount in self.scoped(scope) {
@@ -241,7 +241,7 @@ impl XrayVfs {
   /// Answers `None` both for an absent asset and for a path that is not a valid logical path — a size gate has nothing
   /// useful to do with the difference, and every caller would discard it.
   pub fn size(&self, scope: &XrayLookupScope, logical_path: &str) -> Option<u64> {
-    let logical_path: String = normalize(logical_path).ok()?;
+    let logical_path: Cow<str> = normalize(logical_path).ok()?;
 
     if !Self::within_prefix(scope, &logical_path) {
       return None;
@@ -262,28 +262,12 @@ impl XrayVfs {
   /// order, and two shipped defects came from a caller forgetting to impose one. Sorting ~47,000 entries costs
   /// milliseconds against the enumeration itself.
   pub fn entries(&self, scope: &XrayLookupScope) -> Vec<XrayAsset> {
-    let mut seen: HashSet<String> = HashSet::new();
-    let mut located: Vec<XrayAsset> = Vec::new();
+    let mut located: Vec<XrayAsset> = self.entries_all(scope);
 
-    for mount in self.scoped(scope) {
-      let Some(source_prefix) = mount.to_source_prefix(scope.prefix()) else {
-        continue;
-      };
-
-      for source_path in mount.source().entries(source_prefix.as_deref()) {
-        let Ok(logical_path) = mount.to_logical_path(&source_path) else {
-          continue;
-        };
-
-        if seen.insert(logical_path.clone())
-          && let Some(location) = Self::locate_in(mount, &logical_path)
-        {
-          located.push(location);
-        }
-      }
-    }
-
-    located.sort_by(|first, second| first.logical_path().cmp(second.logical_path()));
+    // `entries_all` sorts stably by logical path after collecting in mount order, so within one path the
+    // highest-priority mount comes first — which is exactly the entry `dedup_by` keeps. Deduping the sort we already
+    // need costs nothing, where a seen-set cost a hash and an owned copy of every path enumerated.
+    located.dedup_by(|first, second| first.logical_path() == second.logical_path());
 
     located
   }
@@ -313,7 +297,7 @@ impl XrayVfs {
   ///
   /// Returns an error when `suffix` is not a valid X-Ray logical path fragment.
   pub fn entries_with_suffix(&self, scope: &XrayLookupScope, suffix: &str) -> XrfResult<Vec<XrayAsset>> {
-    let suffix: String = normalize(suffix)?;
+    let suffix: Cow<str> = normalize(suffix)?;
 
     Ok(
       self
@@ -323,7 +307,7 @@ impl XrayVfs {
           entry
             .logical_path()
             .as_str()
-            .strip_suffix(&suffix)
+            .strip_suffix(suffix.as_ref())
             .is_some_and(|rest| rest.is_empty() || rest.ends_with('\\'))
         })
         .collect(),
@@ -355,8 +339,8 @@ impl XrayVfs {
   ///
   /// Returns an error when `directory` is not a valid X-Ray logical path. An empty `directory` lists the logical root.
   pub fn children(&self, scope: &XrayLookupScope, directory: &str) -> XrfResult<XrayDirectoryListing> {
-    let directory: String = if directory.is_empty() {
-      String::new()
+    let directory: Cow<str> = if directory.is_empty() {
+      Cow::Borrowed("")
     } else {
       normalize(directory)?
     };
@@ -432,7 +416,7 @@ impl XrayVfs {
   ///
   /// The operation refuses read-only winners and absent paths instead of creating a loose override.
   pub fn write(&self, scope: &XrayLookupScope, logical_path: &str, bytes: &[u8]) -> XrfResult<()> {
-    let logical_path: String = normalize(logical_path)?;
+    let logical_path: Cow<str> = normalize(logical_path)?;
 
     if Self::within_prefix(scope, &logical_path) {
       for mount in self.scoped(scope) {
@@ -474,7 +458,7 @@ impl XrayVfs {
   /// Returns an error when the path is invalid or out of scope, no writable mount can contain it, the target is already
   /// indexed there, creation or remounting fails, or the new entry does not resolve.
   pub fn write_override(&mut self, scope: &XrayLookupScope, logical_path: &str, bytes: &[u8]) -> XrfResult<XrayAsset> {
-    let logical_path: String = normalize(logical_path)?;
+    let logical_path: Cow<str> = normalize(logical_path)?;
 
     if !Self::within_prefix(scope, &logical_path) {
       return Err(XrfError::new_asset_error(format!(

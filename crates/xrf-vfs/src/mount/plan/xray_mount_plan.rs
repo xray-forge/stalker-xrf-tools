@@ -1,3 +1,4 @@
+use std::borrow::Cow;
 use std::fs;
 use std::path::{Path, PathBuf};
 
@@ -148,7 +149,7 @@ impl XrayMountPlan {
       base: if base.is_empty() {
         String::new()
       } else {
-        normalize(base)?
+        normalize(base)?.into_owned()
       },
       ignored: Vec::new(),
       kind,
@@ -170,7 +171,7 @@ impl XrayMountPlan {
   pub fn ignoring(mut self, ignored: &[String]) -> XrfResult<Self> {
     let ignored: Vec<String> = ignored
       .iter()
-      .map(|prefix| normalize(prefix))
+      .map(|prefix| normalize(prefix).map(Cow::into_owned))
       .collect::<XrfResult<_>>()?;
 
     for mount in &mut self.mounts {

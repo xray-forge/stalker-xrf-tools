@@ -64,7 +64,7 @@ impl XrayLookupScope {
   ///
   /// Returns an error when `prefix` is not a valid X-Ray logical path.
   pub fn with_prefix(mut self, prefix: &str) -> XrfResult<Self> {
-    self.prefix = Some(normalize(prefix)?);
+    self.prefix = Some(normalize(prefix)?.into_owned());
 
     Ok(self)
   }

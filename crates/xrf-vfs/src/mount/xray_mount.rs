@@ -35,7 +35,7 @@ impl XrayMount {
       base: if base.is_empty() {
         String::new()
       } else {
-        normalize(base)?
+        normalize(base)?.into_owned()
       },
       id,
       source,
@@ -88,12 +88,15 @@ impl XrayMount {
   }
 
   /// Applies this mount's base to a source-relative path.
-  pub(crate) fn to_logical_path(&self, source_path: &str) -> XrfResult<String> {
+  ///
+  /// Borrowed for a root mount, where the source path already *is* the logical path — enumeration calls this once per
+  /// entry, so copying each one to say nothing was the bulk of its allocation.
+  pub(crate) fn to_logical_path<'a>(&self, source_path: &'a str) -> XrfResult<Cow<'a, str>> {
     if self.base.is_empty() {
       return normalize(source_path);
     }
 
-    join(&self.base, source_path)
+    Ok(Cow::Owned(join(&self.base, source_path)?))
   }
 
   /// Translates a scope prefix into the source's namespace.

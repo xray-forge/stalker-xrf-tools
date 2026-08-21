@@ -1,3 +1,4 @@
+use std::borrow::Cow;
 use std::collections::BTreeMap;
 use std::path::Path;
 
@@ -32,7 +33,10 @@ impl XrayAssetIndex {
   ///
   /// Returns an error when an ignored prefix or an asset path is not a valid X-Ray logical path.
   pub(crate) fn new(directory: DirectoryAssetIndex, ignored: &[String]) -> XrfResult<Self> {
-    let ignored: Vec<String> = ignored.iter().map(|path| normalize(path)).collect::<XrfResult<_>>()?;
+    let ignored: Vec<String> = ignored
+      .iter()
+      .map(|path| normalize(path).map(Cow::into_owned))
+      .collect::<XrfResult<_>>()?;
 
     let mut assets: BTreeMap<String, usize> = BTreeMap::new();
     let mut collisions: Vec<XrayPathCollision> = Vec::new();
@@ -91,7 +95,7 @@ impl XrayAssetIndex {
     Ok(
       self
         .assets
-        .get_key_value(&path)
+        .get_key_value(path.as_ref())
         .map(|(path, index)| self.asset(path, *index)),
     )
   }

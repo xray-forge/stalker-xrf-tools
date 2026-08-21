@@ -1,3 +1,4 @@
+use std::borrow::Cow;
 use std::fmt::{Display, Formatter, Result as FormatResult};
 use std::path::Path;
 
@@ -29,7 +30,7 @@ impl XrayPath {
   ///
   /// Returns an error when the path is empty or holds an empty, `.` or `..` component.
   pub fn new(path: &str) -> XrfResult<Self> {
-    Ok(Self(normalize(path)?))
+    Ok(Self(normalize(path)?.into_owned()))
   }
 
   /// Wraps a string [`normalize`] already produced.
@@ -104,7 +105,7 @@ impl Display for XrayPath {
 ///
 /// Returns an error when the path contains an empty, `.` or `..` component.
 pub fn normalize_logical(path: &str) -> XrfResult<String> {
-  normalize(path)
+  Ok(normalize(path)?.into_owned())
 }
 
 /// Whether a logical path sits under a prefix, matching on component boundaries so `configs_backup` does not match
@@ -117,39 +118,77 @@ pub fn is_component_prefix(path: &str, prefix: &str) -> bool {
   path == prefix || path.strip_prefix(prefix).is_some_and(|rest| rest.starts_with('\\'))
 }
 
-pub(crate) fn normalize(path: &str) -> XrfResult<String> {
-  let normalized: String = path.replace('/', "\\").to_lowercase();
-  let normalized: &str = normalized.trim_matches('\\');
+/// Normalizes a path, borrowing it when it is already canonical.
+///
+/// Rewriting cost three allocations and two full passes to produce an identical string, and enumeration calls this once
+/// per entry — tens of thousands of times per run, on paths a source already keyed canonically. Checking first is a
+/// single pass with no allocation, so the common case now copies nothing.
+pub(crate) fn normalize(path: &str) -> XrfResult<Cow<'_, str>> {
+  if is_canonical(path) {
+    validate_components(path, path)?;
 
+    return Ok(Cow::Borrowed(path));
+  }
+
+  let rewritten: String = path.replace('/', "\\").to_lowercase();
+  let trimmed: &str = rewritten.trim_matches('\\');
+
+  validate_components(trimmed, path)?;
+
+  Ok(Cow::Owned(trimmed.to_string()))
+}
+
+/// Whether a path is already in the form [`normalize`] would produce.
+///
+/// Deliberately conservative: it answers `false` for anything needing a decision, so a path it accepts is byte-identical
+/// to the rewritten form. `char::is_uppercase` rather than the ASCII test, because `to_lowercase` folds Cyrillic too and
+/// engine paths carry it.
+fn is_canonical(path: &str) -> bool {
+  !path.is_empty()
+    && !path.starts_with('\\')
+    && !path.ends_with('\\')
+    && !path
+      .chars()
+      .any(|character| character == '/' || character.is_uppercase())
+}
+
+/// Rejects a path whose components the engine cannot address.
+///
+/// `original` is reported rather than the rewritten form, so the error names what the caller passed.
+fn validate_components(normalized: &str, original: &str) -> XrfResult<()> {
   if normalized.is_empty()
     || normalized
       .split('\\')
       .any(|part| part.is_empty() || matches!(part, "." | ".."))
   {
-    return Err(XrfError::new_asset_error(format!("invalid X-Ray logical path: {path}")));
+    return Err(XrfError::new_asset_error(format!(
+      "invalid X-Ray logical path: {original}"
+    )));
   }
 
-  Ok(normalized.to_string())
+  Ok(())
 }
 
 /// Converts a root-relative host path into the canonical X-Ray logical path used for indexing.
 ///
 /// Named for the domain it crosses: the input is a host path fragment, the output an engine identity.
 pub(crate) fn normalize_host_relative(path: &Path) -> XrfResult<String> {
-  normalize(
-    path.to_str().ok_or_else(|| {
-      XrfError::new_asset_error(format!("directory asset path is not valid UTF-8: {}", path.display()))
-    })?,
-  )
+  let path: &str = path
+    .to_str()
+    .ok_or_else(|| XrfError::new_asset_error(format!("directory asset path is not valid UTF-8: {}", path.display())))?;
+
+  Ok(normalize(path)?.into_owned())
 }
 
 pub(crate) fn join(prefix: &str, path: &str) -> XrfResult<String> {
-  match (prefix.is_empty(), path.is_empty()) {
-    (true, true) => normalize(""),
-    (true, false) => normalize(path),
-    (false, true) => normalize(prefix),
-    (false, false) => normalize(&format!("{prefix}\\{path}")),
-  }
+  let joined: Cow<str> = match (prefix.is_empty(), path.is_empty()) {
+    (true, true) => normalize("")?,
+    (true, false) => normalize(path)?,
+    (false, true) => normalize(prefix)?,
+    (false, false) => Cow::Owned(normalize(&format!("{prefix}\\{path}"))?.into_owned()),
+  };
+
+  Ok(joined.into_owned())
 }
 
 /// Whether a logical path carries `extension`, compared without case.
