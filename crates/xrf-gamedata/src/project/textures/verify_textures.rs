@@ -21,8 +21,7 @@ impl GamedataProject {
     let started_at: Instant = Instant::now();
 
     let texture_paths: Vec<String> = self
-      .vfs()
-      .entries_of_type(&self.scope, AssetType::Dds)
+      .entries_of_type(AssetType::Dds)
       .into_iter()
       .map(|location| location.logical_path().to_string())
       .collect();
@@ -106,8 +105,7 @@ impl GamedataProject {
   /// Returns the findings and how many descriptors declared a bump at all.
   fn verify_texture_bumps(&self, options: &GamedataProjectVerifyOptions) -> XrfResult<(Vec<Finding>, u32)> {
     let descriptor_paths: Vec<String> = self
-      .vfs()
-      .entries_of_type(&self.scope, AssetType::Thm)
+      .entries_of_type(AssetType::Thm)
       .into_iter()
       .map(|location| location.logical_path().to_string())
       .collect();
@@ -142,7 +140,7 @@ impl GamedataProject {
     let findings: Vec<Finding> = declarations
       .par_iter()
       .filter_map(|(relative_path, bump_name)| {
-        if self.vfs().dds_texture(&self.scope, bump_name).ok().flatten().is_some() {
+        if self.dds_texture(bump_name).ok().flatten().is_some() {
           return None;
         }
 

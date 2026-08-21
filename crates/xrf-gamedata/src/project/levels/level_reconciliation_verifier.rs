@@ -94,7 +94,7 @@ impl<'a> LevelReconciliationVerifier<'a> {
       (SINGLE_PLAYER_MAPS_FILE, SINGLE_PLAYER_MAPS_SECTION),
       (MULTIPLAYER_MAPS_FILE, MULTIPLAYER_MAPS_SECTION),
     ] {
-      for location in self.project.vfs().entries_with_suffix(self.project.scope(), file)? {
+      for location in self.project.entries_with_suffix(file)? {
         let path: &str = location.logical_path().as_str();
 
         // Malformed configurations are reported by the ltx check, not this one.

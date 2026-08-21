@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
 
 use xrf_error::{XrfError, XrfResult};
@@ -22,6 +22,11 @@ use crate::{
 pub struct XrayVfs {
   mounts: Vec<XrayMount>,
   skipped: Vec<XraySkippedMount>,
+  /// Paths already mounted from a plan, so a later plan naming the same source reuses it.
+  ///
+  /// Keyed by the planned path rather than the source's root, because a volume set's root is the common parent of its
+  /// volumes: two single-volume plans in one directory share a root while naming different sources.
+  planned: HashMap<PathBuf, XrayMountId>,
 }
 
 impl XrayVfs {
@@ -42,6 +47,23 @@ impl XrayVfs {
   /// Records a source that a plan named but could not open.
   pub(crate) fn record_skipped(&mut self, skipped: XraySkippedMount) {
     self.skipped.push(skipped);
+  }
+
+  /// The mount already opened from a planned path, when its kind still matches.
+  ///
+  /// Opening a source indexes it, so a caller that keeps one VFS across requests — a viewer resolving one model after
+  /// another — would otherwise re-walk the same tree and append a duplicate mount every time.
+  pub(crate) fn planned_mount(&self, path: &Path, kind: XrayMountKind) -> Option<XrayMountId> {
+    self
+      .planned
+      .get(path)
+      .copied()
+      .filter(|id| self.mounts.get(id.0).is_some_and(|mount| mount.kind() == kind))
+  }
+
+  /// Remembers which mount a planned path produced.
+  pub(crate) fn record_planned(&mut self, path: PathBuf, id: XrayMountId) {
+    self.planned.insert(path, id);
   }
 
   /// Appends a source at a logical base with lower priority than existing mounts.
@@ -150,6 +172,45 @@ impl XrayVfs {
       "no asset '{logical_path}' in scope across {} mount(s)",
       self.scoped(scope).count()
     )))
+  }
+
+  /// Reads the bytes of an asset this VFS already resolved.
+  ///
+  /// Prefer this over [`Self::read`] whenever a lookup or an enumeration already produced the asset. It reads from the
+  /// source that *answered* rather than searching the mounts again, which is both cheaper and more truthful: between a
+  /// resolve and a path-keyed read, a remount or a new override can change which mount wins, so the bytes need not be
+  /// the ones described by the asset in hand.
+  ///
+  /// # Errors
+  ///
+  /// Returns a not-found error when no mount in this VFS holds the asset's container — most often because the asset came
+  /// from a different VFS, or its mount has since been replaced.
+  pub fn read_asset(&self, asset: &XrayAsset) -> XrfResult<Vec<u8>> {
+    let container_root: &Path = match asset.container() {
+      XrayAssetContainer::Directory { root, .. } => root,
+      XrayAssetContainer::Archive { path } => path,
+    };
+
+    let Some(mount) = self
+      .mounts
+      .iter()
+      .find(|mount| mount.source().root_path() == container_root)
+    else {
+      return Err(XrfError::new_not_found_error(format!(
+        "cannot read '{}': no mount in this VFS holds {}",
+        asset.logical_path(),
+        container_root.display()
+      )));
+    };
+
+    let Some(source_path) = mount.to_source_path(asset.logical_path().as_str()) else {
+      return Err(XrfError::new_not_found_error(format!(
+        "cannot read '{}': it falls outside the base of the mount holding it",
+        asset.logical_path()
+      )));
+    };
+
+    mount.source().read(&source_path)
   }
 
   /// Size in bytes of the winning entry, without reading it.

@@ -38,11 +38,26 @@ pub fn mount_plan(vfs: &mut XrayVfs, plan: &XrayMountPlan) -> XrfResult<Vec<Xray
 }
 
 fn mount_one(vfs: &mut XrayVfs, planned: &XrayPlannedMount) -> XrfResult<XrayMountId> {
-  match planned.kind {
-    XrayMountKind::Archive => vfs.mount(&planned.base, Box::new(ArchiveAssetSource::read(&planned.path)?)),
+  // Checked before constructing the source, because constructing it is what indexes the tree or the name table.
+  if let Some(existing) = vfs.planned_mount(&planned.path, planned.kind) {
+    log::debug!(
+      "Reusing mount {existing:?} for already-mounted {} at {}",
+      planned.origin,
+      planned.path.display()
+    );
+
+    return Ok(existing);
+  }
+
+  let id: XrayMountId = match planned.kind {
+    XrayMountKind::Archive => vfs.mount(&planned.base, Box::new(ArchiveAssetSource::read(&planned.path)?))?,
     XrayMountKind::Directory => vfs.mount(
       &planned.base,
       Box::new(XrayDirectorySource::read_ignoring(&planned.path, &planned.ignored)?),
-    ),
-  }
+    )?,
+  };
+
+  vfs.record_planned(planned.path.clone(), id);
+
+  Ok(id)
 }

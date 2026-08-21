@@ -2,7 +2,7 @@ use std::path::Path;
 
 use xrf_error::XrfResult;
 use xrf_vfs::mount_plan;
-use xrf_vfs::{XrayAssetType, XrayLookupScope, XrayMountPlan, XrayVfs};
+use xrf_vfs::{XrayLookupScope, XrayMountPlan, XrayVfs};
 use xrf_visual::VisualSubmesh;
 
 use crate::types::TauriResult;
@@ -59,18 +59,21 @@ impl VisualTextureResolver {
     }
   }
 
-  /// Reads a texture from the winning mount.
+  /// Reads a texture from the mount that resolved it.
   ///
-  /// Reading through the VFS avoids exposing the winning mount's physical path to the caller.
+  /// Resolved first, then read from the source that answered.
   pub fn read(&self, scope: &XrayLookupScope, reference: &str) -> TauriResult<Vec<u8>> {
-    let logical_path: String = XrayAssetType::Dds
-      .rules()
-      .expect("dds has rules")
-      .logical_path(reference);
+    let Some(asset) = self
+      .vfs
+      .dds_texture(scope, reference)
+      .map_err(|error| format!("Rejected texture reference '{reference}': {error}"))?
+    else {
+      return Err(format!("Failed to read texture '{reference}': it resolves to nothing"));
+    };
 
     self
       .vfs
-      .read(scope, &format!("textures\\{logical_path}"))
+      .read_asset(&asset)
       .map_err(|error| format!("Failed to read texture '{reference}': {error}"))
   }
 

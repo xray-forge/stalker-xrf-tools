@@ -20,8 +20,7 @@ impl GamedataProject {
 
     let started_at: Instant = Instant::now();
     let script_paths: Vec<String> = self
-      .vfs()
-      .entries_of_type(self.scope(), AssetType::Script)
+      .entries_of_type(AssetType::Script)
       .into_iter()
       .map(|location| location.logical_path().to_string())
       .filter(|path| is_runtime_script(path))
@@ -36,8 +35,7 @@ impl GamedataProject {
         xrf_output::verbose!(options.output, "Verify script: {relative_path}");
 
         let Some(path) = self
-          .vfs()
-          .find(self.scope(), relative_path)
+          .find(relative_path)
           .ok()
           .flatten()
           .map(|location| location.logical_path().to_string())

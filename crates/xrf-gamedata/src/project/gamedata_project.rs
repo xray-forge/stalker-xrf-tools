@@ -5,7 +5,10 @@ use std::path::{Path, PathBuf};
 use xrf_chunk::{ChunkReader, InMemoryChunkDataSource};
 use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{LtxProject, LtxProjectOptions};
-use xrf_vfs::{XrayLookupScope, XrayMountMode, XrayPath, XrayPathCollision, XraySkippedMount, XrayVfs, open_plan};
+use xrf_vfs::{
+  XrayAsset, XrayAssetType, XrayLookupScope, XrayMountMode, XrayPath, XrayPathCollision, XraySkippedMount, XrayVfs,
+  open_plan,
+};
 
 use crate::project::gamedata_project_options::GamedataProjectReadOptions;
 
@@ -164,6 +167,112 @@ impl GamedataProject {
   /// Returns an error when the prefix is not a valid X-Ray logical path.
   fn hides_system_ltx(prefix: &str) -> XrfResult<bool> {
     XrayPath::new(SYSTEM_LTX_LOGICAL_PATH)?.is_under(prefix)
+  }
+}
+
+/// Asset access bound to this project's scope.
+///
+/// A check should never name the scope: the project owns the `(vfs, scope)` pair, and threading both through every call
+/// site is how the two drift apart. These delegate to [`XrayVfs`] with the project's own scope supplied, so a check reads
+/// as what it wants rather than where to look for it.
+impl GamedataProject {
+  /// The winning asset for a logical path, or `None` when nothing in the project holds it.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when the path is not a valid X-Ray logical path.
+  pub(crate) fn find(&self, logical_path: &str) -> XrfResult<Option<XrayAsset>> {
+    self.vfs().find(&self.scope, logical_path)
+  }
+
+  /// Size of an asset without reading it, for a gate that exists to avoid parsing a truncated file.
+  pub(crate) fn size(&self, logical_path: &str) -> Option<u64> {
+    self.vfs().size(&self.scope, logical_path)
+  }
+
+  /// Every asset the project resolves, one per logical path, ordered by that path.
+  pub(crate) fn entries(&self) -> Vec<XrayAsset> {
+    self.vfs().entries(&self.scope)
+  }
+
+  /// Every asset whose extension identifies one kind, wherever in the tree it lives.
+  pub(crate) fn entries_of_type(&self, asset_type: XrayAssetType) -> Vec<XrayAsset> {
+    self.vfs().entries_of_type(&self.scope, asset_type)
+  }
+
+  /// Every asset whose logical path ends with `suffix` on a component boundary.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when `suffix` is not a valid X-Ray logical path fragment.
+  pub(crate) fn entries_with_suffix(&self, suffix: &str) -> XrfResult<Vec<XrayAsset>> {
+    self.vfs().entries_with_suffix(&self.scope, suffix)
+  }
+
+  /// Resolves a raw engine reference of one kind under that kind's directory and extension.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when the kind has no canonical home, or the reference is not a valid X-Ray path.
+  pub(crate) fn resolve(&self, asset_type: XrayAssetType, reference: &str) -> XrfResult<Option<XrayAsset>> {
+    self.vfs().resolve(&self.scope, asset_type, reference)
+  }
+
+  /// Resolves every asset of one kind a reference names, which may be a `*` mask.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when the kind has no canonical home, the reference is invalid, or a mask carries more than one `*`.
+  pub(crate) fn resolve_all(&self, asset_type: XrayAssetType, reference: &str) -> XrfResult<Vec<XrayAsset>> {
+    self.vfs().resolve_all(&self.scope, asset_type, reference)
+  }
+
+  /// Resolves an OGF reference under the `meshes` namespace.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when the reference is not a valid X-Ray path.
+  pub(crate) fn ogf(&self, reference: &str) -> XrfResult<Option<XrayAsset>> {
+    self.resolve(XrayAssetType::Ogf, reference)
+  }
+
+  /// Resolves an OMF reference under the `meshes` namespace.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when the reference is not a valid X-Ray path.
+  pub(crate) fn omf(&self, reference: &str) -> XrfResult<Option<XrayAsset>> {
+    self.resolve(XrayAssetType::Omf, reference)
+  }
+
+  /// Resolves a texture reference, appending `.dds` or replacing its authoring extension.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when the reference is not a valid X-Ray path.
+  pub(crate) fn dds_texture(&self, reference: &str) -> XrfResult<Option<XrayAsset>> {
+    self.resolve(XrayAssetType::Dds, reference)
+  }
+
+  /// Reads an asset the project already resolved.
+  ///
+  /// Preferred over [`Self::read_asset`] when a lookup or enumeration produced the asset: it reads from the source that
+  /// answered instead of searching the mounts again by path.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when no mount holds the asset's container, or the source cannot read it.
+  pub(crate) fn read_resolved(&self, asset: &XrayAsset) -> XrfResult<Vec<u8>> {
+    self.vfs().read_asset(asset)
+  }
+
+  /// Opens a chunk reader over an asset the project already resolved.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when the asset cannot be read or holds no chunk.
+  pub(crate) fn read_resolved_chunks(&self, asset: &XrayAsset) -> XrfResult<ChunkReader<InMemoryChunkDataSource>> {
+    ChunkReader::from_vec(self.read_resolved(asset)?)
   }
 }
 

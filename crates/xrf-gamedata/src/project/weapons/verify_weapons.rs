@@ -176,8 +176,7 @@ impl GamedataProject {
     // Resolved and read through the VFS, so a visual inside an archive volume is checked too.
     if let Some(visual) = &section.get("visual").and_then(|it| {
       self
-        .vfs()
-        .ogf(&self.scope, it)
+        .ogf(it)
         .ok()
         .flatten()
         .map(|location| location.logical_path().to_string())
@@ -223,8 +222,7 @@ impl GamedataProject {
 
     if let Some(visual_path) = &hud_section.get("item_visual").and_then(|it| {
       self
-        .vfs()
-        .ogf(&self.scope, it)
+        .ogf(it)
         .ok()
         .flatten()
         .map(|location| location.logical_path().to_string())
@@ -239,8 +237,7 @@ impl GamedataProject {
 
             for motion_ref in &motion_refs {
               if let Some(motion_file_path) = self
-                .vfs()
-                .omf(self.scope(), motion_ref)
+                .omf(motion_ref)
                 .ok()
                 .flatten()
                 .map(|location| location.logical_path().to_string())
@@ -468,8 +465,7 @@ impl GamedataProject {
     //
     // todo: Check the OGG contents, not only that the sound resolves.
     if self
-      .vfs()
-      .resolve(self.scope(), XrayAssetType::Ogg, &sound_object_value)
+      .resolve(XrayAssetType::Ogg, &sound_object_value)
       .ok()
       .flatten()
       .is_some()

@@ -16,8 +16,7 @@ impl GamedataProject {
     let started_at: Instant = Instant::now();
 
     let spawn_files: Vec<String> = self
-      .vfs()
-      .entries_of_type(self.scope(), AssetType::Spawn)
+      .entries_of_type(AssetType::Spawn)
       .into_iter()
       .filter(|location| location.logical_path().is_under(SPAWNS_DIRECTORY).unwrap_or(false))
       .map(|location| location.logical_path().to_string())
@@ -46,7 +45,7 @@ impl GamedataProject {
       total_spawns += 1;
 
       // Read through the VFS, so an archived spawn file is verified rather than reported missing.
-      if self.vfs().find(&self.scope, relative_path).ok().flatten().is_some() {
+      if self.find(relative_path).ok().flatten().is_some() {
         let spawn_findings: Vec<Finding> = self.verify_spawn_findings(options, relative_path);
 
         if !spawn_findings.is_empty() {

@@ -56,8 +56,9 @@ impl GamedataProject {
   fn read_particle_names(&self) -> XrfResult<HashSet<String>> {
     let mut names: HashSet<String> = HashSet::new();
 
-    for location in self.vfs().entries_with_suffix(self.scope(), "particles.xr")? {
-      let mut chunks = self.read_asset_chunks(location.logical_path().as_str())?;
+    for library in self.entries_with_suffix("particles.xr")? {
+      // Read from the source that answered the enumeration, rather than searching the mounts again by path.
+      let mut chunks = self.read_resolved_chunks(&library)?;
       let particles_file: ParticlesFile = ParticlesFile::read_from_chunk::<XRayByteOrder, _>(&mut chunks)?;
 
       for effect in &particles_file.effects.effects {
@@ -110,8 +111,7 @@ impl GamedataProject {
     result: &mut GamedataParticlesUsageVerificationResult,
   ) {
     let spawn_files: Vec<String> = self
-      .vfs()
-      .entries_of_type(self.scope(), AssetType::Spawn)
+      .entries_of_type(AssetType::Spawn)
       .into_iter()
       .filter(|location| location.logical_path().is_under(SPAWNS_DIRECTORY).unwrap_or(false))
       .map(|location| location.logical_path().to_string())
@@ -121,8 +121,7 @@ impl GamedataProject {
       result.checked_spawn_files_count += 1;
 
       let Some(spawn_path) = self
-        .vfs()
-        .find(self.scope(), relative_path)
+        .find(relative_path)
         .ok()
         .flatten()
         .map(|location| location.logical_path().to_string())

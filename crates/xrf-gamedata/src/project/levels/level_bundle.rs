@@ -55,7 +55,7 @@ impl<'a> LevelBundle<'a> {
 
   /// Size of a bundle file without reading it, so a truncated asset is caught before parsing.
   pub(crate) fn file_size(&self, file: &str) -> Option<u64> {
-    self.project.vfs().size(self.project.scope(), &self.file_path(file))
+    self.project.size(&self.file_path(file))
   }
 
   pub(crate) fn contains(&self, file: &str) -> bool {
