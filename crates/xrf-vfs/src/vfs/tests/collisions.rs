@@ -9,7 +9,7 @@ use std::path::PathBuf;
 use xrf_test_utils::utils::get_absolute_generated_test_resource_path;
 
 use crate::vfs::tests::fake_source::FakeArchiveSource;
-use crate::{XrayLookupScope, XrayMountKind, XrayMountPlan, XrayPathCollision, XrayVfs, open_plan};
+use crate::{XrayLookupScope, XrayMountKind, XrayMountPlan, XrayPath, XrayPathCollision, XrayVfs, open_plan};
 
 /// Writes a tree whose file names differ only by case, which normalize to one logical path.
 fn tree(name: &str, files: &[&str]) -> PathBuf {
@@ -43,7 +43,7 @@ fn reports_collisions_from_every_mount_in_scope() {
       Box::new(
         FakeArchiveSource::new("clashing", &["textures/wpn/wpn_ak74.dds"]).with_collision(XrayPathCollision {
           kept: PathBuf::from("C:\\tree\\textures\\wpn\\wpn_ak74.dds"),
-          logical_path: String::from("textures\\wpn\\wpn_ak74.dds"),
+          logical_path: XrayPath::new("textures\\wpn\\wpn_ak74.dds").expect("valid logical path"),
           unreachable: PathBuf::from("C:\\tree\\textures\\Wpn\\wpn_ak74.dds"),
         }),
       ),
@@ -53,7 +53,7 @@ fn reports_collisions_from_every_mount_in_scope() {
   let collisions: Vec<XrayPathCollision> = vfs.collisions(&XrayLookupScope::all());
 
   assert_eq!(collisions.len(), 1, "reported once, from the mount that holds it");
-  assert_eq!(collisions[0].logical_path, "textures\\wpn\\wpn_ak74.dds");
+  assert_eq!(collisions[0].logical_path.as_str(), "textures\\wpn\\wpn_ak74.dds");
   assert!(
     vfs
       .find(&XrayLookupScope::all(), "textures\\wpn\\wpn_ak74.dds")

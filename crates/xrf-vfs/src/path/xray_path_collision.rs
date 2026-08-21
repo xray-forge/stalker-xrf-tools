@@ -1,5 +1,7 @@
 use std::path::PathBuf;
 
+use crate::path::XrayPath;
+
 /// Two files in one source claiming the same engine identity.
 ///
 /// An authoring error rather than shadowing: shadowing is what happens *between* mounts, where a loose file legitimately
@@ -11,7 +13,7 @@ use std::path::PathBuf;
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct XrayPathCollision {
   /// Engine identity both files normalize to.
-  pub logical_path: String,
+  pub logical_path: XrayPath,
   /// File the source resolves, being the first one indexed.
   pub kept: PathBuf,
   /// File no lookup can reach, because `kept` already claims its identity.

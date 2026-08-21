@@ -1,9 +1,11 @@
+use std::collections::HashSet;
 use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant};
 
 use xrf_error::XrfResult;
 use xrf_vfs::{
-  XrayAsset, XrayLookupScope, XrayMountKind, XrayMountMode, XrayPathCollision, XraySkippedMount, XrayVfs, open_plan,
+  XrayAsset, XrayAssetContainer, XrayLookupScope, XrayMountKind, XrayMountMode, XrayPath, XrayPathCollision,
+  XraySkippedMount, XrayVfs, open_plan,
 };
 
 /// Resolved assets and source metadata for one listing.
@@ -138,15 +140,17 @@ impl AssetLister {
 
   /// Returns entries hidden by a higher-priority mount.
   ///
-  /// The result removes winning path and container pairs from the complete enumeration.
+  /// The result removes winning path and container pairs from the complete enumeration. Indexed rather than scanned: an
+  /// installation enumerates ~48,000 entries, and a linear search per entry made this quadratic.
   fn shadowed(vfs: &XrayVfs, scope: &XrayLookupScope, winners: &[XrayAsset]) -> Vec<XrayAsset> {
     let mut shadowed: Vec<XrayAsset> = vfs.entries_all(scope);
 
-    shadowed.retain(|entry| {
-      !winners
-        .iter()
-        .any(|winner| winner.logical_path() == entry.logical_path() && winner.container() == entry.container())
-    });
+    let winning: HashSet<(&XrayPath, &XrayAssetContainer)> = winners
+      .iter()
+      .map(|winner| (winner.logical_path(), winner.container()))
+      .collect();
+
+    shadowed.retain(|entry| !winning.contains(&(entry.logical_path(), entry.container())));
 
     shadowed
   }

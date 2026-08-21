@@ -1,3 +1,4 @@
+use std::borrow::Cow;
 use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
 
@@ -67,6 +68,10 @@ impl XrayVfs {
   }
 
   /// Appends a source at a logical base with lower priority than existing mounts.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when a non-empty base is not a valid X-Ray logical path.
   pub fn mount(&mut self, base: &str, source: Box<dyn XrayAssetSource>) -> XrfResult<XrayMountId> {
     let id: XrayMountId = XrayMountId(self.mounts.len());
 
@@ -124,6 +129,10 @@ impl XrayVfs {
   }
 
   /// The winning location for a logical path, or `None` when no mount in scope holds it.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when the path is not a valid X-Ray logical path. Absence is `Ok(None)`, not an error.
   pub fn find(&self, scope: &XrayLookupScope, logical_path: &str) -> XrfResult<Option<XrayAsset>> {
     let logical_path: String = normalize(logical_path)?;
 
@@ -137,6 +146,10 @@ impl XrayVfs {
   /// Every mount in scope holding a logical path, winner first.
   ///
   /// Includes shadowed copies for override auditing.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when the path is not a valid X-Ray logical path.
   pub fn find_all(&self, scope: &XrayLookupScope, logical_path: &str) -> XrfResult<Vec<XrayAsset>> {
     let logical_path: String = normalize(logical_path)?;
 
@@ -153,6 +166,13 @@ impl XrayVfs {
   }
 
   /// Reads bytes from the winning entry for a logical path.
+  ///
+  /// Prefer [`Self::read_asset`] when the asset has already been resolved.
+  ///
+  /// # Errors
+  ///
+  /// Returns a not-found error when nothing in scope holds the path, an invalid-path error when it is not a valid X-Ray
+  /// logical path, or the source's own error when the bytes cannot be read.
   pub fn read(&self, scope: &XrayLookupScope, logical_path: &str) -> XrfResult<Vec<u8>> {
     let logical_path: String = normalize(logical_path)?;
 
@@ -217,6 +237,9 @@ impl XrayVfs {
   ///
   /// For a size gate that exists to avoid parsing a truncated asset: reading the bytes to measure them would defeat it, and
   /// for an archived entry would decompress the whole thing.
+  ///
+  /// Answers `None` both for an absent asset and for a path that is not a valid logical path — a size gate has nothing
+  /// useful to do with the difference, and every caller would discard it.
   pub fn size(&self, scope: &XrayLookupScope, logical_path: &str) -> Option<u64> {
     let logical_path: String = normalize(logical_path).ok()?;
 
@@ -627,7 +650,7 @@ impl XrayVfs {
 
   /// Pairs a logical path with the physical container reported by the mount's source.
   fn locate_in(mount: &XrayMount, logical_path: &str) -> Option<XrayAsset> {
-    let source_path: String = mount.to_source_path(logical_path)?;
+    let source_path: Cow<'_, str> = mount.to_source_path(logical_path)?;
     let container: XrayAssetContainer = mount.source().locate(&source_path)?;
 
     Some(XrayAsset::new(

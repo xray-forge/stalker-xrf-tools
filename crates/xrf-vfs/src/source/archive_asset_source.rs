@@ -29,7 +29,7 @@ impl ArchiveAssetSource {
   /// Opens a volume set, or a single volume, at a path.
   pub fn read(path: impl AsRef<Path>) -> XrfResult<Self> {
     let path: &Path = path.as_ref();
-    let project: ArchiveProject = ArchiveProject::new_shallow(&path)?;
+    let project: ArchiveProject = ArchiveProject::new_shallow(path)?;
 
     let entries: HashMap<String, String> = project
       .files

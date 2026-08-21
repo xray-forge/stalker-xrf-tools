@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use serde::Serialize;
 use xrf_error::XrfResult;
 
@@ -9,7 +11,7 @@ use crate::{XrayAssetSource, XrayMountKind};
 /// Labels need not be unique, so scopes select mounts by this identifier.
 #[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, Serialize)]
-pub struct XrayMountId(pub usize);
+pub struct XrayMountId(pub(crate) usize);
 
 /// One source mounted at a logical base.
 ///
@@ -70,20 +72,23 @@ impl XrayMount {
   }
 
   /// Converts a logical path to a source-relative path, or returns `None` when it lies outside the mount's base.
-  pub fn to_source_path(&self, logical_path: &str) -> Option<String> {
+  ///
+  /// Borrowed for the common case: most mounts sit at the logical root, where the source path *is* the logical path, and
+  /// this runs once per mount on every lookup — allocating a copy of each probed path was the cost of saying nothing.
+  pub(crate) fn to_source_path<'a>(&self, logical_path: &'a str) -> Option<Cow<'a, str>> {
     if self.base.is_empty() {
-      return Some(logical_path.to_string());
+      return Some(Cow::Borrowed(logical_path));
     }
 
     if !is_component_prefix(logical_path, &self.base) {
       return None;
     }
 
-    Some(logical_path[self.base.len()..].trim_start_matches('\\').to_string())
+    Some(Cow::Borrowed(logical_path[self.base.len()..].trim_start_matches('\\')))
   }
 
   /// Applies this mount's base to a source-relative path.
-  pub fn to_logical_path(&self, source_path: &str) -> XrfResult<String> {
+  pub(crate) fn to_logical_path(&self, source_path: &str) -> XrfResult<String> {
     if self.base.is_empty() {
       return normalize(source_path);
     }
@@ -94,7 +99,7 @@ impl XrayMount {
   /// Translates a scope prefix into the source's namespace.
   ///
   /// Returns `None` when the scope cannot overlap this mount, and `Some(None)` when every source entry qualifies.
-  pub fn to_source_prefix(&self, logical_prefix: Option<&str>) -> Option<Option<String>> {
+  pub(crate) fn to_source_prefix(&self, logical_prefix: Option<&str>) -> Option<Option<String>> {
     let Some(prefix) = logical_prefix else {
       return Some(None);
     };
@@ -105,7 +110,11 @@ impl XrayMount {
 
     // The prefix reaches into this mount, so narrow it to the part below the base.
     if let Some(inner) = self.to_source_path(prefix) {
-      return Some(if inner.is_empty() { None } else { Some(inner) });
+      return Some(if inner.is_empty() {
+        None
+      } else {
+        Some(inner.into_owned())
+      });
     }
 
     // The base sits inside the requested prefix, so the whole mount qualifies.

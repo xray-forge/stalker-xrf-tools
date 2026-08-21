@@ -29,8 +29,8 @@ impl ArchiveProject {
   /// # Errors
   ///
   /// Returns an error when no archive volume is found or a volume cannot be read.
-  pub fn new<P: AsRef<Path>>(path: &P) -> XrfResult<Self> {
-    Self::read_to_depth(path, usize::MAX)
+  pub fn new(path: impl AsRef<Path>) -> XrfResult<Self> {
+    Self::read_to_depth(path.as_ref(), usize::MAX)
   }
 
   /// Reads one archive file or archive volumes directly under a directory.
@@ -41,28 +41,28 @@ impl ArchiveProject {
   /// # Errors
   ///
   /// Returns an error when no archive volume is found or a volume cannot be read.
-  pub fn new_shallow<P: AsRef<Path>>(path: &P) -> XrfResult<Self> {
-    Self::read_to_depth(path, 1)
+  pub fn new_shallow(path: impl AsRef<Path>) -> XrfResult<Self> {
+    Self::read_to_depth(path.as_ref(), 1)
   }
 
-  fn read_to_depth<P: AsRef<Path>>(path: &P, depth: usize) -> XrfResult<Self> {
+  fn read_to_depth(path: &Path, depth: usize) -> XrfResult<Self> {
     let mut archives: Vec<ArchiveDescriptor> = Vec::new();
     let mut files: HashMap<String, ArchiveFileDescriptor> = HashMap::new();
 
-    if path.as_ref().is_file() {
-      log::info!("Reading archive file: {}", path.as_ref().display());
+    if path.is_file() {
+      log::info!("Reading archive file: {}", path.display());
 
       archives.push(ArchiveReader::from_path_windows1251(path)?.read_archive()?);
     } else {
-      log::info!("Reading archive directory: {}", path.as_ref().display());
+      log::info!("Reading archive directory: {}", path.display());
 
       for entry in WalkDir::new(path).max_depth(depth).into_iter().filter_map(Result::ok) {
         let path: &Path = entry.path();
 
-        if ArchiveDescriptor::is_valid_db_path(&path) {
+        if ArchiveDescriptor::is_valid_db_path(path) {
           log::info!("Reading archive file: {}", path.display());
 
-          archives.push(ArchiveReader::from_path_windows1251(&path)?.read_archive()?);
+          archives.push(ArchiveReader::from_path_windows1251(path)?.read_archive()?);
         }
       }
     }
@@ -70,7 +70,7 @@ impl ArchiveProject {
     if archives.is_empty() {
       return Err(XrfError::new_read_error(format!(
         "Unable to read archives at location {}",
-        path.as_ref().display()
+        path.display()
       )));
     }
 
@@ -199,11 +199,11 @@ mod tests {
 
   #[test]
   fn recognizes_volume_extensions_without_case() {
-    assert!(ArchiveDescriptor::is_valid_db_path(&Path::new("game.db0")));
-    assert!(ArchiveDescriptor::is_valid_db_path(&Path::new("GAME.DB0")));
-    assert!(ArchiveDescriptor::is_valid_db_path(&Path::new("mod.xdb1")));
-    assert!(!ArchiveDescriptor::is_valid_db_path(&Path::new("readme.txt")));
-    assert!(!ArchiveDescriptor::is_valid_db_path(&Path::new("noextension")));
+    assert!(ArchiveDescriptor::is_valid_db_path(Path::new("game.db0")));
+    assert!(ArchiveDescriptor::is_valid_db_path(Path::new("GAME.DB0")));
+    assert!(ArchiveDescriptor::is_valid_db_path(Path::new("mod.xdb1")));
+    assert!(!ArchiveDescriptor::is_valid_db_path(Path::new("readme.txt")));
+    assert!(!ArchiveDescriptor::is_valid_db_path(Path::new("noextension")));
   }
 
   #[test]

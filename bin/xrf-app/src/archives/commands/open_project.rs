@@ -11,7 +11,7 @@ use crate::types::TauriResult;
 pub async fn archives_open_project(path: &str, state: State<'_, ArchiveProjectState>) -> TauriResult<ArchiveProject> {
   log::info!("Opening archives project");
 
-  let project: ArchiveProject = ArchiveProject::new(&Path::new(path))
+  let project: ArchiveProject = ArchiveProject::new(Path::new(path))
     .map_err(|error| format!("Failed to open provided archive project: {}", error))?;
 
   log::info!("Opened archives project");

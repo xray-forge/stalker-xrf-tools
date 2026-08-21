@@ -82,11 +82,7 @@ impl GamedataProject {
     })
   }
 
-  /// Whether one spawn file reads cleanly, addressed by its logical path.
-  pub fn verify_spawn(&self, options: &GamedataProjectVerifyOptions, path: &str) -> XrfResult<bool> {
-    Ok(self.verify_spawn_findings(options, path).is_empty())
-  }
-
+  /// Findings from reading one spawn file, addressed by its logical path.
   fn verify_spawn_findings(&self, options: &GamedataProjectVerifyOptions, path: &str) -> Vec<Finding> {
     let file_path: String = path.to_string();
 

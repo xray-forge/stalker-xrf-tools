@@ -1,4 +1,3 @@
-use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
 
 use walkdir::WalkDir;
@@ -7,7 +6,7 @@ use xrf_error::{XrfError, XrfResult};
 use crate::source::DirectoryAsset;
 
 #[derive(Debug)]
-pub struct DirectoryAssetIndex {
+pub(crate) struct DirectoryAssetIndex {
   root: PathBuf,
   assets: Vec<DirectoryAsset>,
 }
@@ -71,27 +70,6 @@ impl DirectoryAssetIndex {
   /// Iterates over all indexed files in relative-path order.
   pub fn assets(&self) -> impl Iterator<Item = &DirectoryAsset> {
     self.assets.iter()
-  }
-
-  /// Finds an exact root-relative filesystem path.
-  pub fn find(&self, relative_path: &Path) -> Option<&DirectoryAsset> {
-    self.assets.iter().find(|asset| asset.relative_path() == relative_path)
-  }
-
-  /// Iterates over assets below a root-relative path prefix.
-  pub fn with_prefix(&self, prefix: &Path) -> impl Iterator<Item = &DirectoryAsset> {
-    self
-      .assets
-      .iter()
-      .filter(move |asset| asset.relative_path().starts_with(prefix))
-  }
-
-  /// Iterates over assets whose filesystem extension equals `extension`.
-  pub fn with_extension(&self, extension: &OsStr) -> impl Iterator<Item = &DirectoryAsset> {
-    self
-      .assets
-      .iter()
-      .filter(move |asset| asset.relative_path().extension() == Some(extension))
   }
 
   pub(crate) fn asset(&self, index: usize) -> &DirectoryAsset {

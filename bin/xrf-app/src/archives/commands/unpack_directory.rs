@@ -11,7 +11,7 @@ use crate::utils::error_to_string;
 pub async fn archives_unpack_directory(from: &str, destination: &str) -> TauriResult<ArchiveUnpackResult> {
   log::info!("Open archive directory: {}", from);
 
-  let project: ArchiveProject = ArchiveProject::new(&Path::new(from)).map_err(error_to_string)?;
+  let project: ArchiveProject = ArchiveProject::new(Path::new(from)).map_err(error_to_string)?;
 
   log::info!("Unpacking archive to: {}", destination);
 

@@ -3,6 +3,7 @@ use std::fs::File;
 use std::io::ErrorKind::UnexpectedEof;
 use std::io::{Cursor, Read, Seek, SeekFrom};
 use std::path::{Path, PathBuf};
+use std::sync::LazyLock;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use byteorder::ReadBytesExt;
@@ -20,46 +21,70 @@ use crate::archive::byte_order::XRayByteOrder;
 use crate::archive::constants::{CHUNK_ID_COMPRESSED_MASK, CHUNK_ID_MASK};
 use crate::archive::file_io::allocate_declared;
 
-pub struct ArchiveReader {
-  pub path: PathBuf,
-  pub file: File,
-  pub section_regex: Regex,
-  pub variable_regex: Regex,
-  pub root_regex: Regex,
-  pub encoding: XRayEncoding,
+/// Patterns of the `[header]` metadata chunk, compiled once.
+///
+/// A volume set opens one reader per volume — seven for Anomaly's textures alone — and these never vary, so compiling
+/// them per reader was pure waste. `expect` is sound on a literal pattern: it cannot fail at runtime without the source
+/// having been edited into something invalid.
+static SECTION_PATTERN: LazyLock<Regex> =
+  LazyLock::new(|| Regex::new(r"^.*\[(?P<name>\w*)\]$").expect("section pattern is valid"));
+static VARIABLE_PATTERN: LazyLock<Regex> =
+  LazyLock::new(|| Regex::new(r"^\s*(?P<name>\w+)\s*=\s*(?P<value>.+)\s*$").expect("variable pattern is valid"));
+static ROOT_ALIAS_PATTERN: LazyLock<Regex> =
+  LazyLock::new(|| Regex::new(r"^\$\w+?\$\\").expect("root alias pattern is valid"));
+
+/// Reads one archive volume's header chunks.
+///
+/// Crate-internal: a consumer opens a volume set through [`crate::ArchiveProject`], which is what merges volumes into one
+/// name table.
+pub(crate) struct ArchiveReader {
+  path: PathBuf,
+  file: File,
+  encoding: XRayEncoding,
 }
 
 impl ArchiveReader {
-  /// Create chunk based on whole file.
-  pub fn from_path<P: AsRef<Path>>(path: &P, encoding: XRayEncoding) -> XrfResult<Self> {
-    match File::open(path.as_ref()) {
+  /// Opens a volume, decoding its header strings with `encoding`.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when the file cannot be opened.
+  pub(crate) fn from_path(path: impl AsRef<Path>, encoding: XRayEncoding) -> XrfResult<Self> {
+    let path: &Path = path.as_ref();
+
+    match File::open(path) {
       Ok(file) => Ok(Self {
         encoding,
         file,
-        path: path.as_ref().into(),
-        root_regex: Regex::new(r"^\$\w+?\$\\").unwrap(),
-        section_regex: Regex::new(r"^.*\[(?P<name>\w*)\]$").unwrap(),
-        variable_regex: Regex::new(r"^\s*(?P<name>\w+)\s*=\s*(?P<value>.+)\s*$").unwrap(),
+        path: path.into(),
       }),
       Err(error) => Err(XrfError::new_read_error(format!(
         "Failed to read archive file {}, {}",
-        path.as_ref().display(),
+        path.display(),
         error
       ))),
     }
   }
 
-  /// Create chunk based on whole file.
-  pub fn from_path_utf8<P: AsRef<Path>>(path: &P) -> XrfResult<Self> {
+  /// Opens a volume whose header strings are UTF-8.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when the file cannot be opened.
+  pub(crate) fn from_path_utf8(path: impl AsRef<Path>) -> XrfResult<Self> {
     Self::from_path(path, get_utf8_encoder())
   }
 
-  /// Create chunk based on whole file, reading strings as windows-1251.
+  /// Opens a volume, reading strings as windows-1251.
   ///
   /// X-Ray engine stores archive header and file names using the system ANSI
   /// codepage (windows-1251 for the original localization), so non-ASCII names
   /// are not valid UTF-8 and must be decoded accordingly.
-  pub fn from_path_windows1251<P: AsRef<Path>>(path: &P) -> XrfResult<Self> {
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when the file cannot be opened.
+  pub(crate) fn from_path_windows1251(path: impl AsRef<Path>) -> XrfResult<Self> {
     Self::from_path(path, get_windows1251_encoder())
   }
 }
@@ -72,7 +97,7 @@ impl ArchiveReader {
   /// Returns an error when the volume cannot be read, declares chunk or entry sizes its bytes cannot hold, or contains
   /// no file descriptors chunk. Malformed volumes are errors, never panics: a corrupt `.db` must become a skipped or
   /// reported mount rather than aborting the tool.
-  pub fn read_archive(&mut self) -> XrfResult<ArchiveDescriptor> {
+  pub(crate) fn read_archive(&mut self) -> XrfResult<ArchiveDescriptor> {
     let header: ArchiveHeader = self.read_archive_header()?.ok_or_else(|| {
       XrfError::new_read_error(format!(
         "archive {} holds no file descriptors chunk",
@@ -176,16 +201,16 @@ impl ArchiveReader {
     let mut last_section_name: String = String::new();
 
     for line in decode_bytes_to_string_without_bom_handling(chunk_data, self.encoding)?.lines() {
-      let section_captures = self.section_regex.captures(line);
+      let section_captures = SECTION_PATTERN.captures(line);
       match (section_captures, last_section_name.as_str()) {
         (None, "header") => {
-          let variable_captures = self.variable_regex.captures(line);
+          let variable_captures = VARIABLE_PATTERN.captures(line);
 
           if let Some(captures) = variable_captures
             && &captures["name"] == "entry_point"
           {
             let entry_point = captures["value"].to_string();
-            return Ok(Some(self.root_regex.replace(entry_point.as_str(), "").to_string()));
+            return Ok(Some(ROOT_ALIAS_PATTERN.replace(entry_point.as_str(), "").to_string()));
           }
         }
         (Some(capture), _) => {

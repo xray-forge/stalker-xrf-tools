@@ -4,6 +4,5 @@ pub(crate) mod archive_header;
 pub(crate) mod byte_order;
 pub(crate) mod constants;
 pub(crate) mod file_io;
-pub(crate) mod io;
 pub(crate) mod project;
 pub(crate) mod reader;

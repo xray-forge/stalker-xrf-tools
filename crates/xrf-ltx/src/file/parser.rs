@@ -48,19 +48,12 @@ impl<'a> LtxParser<'a> {
   /// Parse the whole LTX input.
   pub fn parse(&mut self) -> XrfResult<Ltx> {
     let mut current_section: String = ROOT_SECTION.to_string();
-    let mut includes_processed: bool = false;
     let mut is_metadata_header: bool = true;
     let mut ltx: Ltx = Ltx::new();
 
     self.skip_whitespaces();
 
     while let Some(current_char) = self.char {
-      // Allow includes declaration header.
-      // Allow writing comments before.
-      if !includes_processed {
-        includes_processed = !matches!(current_char, |LTX_SYMBOL_INCLUDE| LTX_SYMBOL_COMMENT)
-      }
-
       match current_char {
         current if current == LTX_SYMBOL_COMMENT => {
           let comment_line: usize = self.line + 1;

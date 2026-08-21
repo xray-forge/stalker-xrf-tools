@@ -9,7 +9,7 @@ use crate::path::XrayPath;
 ///
 /// Separate variants prevent callers from treating an archived entry as a loose file with a usable filesystem path.
 #[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
-#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Serialize)]
 // `rename_all_fields` keeps struct-variant fields camel-cased alongside the variants.
 #[serde(tag = "kind", rename_all = "camelCase", rename_all_fields = "camelCase")]
 pub enum XrayAssetContainer {

@@ -1,5 +1,6 @@
 use std::fmt::{Display, Formatter, Result as FormatResult};
 use std::path::Path;
+use std::str::FromStr;
 
 use xrf_error::XrfResult;
 
@@ -92,6 +93,15 @@ impl TryFrom<&str> for XrayMountMode {
         "unknown source mode '{other}', expected auto, directory, installation or containing-installation"
       ))),
     }
+  }
+}
+
+/// Delegates to [`TryFrom<&str>`], so a mode parses out of a command flag or a config value with `parse()`.
+impl FromStr for XrayMountMode {
+  type Err = xrf_error::XrfError;
+
+  fn from_str(value: &str) -> Result<Self, Self::Err> {
+    Self::try_from(value)
   }
 }
 

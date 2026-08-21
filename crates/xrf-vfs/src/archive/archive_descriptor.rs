@@ -21,7 +21,7 @@ impl ArchiveDescriptor {
   ///
   /// Case-insensitive to agree with the mount planner's volume detection; a non-UTF-8 extension is not a volume rather
   /// than a panic.
-  pub fn is_valid_db_path<P: AsRef<Path>>(path: &P) -> bool {
+  pub fn is_valid_db_path(path: impl AsRef<Path>) -> bool {
     path
       .as_ref()
       .extension()
