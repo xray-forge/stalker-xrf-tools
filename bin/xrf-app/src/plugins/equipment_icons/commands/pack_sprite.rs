@@ -3,8 +3,8 @@ use xrf_ltx::Ltx;
 use xrf_output::OutputOptions;
 use xrf_texture::{PackEquipmentOptions, PackEquipmentProcessor, PackEquipmentResult};
 
-use crate::app::types::TauriResult;
-use crate::app::utils::error_to_string;
+use crate::core::error::error_to_string;
+use crate::core::types::TauriResult;
 
 #[cfg_attr(feature = "typescript-bindings", specta::specta(rename = "pack_sprite"))]
 #[tauri::command(rename = "pack_sprite")]

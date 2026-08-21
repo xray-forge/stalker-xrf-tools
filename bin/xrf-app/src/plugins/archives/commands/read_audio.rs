@@ -6,7 +6,7 @@ use xrf_sound::{SoundFile, SoundMetadata};
 use xrf_utils::encode_bytes_to_standard_base64;
 use xrf_vfs::{ArchiveFileDescriptor, ArchiveProject};
 
-use crate::app::types::TauriResult;
+use crate::core::types::TauriResult;
 use crate::plugins::archives::state::ArchiveProjectState;
 
 /// The X-Ray source parameters carried in a sound's first vorbis comment.

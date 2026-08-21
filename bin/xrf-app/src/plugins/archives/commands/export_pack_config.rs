@@ -1,7 +1,7 @@
 use xrf_archive::ArchivePackConfig;
 
-use crate::app::types::TauriResult;
-use crate::app::utils::error_to_string;
+use crate::core::error::error_to_string;
+use crate::core::types::TauriResult;
 
 /// Write the selection rules of a configuration out as an xrCompress configuration file.
 ///

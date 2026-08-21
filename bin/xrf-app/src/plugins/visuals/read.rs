@@ -1,7 +1,7 @@
 use xrf_db::{OgfFile, XRayByteOrder};
 use xrf_visual::{VisualPackage, VisualPacker};
 
-use crate::app::types::TauriResult;
+use crate::core::types::TauriResult;
 use crate::plugins::visuals::state::VisualSource;
 
 /// Read a visual and flatten it for rendering.

@@ -3,7 +3,7 @@ use std::sync::MutexGuard;
 use tauri::State;
 use xrf_db::{SpawnFile, SpawnHeaderChunk};
 
-use crate::app::types::TauriResult;
+use crate::core::types::TauriResult;
 use crate::plugins::spawn::state::SpawnFileState;
 
 #[cfg_attr(feature = "typescript-bindings", specta::specta(rename = "get_header"))]

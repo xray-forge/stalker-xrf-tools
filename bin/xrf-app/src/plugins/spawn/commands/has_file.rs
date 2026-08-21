@@ -1,6 +1,6 @@
 use tauri::State;
 
-use crate::app::types::TauriResult;
+use crate::core::types::TauriResult;
 use crate::plugins::spawn::state::SpawnFileState;
 
 #[cfg_attr(feature = "typescript-bindings", specta::specta(rename = "has_file"))]

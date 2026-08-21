@@ -2,7 +2,7 @@ use std::fs;
 use std::io;
 use std::path::Path;
 
-use crate::bindings::constants::TAURI_SPECTA_HEADER;
+use crate::ipc::bindings::constants::TAURI_SPECTA_HEADER;
 
 /// Rewrites a file Tauri Specta just wrote, dropping its header and normalizing its doc comments.
 pub(super) fn normalize_generated_bindings(path: &Path) -> io::Result<()> {

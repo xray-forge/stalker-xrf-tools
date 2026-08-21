@@ -1,7 +1,7 @@
 use tauri::utils::config::WindowConfig;
 use tauri::webview::WebviewWindowBuilder;
 
-use crate::app::webview_extensions::DevExtensions;
+use crate::core::webview_extensions::DevExtensions;
 use crate::plugins::archives::plugin::ArchivesPlugin;
 use crate::plugins::configs::plugin::ConfigsPlugin;
 use crate::plugins::equipment_icons::plugin::EquipmentIconsPlugin;

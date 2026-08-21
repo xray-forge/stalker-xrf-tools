@@ -1,8 +1,8 @@
 use tauri::State;
 use xrf_export::{ExportsProject, ExportsProjectParser};
 
-use crate::app::types::TauriResult;
-use crate::app::utils::error_to_string;
+use crate::core::error::error_to_string;
+use crate::core::types::TauriResult;
 use crate::plugins::exports::state::ExportsProjectState;
 
 #[cfg_attr(feature = "typescript-bindings", specta::specta(rename = "open_project"))]

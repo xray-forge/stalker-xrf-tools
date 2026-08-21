@@ -3,7 +3,7 @@ use std::sync::MutexGuard;
 use tauri::State;
 use xrf_vfs::ArchiveProject;
 
-use crate::app::types::TauriResult;
+use crate::core::types::TauriResult;
 use crate::plugins::archives::state::ArchiveProjectState;
 
 #[cfg_attr(feature = "typescript-bindings", specta::specta(rename = "close_project"))]

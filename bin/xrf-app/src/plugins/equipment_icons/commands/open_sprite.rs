@@ -3,8 +3,8 @@ use xrf_dds::{DdsFile, DdsPng};
 use xrf_ltx::Ltx;
 use xrf_texture::InventorySpriteDescriptor;
 
-use crate::app::types::TauriResult;
-use crate::app::utils::error_to_string;
+use crate::core::error::error_to_string;
+use crate::core::types::TauriResult;
 use crate::plugins::equipment_icons::state::{EquipmentSpriteMetadata, EquipmentSpriteState};
 
 #[cfg_attr(feature = "typescript-bindings", specta::specta(rename = "open_sprite"))]

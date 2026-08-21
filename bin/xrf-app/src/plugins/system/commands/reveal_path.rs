@@ -2,7 +2,7 @@ use std::io;
 use std::path::Path;
 use std::process::Command;
 
-use crate::app::types::TauriResult;
+use crate::core::types::TauriResult;
 
 /// Show a path in the desktop's own file manager.
 ///

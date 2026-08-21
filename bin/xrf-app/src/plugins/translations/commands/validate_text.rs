@@ -1,8 +1,8 @@
 use tauri::State;
 use xrf_translation::{TranslationProjectDescriptor, find_unwritable_character};
 
-use crate::app::types::TauriResult;
-use crate::app::utils::error_to_string;
+use crate::core::error::error_to_string;
+use crate::core::types::TauriResult;
 use crate::plugins::translations::state::TranslationProjectState;
 
 /// Report the first character a language cannot hold, or nothing when the value is writable.

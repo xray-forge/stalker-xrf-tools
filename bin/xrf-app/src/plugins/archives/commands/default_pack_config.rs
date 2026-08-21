@@ -1,6 +1,6 @@
 use xrf_archive::ArchivePackConfig;
 
-use crate::app::types::TauriResult;
+use crate::core::types::TauriResult;
 
 /// Hand back a packing configuration with nothing chosen yet.
 ///

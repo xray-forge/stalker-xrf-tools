@@ -6,10 +6,10 @@ use std::path::Path;
 use specta::{Format, Types};
 use specta_typescript::{Exporter, primitives};
 
-use crate::bindings::constants::GENERATED_HEADER;
-use crate::bindings::exporter::{TypeScriptFormat, exporter};
-use crate::bindings::output::write_generated;
-use crate::bindings::ownership::{TypeOwnership, assert_no_import_cycles};
+use crate::ipc::bindings::constants::GENERATED_HEADER;
+use crate::ipc::bindings::exporter::{TypeScriptFormat, exporter};
+use crate::ipc::bindings::output::write_generated;
+use crate::ipc::bindings::ownership::{TypeOwnership, assert_no_import_cycles};
 
 /// Writes one module per declaring crate and answers with the ownership those modules establish.
 pub(super) fn export_type_modules(output: &Path, collected: &Types) -> TypeOwnership {

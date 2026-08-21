@@ -2,7 +2,7 @@ use std::sync::MutexGuard;
 
 use tauri::State;
 
-use crate::app::types::TauriResult;
+use crate::core::types::TauriResult;
 use crate::plugins::visuals::state::{SelectedVisual, VisualState};
 
 /// Drop the selected visual and its packed geometry.

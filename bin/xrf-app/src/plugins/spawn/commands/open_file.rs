@@ -2,7 +2,7 @@ use std::path::Path;
 
 use xrf_db::{SpawnFile, SpawnHeaderChunk, XRayByteOrder};
 
-use crate::app::types::TauriResult;
+use crate::core::types::TauriResult;
 use crate::plugins::spawn::state::SpawnFileState;
 
 /// Read a packed spawn file into the application session.

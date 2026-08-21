@@ -4,7 +4,7 @@ use tauri::State;
 use tauri::ipc::Response;
 use xrf_visual::VisualPackage;
 
-use crate::app::types::TauriResult;
+use crate::core::types::TauriResult;
 use crate::plugins::visuals::read::pack_source;
 use crate::plugins::visuals::state::{SelectedVisual, VisualSource, VisualState};
 

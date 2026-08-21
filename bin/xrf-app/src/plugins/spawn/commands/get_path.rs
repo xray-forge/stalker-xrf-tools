@@ -2,7 +2,7 @@ use std::sync::MutexGuard;
 
 use tauri::State;
 
-use crate::app::types::TauriResult;
+use crate::core::types::TauriResult;
 use crate::plugins::spawn::state::SpawnFileState;
 
 /// Where the open file came from, so a restored session can name what it is showing.

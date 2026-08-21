@@ -9,7 +9,7 @@ use crate::plugins::equipment_icons::stream::get_sprite_stream_response;
 pub struct EquipmentIconsPlugin {}
 
 impl EquipmentIconsPlugin {
-  pub const NAME: &'static str = crate::registry::equipment_icons::NAME;
+  pub const NAME: &'static str = crate::ipc::registry::equipment_icons::NAME;
 
   pub fn init<R: Runtime>() -> TauriPlugin<R> {
     tauri::plugin::Builder::new(Self::NAME)
@@ -29,15 +29,15 @@ impl EquipmentIconsPlugin {
             .unwrap()
         })
       })
-      .invoke_handler(crate::app::logging::warn_on_unhandled_command(
+      .invoke_handler(crate::core::logging::warn_on_unhandled_command(
         Self::NAME,
-        crate::registry::equipment_icons::handler(),
+        crate::ipc::registry::equipment_icons::handler(),
       ))
       .build()
   }
 
   #[cfg(feature = "typescript-bindings")]
   pub(crate) fn specta_builder<R: Runtime>() -> tauri_specta::Builder<R> {
-    crate::registry::equipment_icons::specta_builder()
+    crate::ipc::registry::equipment_icons::specta_builder()
   }
 }

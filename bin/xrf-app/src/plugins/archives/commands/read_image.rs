@@ -6,7 +6,7 @@ use xrf_dds::{DdsFile, DdsPng};
 use xrf_utils::encode_bytes_to_standard_base64;
 use xrf_vfs::{ArchiveFileDescriptor, ArchiveProject};
 
-use crate::app::types::TauriResult;
+use crate::core::types::TauriResult;
 use crate::plugins::archives::state::ArchiveProjectState;
 
 #[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]

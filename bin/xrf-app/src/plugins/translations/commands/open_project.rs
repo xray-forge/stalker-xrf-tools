@@ -1,8 +1,8 @@
 use tauri::State;
 use xrf_translation::{TranslationProjectDescriptor, TranslationProjectMode, read_gamedata, read_source};
 
-use crate::app::types::TauriResult;
-use crate::app::utils::error_to_string;
+use crate::core::error::error_to_string;
+use crate::core::types::TauriResult;
 use crate::plugins::translations::state::TranslationProjectState;
 
 #[cfg_attr(feature = "typescript-bindings", specta::specta(rename = "open_project"))]

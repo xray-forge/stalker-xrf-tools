@@ -5,19 +5,19 @@ use tauri::plugin::TauriPlugin;
 pub struct SystemPlugin {}
 
 impl SystemPlugin {
-  pub const NAME: &'static str = crate::registry::system::NAME;
+  pub const NAME: &'static str = crate::ipc::registry::system::NAME;
 
   pub fn init<R: Runtime>() -> TauriPlugin<R> {
     tauri::plugin::Builder::new(Self::NAME)
-      .invoke_handler(crate::app::logging::warn_on_unhandled_command(
+      .invoke_handler(crate::core::logging::warn_on_unhandled_command(
         Self::NAME,
-        crate::registry::system::handler(),
+        crate::ipc::registry::system::handler(),
       ))
       .build()
   }
 
   #[cfg(feature = "typescript-bindings")]
   pub(crate) fn specta_builder<R: Runtime>() -> tauri_specta::Builder<R> {
-    crate::registry::system::specta_builder()
+    crate::ipc::registry::system::specta_builder()
   }
 }

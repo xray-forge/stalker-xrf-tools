@@ -8,8 +8,8 @@ use specta_typescript::{Exporter, Typescript};
 use specta_util::Remapper;
 use tauri_specta::{BuilderConfiguration, LanguageExt};
 
-use crate::bindings::constants::GENERATED_HEADER;
-use crate::bindings::output::normalize_generated_bindings;
+use crate::ipc::bindings::constants::GENERATED_HEADER;
+use crate::ipc::bindings::output::normalize_generated_bindings;
 
 /// Exports one plugin's commands while recording every type those commands referenced.
 ///

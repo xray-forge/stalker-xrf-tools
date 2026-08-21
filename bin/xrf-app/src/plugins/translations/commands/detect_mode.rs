@@ -2,7 +2,7 @@ use std::path::Path;
 
 use xrf_translation::{TranslationProjectMode, detect_mode};
 
-use crate::app::types::TauriResult;
+use crate::core::types::TauriResult;
 
 /// Report which layout a directory looks like, for the open form to preselect.
 #[cfg_attr(feature = "typescript-bindings", specta::specta(rename = "detect_mode"))]

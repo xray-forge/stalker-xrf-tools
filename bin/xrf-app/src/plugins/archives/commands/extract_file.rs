@@ -4,7 +4,7 @@ use tauri::State;
 use xrf_archive::{ArchiveExtractResult, ArchiveUnpacker};
 use xrf_vfs::ArchiveProject;
 
-use crate::app::types::TauriResult;
+use crate::core::types::TauriResult;
 use crate::plugins::archives::state::ArchiveProjectState;
 
 /// Write a single archived file to a path the user chose.

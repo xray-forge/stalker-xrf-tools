@@ -2,8 +2,8 @@ use std::path::Path;
 
 use xrf_db::{SpawnFile, XRayByteOrder};
 
-use crate::app::types::TauriResult;
-use crate::app::utils::error_to_string;
+use crate::core::error::error_to_string;
+use crate::core::types::TauriResult;
 
 /// Expand a packed spawn file into editable chunks on disk.
 #[cfg_attr(feature = "typescript-bindings", specta::specta(rename = "unpack_file"))]

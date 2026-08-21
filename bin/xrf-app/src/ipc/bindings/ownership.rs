@@ -5,7 +5,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use specta::Types;
 use specta::datatype::NamedDataType;
 
-use crate::bindings::references::{referenced_types, render_imports};
+use crate::ipc::bindings::references::{referenced_types, render_imports};
 
 /// The bindings module owning a type, taken from the crate that declares it.
 ///

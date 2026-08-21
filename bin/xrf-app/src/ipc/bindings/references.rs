@@ -5,7 +5,7 @@
 
 use std::collections::{BTreeMap, BTreeSet};
 
-use crate::bindings::constants::{BINDINGS_ROOT, TYPES_DIRECTORY};
+use crate::ipc::bindings::constants::{BINDINGS_ROOT, TYPES_DIRECTORY};
 
 /// Generated source with doc comments and string literals blanked out.
 ///

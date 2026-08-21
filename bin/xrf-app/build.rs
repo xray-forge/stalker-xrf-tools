@@ -3,7 +3,7 @@ use std::fs;
 use std::io;
 use std::path::PathBuf;
 
-#[path = "src/registry/build.rs"]
+#[path = "src/ipc/registry/build.rs"]
 mod registry;
 
 use tauri_build::{Attributes, WindowsAttributes};

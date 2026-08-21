@@ -1,6 +1,6 @@
 use tauri::State;
 
-use crate::app::types::TauriResult;
+use crate::core::types::TauriResult;
 use crate::plugins::translations::state::TranslationProjectState;
 
 #[cfg_attr(feature = "typescript-bindings", specta::specta(rename = "close_project"))]

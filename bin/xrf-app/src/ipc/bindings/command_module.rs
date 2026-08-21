@@ -5,9 +5,9 @@ use std::path::Path;
 
 use xrf_utils::to_camel_case;
 
-use crate::bindings::constants::{GENERATED_HEADER, TYPES_MARKER};
-use crate::bindings::output::write_generated;
-use crate::bindings::ownership::TypeOwnership;
+use crate::ipc::bindings::constants::{GENERATED_HEADER, TYPES_MARKER};
+use crate::ipc::bindings::output::write_generated;
+use crate::ipc::bindings::ownership::TypeOwnership;
 
 /// Replaces the types Tauri Specta inlined into a command module with imports, and names its commands.
 ///

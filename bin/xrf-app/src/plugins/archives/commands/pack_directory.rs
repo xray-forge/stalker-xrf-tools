@@ -1,7 +1,7 @@
 use xrf_archive::{ArchivePackConfig, ArchivePackResult, ArchivePacker};
 
-use crate::app::types::TauriResult;
-use crate::app::utils::error_to_string;
+use crate::core::error::error_to_string;
+use crate::core::types::TauriResult;
 
 /// Pack a directory into archive volumes from a configuration held by the caller.
 ///

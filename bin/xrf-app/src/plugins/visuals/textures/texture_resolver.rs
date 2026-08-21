@@ -5,7 +5,7 @@ use xrf_vfs::mount_plan;
 use xrf_vfs::{XrayLookupScope, XrayMountPlan, XrayVfs};
 use xrf_visual::VisualSubmesh;
 
-use crate::app::types::TauriResult;
+use crate::core::types::TauriResult;
 use crate::plugins::visuals::textures::submesh_texture::{
   MISSING_TEXTURE_REFERENCE, SubmeshTexture, SubmeshTextureResolution,
 };

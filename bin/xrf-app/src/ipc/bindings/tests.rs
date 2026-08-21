@@ -3,12 +3,12 @@ use std::sync::{Arc, Mutex};
 
 use specta::Types;
 
-use crate::bindings::command_module::{export_raw_commands, finalize_command_module};
-use crate::bindings::constants::{COMMANDS_DIRECTORY, TYPES_DIRECTORY};
-use crate::bindings::exporter::command_exporter;
-use crate::bindings::output::reset_directory;
-use crate::bindings::ownership::TypeOwnership;
-use crate::bindings::types_module::export_type_modules;
+use crate::ipc::bindings::command_module::{export_raw_commands, finalize_command_module};
+use crate::ipc::bindings::constants::{COMMANDS_DIRECTORY, TYPES_DIRECTORY};
+use crate::ipc::bindings::exporter::command_exporter;
+use crate::ipc::bindings::output::reset_directory;
+use crate::ipc::bindings::ownership::TypeOwnership;
+use crate::ipc::bindings::types_module::export_type_modules;
 use crate::plugins::archives::plugin::ArchivesPlugin;
 use crate::plugins::configs::plugin::ConfigsPlugin;
 use crate::plugins::equipment_icons::plugin::EquipmentIconsPlugin;
@@ -65,9 +65,9 @@ fn export_typescript_bindings() {
   }
 
   export_raw_commands(
-    &commands_output.join(format!("{}-raw.ts", crate::registry::visuals::NAME)),
-    crate::registry::visuals::NAME,
-    crate::registry::visuals::RAW_COMMANDS,
+    &commands_output.join(format!("{}-raw.ts", crate::ipc::registry::visuals::NAME)),
+    crate::ipc::registry::visuals::NAME,
+    crate::ipc::registry::visuals::RAW_COMMANDS,
     &ownership,
   );
 }

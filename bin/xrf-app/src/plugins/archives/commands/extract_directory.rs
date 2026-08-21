@@ -4,7 +4,7 @@ use tauri::State;
 use xrf_archive::{ArchiveExtractDirectoryResult, ArchiveUnpacker};
 use xrf_vfs::ArchiveProject;
 
-use crate::app::types::TauriResult;
+use crate::core::types::TauriResult;
 use crate::plugins::archives::state::ArchiveProjectState;
 
 /// Write every archived file under one directory into a destination root.

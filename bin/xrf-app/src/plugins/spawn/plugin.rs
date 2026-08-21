@@ -6,7 +6,7 @@ use crate::plugins::spawn::state::SpawnFileState;
 pub struct SpawnPlugin {}
 
 impl SpawnPlugin {
-  pub const NAME: &'static str = crate::registry::spawn::NAME;
+  pub const NAME: &'static str = crate::ipc::registry::spawn::NAME;
 
   pub fn init<R: Runtime>() -> TauriPlugin<R> {
     tauri::plugin::Builder::new(Self::NAME)
@@ -15,15 +15,15 @@ impl SpawnPlugin {
 
         Ok(())
       })
-      .invoke_handler(crate::app::logging::warn_on_unhandled_command(
+      .invoke_handler(crate::core::logging::warn_on_unhandled_command(
         Self::NAME,
-        crate::registry::spawn::handler(),
+        crate::ipc::registry::spawn::handler(),
       ))
       .build()
   }
 
   #[cfg(feature = "typescript-bindings")]
   pub(crate) fn specta_builder<R: Runtime>() -> tauri_specta::Builder<R> {
-    crate::registry::spawn::specta_builder()
+    crate::ipc::registry::spawn::specta_builder()
   }
 }

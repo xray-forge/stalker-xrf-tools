@@ -1,7 +1,7 @@
 use xrf_ltx::{LtxProject, LtxProjectOptions, LtxProjectVerifyResult, LtxVerifyOptions};
 
-use crate::app::types::TauriResult;
-use crate::app::utils::error_to_string;
+use crate::core::error::error_to_string;
+use crate::core::types::TauriResult;
 
 #[cfg_attr(feature = "typescript-bindings", specta::specta(rename = "verify_directory"))]
 #[tauri::command(rename = "verify_directory")]

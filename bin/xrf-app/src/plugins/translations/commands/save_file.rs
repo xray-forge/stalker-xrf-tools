@@ -7,8 +7,8 @@ use xrf_translation::{
   read_source,
 };
 
-use crate::app::types::TauriResult;
-use crate::app::utils::error_to_string;
+use crate::core::error::error_to_string;
+use crate::core::types::TauriResult;
 use crate::plugins::translations::state::TranslationProjectState;
 
 /// Write one logical file's pending edits, grouped by the language each belongs to.

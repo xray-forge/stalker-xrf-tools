@@ -3,8 +3,8 @@ use std::path::Path;
 use xrf_archive::{ArchiveUnpackResult, ArchiveUnpacker};
 use xrf_vfs::ArchiveProject;
 
-use crate::app::types::TauriResult;
-use crate::app::utils::error_to_string;
+use crate::core::error::error_to_string;
+use crate::core::types::TauriResult;
 
 #[cfg_attr(feature = "typescript-bindings", specta::specta(rename = "unpack_directory"))]
 #[tauri::command(rename = "unpack_directory")]
