@@ -158,7 +158,7 @@ fn a_source_that_cannot_be_opened_is_recorded_rather_than_silently_dropped() {
 
   let vfs: XrayVfs = open_plan(&plan).expect("the readable mount still opens");
 
-  assert_eq!(vfs.mount_count(), 1, "only the directory mounted");
+  assert_eq!(vfs.mounts().len(), 1, "only the directory mounted");
   assert_eq!(vfs.skipped_mounts().len(), 1);
   assert_eq!(vfs.skipped_mounts()[0].origin, "$arch_dir$");
   assert_eq!(vfs.skipped_mounts()[0].path, absent);

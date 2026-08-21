@@ -188,5 +188,5 @@ fn planning_the_same_source_twice_reuses_its_mount() {
   let second: Vec<XrayMountId> = mount_plan(&mut vfs, &plan).expect("second mount");
 
   assert_eq!(first, second, "the same mount answers both plans");
-  assert_eq!(vfs.mount_count(), 1, "planning twice does not append a duplicate");
+  assert_eq!(vfs.mounts().len(), 1, "planning twice does not append a duplicate");
 }

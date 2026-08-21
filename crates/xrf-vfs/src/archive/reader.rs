@@ -10,9 +10,7 @@ use byteorder::ReadBytesExt;
 use regex::Regex;
 use xrf_error::{XrfError, XrfResult};
 use xrf_lzhuf::decompress;
-use xrf_utils::{
-  XRayEncoding, assert, decode_bytes_to_string_without_bom_handling, get_utf8_encoder, get_windows1251_encoder,
-};
+use xrf_utils::{XRayEncoding, assert, decode_bytes_to_string_without_bom_handling, get_windows1251_encoder};
 
 use crate::archive::archive_descriptor::ArchiveDescriptor;
 use crate::archive::archive_file_descriptor::ArchiveFileDescriptor;
@@ -40,21 +38,19 @@ static ROOT_ALIAS_PATTERN: LazyLock<Regex> =
 pub(crate) struct ArchiveReader {
   path: PathBuf,
   file: File,
-  encoding: XRayEncoding,
 }
 
 impl ArchiveReader {
-  /// Opens a volume, decoding its header strings with `encoding`.
+  /// Opens a volume.
   ///
   /// # Errors
   ///
   /// Returns an error when the file cannot be opened.
-  pub(crate) fn from_path(path: impl AsRef<Path>, encoding: XRayEncoding) -> XrfResult<Self> {
+  pub(crate) fn from_path(path: impl AsRef<Path>) -> XrfResult<Self> {
     let path: &Path = path.as_ref();
 
     match File::open(path) {
       Ok(file) => Ok(Self {
-        encoding,
         file,
         path: path.into(),
       }),
@@ -65,31 +61,18 @@ impl ArchiveReader {
       ))),
     }
   }
-
-  /// Opens a volume whose header strings are UTF-8.
-  ///
-  /// # Errors
-  ///
-  /// Returns an error when the file cannot be opened.
-  pub(crate) fn from_path_utf8(path: impl AsRef<Path>) -> XrfResult<Self> {
-    Self::from_path(path, get_utf8_encoder())
-  }
-
-  /// Opens a volume, reading strings as windows-1251.
-  ///
-  /// X-Ray engine stores archive header and file names using the system ANSI
-  /// codepage (windows-1251 for the original localization), so non-ASCII names
-  /// are not valid UTF-8 and must be decoded accordingly.
-  ///
-  /// # Errors
-  ///
-  /// Returns an error when the file cannot be opened.
-  pub(crate) fn from_path_windows1251(path: impl AsRef<Path>) -> XrfResult<Self> {
-    Self::from_path(path, get_windows1251_encoder())
-  }
 }
 
 impl ArchiveReader {
+  /// Encoding of a volume's header strings.
+  ///
+  /// A property of the format, not a caller's choice: the engine writes the archive header and entry names in the system
+  /// ANSI codepage — windows-1251 for the original localization — so non-ASCII names are not valid UTF-8 and a reader that
+  /// let the caller pick could only pick wrong.
+  fn header_encoding() -> XRayEncoding {
+    get_windows1251_encoder()
+  }
+
   /// Reads a volume's header chunks into a descriptor.
   ///
   /// # Errors
@@ -170,7 +153,7 @@ impl ArchiveReader {
           let chunk_data: Vec<u8> = Self::read_chunk(&mut self.file, chunk_usize, compressed)?;
           let mut reader: Cursor<&[u8]> = Cursor::new(chunk_data.as_slice());
 
-          file_descriptors = Some(Self::read_file_descriptors(&mut reader, self.encoding)?);
+          file_descriptors = Some(Self::read_file_descriptors(&mut reader)?);
         }
         // Metadata header
         666 | 1337 => {
@@ -200,7 +183,7 @@ impl ArchiveReader {
   fn read_root_path(&self, chunk_data: &[u8]) -> XrfResult<Option<String>> {
     let mut last_section_name: String = String::new();
 
-    for line in decode_bytes_to_string_without_bom_handling(chunk_data, self.encoding)?.lines() {
+    for line in decode_bytes_to_string_without_bom_handling(chunk_data, Self::header_encoding())?.lines() {
       let section_captures = SECTION_PATTERN.captures(line);
       match (section_captures, last_section_name.as_str()) {
         (None, "header") => {
@@ -231,10 +214,7 @@ impl ArchiveReader {
     if compressed { decompress(&buffer) } else { Ok(buffer) }
   }
 
-  fn read_file_descriptors<T: Read>(
-    reader: &mut T,
-    encoding: XRayEncoding,
-  ) -> XrfResult<HashMap<String, ArchiveFileDescriptor>> {
+  fn read_file_descriptors<T: Read>(reader: &mut T) -> XrfResult<HashMap<String, ArchiveFileDescriptor>> {
     let mut file_descriptors: HashMap<String, ArchiveFileDescriptor> = HashMap::new();
     let mut name_buf: [u8; 520] = [0u8; 520];
 
@@ -265,7 +245,7 @@ impl ArchiveReader {
       };
 
       let offset: u32 = reader.read_u32::<XRayByteOrder>()?;
-      let name: String = decode_bytes_to_string_without_bom_handling(name_bytes, encoding)?;
+      let name: String = decode_bytes_to_string_without_bom_handling(name_bytes, Self::header_encoding())?;
 
       file_descriptors.insert(
         name.clone(),
@@ -308,7 +288,7 @@ mod tests {
     let path: PathBuf = volume("empty.db0", b"");
 
     assert!(
-      ArchiveReader::from_path_windows1251(&path)
+      ArchiveReader::from_path(&path)
         .expect("reader opens")
         .read_archive()
         .is_err()
@@ -324,7 +304,7 @@ mod tests {
     bytes.write_u32::<LittleEndian>(u32::MAX).expect("chunk size");
 
     let path: PathBuf = volume("absurd_size.db0", &bytes);
-    let error = ArchiveReader::from_path_windows1251(&path)
+    let error = ArchiveReader::from_path(&path)
       .expect("reader opens")
       .read_archive()
       .expect_err("declared size exceeds the volume");
@@ -351,7 +331,7 @@ mod tests {
     bytes.extend_from_slice(&descriptors);
 
     let path: PathBuf = volume("short_header.db0", &bytes);
-    let error = ArchiveReader::from_path_windows1251(&path)
+    let error = ArchiveReader::from_path(&path)
       .expect("reader opens")
       .read_archive()
       .expect_err("header smaller than its prefix");
@@ -381,7 +361,7 @@ mod tests {
     let path: PathBuf = volume("truncated.db0", &bytes);
 
     assert!(
-      ArchiveReader::from_path_windows1251(&path)
+      ArchiveReader::from_path(&path)
         .expect("reader opens")
         .read_archive()
         .is_err()

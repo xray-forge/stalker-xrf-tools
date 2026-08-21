@@ -188,7 +188,7 @@ fn mounting_the_same_directory_twice_reuses_the_mount() {
   let second = vfs.mount_directory("", &root).expect("mounts again");
 
   assert_eq!(first, second);
-  assert_eq!(vfs.mount_count(), 1, "the same root is not walked twice");
+  assert_eq!(vfs.mounts().len(), 1, "the same root is not walked twice");
 }
 
 #[test]

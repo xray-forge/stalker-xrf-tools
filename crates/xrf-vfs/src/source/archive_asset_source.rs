@@ -58,10 +58,6 @@ impl ArchiveAssetSource {
   pub fn project(&self) -> &ArchiveProject {
     &self.project
   }
-
-  pub fn entry_count(&self) -> usize {
-    self.entries.len()
-  }
 }
 
 /// Written by hand rather than derived, because a derived one would print the whole name table - 17,188 assets for

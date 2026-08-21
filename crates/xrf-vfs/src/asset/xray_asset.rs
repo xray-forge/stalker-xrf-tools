@@ -34,30 +34,11 @@ pub struct XrayAsset {
 }
 
 impl XrayAsset {
-  /// Creates a location for a loose file.
-  ///
-  /// `relative_path` is joined to `root` only when [`Self::physical_path`] is requested; the
-  /// logical path remains the normalized X-Ray identity used for lookups and IPC.
-  pub fn new_directory(logical_path: XrayPath, root: PathBuf, relative_path: PathBuf) -> Self {
-    Self {
-      container: XrayAssetContainer::Directory { relative_path, root },
-      logical_path,
-    }
-  }
-
-  /// Creates a location for an entry in an archive volume set.
-  ///
-  /// The path identifies the archive container, not a filesystem path for the entry itself.
-  pub fn new_archive(logical_path: XrayPath, path: PathBuf) -> Self {
-    Self {
-      container: XrayAssetContainer::Archive { path },
-      logical_path,
-    }
-  }
-
   /// Creates a location from an engine path and a source-reported container.
   ///
-  /// The caller is responsible for passing the normalized logical path returned by the VFS.
+  /// The caller is responsible for passing the normalized logical path returned by the VFS. A loose container's
+  /// `relative_path` is joined to its `root` only when [`Self::physical_path`] is asked for; the logical path stays the
+  /// engine identity used for lookups and IPC.
   pub fn new(logical_path: XrayPath, container: XrayAssetContainer) -> Self {
     Self {
       container,
@@ -127,10 +108,12 @@ mod tests {
     // so a Windows-shaped literal compares unequal to a joined path on Linux while passing here.
     let root: PathBuf = PathBuf::from("gamedata");
     let relative: PathBuf = Path::new("textures").join("wpn").join("wpn_ak74.dds");
-    let asset: XrayAsset = XrayAsset::new_directory(
+    let asset: XrayAsset = XrayAsset::new(
       XrayPath::new("textures\\wpn\\wpn_ak74.dds").expect("valid logical path"),
-      root.clone(),
-      relative.clone(),
+      XrayAssetContainer::Directory {
+        relative_path: relative.clone(),
+        root: root.clone(),
+      },
     );
 
     assert_eq!(asset.root(), Some(root.as_path()));
@@ -148,9 +131,11 @@ mod tests {
   #[test]
   fn an_archived_asset_answers_no_physical_path_rather_than_a_plausible_one() {
     // Archive entries have no physical path; joining the volume directory to the logical path would invent one.
-    let location: XrayAsset = XrayAsset::new_archive(
+    let location: XrayAsset = XrayAsset::new(
       XrayPath::new("textures\\wpn\\wpn_ak74.dds").expect("valid logical path"),
-      Path::new("anomaly").join("db").join("textures"),
+      XrayAssetContainer::Archive {
+        path: Path::new("anomaly").join("db").join("textures"),
+      },
     );
 
     assert_eq!(location.root(), None);

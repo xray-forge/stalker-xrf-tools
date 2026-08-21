@@ -52,7 +52,7 @@ impl ArchiveProject {
     if path.is_file() {
       log::info!("Reading archive file: {}", path.display());
 
-      archives.push(ArchiveReader::from_path_windows1251(path)?.read_archive()?);
+      archives.push(ArchiveReader::from_path(path)?.read_archive()?);
     } else {
       log::info!("Reading archive directory: {}", path.display());
 
@@ -62,7 +62,7 @@ impl ArchiveProject {
         if ArchiveDescriptor::is_valid_db_path(path) {
           log::info!("Reading archive file: {}", path.display());
 
-          archives.push(ArchiveReader::from_path_windows1251(path)?.read_archive()?);
+          archives.push(ArchiveReader::from_path(path)?.read_archive()?);
         }
       }
     }

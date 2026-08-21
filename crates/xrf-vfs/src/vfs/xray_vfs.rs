@@ -113,11 +113,6 @@ impl XrayVfs {
     &self.mounts
   }
 
-  /// Returns the number of mounts, including mounts that contain no matching entry for a scope.
-  pub fn mount_count(&self) -> usize {
-    self.mounts.len()
-  }
-
   /// Returns whether no source has been mounted.
   pub fn is_empty(&self) -> bool {
     self.mounts.is_empty()

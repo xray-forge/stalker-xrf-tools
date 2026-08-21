@@ -199,44 +199,14 @@ pub(crate) fn has_extension(path: &str, extension: &str) -> bool {
       .is_some_and(|tail| tail.eq_ignore_ascii_case(extension))
 }
 
-/// Appends an extension to an X-Ray logical path when it is not already present.
-///
-/// The comparison ignores case, because a reference authored as `actors\stalker.OGF` names the same asset as
-/// `actors\stalker.ogf`, and appending a second extension would resolve to nothing.
-pub(crate) fn with_extension(path: &str, extension: &str) -> String {
-  if has_extension(path, extension) {
-    path.to_string()
-  } else {
-    format!("{path}{extension}")
-  }
-}
-
 #[cfg(test)]
 mod tests {
   use std::path::{Path, PathBuf};
 
-  use super::{XrayPath, has_extension, join, normalize, normalize_host_relative, with_extension};
-
-  #[test]
-  fn preserves_an_existing_extension() {
-    assert_eq!(with_extension("actors\\stalker.ogf", ".ogf"), "actors\\stalker.ogf");
-  }
-
-  #[test]
-  fn appends_a_missing_extension() {
-    assert_eq!(with_extension("actors\\stalker", ".ogf"), "actors\\stalker.ogf");
-  }
-
-  #[test]
-  fn treats_an_authored_extension_as_present_whatever_its_case() {
-    // A doubled extension normalizes to `actors\stalker.ogf.ogf`, which resolves to nothing.
-    assert_eq!(with_extension("actors\\stalker.OGF", ".ogf"), "actors\\stalker.OGF");
-    assert_eq!(with_extension("actors\\stalker.Omf", ".omf"), "actors\\stalker.Omf");
-  }
+  use super::{XrayPath, has_extension, join, normalize, normalize_host_relative};
 
   #[test]
   fn does_not_treat_a_bare_extension_as_a_named_asset() {
-    assert_eq!(with_extension(".ogf", ".ogf"), ".ogf.ogf");
     assert!(!has_extension(".ltx", ".ltx"));
   }
 

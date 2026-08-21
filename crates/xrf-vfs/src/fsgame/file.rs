@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
 
@@ -78,23 +77,6 @@ impl FsgameFile {
   /// Finds an alias by its exact spelling.
   pub fn declaration(&self, alias: &str) -> Option<&FsgameDeclaration> {
     self.declarations.iter().find(|it| it.alias == alias)
-  }
-
-  /// Resolves every valid alias to a filesystem path.
-  ///
-  /// Cyclic chains and chains with an undeclared root are logged and omitted.
-  pub fn resolve_paths(&self) -> HashMap<String, PathBuf> {
-    let mut resolved: HashMap<String, PathBuf> = HashMap::new();
-
-    for declaration in &self.declarations {
-      if let Some(path) = self.resolve(&declaration.alias) {
-        resolved.insert(declaration.alias.clone(), path);
-      } else {
-        log::warn!("Unresolvable fsgame alias: {}", declaration.alias);
-      }
-    }
-
-    resolved
   }
 
   /// Resolves one alias, or returns `None` when its chain is undeclared, cyclic, or does not reach `$fs_root$`.

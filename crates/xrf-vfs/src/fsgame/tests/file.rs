@@ -84,11 +84,20 @@ fn a_cycle_terminates_instead_of_recursing() {
 }
 
 #[test]
-fn resolves_every_declared_alias_at_once() {
-  let resolved = file().resolve_paths();
+fn resolves_every_declared_alias() {
+  let file: FsgameFile = file();
 
-  assert_eq!(resolved.len(), 6);
-  assert_eq!(resolved.get("$arch_dir$"), Some(&root().join("db")));
+  assert_eq!(file.declarations().len(), 6);
+
+  for declaration in file.declarations() {
+    assert!(
+      file.resolve(&declaration.alias).is_some(),
+      "every alias of a well-formed file resolves: {}",
+      declaration.alias
+    );
+  }
+
+  assert_eq!(file.resolve("$arch_dir$"), Some(root().join("db")));
 }
 
 #[test]

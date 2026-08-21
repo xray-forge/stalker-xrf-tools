@@ -135,8 +135,8 @@ impl XrayAssetType {
       Some("thm") => Some(Self::Thm),
       Some("wallmarks") => Some(Self::Wallmarks),
       Some("xr") => Some(Self::XrPack),
+      // Reached only by a path carrying no `.` at all, which is how a level bundle's `level` file is named.
       _ if path.ends_with("level") => Some(Self::Level),
-      _ if path.ends_with(".s") => Some(Self::Shader),
       _ => None,
     }
   }
@@ -221,5 +221,27 @@ mod tests {
     assert_eq!(rules(XrayAssetType::Ltx).directory, "configs");
     assert_eq!(rules(XrayAssetType::Script).directory, "scripts");
     assert_eq!(rules(XrayAssetType::Ppe).directory, "anims");
+  }
+
+  #[test]
+  fn reads_a_kind_off_an_extension() {
+    assert_eq!(
+      XrayAssetType::from_logical_path("shaders\\lod.s"),
+      Some(XrayAssetType::Shader)
+    );
+    assert_eq!(
+      XrayAssetType::from_logical_path("shaders\\model.ps"),
+      Some(XrayAssetType::Shader)
+    );
+    assert_eq!(
+      XrayAssetType::from_logical_path("textures\\wpn\\ak74.dds"),
+      Some(XrayAssetType::Dds)
+    );
+    // A level bundle's own file carries no extension, which is the only way the trailing guard is reached.
+    assert_eq!(
+      XrayAssetType::from_logical_path("levels\\l01_escape\\level"),
+      Some(XrayAssetType::Level)
+    );
+    assert_eq!(XrayAssetType::from_logical_path("readme"), None);
   }
 }
