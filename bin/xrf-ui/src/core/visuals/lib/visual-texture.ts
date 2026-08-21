@@ -1,7 +1,7 @@
 import { CompressedPixelFormat, CompressedTexture, LinearFilter, RepeatWrapping } from "three";
 import { DDS, DDSLoader } from "three/examples/jsm/loaders/DDSLoader.js";
 
-import { SubmeshTexture, SubmeshTextureResolution } from "@/core/bindings/xrf-app-visuals";
+import { SubmeshTexture, SubmeshTextureResolution } from "@/core/bindings/types/xrf-app";
 import { Nullable } from "@/lib/types/general";
 
 /** Shared parser, since `DDSLoader.parse` keeps no state between calls and constructing one per texture is waste. */

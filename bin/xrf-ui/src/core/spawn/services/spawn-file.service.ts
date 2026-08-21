@@ -10,14 +10,14 @@ import {
 } from "@wirestate/core";
 import { BoundAction, Computed, makeObservable, Observable, runInAction } from "@wirestate/mobx";
 
-import { commands as spawnCommands } from "@/core/bindings/xrf-app-spawn";
+import { spawnCommands } from "@/core/bindings/commands/spawn";
 import {
   SpawnALifeSpawnsChunk,
   SpawnArtefactSpawnsChunk,
   SpawnGraphsChunk,
   SpawnHeaderChunk,
   SpawnPatrolsChunk,
-} from "@/core/bindings/xrf-db";
+} from "@/core/bindings/types/xrf-db";
 import { transformError } from "@/core/error/lib";
 import { releaseEditorProject } from "@/core/ipc/release";
 import { emitNotification, ENotificationSeverity } from "@/core/notifications/lib";

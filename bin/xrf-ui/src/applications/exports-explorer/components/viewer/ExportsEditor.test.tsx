@@ -4,7 +4,7 @@ import { userEvent } from "@testing-library/user-event";
 
 import { ExportsExplorerApplication } from "@/applications/exports-explorer/ExportsExplorerApplication";
 import { ExportsService } from "@/applications/exports-explorer/store/exports";
-import { ExportsProject } from "@/core/bindings/xrf-export";
+import { ExportsProject } from "@/core/bindings/types/xrf-export";
 import { TCallableExportDescriptor, TValueExportDescriptor } from "@/core/exports";
 import { ProjectService } from "@/core/settings/services/project";
 import { ApplicationStatusBar } from "@/core/shell/footer/ApplicationStatusBar";

@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from "@jest/globals";
 import { isComputedProp, isObservableProp } from "@wirestate/mobx";
 
 import { VisualsService } from "@/applications/visuals-viewer/store/visuals";
-import { SelectedVisualDescription } from "@/core/bindings/xrf-app-visuals";
+import { SelectedVisualDescription } from "@/core/bindings/types/xrf-app";
 import { resetMockInvoke, setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import {
   mockPackedSubmesh,

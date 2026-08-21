@@ -1,8 +1,8 @@
 import { EventBus, inject, Injectable, OnDeactivation, OnProvision } from "@wirestate/core";
 import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate/mobx";
 
-import { commands as exportsCommands } from "@/core/bindings/xrf-app-exports";
-import { ExportSourceContent, ExportsProject } from "@/core/bindings/xrf-export";
+import { exportsCommands } from "@/core/bindings/commands/exports";
+import { ExportSourceContent, ExportsProject } from "@/core/bindings/types/xrf-export";
 import { transformError } from "@/core/error/lib";
 import { releaseEditorProject } from "@/core/ipc/release";
 import { emitNotification, ENotificationSeverity } from "@/core/notifications/lib";

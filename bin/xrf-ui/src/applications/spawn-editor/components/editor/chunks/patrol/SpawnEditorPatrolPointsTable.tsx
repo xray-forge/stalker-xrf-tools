@@ -2,7 +2,7 @@ import { GridColDef, GridRowId } from "@mui/x-data-grid";
 import { ReactElement, useMemo } from "react";
 
 import { SpawnTable } from "@/applications/spawn-editor/components/editor/table/SpawnTable";
-import { Patrol, PatrolPoint } from "@/core/bindings/xrf-db";
+import { Patrol, PatrolPoint } from "@/core/bindings/types/xrf-db";
 import { flagsColumn, identifierColumn, textColumn, vectorColumn } from "@/core/ui/table";
 
 interface IPatrolPointRow extends PatrolPoint {

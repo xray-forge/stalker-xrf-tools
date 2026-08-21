@@ -7,7 +7,7 @@ import { BoundAction, makeObservable, Observable, runInAction } from "@wirestate
 
 import { urlToImage } from "@/core/assets/image";
 import { AssetService } from "@/core/assets/services";
-import { commands as equipmentIconsCommands } from "@/core/bindings/xrf-app-equipment-icons";
+import { equipmentIconsCommands } from "@/core/bindings/commands/equipment-icons";
 import {
   IEquipmentSectionDescriptor,
   IEquipmentSpriteMetadata,

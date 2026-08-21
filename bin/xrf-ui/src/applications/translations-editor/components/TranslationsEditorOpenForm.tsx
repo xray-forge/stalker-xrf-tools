@@ -3,7 +3,7 @@ import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback, useEffect, useState } from "react";
 
 import { TranslationsService } from "@/applications/translations-editor/store/translations";
-import { TranslationProjectMode } from "@/core/bindings/xrf-app-translations";
+import { TranslationProjectMode } from "@/core/bindings/types/xrf-translation";
 import { EApplicationId } from "@/core/routing/application";
 import { getPathIfExists, getProjectTranslationsPath } from "@/core/settings/lib/path";
 import { ProjectService } from "@/core/settings/services/project";

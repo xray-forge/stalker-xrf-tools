@@ -4,7 +4,7 @@ import { ReactElement } from "react";
 import { Route, Routes } from "react-router-dom";
 
 import { SpawnEditor } from "@/applications/spawn-editor/components/editor/SpawnEditor";
-import { SpawnFile, SpawnHeaderChunk } from "@/core/bindings/xrf-db";
+import { SpawnFile, SpawnHeaderChunk } from "@/core/bindings/types/xrf-db";
 import { ApplicationStatusBar } from "@/core/shell/footer/ApplicationStatusBar";
 import { IEditorPanel, useEditorPanelsRegistry } from "@/core/shell/panel/context";
 import { SpawnFileService } from "@/core/spawn/services";

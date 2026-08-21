@@ -2,8 +2,6 @@ pub(crate) mod condlist;
 pub(crate) mod file;
 pub(crate) mod project;
 pub(crate) mod scheme;
-#[cfg(feature = "typescript-bindings")]
-mod typescript_bindings;
 
 pub use crate::file::check::*;
 pub use crate::file::file_configuration::constants::LTX_EXTENSION;
@@ -19,5 +17,3 @@ pub use crate::project::ltx_project_format_result::*;
 pub use crate::project::ltx_project_options::*;
 pub use crate::project::ltx_project_verify_result::*;
 pub use crate::project::ltx_verify_options::*;
-#[cfg(feature = "typescript-bindings")]
-pub use crate::typescript_bindings::typescript_bindings;

@@ -1,13 +1,13 @@
 import { EventBus, inject, Injectable, OnDeactivation, OnProvision } from "@wirestate/core";
 import { BoundAction, Computed, makeObservable, Observable, runInAction } from "@wirestate/mobx";
 
+import { translationsCommands } from "@/core/bindings/commands/translations";
 import {
   TranslationEdit,
   TranslationProjectDescriptor,
   TranslationProjectMode,
-  commands as translationsCommands,
   TranslationVariant,
-} from "@/core/bindings/xrf-app-translations";
+} from "@/core/bindings/types/xrf-translation";
 import { transformError } from "@/core/error/lib";
 import { releaseEditorProject } from "@/core/ipc/release";
 import { emitNotification, ENotificationSeverity } from "@/core/notifications/lib";

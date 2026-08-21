@@ -2,7 +2,7 @@ import { GridColDef, GridRowId } from "@mui/x-data-grid";
 import { ReactElement, useMemo } from "react";
 
 import { SpawnTable } from "@/applications/spawn-editor/components/editor/table/SpawnTable";
-import { GraphLevelPoint } from "@/core/bindings/xrf-db";
+import { GraphLevelPoint } from "@/core/bindings/types/xrf-db";
 import { decimalColumn, textColumn } from "@/core/ui/table";
 
 interface IGraphPointRow extends GraphLevelPoint {

@@ -5,7 +5,7 @@ import { ReactElement } from "react";
 import { ArchivePreviewError } from "@/applications/archives-explorer/components/editor/preview/ArchivePreviewError";
 import { ArchivesService } from "@/applications/archives-explorer/services/archives";
 import { TArchiveContent } from "@/core/archive";
-import { ArchiveImagePreview as TArchiveImagePreview } from "@/core/bindings/xrf-app";
+import { ArchiveImagePreview as TArchiveImagePreview } from "@/core/bindings/types/xrf-app";
 import { DelayedProgress } from "@/core/ui/layout/DelayedProgress";
 import { EmptyState } from "@/core/ui/layout/EmptyState";
 import { ImageViewport } from "@/core/ui/media/ImageViewport";

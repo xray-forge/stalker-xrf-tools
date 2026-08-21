@@ -1,9 +1,6 @@
-import { ArchiveAudioPreview, ArchiveImagePreview } from "@/core/bindings/xrf-app";
-import {
-  ArchiveExtractDirectoryResult,
-  ArchiveFileDescriptor,
-  ProjectReadResult,
-} from "@/core/bindings/xrf-app-archives";
+import { ArchiveAudioPreview, ArchiveImagePreview } from "@/core/bindings/types/xrf-app";
+import { ArchiveExtractDirectoryResult } from "@/core/bindings/types/xrf-archive";
+import { ArchiveFileDescriptor, ProjectReadResult } from "@/core/bindings/types/xrf-vfs";
 
 /**
  * What the explorer currently points at.

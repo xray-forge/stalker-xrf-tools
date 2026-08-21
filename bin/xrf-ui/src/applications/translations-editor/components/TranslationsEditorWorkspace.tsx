@@ -9,7 +9,7 @@ import {
   TranslationsTable,
 } from "@/applications/translations-editor/components/editor/TranslationsTable";
 import { TranslationsService } from "@/applications/translations-editor/store/translations";
-import { TranslationFile, TranslationProjectDescriptor } from "@/core/bindings/xrf-app-translations";
+import { TranslationFile, TranslationProjectDescriptor } from "@/core/bindings/types/xrf-translation";
 import { EmptyState } from "@/core/ui/layout/EmptyState";
 import { Nullable } from "@/lib/types/general";
 

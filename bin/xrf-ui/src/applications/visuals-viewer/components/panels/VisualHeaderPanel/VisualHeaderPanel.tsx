@@ -7,7 +7,7 @@ import { VisualPanelEmpty } from "@/applications/visuals-viewer/components/panel
 import { VisualPanelRow } from "@/applications/visuals-viewer/components/panels/VisualPanelRow";
 import { VisualPanelSection } from "@/applications/visuals-viewer/components/panels/VisualPanelSection";
 import { VisualsService } from "@/applications/visuals-viewer/store/visuals";
-import { VisualDescription } from "@/core/bindings/xrf-visual";
+import { VisualDescription } from "@/core/bindings/types/xrf-visual";
 import { ABSENT_VALUE } from "@/lib/format/number";
 import { Nullable } from "@/lib/types/general";
 

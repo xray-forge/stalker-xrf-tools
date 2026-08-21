@@ -12,7 +12,7 @@ import { SpawnEditorPatrols } from "@/applications/spawn-editor/components/edito
 import { createSpawnEditorPanels } from "@/applications/spawn-editor/components/editor/spawn-panels";
 import { SpawnEditorActions } from "@/applications/spawn-editor/components/editor/SpawnEditorActions";
 import { SpawnEditorMenu } from "@/applications/spawn-editor/components/editor/SpawnEditorMenu";
-import { SpawnHeaderChunk } from "@/core/bindings/xrf-db";
+import { SpawnHeaderChunk } from "@/core/bindings/types/xrf-db";
 import { EditorLayout } from "@/core/shell/editor/EditorLayout";
 import { EditorToolbar } from "@/core/shell/editor/EditorToolbar";
 import { useEditorBusy } from "@/core/shell/EditorBusyContext";

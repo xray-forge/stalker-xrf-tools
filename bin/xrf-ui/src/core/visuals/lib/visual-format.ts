@@ -1,4 +1,4 @@
-import { Vector3d } from "@/core/bindings/xrf-visual";
+import { Vector3d } from "@/core/bindings/types/xrf-db";
 import { ABSENT_VALUE, formatNumber } from "@/lib/format/number";
 import { Nullable } from "@/lib/types/general";
 

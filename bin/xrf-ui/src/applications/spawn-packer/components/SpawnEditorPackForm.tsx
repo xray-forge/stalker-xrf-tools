@@ -2,7 +2,7 @@ import { Alert } from "@mui/material";
 import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback, useState } from "react";
 
-import { commands as spawnCommands } from "@/core/bindings/xrf-app-spawn";
+import { spawnCommands } from "@/core/bindings/commands/spawn";
 import { ENotificationSeverity, TEmitNotification, useEmitNotification } from "@/core/notifications/lib";
 import { EApplicationId } from "@/core/routing/application";
 import { getExistingProjectUnpackedAllSpawnPath, getProjectAllSpawnRepackPath } from "@/core/settings/lib/path";

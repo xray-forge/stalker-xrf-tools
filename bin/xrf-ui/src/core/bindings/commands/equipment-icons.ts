@@ -2,8 +2,11 @@
 
 import { invoke as __TAURI_INVOKE } from "@tauri-apps/api/core";
 
+import { EquipmentSpriteMetadata } from "@/core/bindings/types/xrf-app";
+import { InventorySpriteDescriptor, PackEquipmentResult } from "@/core/bindings/types/xrf-texture";
+
 /** Commands */
-export const commands = {
+export const equipmentIconsCommands = {
   closeSprite: () => __TAURI_INVOKE<null>("plugin:equipment-icons|close_sprite"),
   getSprite: () =>
     __TAURI_INVOKE<{
@@ -21,30 +24,4 @@ export const commands = {
       outputPath,
       systemLtxPath,
     }),
-};
-
-/* Types */
-export type EquipmentSpriteMetadata = {
-  path: string;
-  name: string;
-  systemLtxPath: string;
-  equipmentDescriptors: Array<InventorySpriteDescriptor>;
-};
-
-export type InventorySpriteDescriptor = {
-  section: string;
-  customIcon: string | null;
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-};
-
-export type PackEquipmentResult = {
-  duration: number;
-  savedAt: string;
-  savedWidth: number;
-  savedHeight: number;
-  packedCount: number;
-  skippedCount: number;
 };

@@ -5,8 +5,8 @@ import { VisualSubmeshSection } from "@/applications/visuals-viewer/components/p
 import { VisualPanel } from "@/applications/visuals-viewer/components/panels/VisualPanel";
 import { VisualPanelEmpty } from "@/applications/visuals-viewer/components/panels/VisualPanelEmpty";
 import { VisualsService } from "@/applications/visuals-viewer/store/visuals";
-import { SubmeshTexture } from "@/core/bindings/xrf-app-visuals";
-import { VisualDescription } from "@/core/bindings/xrf-visual";
+import { SubmeshTexture } from "@/core/bindings/types/xrf-app";
+import { VisualDescription } from "@/core/bindings/types/xrf-visual";
 import { Nullable } from "@/lib/types/general";
 
 /** Every submesh of the open visual, in the order the file stores them. */

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "@jest/globals";
 
-import { VisualDescription } from "@/core/bindings/xrf-visual";
+import { VisualDescription } from "@/core/bindings/types/xrf-visual";
 import { createVisualCameraFit, createVisualViews, IVisualModelViews } from "@/core/visuals/lib/visual-views";
 import {
   mockPackedSubmesh,
@@ -35,9 +35,7 @@ describe("visual views", () => {
       bufferLength: buffer.byteLength + 4,
     });
 
-    expect(() => createVisualViews(description, buffer.toArrayBuffer())).toThrow(
-      /came from different reads/
-    );
+    expect(() => createVisualViews(description, buffer.toArrayBuffer())).toThrow(/came from different reads/);
   });
 
   it("keeps the draw range separate from the whole index buffer", () => {

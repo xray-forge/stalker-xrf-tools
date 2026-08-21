@@ -1,7 +1,7 @@
 import { Box, Chip, List, ListItem, ListItemText, Typography } from "@mui/material";
 import { ReactElement } from "react";
 
-import { TranslationFinding } from "@/core/bindings/xrf-app-translations";
+import { TranslationFinding } from "@/core/bindings/types/xrf-translation";
 import { EmptyState } from "@/core/ui/layout/EmptyState";
 
 /** Trims the project root off a subject, which is otherwise most of the line. */

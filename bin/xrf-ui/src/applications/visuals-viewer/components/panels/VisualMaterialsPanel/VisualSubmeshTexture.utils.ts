@@ -1,4 +1,4 @@
-import { SubmeshTextureResolution } from "@/core/bindings/xrf-app-visuals";
+import { SubmeshTextureResolution } from "@/core/bindings/types/xrf-app";
 import { EVisualTextureState } from "@/core/visuals/lib/visual-texture";
 
 /** How a texture state reads in the panel, and how loudly. */

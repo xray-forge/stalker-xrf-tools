@@ -1,11 +1,11 @@
-import { SelectedVisualDescription, SubmeshTexture } from "@/core/bindings/xrf-app-visuals";
+import { SelectedVisualDescription, SubmeshTexture } from "@/core/bindings/types/xrf-app";
 import {
   VisualBounds,
   VisualDescription,
   VisualGeometry,
   VisualSection,
   VisualSubmesh,
-} from "@/core/bindings/xrf-visual";
+} from "@/core/bindings/types/xrf-visual";
 
 const ALIGNMENT: number = 4;
 

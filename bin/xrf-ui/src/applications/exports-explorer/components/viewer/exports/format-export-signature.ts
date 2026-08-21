@@ -16,4 +16,4 @@ export function formatExportSignature(declaration: ExportDescriptor): string {
     }
   }
 }
-import { ExportDescriptor, ExportParameterDescriptor } from "@/core/bindings/xrf-export";
+import { ExportDescriptor, ExportParameterDescriptor } from "@/core/bindings/types/xrf-export";

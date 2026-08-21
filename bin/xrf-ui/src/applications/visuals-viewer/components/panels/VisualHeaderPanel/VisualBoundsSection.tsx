@@ -2,7 +2,7 @@ import { ReactElement } from "react";
 
 import { VisualPanelRow } from "@/applications/visuals-viewer/components/panels/VisualPanelRow";
 import { VisualPanelSection } from "@/applications/visuals-viewer/components/panels/VisualPanelSection";
-import { VisualBounds } from "@/core/bindings/xrf-visual";
+import { VisualBounds } from "@/core/bindings/types/xrf-visual";
 import { formatCoordinate, formatVector } from "@/core/visuals/lib/visual-format";
 import { Nullable } from "@/lib/types/general";
 

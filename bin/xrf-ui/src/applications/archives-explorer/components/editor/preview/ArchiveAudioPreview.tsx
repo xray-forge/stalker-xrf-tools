@@ -7,7 +7,7 @@ import { ArchivePreviewError } from "@/applications/archives-explorer/components
 import { ArchivesService } from "@/applications/archives-explorer/services/archives";
 import { TArchiveContent } from "@/core/archive";
 import { AssetService } from "@/core/assets/services";
-import { ArchiveAudioPreview as TArchiveAudioPreview } from "@/core/bindings/xrf-app";
+import { ArchiveAudioPreview as TArchiveAudioPreview } from "@/core/bindings/types/xrf-app";
 import { CenteredColumn } from "@/core/ui/layout/CenteredColumn";
 import { DelayedProgress } from "@/core/ui/layout/DelayedProgress";
 import { EmptyState } from "@/core/ui/layout/EmptyState";

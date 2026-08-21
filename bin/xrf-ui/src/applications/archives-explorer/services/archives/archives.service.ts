@@ -18,12 +18,9 @@ import {
   TArchiveOperation,
   TArchiveSelection,
 } from "@/core/archive";
-import {
-  ArchiveExtractDirectoryResult,
-  ArchiveFileDescriptor,
-  ArchiveProject,
-  commands as archivesCommands,
-} from "@/core/bindings/xrf-app-archives";
+import { archivesCommands } from "@/core/bindings/commands/archives";
+import { ArchiveExtractDirectoryResult } from "@/core/bindings/types/xrf-archive";
+import { ArchiveFileDescriptor, ArchiveProject } from "@/core/bindings/types/xrf-vfs";
 import { transformError } from "@/core/error/lib";
 import { releaseEditorProject } from "@/core/ipc/release";
 import { emitNotification, ENotificationSeverity } from "@/core/notifications/lib";

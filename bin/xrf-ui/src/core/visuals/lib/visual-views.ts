@@ -1,10 +1,5 @@
-import {
-  Vector3d,
-  VisualBounds,
-  VisualDescription,
-  VisualSection,
-  VisualSubmesh,
-} from "@/core/bindings/xrf-visual";
+import { Vector3d } from "@/core/bindings/types/xrf-db";
+import { VisualBounds, VisualDescription, VisualSection, VisualSubmesh } from "@/core/bindings/types/xrf-visual";
 import { Nullable } from "@/lib/types/general";
 
 /** Framing values a camera needs, derived from what the model actually spans. */

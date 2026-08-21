@@ -8,7 +8,7 @@ import {
 } from "@/applications/visuals-viewer/components/panels/VisualMaterialsPanel/VisualSubmeshTexture.utils";
 import { VisualSubmeshTextureSource } from "@/applications/visuals-viewer/components/panels/VisualMaterialsPanel/VisualSubmeshTextureSource";
 import { VisualPanelRow } from "@/applications/visuals-viewer/components/panels/VisualPanelRow";
-import { SubmeshTexture } from "@/core/bindings/xrf-app-visuals";
+import { SubmeshTexture } from "@/core/bindings/types/xrf-app";
 import { EVisualTextureState, IVisualTextureStatus } from "@/core/visuals/lib/visual-texture";
 import { Nullable } from "@/lib/types/general";
 

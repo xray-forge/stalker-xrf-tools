@@ -3,7 +3,7 @@
 import { invoke as __TAURI_INVOKE } from "@tauri-apps/api/core";
 
 /** Commands */
-export const commands = {
+export const systemCommands = {
   /**
    * Show a path in the desktop's own file manager.
    *

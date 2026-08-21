@@ -1,7 +1,7 @@
 import { GridColDef } from "@mui/x-data-grid";
 import { ReactElement, useMemo } from "react";
 
-import { ArchiveUnpackResult } from "@/core/bindings/xrf-archive";
+import { ArchiveUnpackResult } from "@/core/bindings/types/xrf-archive";
 import { EApplicationId } from "@/core/routing/application";
 import { CommandResult, ICommandResultStat } from "@/core/ui/command-result/CommandResult";
 import { CommandResultFindings } from "@/core/ui/command-result/CommandResultFindings";

@@ -2,7 +2,7 @@ import { GridColDef, GridRowId } from "@mui/x-data-grid";
 import { ReactElement, useMemo } from "react";
 
 import { SpawnTable } from "@/applications/spawn-editor/components/editor/table/SpawnTable";
-import { SpawnHeaderChunk } from "@/core/bindings/xrf-db";
+import { SpawnHeaderChunk } from "@/core/bindings/types/xrf-db";
 import { identifierColumn, textColumn } from "@/core/ui/table";
 
 interface IHeaderRow extends SpawnHeaderChunk {

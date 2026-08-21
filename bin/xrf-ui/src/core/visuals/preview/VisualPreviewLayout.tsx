@@ -4,7 +4,7 @@ import { Texture } from "three";
 
 import { EditorLayout } from "@/core/shell/editor/EditorLayout";
 import { useEditorStatus } from "@/core/shell/EditorStatusContext";
-import { IEditorPanel , useEditorPanels } from "@/core/shell/panel/context";
+import { IEditorPanel, useEditorPanels } from "@/core/shell/panel/context";
 import { IVisualPreviewViewOptions } from "@/core/visuals";
 import { IVisualModelViews } from "@/core/visuals/lib/visual-views";
 import { VisualPreviewAnimationBar } from "@/core/visuals/preview/VisualPreviewAnimationBar";
@@ -95,12 +95,7 @@ export function VisualPreviewLayout({
       }
       footer={<VisualPreviewAnimationBar />}
     >
-      <VisualPreviewViewport
-        model={model}
-        options={options}
-        cameraResetToken={cameraResetToken}
-        textures={textures}
-      />
+      <VisualPreviewViewport model={model} options={options} cameraResetToken={cameraResetToken} textures={textures} />
     </EditorLayout>
   );
 }

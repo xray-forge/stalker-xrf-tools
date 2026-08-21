@@ -8,7 +8,7 @@ import { groupExports, IExportGroup } from "@/applications/exports-explorer/comp
 import { ExportsMenu } from "@/applications/exports-explorer/components/viewer/exports/ExportsMenu";
 import { ExportsViewer } from "@/applications/exports-explorer/components/viewer/exports/ExportsViewer";
 import { ExportsService } from "@/applications/exports-explorer/store/exports";
-import { ExportDescriptor, ExportsProject } from "@/core/bindings/xrf-export";
+import { ExportDescriptor, ExportsProject } from "@/core/bindings/types/xrf-export";
 import { EditorLayout } from "@/core/shell/editor/EditorLayout";
 import { EditorToolbar } from "@/core/shell/editor/EditorToolbar";
 import { useEditorBusy } from "@/core/shell/EditorBusyContext";

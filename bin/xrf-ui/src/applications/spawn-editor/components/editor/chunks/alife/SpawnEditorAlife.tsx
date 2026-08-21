@@ -3,7 +3,7 @@ import { ReactElement } from "react";
 
 import { SpawnEditorAlifeObjectsTable } from "@/applications/spawn-editor/components/editor/chunks/alife/SpawnEditorAlifeObjectsTable";
 import { SpawnChunkView } from "@/applications/spawn-editor/components/editor/chunks/SpawnChunkView";
-import { SpawnALifeSpawnsChunk } from "@/core/bindings/xrf-db";
+import { SpawnALifeSpawnsChunk } from "@/core/bindings/types/xrf-db";
 import { SpawnFileService } from "@/core/spawn/services";
 
 export function SpawnEditorAlife(): ReactElement {

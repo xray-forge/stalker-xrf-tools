@@ -1,4 +1,4 @@
-import { AlifeObject, Patrol, SpawnFile, Vector3d } from "@/core/bindings/xrf-db";
+import { AlifeObject, Patrol, SpawnFile, Vector3d } from "@/core/bindings/types/xrf-db";
 
 /**
  * Creates a vector fixture.

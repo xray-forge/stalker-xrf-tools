@@ -6,7 +6,7 @@ import {
   ARCHIVE_VOLUME_EXTENSION,
   ARCHIVE_VOLUME_SUFFIX,
 } from "@/applications/archives-packer/lib/pack-config";
-import { ArchivePackConfig } from "@/core/bindings/xrf-archive";
+import { ArchivePackConfig } from "@/core/bindings/types/xrf-archive";
 import { FormRow } from "@/core/ui/form/FormRow";
 import { Nullable } from "@/lib/types/general";
 

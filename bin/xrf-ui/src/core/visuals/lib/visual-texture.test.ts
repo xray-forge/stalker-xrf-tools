@@ -1,14 +1,8 @@
 import { describe, expect, it } from "@jest/globals";
-import {
-  CompressedTexture,
-  LinearFilter,
-  RepeatWrapping,
-  RGB_S3TC_DXT1_Format,
-  RGBA_S3TC_DXT5_Format,
-} from "three";
+import { CompressedTexture, LinearFilter, RepeatWrapping, RGB_S3TC_DXT1_Format, RGBA_S3TC_DXT5_Format } from "three";
 
-import { SubmeshTexture } from "@/core/bindings/xrf-app-visuals";
-import { XrayAsset } from "@/core/bindings/xrf-vfs";
+import { SubmeshTexture } from "@/core/bindings/types/xrf-app";
+import { XrayAsset } from "@/core/bindings/types/xrf-vfs";
 import {
   createDdsTexture,
   EVisualTextureState,

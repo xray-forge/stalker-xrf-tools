@@ -13,7 +13,7 @@ import {
   IExportGroup,
   IExportTreeItem,
 } from "@/applications/exports-explorer/components/viewer/exports/exports-groups";
-import { ExportDescriptor } from "@/core/bindings/xrf-export";
+import { ExportDescriptor } from "@/core/bindings/types/xrf-export";
 import { ISearchResult, IUseRankedSearch, useRankedSearch } from "@/core/search/lib";
 import { EditorSearchHeader } from "@/core/shell/editor/EditorSearchHeader";
 import { EditorSearchResults, IEditorSearchResultRow } from "@/core/shell/editor/EditorSearchResults";

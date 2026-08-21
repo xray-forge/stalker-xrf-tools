@@ -3,7 +3,7 @@ import { useInjection } from "@wirestate/react";
 import { ReactElement, useEffect, useState } from "react";
 
 import { ExportsService } from "@/applications/exports-explorer/store/exports";
-import { ExportSourceContent } from "@/core/bindings/xrf-export";
+import { ExportSourceContent } from "@/core/bindings/types/xrf-export";
 import { transformError } from "@/core/error/lib";
 import { CodeView } from "@/core/syntax/components/CodeView";
 import { getSyntaxLanguage } from "@/core/syntax/lib";

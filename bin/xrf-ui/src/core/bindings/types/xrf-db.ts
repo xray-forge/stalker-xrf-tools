@@ -608,12 +608,6 @@ export type PatrolPoint = {
   gameVertexId: number;
 };
 
-export type RgbColor = {
-  r: number | null;
-  g: number | null;
-  b: number | null;
-};
-
 /** Shape enumeration stored in objects descriptors. */
 export type Shape =
   | ({ Sphere: [Vector3d, number | null] } & { Box?: never })

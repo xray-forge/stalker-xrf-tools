@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "@jest/globals";
 
 import { ExportsService } from "@/applications/exports-explorer/store/exports/exports.service";
-import { ExportSourceContent } from "@/core/bindings/xrf-export";
+import { ExportSourceContent } from "@/core/bindings/types/xrf-export";
 import { mockInvoke, setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { mockInjectedService } from "@/fixtures/utils/container";
 

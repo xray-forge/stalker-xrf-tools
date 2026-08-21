@@ -3,7 +3,7 @@ import { act, waitFor } from "@testing-library/react";
 
 import { ExportSourceView } from "@/applications/exports-explorer/components/viewer/exports/ExportSourceView";
 import { ExportsService } from "@/applications/exports-explorer/store/exports";
-import { ExportSourceContent } from "@/core/bindings/xrf-export";
+import { ExportSourceContent } from "@/core/bindings/types/xrf-export";
 import { setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { renderWithProviders } from "@/fixtures/utils/render";
 import { Nullable } from "@/lib/types/general";

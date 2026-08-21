@@ -10,8 +10,6 @@ pub(crate) mod shader_library;
 pub(crate) mod spawn;
 pub(crate) mod thm;
 pub(crate) mod types;
-#[cfg(feature = "typescript-bindings")]
-mod typescript_bindings;
 
 pub use xrf_chunk::XRayByteOrder;
 
@@ -92,5 +90,3 @@ pub use crate::thm::thm_bump_patch_report::*;
 pub use crate::thm::thm_bump_processor::*;
 pub use crate::thm::thm_file::*;
 pub use crate::types::*;
-#[cfg(feature = "typescript-bindings")]
-pub use crate::typescript_bindings::typescript_bindings;

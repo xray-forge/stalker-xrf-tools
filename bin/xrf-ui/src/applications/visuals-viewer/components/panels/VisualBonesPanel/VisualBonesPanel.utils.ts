@@ -1,6 +1,6 @@
 import { TreeViewDefaultItemModelProperties } from "@mui/x-tree-view";
 
-import { VisualBone } from "@/core/bindings/xrf-visual";
+import { VisualBone } from "@/core/bindings/types/xrf-visual";
 import { Maybe } from "@/lib/types/general";
 
 /**

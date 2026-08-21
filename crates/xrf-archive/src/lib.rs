@@ -11,8 +11,6 @@
 mod asset_source_tests;
 pub(crate) mod pack;
 pub(crate) mod types;
-#[cfg(feature = "typescript-bindings")]
-mod typescript_bindings;
 pub(crate) mod unpack;
 
 pub use crate::pack::archive_pack_config::{
@@ -20,8 +18,6 @@ pub use crate::pack::archive_pack_config::{
 };
 pub use crate::pack::archive_pack_result::ArchivePackResult;
 pub use crate::pack::archive_packer::ArchivePacker;
-#[cfg(feature = "typescript-bindings")]
-pub use crate::typescript_bindings::typescript_bindings;
 pub use crate::unpack::archive_extract_result::{ArchiveExtractDirectoryResult, ArchiveExtractResult};
 pub use crate::unpack::archive_unpack_result::ArchiveUnpackResult;
 pub use crate::unpack::archive_unpacker::ArchiveUnpacker;

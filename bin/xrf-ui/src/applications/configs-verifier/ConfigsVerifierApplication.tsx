@@ -3,8 +3,8 @@ import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback, useEffect, useState } from "react";
 
 import { ConfigsVerifyResult } from "@/applications/configs-verifier/components/ConfigsVerifyResult";
-import { commands as configsCommands } from "@/core/bindings/xrf-app-configs";
-import { LtxProjectVerifyResult } from "@/core/bindings/xrf-ltx";
+import { configsCommands } from "@/core/bindings/commands/configs";
+import { LtxProjectVerifyResult } from "@/core/bindings/types/xrf-ltx";
 import { ENotificationSeverity, TEmitNotification, useEmitNotification } from "@/core/notifications/lib";
 import { EApplicationId } from "@/core/routing/application";
 import { getProjectConfigsPath } from "@/core/settings/lib/path";

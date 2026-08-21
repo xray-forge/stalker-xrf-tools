@@ -1,7 +1,7 @@
 import { ReactElement } from "react";
 
 import { VisualPanelRow } from "@/applications/visuals-viewer/components/panels/VisualPanelRow";
-import { XrayAssetContainer } from "@/core/bindings/xrf-vfs";
+import { XrayAssetContainer } from "@/core/bindings/types/xrf-vfs";
 
 export interface IVisualSubmeshTextureSourceProps {
   container: XrayAssetContainer;

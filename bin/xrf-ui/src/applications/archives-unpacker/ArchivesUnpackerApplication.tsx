@@ -3,8 +3,8 @@ import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback, useEffect, useState } from "react";
 
 import { ArchivesUnpackResult } from "@/applications/archives-unpacker/components/ArchivesUnpackResult";
-import { commands as archivesCommands } from "@/core/bindings/xrf-app-archives";
-import { ArchiveUnpackResult } from "@/core/bindings/xrf-archive";
+import { archivesCommands } from "@/core/bindings/commands/archives";
+import { ArchiveUnpackResult } from "@/core/bindings/types/xrf-archive";
 import { ENotificationSeverity, TEmitNotification, useEmitNotification } from "@/core/notifications/lib";
 import { EApplicationId } from "@/core/routing/application";
 import { getExistingProjectLinkedGamePath, getProjectArchivesUnpackPath } from "@/core/settings/lib/path";

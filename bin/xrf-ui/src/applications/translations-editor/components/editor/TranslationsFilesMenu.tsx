@@ -2,7 +2,7 @@ import { default as CircleIcon } from "@mui/icons-material/Circle";
 import { Box, Typography } from "@mui/material";
 import { ReactElement, useMemo } from "react";
 
-import { TranslationFile } from "@/core/bindings/xrf-app-translations";
+import { TranslationFile } from "@/core/bindings/types/xrf-translation";
 import { ISearchResult, IUseRankedSearch, useRankedSearch } from "@/core/search/lib";
 import { EditorSearchHeader } from "@/core/shell/editor/EditorSearchHeader";
 import { EditorSideMenu, IEditorSideMenuItem } from "@/core/shell/editor/EditorSideMenu";

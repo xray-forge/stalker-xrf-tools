@@ -21,11 +21,6 @@ pub mod source;
 pub mod vfs;
 
 pub(crate) mod archive;
-#[cfg(feature = "typescript-bindings")]
-mod typescript_bindings;
-
-#[cfg(feature = "typescript-bindings")]
-pub use crate::typescript_bindings::typescript_bindings;
 
 pub use asset::{
   SHADER_LIBRARY_LOGICAL_PATH, XrayAsset, XrayAssetContainer, XrayAssetRules, XrayAssetType, sound_reference_name,

@@ -2,13 +2,9 @@ import { EventBus, inject, Injectable, OnDeactivation, OnProvision } from "@wire
 import { BoundAction, Computed, makeObservable, Observable, runInAction } from "@wirestate/mobx";
 import { Texture } from "three";
 
-import {
-  SelectedVisualDescription,
-  SubmeshTexture,
-  commands as visualsCommands,
-  VisualSource,
-} from "@/core/bindings/xrf-app-visuals";
-import { commands as visualsRawCommands } from "@/core/bindings/xrf-app-visuals-raw";
+import { visualsCommands } from "@/core/bindings/commands/visuals";
+import { visualsRawCommands } from "@/core/bindings/commands/visuals-raw";
+import { SelectedVisualDescription, SubmeshTexture, VisualSource } from "@/core/bindings/types/xrf-app";
 import { transformError } from "@/core/error/lib";
 import { releaseEditorProject } from "@/core/ipc/release";
 import { emitNotification, ENotificationSeverity } from "@/core/notifications/lib";

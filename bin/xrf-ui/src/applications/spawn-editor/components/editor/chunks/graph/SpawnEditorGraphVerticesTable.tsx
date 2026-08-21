@@ -2,7 +2,7 @@ import { GridColDef, GridRowId } from "@mui/x-data-grid";
 import { ReactElement, useMemo } from "react";
 
 import { SpawnTable } from "@/applications/spawn-editor/components/editor/table/SpawnTable";
-import { GraphVertex } from "@/core/bindings/xrf-db";
+import { GraphVertex } from "@/core/bindings/types/xrf-db";
 import { textColumn, tupleColumn, vectorColumn } from "@/core/ui/table";
 
 /** Offsets locate a vertex inside the file rather than in the world; available, off by default. */

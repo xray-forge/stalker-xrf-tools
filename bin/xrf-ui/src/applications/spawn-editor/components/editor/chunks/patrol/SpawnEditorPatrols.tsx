@@ -7,7 +7,7 @@ import { SpawnEditorPatrolPointsTable } from "@/applications/spawn-editor/compon
 import { SpawnEditorPatrolsTable } from "@/applications/spawn-editor/components/editor/chunks/patrol/SpawnEditorPatrolsTable";
 import { SpawnChunkView } from "@/applications/spawn-editor/components/editor/chunks/SpawnChunkView";
 import { TChunkTabChange, useChunkTab } from "@/applications/spawn-editor/components/editor/chunks/use-chunk-tab";
-import { SpawnPatrolsChunk } from "@/core/bindings/xrf-db";
+import { SpawnPatrolsChunk } from "@/core/bindings/types/xrf-db";
 import { SpawnFileService } from "@/core/spawn/services";
 
 const BASE_PATH: string = "/spawn-editor/patrols";

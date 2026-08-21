@@ -1,10 +1,6 @@
 // Auto-generated rust bindings. Do not edit it manually.
 
-export type Vector3d<T = number | null> = {
-  x: T;
-  y: T;
-  z: T;
-};
+import { Vector3d } from "@/core/bindings/types/xrf-db";
 
 /**
  * One bone of a visual's skeleton, as a name and the name of its parent.

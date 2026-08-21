@@ -7,7 +7,7 @@ import { VisualPanel } from "@/applications/visuals-viewer/components/panels/Vis
 import { VisualPanelEmpty } from "@/applications/visuals-viewer/components/panels/VisualPanelEmpty";
 import { VisualPanelSection } from "@/applications/visuals-viewer/components/panels/VisualPanelSection";
 import { VisualsService } from "@/applications/visuals-viewer/store/visuals";
-import { VisualBone } from "@/core/bindings/xrf-visual";
+import { VisualBone } from "@/core/bindings/types/xrf-visual";
 import { Nullable } from "@/lib/types/general";
 
 /** The open visual's skeleton, as the tree its parent names describe. */

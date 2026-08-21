@@ -4,7 +4,7 @@ import { ReactElement } from "react";
 
 import { ARCHIVE_EDITOR_MONOSPACE_FONT } from "@/applications/archives-explorer/components/editor/archive-editor.styles";
 import { ArchiveFileExtractAction } from "@/applications/archives-explorer/components/editor/preview/ArchiveFileExtractAction";
-import { ArchiveFileDescriptor } from "@/core/bindings/xrf-app-archives";
+import { ArchiveFileDescriptor } from "@/core/bindings/types/xrf-vfs";
 import { BaseComponentProps } from "@/lib/dom/element-types";
 import { formatBytes } from "@/lib/memory/format";
 
