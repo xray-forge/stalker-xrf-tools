@@ -65,6 +65,19 @@ jobs:
       - name: Install UI dependencies
         run: pnpm.cmd --dir bin/xrf-ui install --frozen-lockfile
 
+      - name: Regenerate frontend bindings
+        run: cargo test -p xrf-app --features typescript-bindings export_typescript_bindings
+
+      - name: Format regenerated frontend bindings
+        run: pnpm.cmd --dir bin/xrf-ui run format:bindings
+
+      # The mirrors are committed, so a Rust type can change without them following. Comparing a fresh
+      # generation against the tree is what makes the committed output a function of the Rust sources.
+      - name: Verify frontend bindings match the Rust sources
+        run: |
+          git add --intent-to-add -- bin/xrf-ui/src/core/bindings
+          git diff --exit-code -- bin/xrf-ui/src/core/bindings
+
       - name: Typecheck UI
         run: pnpm.cmd --dir bin/xrf-ui typecheck
 
