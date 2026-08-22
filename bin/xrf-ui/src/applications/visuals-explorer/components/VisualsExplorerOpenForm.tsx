@@ -86,7 +86,7 @@ export function VisualsExplorerOpenForm({ onFinished }: IVisualsExplorerOpenForm
       await visualsService.close();
       await browseService.openRoot(field.value);
     } else {
-      browseService.close();
+      await browseService.close();
       await visualsService.openFile(field.value);
     }
 

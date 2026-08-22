@@ -67,8 +67,11 @@ macro_rules! for_each_tauri_command_domain {
         reveal_path => crate::plugins::system::commands::reveal_path::system_reveal_path,
       }
       visuals => "visuals" {
+        close_browse => crate::plugins::visuals::commands::close_browse::visuals_close_browse,
         close_model => crate::plugins::visuals::commands::close_model::visuals_close_model,
+        get_browse => crate::plugins::visuals::commands::get_browse::visuals_get_browse,
         get_model => crate::plugins::visuals::commands::get_model::visuals_get_model,
+        open_browse => crate::plugins::visuals::commands::open_browse::visuals_open_browse,
         open_model => crate::plugins::visuals::commands::open_model::visuals_open_model,
       }
       // Returns `tauri::ipc::Response`, so it is dispatched and permitted like any command but cannot join

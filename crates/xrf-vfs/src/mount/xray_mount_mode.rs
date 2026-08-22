@@ -14,7 +14,8 @@ use crate::{FsgameFile, XrayMountPlan};
 /// rather than each re-deriving it.
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub enum XrayMountMode {
-  /// Treat the path as an installation when it declares one, otherwise as a complete root.
+  /// Treat the path as an installation when it declares one, as a volume set when it holds volumes, and as a complete
+  /// root otherwise.
   ///
   /// Detection looks **only** at the path given. It deliberately does not search upwards: widening
   /// `<install>\gamedata\configs` into the whole game would silently change what a command touches.
@@ -39,9 +40,14 @@ impl XrayMountMode {
     let path: &Path = path.as_ref();
 
     match self {
+      // A directory of volumes is neither an installation nor a loose root, and mounting it as the latter answers for
+      // `textures.db0` instead of for the assets inside it - which is what the fsgame planner already avoids when it
+      // meets the same directory through a declaration.
       Self::Auto => {
         if Self::declares_installation(path) {
           XrayMountPlan::from_fsgame(path)
+        } else if XrayMountPlan::holds_volumes(path) {
+          XrayMountPlan::volumes(path)
         } else {
           XrayMountPlan::root(path)
         }

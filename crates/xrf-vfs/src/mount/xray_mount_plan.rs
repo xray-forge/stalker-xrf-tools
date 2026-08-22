@@ -113,6 +113,18 @@ impl XrayMountPlan {
     }
   }
 
+  /// Plans the volume set a directory holds, as one archive source.
+  ///
+  /// The counterpart of [`Self::root`] for a directory of `.db` volumes rather than a loose tree: the same directory
+  /// mounted loosely would answer for `textures.db0` as though it were an asset, and for none of the assets inside it.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when the mount cannot be planned at the root base.
+  pub fn volumes(path: impl AsRef<Path>) -> XrfResult<Self> {
+    Self::new().with_kind(path, "", "volumes", XraySourceKind::Archive)
+  }
+
   /// Plans a whole installation from its `fsgame.ltx`.
   ///
   /// The plan includes the existing `$game_data$` directory and existing declared directories that directly contain a
@@ -250,7 +262,11 @@ impl XrayMountPlan {
   /// Only the immediate contents count, because fsgame declares each volume directory separately and the engine scans them
   /// non-recursively. Mounting such a directory as a loose source instead would register `textures.db0` as an addressable
   /// asset.
-  fn holds_volumes(path: &Path) -> bool {
+  pub fn holds_volumes(path: impl AsRef<Path>) -> bool {
+    Self::holds_volumes_at(path.as_ref())
+  }
+
+  fn holds_volumes_at(path: &Path) -> bool {
     fs::read_dir(path).is_ok_and(|entries| entries.flatten().any(|entry| Self::is_volume(&entry.path())))
   }
 

@@ -2,15 +2,14 @@ import { Injectable, OnDeactivation, OnProvision } from "@wirestate/core";
 import { BoundAction, Computed, makeObservable, Observable, runInAction } from "@wirestate/mobx";
 
 import { assetsCommands } from "@/core/bindings/commands/assets";
+import { visualsCommands } from "@/core/bindings/commands/visuals";
+import { AssetWorldSpec } from "@/core/bindings/types/xrf-app";
 import { XrayAsset } from "@/core/bindings/types/xrf-vfs";
 import { transformError } from "@/core/error/lib";
+import { releaseEditorProject } from "@/core/ipc/release";
 import { createLoadable, Loadable } from "@/lib/loadable";
-import { getLocalStorageValue, setLocalStorageValue } from "@/lib/local-storage";
 import { Logger } from "@/lib/logging";
 import { Nullable } from "@/lib/types/general";
-
-/** Where the browsed root is remembered, so a reload comes back to the tree it was showing. */
-const ROOT_STORAGE_KEY: string = "xrf.visuals.browse-root";
 
 /**
  * The world being browsed, and every visual in it.
@@ -22,19 +21,27 @@ const ROOT_STORAGE_KEY: string = "xrf.visuals.browse-root";
 export class VisualsBrowseService {
   public readonly log: Logger = new Logger(this.constructor.name);
 
-  /** The root being browsed, or null when a single model was opened directly. */
+  /** The world being browsed, or null when a single model was opened directly. */
   @Observable()
-  public root: Nullable<string> = null;
+  public world: Nullable<AssetWorldSpec> = null;
 
   @Observable()
   public visuals: Loadable<Array<XrayAsset>> = createLoadable([]);
 
   /**
-   * @returns Whether a root is open, which is what publishes the tree panel.
+   * @returns Whether a world is open, which is what publishes the tree panel.
    */
   @Computed()
   public get isBrowsing(): boolean {
-    return this.root !== null;
+    return this.world !== null;
+  }
+
+  /**
+   * @returns The root being browsed, for the surfaces that name it to the user.
+   */
+  @Computed()
+  public get root(): Nullable<string> {
+    return this.world?.roots[0] ?? null;
   }
 
   /**
@@ -42,7 +49,7 @@ export class VisualsBrowseService {
    */
   @Computed()
   public get roots(): Array<string> {
-    return this.root ? [this.root] : [];
+    return this.world?.roots ?? [];
   }
 
   public constructor() {
@@ -50,28 +57,41 @@ export class VisualsBrowseService {
   }
 
   /**
-   * Re-open whatever root was last browsed.
+   * Restore whatever world the backend is still browsing.
    *
-   * A reload loses the tree but not the intent, and coming back to an empty panel beside a model that is still open
+   * A reload loses the tree but not the session, and coming back to an empty panel beside a model that is still open
    * reads as a failure rather than a fresh start.
    */
   @OnProvision()
   public async onProvision(): Promise<void> {
-    const stored: Nullable<string> = getLocalStorageValue(ROOT_STORAGE_KEY);
+    try {
+      const world: Nullable<AssetWorldSpec> = await visualsCommands.getBrowse();
 
-    if (stored) {
-      this.log.info("Restoring browsed root:", stored);
+      if (world) {
+        this.log.info("Restoring browsed world:", world.roots.join(", "));
 
-      await this.openRoot(stored);
+        await this.list(world);
+      }
+    } catch (error) {
+      this.log.error("Failed to restore browsed world:", error);
     }
   }
 
   /**
-   * Forget the browsed root on the way out of the application.
+   * Drop the browsed world on the way out of the application.
+   *
+   * The counterpart of the selection being closed on deactivation: leaving means closing in place, so coming back must
+   * not show a tree beside a model the backend has already dropped. A reload runs no deactivation, which is what lets
+   * the session above survive one.
    */
   @OnDeactivation()
   public onDeactivation(): void {
-    this.close();
+    runInAction(() => {
+      this.world = null;
+      this.visuals = createLoadable([]);
+    });
+
+    releaseEditorProject(visualsCommands.closeBrowse);
   }
 
   /**
@@ -81,23 +101,48 @@ export class VisualsBrowseService {
    */
   @BoundAction()
   public async openRoot(root: string): Promise<void> {
+    const world: AssetWorldSpec = { asset: null, roots: [root] };
+
     this.log.info("Browsing root:", root);
 
+    await visualsCommands.openBrowse(world);
+    await this.list(world);
+  }
+
+  /** Stop browsing, leaving whatever model is open on screen. */
+  @BoundAction()
+  public async close(): Promise<void> {
     runInAction(() => {
-      this.root = root;
+      this.world = null;
+      this.visuals = createLoadable([]);
+    });
+
+    try {
+      await visualsCommands.closeBrowse();
+    } catch (error) {
+      this.log.error("Failed to close browsed world:", error);
+    }
+  }
+
+  /**
+   * Lists a world and puts it on screen.
+   *
+   * @param world - World to list, already recorded as the browsed one.
+   */
+  private async list(world: AssetWorldSpec): Promise<void> {
+    runInAction(() => {
+      this.world = world;
       this.visuals = this.visuals.asLoading();
     });
 
-    setLocalStorageValue(ROOT_STORAGE_KEY, root);
-
     try {
-      const visuals: Array<XrayAsset> = await assetsCommands.listAssets({ asset: null, roots: [root] }, "ogf");
+      const visuals: Array<XrayAsset> = await assetsCommands.listAssets(world, "ogf");
 
       runInAction(() => {
         this.visuals = this.visuals.asReady(visuals);
       });
 
-      this.log.info(`Listed ${visuals.length} visuals in:`, root);
+      this.log.info(`Listed ${visuals.length} visuals in:`, world.roots.join(", "));
     } catch (error: unknown) {
       const transformed: Error = transformError(error);
 
@@ -107,16 +152,5 @@ export class VisualsBrowseService {
         this.visuals = this.visuals.asFailed(transformed, []);
       });
     }
-  }
-
-  /** Stop browsing, leaving whatever model is open on screen. */
-  @BoundAction()
-  public close(): void {
-    runInAction(() => {
-      this.root = null;
-      this.visuals = createLoadable([]);
-    });
-
-    setLocalStorageValue(ROOT_STORAGE_KEY, null);
   }
 }

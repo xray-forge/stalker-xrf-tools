@@ -17,15 +17,15 @@ function mockVisual(logicalPath: string): XrayAsset {
 describe("VisualsBrowseService", () => {
   beforeEach(() => {
     resetMockInvoke();
-    window.localStorage.clear();
   });
 
   it("applies its mobx annotations", () => {
     const { service } = mockInjectedService(VisualsBrowseService);
 
-    expect(isObservableProp(service, "root")).toBe(true);
+    expect(isObservableProp(service, "world")).toBe(true);
     expect(isObservableProp(service, "visuals")).toBe(true);
     expect(isComputedProp(service, "isBrowsing")).toBe(true);
+    expect(isComputedProp(service, "root")).toBe(true);
     expect(isComputedProp(service, "roots")).toBe(true);
   });
 
@@ -67,27 +67,55 @@ describe("VisualsBrowseService", () => {
     expect(service.isBrowsing).toBe(true);
   });
 
-  it("comes back to the root it was browsing after a reload", async () => {
-    // The tree is frontend state, so provisioning re-lists rather than restoring a backend session; the mounts the
-    // listing needs are already cached, so repeating it indexes nothing new.
-    setMockInvokeResponses({ ["plugin:assets|list_assets"]: [mockVisual("meshes\\actors\\stalker.ogf")] });
+  it("records the browsed world in the backend rather than keeping it to itself", async () => {
+    let recorded: Nullable<Record<string, unknown>> = null;
 
-    const first = mockInjectedService(VisualsBrowseService);
+    setMockInvokeResponses({
+      ["plugin:assets|list_assets"]: [mockVisual("meshes\\actors\\stalker.ogf")],
+      ["plugin:visuals|open_browse"]: (parameters?: Record<string, unknown>) => {
+        recorded = parameters ?? null;
 
-    await first.service.openRoot("C:\\gamedata");
+        return null;
+      },
+    });
 
-    const second = mockInjectedService(VisualsBrowseService);
+    const { service } = mockInjectedService(VisualsBrowseService);
 
-    await second.service.onProvision();
+    await service.openRoot("C:\\gamedata");
 
-    expect(second.service.root).toBe("C:\\gamedata");
-    expect(second.service.visuals.value).toHaveLength(1);
+    expect(recorded).toEqual({ world: { asset: null, roots: ["C:\\gamedata"] } });
   });
 
-  it("forgets the root on deactivation, so leaving closes in place", async () => {
-    // The selection is dropped on the way out, so a remembered tree would come back beside a model the backend no
+  it("comes back to the world the backend is still browsing after a reload", async () => {
+    // The session lives where every other application's does; a reload asks for it and derives the listing again, which
+    // is cheap because the mounts that listing reads are already cached.
+    setMockInvokeResponses({
+      ["plugin:visuals|get_browse"]: { asset: null, roots: ["C:\\gamedata"] },
+      ["plugin:assets|list_assets"]: [mockVisual("meshes\\actors\\stalker.ogf")],
+    });
+
+    const { service } = mockInjectedService(VisualsBrowseService);
+
+    await service.onProvision();
+
+    expect(service.root).toBe("C:\\gamedata");
+    expect(service.visuals.value).toHaveLength(1);
+  });
+
+  it("releases the browsed world on deactivation, so leaving closes in place", async () => {
+    // The selection is dropped on the way out, so a session left open would come back beside a model the backend no
     // longer has. A reload runs no deactivation, which is what keeps the restore above working.
-    setMockInvokeResponses({ ["plugin:assets|list_assets"]: [mockVisual("meshes\\actors\\stalker.ogf")] });
+    const released: Array<string> = [];
+
+    setMockInvokeResponses({
+      ["plugin:assets|list_assets"]: [mockVisual("meshes\\actors\\stalker.ogf")],
+      ["plugin:visuals|open_browse"]: null,
+      ["plugin:visuals|close_browse"]: () => {
+        released.push("closed");
+
+        return null;
+      },
+    });
 
     const { service } = mockInjectedService(VisualsBrowseService);
 
@@ -97,25 +125,33 @@ describe("VisualsBrowseService", () => {
 
     expect(service.root).toBeNull();
     expect(service.visuals.value).toEqual([]);
-
-    const next = mockInjectedService(VisualsBrowseService);
-
-    await next.service.onProvision();
-
-    expect(next.service.root).toBeNull();
+    expect(released).toEqual(["closed"]);
   });
 
-  it("forgets the root when browsing is closed", async () => {
-    setMockInvokeResponses({ ["plugin:assets|list_assets"]: [] });
+  it("forgets the world when browsing is closed, backend included", async () => {
+    const closed: Array<string> = [];
+
+    setMockInvokeResponses({
+      ["plugin:assets|list_assets"]: [],
+      ["plugin:visuals|open_browse"]: null,
+      ["plugin:visuals|close_browse"]: () => {
+        closed.push("closed");
+
+        return null;
+      },
+      // A session the backend no longer holds is what a later provisioning must find.
+      ["plugin:visuals|get_browse"]: null,
+    });
 
     const { service } = mockInjectedService(VisualsBrowseService);
 
     await service.openRoot("C:\\gamedata");
-    service.close();
+    await service.close();
 
     expect(service.root).toBeNull();
     expect(service.isBrowsing).toBe(false);
     expect(service.roots).toEqual([]);
+    expect(closed).toEqual(["closed"]);
 
     const next = mockInjectedService(VisualsBrowseService);
 

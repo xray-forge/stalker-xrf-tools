@@ -2,7 +2,7 @@ use std::path::{Path, PathBuf};
 
 use xrf_error::XrfResult;
 
-use crate::{XrayLookupScope, XrayMountId, XrayMountPlan, XrayProbeStep, XrayVfs};
+use crate::{XrayLookupScope, XrayMountId, XrayMountMode, XrayMountPlan, XrayProbeStep, XrayVfs};
 
 /// One declared place to search, before it has been mounted.
 #[derive(Clone, Debug)]
@@ -61,6 +61,10 @@ impl XrayProbePlan {
 
   /// Searches one root, named by the caller because only the caller knows what it means to a reader.
   ///
+  /// Planned through [`XrayMountMode::Auto`], so a root the user picked is treated as whatever it is: an installation
+  /// with its volumes, a bare volume set, or a loose tree. A viewer pointed at `<install>\db` otherwise mounts the
+  /// volumes as files and finds no assets at all.
+  ///
   /// A path that is not a directory plans nothing rather than failing: an unconfigured project root is an ordinary state
   /// of a viewer, not an error to report.
   ///
@@ -73,7 +77,7 @@ impl XrayProbePlan {
     self.steps.push(PlannedProbeStep {
       label: label.into(),
       plan: if root.is_dir() {
-        XrayMountPlan::root(&root)?
+        XrayMountMode::Auto.plan(&root)?
       } else {
         XrayMountPlan::new()
       },

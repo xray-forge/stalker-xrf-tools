@@ -6,22 +6,28 @@ use xrf_visual::{VisualDependencies, VisualDescription, VisualPackage};
 
 use crate::core::assets::AssetWorldSpec;
 
-/// The visual the viewer currently points at, and its packed bytes.
+/// What the viewer currently points at: the world being browsed, and the visual open inside it.
 ///
-/// Selection is state for the same reason an open archive is: a reload re-provisions the frontend, and without it the
-/// viewer would come back empty while the window still says a model is open. Loading itself is not stateful - both
-/// commands take the source they act on - so this only ever answers what was selected, never gates what can be read.
+/// Both are state for the same reason an open archive is: a reload re-provisions the frontend, and without them the
+/// viewer would come back empty while the window still says a model is open. Loading itself is not stateful - every
+/// command takes the source it acts on - so this only ever answers what was selected, never gates what can be read.
 ///
 /// The mounted sources are not here. They live in `core/`'s asset world, shared with every other domain, so opening the
-/// same gamedata in two surfaces indexes it once.
+/// same gamedata in two surfaces indexes it once. What is here is the intent: which world the user chose to browse.
 pub struct VisualState {
   pub selected: Mutex<Option<SelectedVisual>>,
+  /// The world being browsed, or `None` when a single visual was opened directly.
+  ///
+  /// The listing is not kept beside it. It is derived from the world by the generic asset listing, and the mounts that
+  /// listing reads are already cached, so re-deriving it after a reload costs a walk of an index that is in memory.
+  pub browsed: Mutex<Option<AssetWorldSpec>>,
 }
 
 impl VisualState {
   pub fn new() -> Self {
     Self {
       selected: Mutex::new(None),
+      browsed: Mutex::new(None),
     }
   }
 }

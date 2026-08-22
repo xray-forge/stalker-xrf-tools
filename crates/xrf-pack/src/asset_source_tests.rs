@@ -8,7 +8,10 @@ use std::path::PathBuf;
 
 use xrf_test_utils::utils::build_absolute_generated_test_resource_path;
 use xrf_vfs::XrayArchiveSource;
-use xrf_vfs::{XrayAssetContainer, XrayAssetSource, XrayLookupScope, XraySourceKind, XrayVfs};
+use xrf_vfs::{
+  XrayAssetContainer, XrayAssetSource, XrayAssetType, XrayLookupScope, XrayMountPlan, XrayProbe, XrayProbePlan,
+  XrayProbeStep, XraySourceKind, XrayVfs,
+};
 
 use crate::pack::archive_pack_config::{ArchivePackConfig, ArchivePackDirectory};
 use crate::pack::archive_packer::ArchivePacker;
@@ -144,5 +147,45 @@ fn a_loose_file_wins_over_the_same_name_in_an_archive() {
       .len(),
     2,
     "the archived copy stays reportable behind the override"
+  );
+}
+
+#[test]
+fn a_directory_of_volumes_is_planned_as_an_archive_source() {
+  // What a viewer pointed at `<install>\db` needs: the directory is neither an installation nor a loose tree, and
+  // mounting it as the latter answers for `packed.db0` instead of for the assets inside it.
+  mount("planned", &[("meshes\\wpn\\wpn_ak74.ogf", TEXTURE)]);
+
+  let volumes: PathBuf = build_absolute_generated_test_resource_path("archive_asset_source/planned/db");
+
+  assert!(XrayMountPlan::holds_volumes(&volumes), "the packer wrote volumes there");
+
+  let mut vfs: XrayVfs = XrayVfs::new();
+  let steps: Vec<XrayProbeStep> = XrayProbePlan::new()
+    .with_root("browsed root", &volumes)
+    .expect("volumes plan")
+    .mount_into(&mut vfs)
+    .expect("volumes mount");
+
+  let probe: XrayProbe = vfs.probe().with_steps(steps);
+  let listed: Vec<String> = probe
+    .list_assets_of_type(XrayAssetType::Ogf)
+    .into_iter()
+    .map(|asset| asset.get_logical_path().as_str().to_string())
+    .collect();
+
+  assert_eq!(
+    listed,
+    ["meshes\\wpn\\wpn_ak74.ogf"],
+    "the volume's assets are browsable"
+  );
+  assert_eq!(
+    probe
+      .resolve(XrayAssetType::Ogf, "wpn\\wpn_ak74")
+      .expect("lookup succeeds")
+      .get_asset()
+      .and_then(|asset| asset.to_physical_path()),
+    None,
+    "an archived model has no filesystem path, which is why it is addressed logically"
   );
 }

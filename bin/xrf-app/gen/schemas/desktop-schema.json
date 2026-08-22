@@ -6759,10 +6759,16 @@
           "markdownDescription": "Denies the validate_text command without any pre-configured scope."
         },
         {
-          "description": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-close-model`\n- `allow-get-model`\n- `allow-open-model`\n- `allow-read-geometry`",
+          "description": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-close-browse`\n- `allow-close-model`\n- `allow-get-browse`\n- `allow-get-model`\n- `allow-open-browse`\n- `allow-open-model`\n- `allow-read-geometry`",
           "type": "string",
           "const": "visuals:default",
-          "markdownDescription": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-close-model`\n- `allow-get-model`\n- `allow-open-model`\n- `allow-read-geometry`"
+          "markdownDescription": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-close-browse`\n- `allow-close-model`\n- `allow-get-browse`\n- `allow-get-model`\n- `allow-open-browse`\n- `allow-open-model`\n- `allow-read-geometry`"
+        },
+        {
+          "description": "Enables the close_browse command without any pre-configured scope.",
+          "type": "string",
+          "const": "visuals:allow-close-browse",
+          "markdownDescription": "Enables the close_browse command without any pre-configured scope."
         },
         {
           "description": "Enables the close_model command without any pre-configured scope.",
@@ -6771,10 +6777,22 @@
           "markdownDescription": "Enables the close_model command without any pre-configured scope."
         },
         {
+          "description": "Enables the get_browse command without any pre-configured scope.",
+          "type": "string",
+          "const": "visuals:allow-get-browse",
+          "markdownDescription": "Enables the get_browse command without any pre-configured scope."
+        },
+        {
           "description": "Enables the get_model command without any pre-configured scope.",
           "type": "string",
           "const": "visuals:allow-get-model",
           "markdownDescription": "Enables the get_model command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the open_browse command without any pre-configured scope.",
+          "type": "string",
+          "const": "visuals:allow-open-browse",
+          "markdownDescription": "Enables the open_browse command without any pre-configured scope."
         },
         {
           "description": "Enables the open_model command without any pre-configured scope.",
@@ -6789,16 +6807,34 @@
           "markdownDescription": "Enables the read_geometry command without any pre-configured scope."
         },
         {
+          "description": "Denies the close_browse command without any pre-configured scope.",
+          "type": "string",
+          "const": "visuals:deny-close-browse",
+          "markdownDescription": "Denies the close_browse command without any pre-configured scope."
+        },
+        {
           "description": "Denies the close_model command without any pre-configured scope.",
           "type": "string",
           "const": "visuals:deny-close-model",
           "markdownDescription": "Denies the close_model command without any pre-configured scope."
         },
         {
+          "description": "Denies the get_browse command without any pre-configured scope.",
+          "type": "string",
+          "const": "visuals:deny-get-browse",
+          "markdownDescription": "Denies the get_browse command without any pre-configured scope."
+        },
+        {
           "description": "Denies the get_model command without any pre-configured scope.",
           "type": "string",
           "const": "visuals:deny-get-model",
           "markdownDescription": "Denies the get_model command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the open_browse command without any pre-configured scope.",
+          "type": "string",
+          "const": "visuals:deny-open-browse",
+          "markdownDescription": "Denies the open_browse command without any pre-configured scope."
         },
         {
           "description": "Denies the open_model command without any pre-configured scope.",
