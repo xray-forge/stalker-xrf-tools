@@ -5,10 +5,7 @@ use std::path::{Path, PathBuf};
 use xrf_chunk::{ChunkReader, InMemoryChunkDataSource};
 use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::{LtxProject, LtxProjectOptions};
-use xrf_vfs::{
-  XrayAsset, XrayAssetType, XrayLogicalPath, XrayLookupScope, XrayMountMode, XrayPathCollision, XraySkippedMount,
-  XrayVfs,
-};
+use xrf_vfs::{XrayAsset, XrayAssetType, XrayLookupScope, XrayMountMode, XrayPathCollision, XraySkippedMount, XrayVfs};
 
 use crate::project::gamedata_project_options::GamedataProjectReadOptions;
 
@@ -44,8 +41,8 @@ impl GamedataProject {
   ///
   /// # Errors
   ///
-  /// Returns an error when the path is not a directory, when the mode cannot plan it, or when the project holds no
-  /// `configs\system.ltx`.
+  /// Returns an error when the path is not a directory, when the mode cannot plan it, or when the unfiltered project
+  /// holds no `configs\system.ltx`.
   pub fn open_with_mode(mode: XrayMountMode, options: &GamedataProjectReadOptions) -> XrfResult<Self> {
     if !Self::is_valid_gamedata_dir(&options.root) {
       return Err(
@@ -60,24 +57,13 @@ impl GamedataProject {
       );
     }
 
-    // An ignored prefix covering the root config would make the gate below fail for a perfectly good project, aborting
-    // every check — including ones that never read configs. Named explicitly rather than left as a puzzling "nothing
-    // resolves", since the cause is the caller's own filter.
-    if let Some(ignored) = options
-      .ignored
-      .iter()
-      .find(|prefix| Self::hides_system_ltx(prefix).unwrap_or(false))
-    {
-      return Err(XrfError::new_invalid_error(format!(
-        "Ignored prefix '{ignored}' hides '{SYSTEM_LTX_LOGICAL_PATH}', which every check needs"
-      )));
-    }
-
-    let vfs: XrayVfs = XrayVfs::from_plan(&mode.plan(&options.root)?.ignoring(&options.ignored)?)?;
+    let plan = mode.plan(&options.root)?;
     let scope: XrayLookupScope = XrayLookupScope::all();
 
-    // The gate is what the project resolves, not what sits on disk: an installation keeps its configs inside `db\configs`.
-    if vfs.scoped(&scope).find(SYSTEM_LTX_LOGICAL_PATH)?.is_none() {
+    // Project identity is independent of the inspection filter: a mesh-only check must not be aborted because a caller
+    // omitted configs. Resolve through the unfiltered plan so archive-only installations remain valid too.
+    let identity_vfs: XrayVfs = XrayVfs::from_plan(&plan)?;
+    if identity_vfs.scoped(&scope).find(SYSTEM_LTX_LOGICAL_PATH)?.is_none() {
       return Err(
         io::Error::new(
           ErrorKind::NotFound,
@@ -90,6 +76,8 @@ impl GamedataProject {
       );
     }
 
+    // Checks enumerate and read only what the caller left in scope.
+    let vfs: XrayVfs = XrayVfs::from_plan(&plan.ignoring(&options.ignored)?)?;
     let ltx_project: LtxProject = LtxProject::open_at_scope_opt(
       // The configs directory, not the game root: this project *is* the config tree, and callers join onto its root.
       options.root.join(CONFIGS_DIRECTORY),
@@ -158,15 +146,6 @@ impl GamedataProject {
   /// reported missing, or simply never counted. Any report of this project's results has to state these alongside them.
   pub fn skipped_mounts(&self) -> &[XraySkippedMount] {
     self.vfs().get_skipped_mounts()
-  }
-
-  /// Whether an ignored prefix would hide the root config every check reads.
-  ///
-  /// # Errors
-  ///
-  /// Returns an error when the prefix is not a valid X-Ray logical path.
-  fn hides_system_ltx(prefix: &str) -> XrfResult<bool> {
-    XrayLogicalPath::new(SYSTEM_LTX_LOGICAL_PATH)?.is_under(prefix)
   }
 }
 

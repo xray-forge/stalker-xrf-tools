@@ -154,14 +154,20 @@ impl LtxProject {
       result.total_sections,
       xrf_utils::format_duration(result.duration)
     );
-    xrf_output::info!(
-      options.output,
-      "Verified {:.2}%, {} files, {} sections, {} fields",
-      (result.checked_sections as f32 * 100.0) / result.total_sections as f32,
-      result.total_files,
-      result.checked_sections,
-      result.checked_fields
-    );
+
+    if result.total_sections == 0 {
+      xrf_output::info!(options.output, "No LTX sections were verified");
+    } else {
+      xrf_output::info!(
+        options.output,
+        "Verified {:.2}%, {} files, {} sections, {} fields",
+        (result.checked_sections as f32 * 100.0) / result.total_sections as f32,
+        result.total_files,
+        result.checked_sections,
+        result.checked_fields
+      );
+    }
+
     xrf_output::info!(options.output, "Found {} error(s)", result.errors.len());
 
     Ok(result)

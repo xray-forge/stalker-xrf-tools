@@ -64,8 +64,9 @@ fn auto_opens_an_installation_that_declares_itself() {
   let project: GamedataProject = GamedataProject::open(&options(root.clone())).expect("auto opens the installation");
 
   assert_eq!(project.collisions().len(), 0, "one mount, nothing shadowed");
-  assert!(
-    project.ltx_project.system_ltx_path().expect("scoped path").as_str() == "configs\\system.ltx",
+  assert_eq!(
+    project.ltx_project.system_ltx_path().expect("scoped path").as_str(),
+    "configs\\system.ltx",
     "the config project is scoped to configs inside the game tree"
   );
 
@@ -73,21 +74,20 @@ fn auto_opens_an_installation_that_declares_itself() {
 }
 
 #[test]
-fn names_an_ignored_prefix_that_would_hide_the_root_config() {
-  // Ignoring `configs` removes `system.ltx` from the VFS, so the validity gate would fail and abort every check —
-  // including ones that never read a config. The caller's own filter is the cause, so the error has to say so.
+fn opens_when_an_ignore_hides_the_root_config() {
+  // Identity is decided before inspection filters apply: checks that do not read configs must still run.
   let root: PathBuf = install("ignored_configs");
-  let error = GamedataProject::open(&GamedataProjectReadOptions {
+  let project: GamedataProject = GamedataProject::open(&GamedataProjectReadOptions {
     ignored: vec![String::from("configs")],
     output: xrf_output::OutputOptions::default(),
     root: root.clone(),
     ..Default::default()
   })
-  .expect_err("an ignore list hiding the root config is refused by name");
+  .expect("the unfiltered project identity is valid");
 
   assert!(
-    error.to_string().contains("Ignored prefix 'configs' hides"),
-    "the refusal names the prefix responsible, got: {error}"
+    project.entries().is_empty(),
+    "the filtered project still hides all config assets from checks"
   );
 
   // A prefix that hides something else is none of the gate's business.
