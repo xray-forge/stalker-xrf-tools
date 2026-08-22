@@ -1,4 +1,4 @@
-import { ArchiveFileDescriptor, ArchiveProjectReadPolicy } from "@/core/bindings/types/xrf-vfs";
+import { ArchiveFileDescriptor, ArchiveProjectReadPolicy } from "@/core/bindings/types/xrf-volume";
 
 export type ArchivePreviewSupport =
   | { kind: "supported" }

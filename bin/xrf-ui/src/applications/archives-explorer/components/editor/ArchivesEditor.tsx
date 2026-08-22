@@ -8,7 +8,7 @@ import { createArchiveEditorPanels } from "@/applications/archives-explorer/comp
 import { ArchivesFileContent } from "@/applications/archives-explorer/components/editor/preview/ArchivesFileContent";
 import { ArchivesMenu } from "@/applications/archives-explorer/components/editor/tree/ArchivesMenu";
 import { ArchivesService } from "@/applications/archives-explorer/services/archives";
-import { ArchiveProject } from "@/core/bindings/types/xrf-vfs";
+import { ArchiveProject } from "@/core/bindings/types/xrf-volume";
 import { EditorLayout } from "@/core/shell/editor/EditorLayout";
 import { EditorToolbar } from "@/core/shell/editor/EditorToolbar";
 import { useEditorBusy } from "@/core/shell/EditorBusyContext";

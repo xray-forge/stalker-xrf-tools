@@ -16,7 +16,7 @@ import {
   ArchiveProject,
   ArchiveProjectReadPolicy,
   ProjectReadResult,
-} from "@/core/bindings/types/xrf-vfs";
+} from "@/core/bindings/types/xrf-volume";
 
 /** Commands */
 export const archivesCommands = {

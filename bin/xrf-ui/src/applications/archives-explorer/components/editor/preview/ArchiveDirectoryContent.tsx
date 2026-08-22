@@ -9,7 +9,7 @@ import { ARCHIVE_EDITOR_MONOSPACE_FONT } from "@/applications/archives-explorer/
 import { ArchivesService } from "@/applications/archives-explorer/services/archives";
 import { isUnderArchiveDirectory, TArchiveOperation } from "@/core/archive";
 import { ArchiveExtractDirectoryResult } from "@/core/bindings/types/xrf-archive";
-import { ArchiveFileDescriptor, ArchiveProject } from "@/core/bindings/types/xrf-vfs";
+import { ArchiveFileDescriptor, ArchiveProject } from "@/core/bindings/types/xrf-volume";
 import { CenteredColumn } from "@/core/ui/layout/CenteredColumn";
 import { Loadable } from "@/lib/loadable";
 import { Logger, useLogger } from "@/lib/logging";

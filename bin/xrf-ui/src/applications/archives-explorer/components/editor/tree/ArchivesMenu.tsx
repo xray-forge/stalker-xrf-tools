@@ -9,7 +9,7 @@ import { ReactElement, SyntheticEvent, useCallback, useMemo, useState } from "re
 import { ArchiveTreeItem } from "@/applications/archives-explorer/components/editor/tree/ArchiveTreeItem";
 import { ArchivesService } from "@/applications/archives-explorer/services/archives";
 import { IArchiveTreeItem, parseTree, TArchiveSelection } from "@/core/archive";
-import { ArchiveFileDescriptor } from "@/core/bindings/types/xrf-vfs";
+import { ArchiveFileDescriptor } from "@/core/bindings/types/xrf-volume";
 import { ISearchResult, IUseRankedSearch, useRankedSearch } from "@/core/search/lib";
 import { EditorSearchHeader } from "@/core/shell/editor/EditorSearchHeader";
 import { EditorSearchResults, IEditorSearchResultRow } from "@/core/shell/editor/EditorSearchResults";
