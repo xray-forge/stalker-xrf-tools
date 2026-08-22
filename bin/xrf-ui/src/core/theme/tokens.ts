@@ -37,6 +37,23 @@ export const LAYOUT = {
 } as const;
 
 /**
+ * Explorer trees, shared by every surface that renders one.
+ *
+ * Sized against `LAYOUT.railButtonSize` rather than freely: a tree row sits in the same panels as the rail's controls,
+ * and rows that disagree with them read as a different application.
+ */
+export const TREE = {
+  /** Row height, dense enough that a mesh directory is scannable without becoming a hit-target problem. */
+  rowHeight: 28,
+  /** Expand and collapse chevron column. */
+  iconWidth: 18,
+  iconSize: 17,
+  iconGap: 4,
+  /** Indent per nesting level, which is the chevron column plus its gap. */
+  indent: 14,
+} as const;
+
+/**
  * Side panels, same on both sides.
  */
 export const PANEL = {

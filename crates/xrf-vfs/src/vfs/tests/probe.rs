@@ -246,3 +246,34 @@ fn finds_an_exact_logical_path_in_step_order() {
     "an exact path that no step holds is missing, not an error"
   );
 }
+
+#[test]
+fn lists_assets_of_a_kind_once_per_identity_with_the_earlier_step_winning() {
+  let (vfs, near_id, far_id, near, far) = two_roots(
+    "list",
+    &["meshes/wpn/wpn_ak74.ogf", "textures/wpn/wpn_ak74.dds"],
+    &["meshes/wpn/wpn_ak74.ogf", "meshes/wpn/wpn_abakan.ogf"],
+  );
+
+  let assets: Vec<crate::XrayAsset> = vfs
+    .probe()
+    .with_step("near", XrayLookupScope::only([near_id]))
+    .with_step("far", XrayLookupScope::only([far_id]))
+    .list_assets_of_type(XrayAssetType::Ogf);
+
+  let mut listed: Vec<(&str, Option<&std::path::Path>)> = assets
+    .iter()
+    .map(|it| (it.get_logical_path().as_str(), it.get_root()))
+    .collect();
+
+  listed.sort_unstable();
+
+  assert_eq!(
+    listed,
+    [
+      ("meshes\\wpn\\wpn_abakan.ogf", Some(far.as_path())),
+      ("meshes\\wpn\\wpn_ak74.ogf", Some(near.as_path())),
+    ],
+    "the shadowed copy is omitted and the texture is not a model"
+  );
+}

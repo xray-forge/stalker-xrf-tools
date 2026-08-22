@@ -12,14 +12,33 @@ use crate::core::types::TauriResult;
 /// webview reload therefore loses nothing, and a surface that did not open a world can still address assets in it —
 /// which is what lets one plugin's selection be read by another's preview.
 ///
-/// The subject asset is not part of a spec. A command that already names one — a model being opened — passes it
-/// separately, and its own tree and installation are searched ahead of these roots.
+/// The subject asset belongs to the spec rather than to the command that has one, because every command taking this
+/// world must search the same places: resolving a model's texture against the model's own tree and then reading it
+/// without that tree is how a loose model came back with geometry and no textures.
 #[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
 #[derive(Clone, Debug, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AssetWorldSpec {
-  /// Roots searched in the order given.
+  /// Asset whose own X-Ray root and installation are searched first, when the world is centred on one.
+  pub asset: Option<String>,
+  /// Roots searched after the asset's own, in the order given.
   pub roots: Vec<String>,
+}
+
+impl AssetWorldSpec {
+  /// The same world, centred on an asset when it does not already name one.
+  ///
+  /// Lets a command fill in the subject it knows about while leaving a caller free to name a different one, and the
+  /// result is what travels back to the frontend — so a later read searches what the open searched.
+  pub fn centred_on(&self, asset: Option<&Path>) -> Self {
+    Self {
+      asset: self
+        .asset
+        .clone()
+        .or_else(|| asset.map(|path| path.display().to_string())),
+      roots: self.roots.clone(),
+    }
+  }
 }
 
 /// Every mounted source the application holds, searched through per-request probes.
@@ -50,18 +69,13 @@ impl AssetWorldState {
   ///
   /// `asset`, when given, is searched for beside itself first — its own X-Ray root, then the installation containing it —
   /// which is how the engine finds a texture shipped next to a model rather than in the shared tree.
-  pub fn with_probe<T>(
-    &self,
-    spec: &AssetWorldSpec,
-    asset: Option<&Path>,
-    consumer: impl FnOnce(&XrayProbe) -> T,
-  ) -> TauriResult<T> {
+  pub fn with_probe<T>(&self, spec: &AssetWorldSpec, consumer: impl FnOnce(&XrayProbe) -> T) -> TauriResult<T> {
     let mut vfs: MutexGuard<XrayVfs> = self
       .vfs
       .lock()
       .map_err(|error| format!("Failed to search assets - the mounted world is unavailable: {error}"))?;
 
-    let steps: Vec<XrayProbeStep> = Self::plan(spec, asset)?
+    let steps: Vec<XrayProbeStep> = Self::plan(spec)?
       .mount_into(&mut vfs)
       .map_err(|error| format!("Failed to mount the asset world: {error}"))?;
 
@@ -72,12 +86,12 @@ impl AssetWorldState {
   ///
   /// Each root is labelled with its own path, because that is what a reader recognizes in a report — the same string the
   /// outcome of a failed lookup lists as searched.
-  fn plan(spec: &AssetWorldSpec, asset: Option<&Path>) -> TauriResult<XrayProbePlan> {
+  fn plan(spec: &AssetWorldSpec) -> TauriResult<XrayProbePlan> {
     let mut plan: XrayProbePlan = XrayProbePlan::new();
 
-    if let Some(asset) = asset {
+    if let Some(asset) = &spec.asset {
       plan = plan
-        .with_asset(asset)
+        .with_asset(Path::new(asset))
         .map_err(|error| format!("Failed to plan the asset's own sources: {error}"))?;
     }
 

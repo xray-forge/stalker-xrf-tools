@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use xrf_error::XrfResult;
 
 use crate::vfs::XrayResolution;
@@ -195,6 +197,26 @@ impl<'a> XrayProbe<'a> {
     Ok(XrayResolution::Missing {
       roots: self.list_roots(),
     })
+  }
+
+  /// Every asset of one kind this probe can reach, in step order and once per engine identity.
+  ///
+  /// Deduped across steps the way a lookup resolves: an asset present in two steps is the one the earlier step holds,
+  /// so a browsed tree lists what opening that path would actually give. Within a step, mount shadowing has already
+  /// been applied.
+  pub fn list_assets_of_type(&self, asset_type: XrayAssetType) -> Vec<XrayAsset> {
+    let mut assets: Vec<XrayAsset> = Vec::new();
+    let mut seen: HashSet<String> = HashSet::new();
+
+    for step in &self.steps {
+      for asset in self.vfs.scoped(step.get_scope()).list_entries_of_type(asset_type) {
+        if seen.insert(asset.get_logical_path().as_str().to_string()) {
+          assets.push(asset);
+        }
+      }
+    }
+
+    assets
   }
 
   /// Reads a located asset through the VFS this probe searches.

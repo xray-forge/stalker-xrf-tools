@@ -1,6 +1,8 @@
 import { Box, Divider, List, ListItem, ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
 import { ReactElement, ReactNode } from "react";
 
+import { BaseComponentProps } from "@/lib/dom/element-types";
+
 export interface IEditorSideMenuItem {
   label: string;
   icon?: ReactNode;
@@ -10,7 +12,7 @@ export interface IEditorSideMenuItem {
   onClick?: () => void;
 }
 
-export interface IEditorSideMenuProps {
+export interface IEditorSideMenuProps extends BaseComponentProps {
   header?: ReactNode;
   sections?: Array<IEditorSideMenuItem>;
   actions?: Array<IEditorSideMenuItem>;
@@ -34,9 +36,27 @@ function renderItem(item: IEditorSideMenuItem): ReactElement {
  * Body of a navigation panel: an optional header, a scrolling middle that is either a section list or
  * arbitrary content, and actions pinned to the bottom.
  */
-export function EditorSideMenu({ header, sections, actions, footer, children }: IEditorSideMenuProps): ReactElement {
+export function EditorSideMenu({
+  "data-testid": dataTestId = "editor-side-menu",
+  id,
+  className,
+  sx,
+  header,
+  sections,
+  actions,
+  footer,
+  children,
+}: IEditorSideMenuProps): ReactElement {
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", width: "100%", height: "100%", minHeight: 0 }}>
+    <Box
+      data-testid={dataTestId}
+      id={id}
+      className={className}
+      sx={[
+        { display: "flex", flexDirection: "column", width: "100%", height: "100%", minHeight: 0 },
+        ...(Array.isArray(sx) ? sx : [sx]),
+      ]}
+    >
       {header ? <Box sx={{ flexShrink: 0 }}>{header}</Box> : null}
 
       <Box sx={{ flexGrow: 1, minHeight: 0, overflowY: "auto" }}>

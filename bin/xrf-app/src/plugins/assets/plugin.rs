@@ -18,4 +18,9 @@ impl AssetsPlugin {
       ))
       .build()
   }
+
+  #[cfg(feature = "typescript-bindings")]
+  pub(crate) fn specta_builder<R: Runtime>() -> tauri_specta::Builder<R> {
+    crate::ipc::registry::assets::specta_builder()
+  }
 }

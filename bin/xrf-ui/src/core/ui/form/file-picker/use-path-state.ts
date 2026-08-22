@@ -1,5 +1,5 @@
 import { DialogFilter, open, save } from "@tauri-apps/plugin-dialog";
-import { Dispatch, SetStateAction, useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 
 import { Nullable } from "@/lib/types/general";
 
@@ -10,9 +10,11 @@ export interface IPathStateOptions {
   isDirectory?: boolean;
   /** Ask where to write instead of what to read. Pack screens choose an output file this way. */
   isSave?: boolean;
+  /** Produces the starting path, read once on the first render. */
+  initial?: () => Nullable<string>;
 }
 
-export type TPathState = [Nullable<string>, Dispatch<SetStateAction<Nullable<string>>>, () => Promise<void>];
+export type TPathState = [Nullable<string>, (value: Nullable<string>) => void, () => Promise<Nullable<string>>];
 
 /**
  * Holds a picked path and the action that fills it.
@@ -26,7 +28,8 @@ export type TPathState = [Nullable<string>, Dispatch<SetStateAction<Nullable<str
  * @param options.isDisabled - Whether selection is disabled.
  * @param options.isDirectory - Whether the dialog selects a directory.
  * @param options.isSave - Whether the dialog selects an output path.
- * @returns The selected path, its state setter, and the selection action.
+ * @param options.initial - Starting path, evaluated once.
+ * @returns The selected path, its setter, and the selection action reporting what was picked.
  */
 export function usePathState({
   title = "Provide path",
@@ -34,16 +37,17 @@ export function usePathState({
   isDisabled = false,
   isDirectory = false,
   isSave = false,
+  initial,
 }: IPathStateOptions = {}): TPathState {
-  const [pathState, setPathState] = useState<Nullable<string>>(null);
+  const [pathState, setPathState] = useState<Nullable<string>>(() => initial?.() ?? null);
 
   // Filters are declared inline by callers, so their identity changes every render. Comparing by
   // content keeps the callback stable without asking every caller to memoise.
   const filtersKey: string = JSON.stringify(filters);
 
-  const onSelectPath = useCallback(async () => {
+  const onSelectPath = useCallback(async (): Promise<Nullable<string>> => {
     if (isDisabled) {
-      return;
+      return null;
     }
 
     const pathResponse: Nullable<string> = isSave
@@ -55,6 +59,9 @@ export function usePathState({
     if (pathResponse) {
       setPathState(pathResponse);
     }
+
+    // Reported rather than only stored, so a caller can persist exactly what the user picked.
+    return pathResponse ?? null;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [title, isDirectory, isDisabled, isSave, filtersKey]);
 

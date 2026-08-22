@@ -25,7 +25,7 @@ pub async fn assets_read_asset(
   log::info!("Reading asset: {logical_path}");
 
   let bytes: Vec<u8> = state
-    .with_probe(&world, None, |probe| read_located(probe, &logical_path))?
+    .with_probe(&world, |probe| read_located(probe, &logical_path))?
     .map_err(|error| format!("Failed to read asset '{logical_path}': {error}"))?;
 
   log::info!("Serving {} bytes for '{logical_path}'", bytes.len());

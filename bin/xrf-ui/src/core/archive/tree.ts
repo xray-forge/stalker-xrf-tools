@@ -1,5 +1,10 @@
 import { ArchiveFileDescriptor } from "@/core/bindings/types/xrf-archive";
-import { Optional } from "@/lib/types/general";
+import {
+  IPathDirectoryTreeItem,
+  IPathFileTreeItem,
+  IPathTreeItem,
+  parsePathTree,
+} from "@/core/ui/tree/path-tree";
 
 /**
  * Whether an archived file would be written when its directory is extracted.
@@ -28,109 +33,27 @@ export function isUnderArchiveDirectory(descriptor: ArchiveFileDescriptor, prefi
   return name.length > normalized.length && name.startsWith(normalized) && /[\\/]/.test(name[normalized.length]);
 }
 
-export interface IArchiveDirectoryTreeItem {
-  id: string;
-  label: string;
-  path: string;
-  kind: "directory";
-  children: Array<IArchiveTreeItem>;
-}
+/** An archive directory node. */
+export type IArchiveDirectoryTreeItem = IPathDirectoryTreeItem<ArchiveFileDescriptor>;
 
-export interface IArchiveFileTreeItem {
-  id: string;
-  label: string;
-  path: string;
-  kind: "file";
-  descriptor: ArchiveFileDescriptor;
-}
+/** An archive file leaf, carrying the descriptor it was built from as its payload. */
+export type IArchiveFileTreeItem = IPathFileTreeItem<ArchiveFileDescriptor>;
 
-export type IArchiveTreeItem = IArchiveDirectoryTreeItem | IArchiveFileTreeItem;
+export type IArchiveTreeItem = IPathTreeItem<ArchiveFileDescriptor>;
 
 /**
  * Build a directory-first explorer tree from effective archive file descriptors.
+ *
+ * The splitting, node paths and sort order come from the shared path tree; what is archive-specific is only that an
+ * entry is identified by its `name` and carries its descriptor.
  *
  * @param files - Effective archive files to attach to leaf nodes.
  * @param separator - Separator used by the archive-relative file paths.
  * @returns Sorted root-level tree items with descriptors attached to file leaves.
  */
 export function parseTree(files: Array<ArchiveFileDescriptor>, separator: string): Array<IArchiveTreeItem> {
-  const root: IArchiveDirectoryTreeItem = {
-    id: "directory:~",
-    label: "root",
-    path: "",
-    kind: "directory",
-    children: [],
-  };
-
-  for (const descriptor of files) {
-    appendFile(root, descriptor.name.split(separator), descriptor, separator);
-  }
-
-  sortTree(root.children);
-
-  return root.children;
-}
-
-/**
- * Append one archive file to a mutable directory tree.
- *
- * @param parent - Directory node that receives the next path segment.
- * @param remainingPath - Mutable path segments still to consume for the file.
- * @param descriptor - File descriptor attached to the resulting leaf node.
- * @param separator - Separator used to reconstruct each canonical node path.
- */
-function appendFile(
-  parent: IArchiveDirectoryTreeItem,
-  remainingPath: Array<string>,
-  descriptor: ArchiveFileDescriptor,
-  separator: string
-): void {
-  const name: Optional<string> = remainingPath.shift();
-
-  if (!name) {
-    return;
-  }
-
-  const path: string = parent.path ? `${parent.path}${separator}${name}` : name;
-
-  if (!remainingPath.length) {
-    parent.children.push({ id: `file:${path}`, label: name, path, kind: "file", descriptor });
-
-    return;
-  }
-
-  const existing: Optional<IArchiveTreeItem> = parent.children.find(
-    (child: IArchiveTreeItem) => child.kind === "directory" && child.label === name
+  return parsePathTree(
+    files.map((descriptor: ArchiveFileDescriptor) => ({ path: descriptor.name, payload: descriptor })),
+    separator
   );
-  const directory: IArchiveDirectoryTreeItem =
-    existing?.kind === "directory"
-      ? existing
-      : { id: `directory:${path}`, label: name, path, kind: "directory", children: [] };
-
-  if (!existing) {
-    parent.children.push(directory);
-  }
-
-  appendFile(directory, remainingPath, descriptor, separator);
-}
-
-/**
- * Sort a mutable tree recursively with directories before files and labels in locale order.
- *
- * @param items - Tree items to sort in place.
- */
-function sortTree(items: Array<IArchiveTreeItem>): void {
-  for (const item of items) {
-    if (item.kind === "directory") {
-      sortTree(item.children);
-    }
-  }
-
-  items.sort((first: IArchiveTreeItem, second: IArchiveTreeItem) => {
-    if (first.kind !== second.kind) {
-      return first.kind === "directory" ? -1 : 1;
-    }
-
-    return first.label.localeCompare(second.label);
-  });
 }

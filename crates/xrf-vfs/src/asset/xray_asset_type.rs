@@ -1,5 +1,12 @@
+use serde::{Deserialize, Serialize};
+
 /// Asset category inferred from an X-Ray logical path's extension or recognized suffix.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+///
+/// Serialized so a consumer can name the kind it wants without the crate growing a command per kind, which is the same
+/// reason [`XrayAssetType::get_rules`] is a table rather than a method each.
+#[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub enum XrayAssetType {
   Ai,
   Anm,

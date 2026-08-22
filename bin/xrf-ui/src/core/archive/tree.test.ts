@@ -8,7 +8,7 @@ const CONFIGS_BACKUP: string = ["configs_backup", "a.ltx"].join("\\");
 const CONFIGS_DIRECTORY: string = ["configs", "gameplay", ""].join("\\");
 
 describe("archive tree", () => {
-  it("builds a directory-first tree with descriptors on file leaves", () => {
+  it("builds a directory-first tree with descriptors as leaf payloads", () => {
     const config = mockArchiveFileDescriptor({ name: "configs\\z.ltx" });
     const script = mockArchiveFileDescriptor({ name: "scripts\\actor.script" });
     const root = mockArchiveFileDescriptor({ name: "readme.ltx" });
@@ -25,7 +25,7 @@ describe("archive tree", () => {
       expect(configs.children[0]).toMatchObject({
         id: "file:configs\\z.ltx",
         kind: "file",
-        descriptor: config,
+        payload: config,
       });
     }
   });

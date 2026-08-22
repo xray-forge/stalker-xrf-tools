@@ -180,6 +180,7 @@ export function mockSelectedVisual(overrides: Partial<SelectedVisualDescription>
     source: { kind: "file", path: "C:\\gamedata\\meshes\\wpn_ak74.ogf" },
     description: mockVisualDescription(),
     dependencies: { motions: [], textures: [] },
+    world: { asset: null, roots: [] },
     ...overrides,
   };
 }

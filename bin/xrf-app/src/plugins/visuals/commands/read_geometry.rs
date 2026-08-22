@@ -4,6 +4,7 @@ use tauri::State;
 use tauri::ipc::Response;
 use xrf_visual::VisualPackage;
 
+use crate::core::assets::{AssetWorldSpec, AssetWorldState};
 use crate::core::types::TauriResult;
 use crate::plugins::visuals::read::pack_source;
 use crate::plugins::visuals::state::{SelectedVisual, VisualSource, VisualState};
@@ -14,7 +15,12 @@ use crate::plugins::visuals::state::{SelectedVisual, VisualSource, VisualState};
 /// model's description when a user clicks through several in a row. Serving the selected model comes out
 /// of the parse `open_model` already did; anything else is read on the spot and changes no state.
 #[tauri::command(rename = "read_geometry")]
-pub async fn visuals_read_geometry(source: VisualSource, state: State<'_, VisualState>) -> TauriResult<Response> {
+pub async fn visuals_read_geometry(
+  source: VisualSource,
+  world: AssetWorldSpec,
+  state: State<'_, VisualState>,
+  assets: State<'_, AssetWorldState>,
+) -> TauriResult<Response> {
   log::info!("Reading visual geometry: {}", source.label());
 
   let selected: MutexGuard<Option<SelectedVisual>> = state
@@ -32,7 +38,9 @@ pub async fn visuals_read_geometry(source: VisualSource, state: State<'_, Visual
 
   drop(selected);
 
-  let package: VisualPackage = pack_source(&source)?;
+  let package: VisualPackage = assets.with_probe(&world.centred_on(source.physical_path()), |probe| {
+    pack_source(&source, probe)
+  })??;
 
   log::info!(
     "Serving {} bytes of freshly packed geometry, {} submeshes",

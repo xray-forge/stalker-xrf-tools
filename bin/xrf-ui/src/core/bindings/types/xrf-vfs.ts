@@ -25,6 +25,46 @@ export type XrayAssetContainer =
   | { kind: "archive"; path: string };
 
 /**
+ * Asset category inferred from an X-Ray logical path's extension or recognized suffix.
+ *
+ * Serialized so a consumer can name the kind it wants without the crate growing a command per kind, which is the same
+ * reason [`XrayAssetType::get_rules`] is a table rather than a method each.
+ */
+export type XrayAssetType =
+  | "ai"
+  | "anm"
+  | "cForm"
+  | "dds"
+  | "dm"
+  | "efd"
+  | "envMod"
+  | "fogVol"
+  | "game"
+  | "geom"
+  | "geomX"
+  | "hom"
+  | "ini"
+  | "level"
+  | "lights"
+  | "ltx"
+  | "misc"
+  | "ogf"
+  | "ogg"
+  | "ogm"
+  | "omf"
+  | "ppe"
+  | "psStatic"
+  | "sndStatic"
+  | "script"
+  | "seq"
+  | "shader"
+  | "spawn"
+  | "thm"
+  | "wallmarks"
+  | "details"
+  | "xrPack";
+
+/**
  * An X-Ray logical path: lower case, backslash separated, with no empty, `.` or `..` component.
  *
  * This is an engine identity, not a location on disk. The asset it names may sit inside an archive and have no file at

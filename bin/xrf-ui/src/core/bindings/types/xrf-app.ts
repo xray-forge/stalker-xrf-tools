@@ -37,11 +37,14 @@ export type ArchiveImagePreview = {
  * webview reload therefore loses nothing, and a surface that did not open a world can still address assets in it —
  * which is what lets one plugin's selection be read by another's preview.
  *
- * The subject asset is not part of a spec. A command that already names one — a model being opened — passes it
- * separately, and its own tree and installation are searched ahead of these roots.
+ * The subject asset belongs to the spec rather than to the command that has one, because every command taking this
+ * world must search the same places: resolving a model's texture against the model's own tree and then reading it
+ * without that tree is how a loose model came back with geometry and no textures.
  */
 export type AssetWorldSpec = {
-  /** Roots searched in the order given. */
+  /** Asset whose own X-Ray root and installation are searched first, when the world is centred on one. */
+  asset: string | null;
+  /** Roots searched after the asset's own, in the order given. */
   roots: Array<string>;
 };
 
@@ -60,11 +63,21 @@ export type EquipmentSpriteMetadata = {
  */
 export type SelectedVisualDescription = {
   source: VisualSource;
+  /** The world the selection was opened in, so a reloaded frontend asks for geometry the same way. */
+  world: AssetWorldSpec;
   description: VisualDescription;
   dependencies: VisualDependencies;
 };
 
-/** Where a visual is read from. */
+/**
+ * Where a visual is read from.
+ *
+ * Both variants are self-describing, and neither is a handle into mount state: an asset is named by its engine
+ * identity, which any surface can spell without having opened anything. The world it is looked for in travels beside
+ * the source on every command that takes one, so one call can never mix two worlds.
+ */
 export type VisualSource =
-  /** A loose `.ogf` file on disk. */
-  { kind: "file"; path: string };
+  /** A loose `.ogf` file on disk, named by its filesystem path. */
+  | { kind: "file"; path: string }
+  /** An asset of the world, loose or archived, named by its engine identity. */
+  | { kind: "asset"; logicalPath: string };

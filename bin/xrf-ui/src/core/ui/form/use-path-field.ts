@@ -37,6 +37,11 @@ export interface IPathField {
 /**
  * Manages a remembered, validated filesystem path for one form field.
  *
+ * What is stored is only ever what a caller asked to store: the remembered path is read once, during
+ * the first render, and written only by `select`, `clear`, and `setValue`. Nothing about mounting,
+ * remounting, or seeding touches storage, so no session can overwrite or erase what an earlier one
+ * remembered while its own state is still empty.
+ *
  * @param options - Field identity, dialog behavior, and validation options.
  * @param options.application - Application the field belongs to, used to scope persistence.
  * @param options.id - Field name within that application, used for persistence.
@@ -60,41 +65,61 @@ export function usePathField({
   isRequired = true,
   seed,
 }: IPathFieldOptions): IPathField {
-  const [value, setValue, select] = usePathState({ title, filters, isDirectory, isSave, isDisabled });
+  const storageKey: string = `${STORAGE_PREFIX}${application}.${id}`;
+
+  const [value, setPath, selectPath] = usePathState({
+    title,
+    filters,
+    isDirectory,
+    isSave,
+    isDisabled,
+    initial: () => getLocalStorageValue(storageKey),
+  });
   const [error, setError] = useState<Nullable<string>>(null);
 
-  const isSeeded = useRef<boolean>(false);
-  const storageKey: string = `${STORAGE_PREFIX}${application}.${id}`;
+  const setValue = useCallback(
+    (next: Nullable<string>): void => {
+      setPath(next);
+      setLocalStorageValue(storageKey, next);
+    },
+    [setPath, storageKey]
+  );
 
   const clear = useCallback(() => setValue(null), [setValue]);
 
-  // Restore, or fall back to the seed exactly once.
+  const select = useCallback(async (): Promise<void> => {
+    const picked: Nullable<string> = await selectPath();
+
+    // Cancelling reports null and leaves both the state and what was remembered as they were.
+    if (picked !== null) {
+      setLocalStorageValue(storageKey, picked);
+    }
+  }, [selectPath, storageKey]);
+
+  // Seeding happens once, and only when nothing was remembered. A guess is not a choice, so it fills
+  // the field without being stored, and every session re-derives it until the user picks a path.
+  const seedRef = useRef<Nullable<IPathFieldOptions["seed"]>>(seed);
+  const isSeedResolved = useRef<boolean>(false);
+
+  seedRef.current = seed;
+
   useEffect(() => {
-    if (isSeeded.current) {
+    if (isSeedResolved.current) {
       return;
     }
 
-    isSeeded.current = true;
+    isSeedResolved.current = true;
 
-    const stored: Nullable<string> = getLocalStorageValue(storageKey);
-
-    if (stored) {
-      setValue(stored);
-
+    if (value !== null || !seedRef.current) {
       return;
     }
 
-    if (seed) {
-      seed()
-        .then((seeded) => seeded && setValue(seeded))
-        .catch(() => setValue(null));
-    }
+    seedRef
+      .current()
+      .then((seeded) => seeded && setPath(seeded))
+      .catch(() => setPath(null));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [storageKey]);
-
-  useEffect(() => {
-    setLocalStorageValue(storageKey, value);
-  }, [storageKey, value]);
 
   useEffect(() => {
     if (!value || isSave) {

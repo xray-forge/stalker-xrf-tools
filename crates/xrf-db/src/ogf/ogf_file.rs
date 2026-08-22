@@ -67,6 +67,14 @@ impl OgfFile {
     Self::read_from_chunk::<T, _>(&mut ChunkReader::from_file(file)?)
   }
 
+  /// Reads a visual already held in memory, such as one served out of an archive volume.
+  ///
+  /// An archived entry has no file to slice, and a caller holding its bytes should not have to learn about chunk
+  /// readers to parse them.
+  pub fn read_from_bytes<T: ByteOrder>(bytes: Vec<u8>) -> XrfResult<Self> {
+    Self::read_from_chunk::<T, _>(&mut ChunkReader::from_vec(bytes)?)
+  }
+
   pub fn read_from_chunk<T: ByteOrder, D: ChunkDataSource>(reader: &mut ChunkReader<D>) -> XrfResult<Self> {
     let chunks: Vec<ChunkReader<D>> = reader.read_children()?;
 

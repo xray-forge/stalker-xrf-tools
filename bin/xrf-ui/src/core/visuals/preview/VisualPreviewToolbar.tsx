@@ -1,3 +1,4 @@
+import { default as AccountTreeIcon } from "@mui/icons-material/AccountTree";
 import { default as CenterFocusStrongIcon } from "@mui/icons-material/CenterFocusStrong";
 import { default as FolderOpenIcon } from "@mui/icons-material/FolderOpen";
 import { default as GridOnIcon } from "@mui/icons-material/GridOn";
@@ -10,14 +11,16 @@ import { ReactElement, useCallback } from "react";
 
 import { EditorToolbar } from "@/core/shell/editor/EditorToolbar";
 import { IVisualPreviewViewOptions } from "@/core/visuals";
+import { BaseComponentProps } from "@/lib/dom/element-types";
 
-interface IVisualPreviewToolbarProps {
+interface IVisualPreviewToolbarProps extends BaseComponentProps {
   subtitle?: string;
   options: IVisualPreviewViewOptions;
   isOpenEnabled: boolean;
   onChangeOptions: (options: IVisualPreviewViewOptions) => void;
   onResetCamera: () => void;
   onOpen?: () => void;
+  onBrowse?: () => void;
 }
 
 /**
@@ -32,6 +35,7 @@ export function VisualPreviewToolbar({
   onChangeOptions,
   onResetCamera,
   onOpen,
+  onBrowse,
 }: IVisualPreviewToolbarProps): ReactElement {
   const onToggleWireframe = useCallback(() => {
     onChangeOptions({ ...options, isWireframe: !options.isWireframe });
@@ -61,6 +65,14 @@ export function VisualPreviewToolbar({
               </IconButton>
             </span>
           </Tooltip>
+
+          {onBrowse ? (
+            <Tooltip title={"Browse the folder this model sits in"}>
+              <IconButton aria-label={"Browse folder"} color={"inherit"} onClick={onBrowse}>
+                <AccountTreeIcon />
+              </IconButton>
+            </Tooltip>
+          ) : null}
 
           <Tooltip title={"Detail level (not implemented)"} describeChild>
             <span>

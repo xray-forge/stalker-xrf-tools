@@ -21,9 +21,11 @@ use crate::plugins::visuals::plugin::VisualsPlugin;
 
 /// Every Tauri plugin whose typed commands are mirrored, as `(plugin name, Specta builder)`.
 ///
-/// A raw-only domain is absent: it has no typed module to write, only the generated wrappers below.
+/// A domain with no typed command at all would be absent: there would be no typed module to write.
 fn command_modules<R: tauri::Runtime>() -> Vec<(&'static str, tauri_specta::Builder<R>)> {
   vec![
+    // The raw `assets` read is absent from this builder by construction, and is generated beside it.
+    (AssetsPlugin::NAME, AssetsPlugin::specta_builder::<R>()),
     (ArchivesPlugin::NAME, ArchivesPlugin::specta_builder::<R>()),
     (ConfigsPlugin::NAME, ConfigsPlugin::specta_builder::<R>()),
     (EquipmentIconsPlugin::NAME, EquipmentIconsPlugin::specta_builder::<R>()),

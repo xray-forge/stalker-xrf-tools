@@ -18,6 +18,8 @@ export const visualsCommands = {
   getModel: () =>
     __TAURI_INVOKE<{
       source: VisualSource;
+      /** The world the selection was opened in, so a reloaded frontend asks for geometry the same way. */
+      world: AssetWorldSpec;
       description: VisualDescription;
       dependencies: VisualDependencies;
     } | null>("plugin:visuals|get_model"),

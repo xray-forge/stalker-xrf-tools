@@ -1,6 +1,8 @@
-import { default as AccountTreeIcon } from "@mui/icons-material/AccountTree";
+import { default as ViewInArIcon } from "@mui/icons-material/ViewInAr";
 import { lazy } from "react";
 
+import { VisualsBrowseService } from "@/applications/visuals-explorer/store/browse";
+import { VisualsService } from "@/applications/visuals-explorer/store/visuals";
 import {
   EApplicationGroupId,
   EApplicationId,
@@ -12,12 +14,13 @@ export const VISUALS_EXPLORER_APPLICATION: IApplicationDescriptor = {
   Component: lazy(() =>
     import("./VisualsExplorerApplication").then((it) => ({ default: it.VisualsExplorerApplication }))
   ),
+  container: { bindings: [VisualsService, VisualsBrowseService] },
   preload: () => import("./VisualsExplorerApplication"),
-  description: "Browse visuals referenced by a project",
+  description: "Browse and preview game visuals in 3D",
   group: EApplicationGroupId.VISUALS,
-  icon: <AccountTreeIcon />,
+  icon: <ViewInArIcon />,
   id: EApplicationId.VISUALS_EXPLORER,
   label: "Visuals explorer",
   path: "/visuals-explorer",
-  status: EApplicationStatus.PLANNED,
+  status: EApplicationStatus.READY,
 };

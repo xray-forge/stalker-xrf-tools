@@ -2385,16 +2385,28 @@
           "markdownDescription": "Denies the unpack_directory command without any pre-configured scope."
         },
         {
-          "description": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-read-asset`",
+          "description": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-list-assets`\n- `allow-read-asset`",
           "type": "string",
           "const": "assets:default",
-          "markdownDescription": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-read-asset`"
+          "markdownDescription": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-list-assets`\n- `allow-read-asset`"
+        },
+        {
+          "description": "Enables the list_assets command without any pre-configured scope.",
+          "type": "string",
+          "const": "assets:allow-list-assets",
+          "markdownDescription": "Enables the list_assets command without any pre-configured scope."
         },
         {
           "description": "Enables the read_asset command without any pre-configured scope.",
           "type": "string",
           "const": "assets:allow-read-asset",
           "markdownDescription": "Enables the read_asset command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the list_assets command without any pre-configured scope.",
+          "type": "string",
+          "const": "assets:deny-list-assets",
+          "markdownDescription": "Denies the list_assets command without any pre-configured scope."
         },
         {
           "description": "Denies the read_asset command without any pre-configured scope.",

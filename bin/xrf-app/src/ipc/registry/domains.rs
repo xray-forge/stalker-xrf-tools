@@ -7,6 +7,7 @@ macro_rules! for_each_tauri_command_domain {
       // Reading is generic, so it lives here rather than being reimplemented per domain; what an asset *means* stays with
       // the domain that parses it.
       assets => "assets" {
+        list_assets => crate::plugins::assets::commands::list_assets::assets_list_assets,
       }
       @raw {
         read_asset(world: "AssetWorldSpec", logicalPath: "string") => crate::plugins::assets::commands::read_asset::assets_read_asset,
@@ -73,7 +74,7 @@ macro_rules! for_each_tauri_command_domain {
       // Returns `tauri::ipc::Response`, so it is dispatched and permitted like any command but cannot join
       // the Specta collection.
       @raw {
-        read_geometry(source: "VisualSource") => crate::plugins::visuals::commands::read_geometry::visuals_read_geometry,
+        read_geometry(source: "VisualSource", world: "AssetWorldSpec") => crate::plugins::visuals::commands::read_geometry::visuals_read_geometry,
       }
       translations => "translations" {
         close_project => crate::plugins::translations::commands::close_project::translations_close_project,

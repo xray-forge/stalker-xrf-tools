@@ -14,9 +14,23 @@ import { ISearchResult, IUseRankedSearch, useRankedSearch } from "@/core/search/
 import { EditorSearchHeader } from "@/core/shell/editor/EditorSearchHeader";
 import { EditorSearchResults, IEditorSearchResultRow } from "@/core/shell/editor/EditorSearchResults";
 import { EditorSideMenu } from "@/core/shell/editor/EditorSideMenu";
+import {
+  getDirectoryItemPath,
+  getFileItemPath,
+  LOGICAL_PATH_SEPARATOR,
+  toDirectoryItemId,
+  toFileItemId,
+} from "@/core/ui/tree/path-tree";
+import { BaseComponentProps } from "@/lib/dom/element-types";
 import { Nullable, Optional } from "@/lib/types/general";
 
-export function ArchivesMenu(): ReactElement {
+export interface IArchivesMenuProps extends BaseComponentProps {}
+
+export function ArchivesMenu({
+  "data-testid": dataTestId = "archives-menu",
+  id,
+  className,
+}: IArchivesMenuProps = {}): ReactElement {
   const archivesService: ArchivesService = useInjection(ArchivesService);
 
   const [expandedItems, setExpandedItems] = useState<Array<string>>([]);
@@ -26,7 +40,7 @@ export function ArchivesMenu(): ReactElement {
     [archivesService.project.value?.files]
   );
 
-  const items: Array<IArchiveTreeItem> = useMemo(() => parseTree(files, "\\"), [files]);
+  const items: Array<IArchiveTreeItem> = useMemo(() => parseTree(files, LOGICAL_PATH_SEPARATOR), [files]);
 
   // Selecting again while a read or a write is in flight starts work that the previous one will
   // outlive, and the tree would show a selection whose content is still the old one.
@@ -62,9 +76,9 @@ export function ArchivesMenu(): ReactElement {
   const selection: TArchiveSelection = archivesService.selection;
   const selectedItem: Nullable<string> =
     selection.kind === "file"
-      ? `file:${selection.descriptor.name}`
+      ? toFileItemId(selection.descriptor.name)
       : selection.kind === "directory"
-        ? `directory:${selection.path || "~"}`
+        ? toDirectoryItemId(selection.path)
         : null;
 
   const onSelectPath = useCallback(
@@ -88,14 +102,20 @@ export function ArchivesMenu(): ReactElement {
         return;
       }
 
-      if (itemId?.startsWith("file:")) {
-        onSelectPath(itemId.slice("file:".length));
-      } else if (itemId?.startsWith("directory:")) {
-        const path: string = itemId.slice("directory:".length);
+      const filePath: Nullable<string> = getFileItemPath(itemId);
 
-        // The synthetic root node stands for the whole archive, which the backend spells as an empty
-        // prefix rather than a literal path.
-        archivesService.selectArchiveDirectory(path === "~" ? "" : path);
+      if (filePath) {
+        onSelectPath(filePath);
+
+        return;
+      }
+
+      const directoryPath: Nullable<string> = getDirectoryItemPath(itemId);
+
+      // The synthetic root node stands for the whole archive, which the backend spells as an empty prefix rather than a
+      // literal path - which is what `getDirectoryItemPath` answers for it.
+      if (directoryPath !== null) {
+        archivesService.selectArchiveDirectory(directoryPath);
       }
     },
     [archivesService, isBusy, onSelectPath]
@@ -103,6 +123,9 @@ export function ArchivesMenu(): ReactElement {
 
   return (
     <EditorSideMenu
+      data-testid={dataTestId}
+      id={id}
+      className={className}
       header={
         <EditorSearchHeader
           title={"Files"}
