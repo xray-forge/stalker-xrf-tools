@@ -31,8 +31,8 @@ export type ArchivePackConfig = {
   /** Base name of the volumes, which become `<name>.db0`, `<name>.db1` and so on. */
   name: string;
   includeFiles: Array<string>;
-  includeFolders: Array<ArchivePackFolder>;
-  excludeFolders: Array<ArchivePackFolder>;
+  includeDirectories: Array<ArchivePackDirectory>;
+  excludeDirectories: Array<ArchivePackDirectory>;
   /** Extension patterns from `[options] exclude_exts`, matched against the extension with its dot. */
   excludeExtensions: Array<string>;
   /** Apply the skip rules xrCompress hard-codes for editor and source leftovers. */
@@ -47,10 +47,13 @@ export type ArchivePackConfig = {
 /**
  * One `[include_folders]` or `[exclude_folders]` entry.
  *
+ * The section names keep the engine's spelling because they are the xrCompress dialect; everything this crate names
+ * itself says `directory`.
+ *
  * The boolean has a different meaning on each side, which is an xrCompress quirk worth stating: an
- * included folder recurses into subfolders, while an excluded one matches by prefix rather than exactly.
+ * included directory recurses into subdirectories, while an excluded one matches by prefix rather than exactly.
  */
-export type ArchivePackFolder = {
+export type ArchivePackDirectory = {
   path: string;
   isRecursive: boolean;
 };

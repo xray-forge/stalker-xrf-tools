@@ -3,16 +3,17 @@ use std::path::Path;
 use xrf_error::XrfResult;
 use xrf_ltx::Ltx;
 
-use crate::pack::archive_pack_config::{ArchivePackConfig, ArchivePackFolder};
+use crate::pack::archive_pack_config::{ArchivePackConfig, ArchivePackDirectory};
 
 /// Section holding the extension patterns that keep a file out.
 const SECTION_OPTIONS: &str = "options";
 
-/// Section listing files by name rather than by folder.
+/// Section listing files by name rather than by directory.
 const SECTION_INCLUDE_FILES: &str = "include_files";
 
-const SECTION_INCLUDE_FOLDERS: &str = "include_folders";
-const SECTION_EXCLUDE_FOLDERS: &str = "exclude_folders";
+/// Section names keep the engine's `folders` spelling: they are the xrCompress dialect, not ours to rename.
+const SECTION_INCLUDE_DIRECTORIES: &str = "include_folders";
+const SECTION_EXCLUDE_DIRECTORIES: &str = "exclude_folders";
 
 /// Section copied into the archive verbatim, which is what tells the engine where to mount it.
 const SECTION_HEADER: &str = "header";
@@ -44,8 +45,8 @@ impl ArchivePackConfig {
       Self::set_entry(&mut ltx, SECTION_INCLUDE_FILES, name, "");
     }
 
-    Self::write_folders(&mut ltx, SECTION_INCLUDE_FOLDERS, &self.include_folders);
-    Self::write_folders(&mut ltx, SECTION_EXCLUDE_FOLDERS, &self.exclude_folders);
+    Self::write_directories(&mut ltx, SECTION_INCLUDE_DIRECTORIES, &self.include_directories);
+    Self::write_directories(&mut ltx, SECTION_EXCLUDE_DIRECTORIES, &self.exclude_directories);
 
     if let Some(header) = &self.header {
       for (key, value) in Self::header_entries(header) {
@@ -56,16 +57,20 @@ impl ArchivePackConfig {
     ltx
   }
 
-  fn write_folders(ltx: &mut Ltx, section_name: &str, folders: &[ArchivePackFolder]) {
-    for folder in folders {
+  fn write_directories(ltx: &mut Ltx, section_name: &str, directories: &[ArchivePackDirectory]) {
+    for directory in directories {
       // An empty path names the packed root, which the dialect spells `.\`.
-      let path: &str = if folder.path.is_empty() { ".\\" } else { &folder.path };
+      let path: &str = if directory.path.is_empty() {
+        ".\\"
+      } else {
+        &directory.path
+      };
 
       Self::set_entry(
         ltx,
         section_name,
         path,
-        if folder.is_recursive { "true" } else { "false" },
+        if directory.is_recursive { "true" } else { "false" },
       );
     }
   }

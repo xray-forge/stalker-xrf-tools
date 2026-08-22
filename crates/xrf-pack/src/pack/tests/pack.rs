@@ -9,7 +9,7 @@ use std::path::{Path, PathBuf};
 use xrf_archive::{ArchiveFileDescriptor, ArchiveProject};
 use xrf_test_utils::utils::build_absolute_generated_test_resource_path;
 
-use crate::pack::archive_pack_config::{ArchivePackConfig, ArchivePackFolder, ArchivePackMode};
+use crate::pack::archive_pack_config::{ArchivePackConfig, ArchivePackDirectory, ArchivePackMode};
 use crate::pack::archive_pack_result::ArchivePackResult;
 use crate::pack::archive_packer::ArchivePacker;
 
@@ -49,7 +49,7 @@ fn pack(
   let mut config: ArchivePackConfig = ArchivePackConfig::new(&source, &destination, "packed");
 
   // Every test packs the whole tree unless it says otherwise.
-  config.include_folders = vec![ArchivePackFolder {
+  config.include_directories = vec![ArchivePackDirectory {
     path: String::new(),
     is_recursive: true,
   }];
@@ -188,7 +188,7 @@ fn refuses_a_name_it_cannot_encode() {
   let destination: PathBuf = build_absolute_generated_test_resource_path("refuses_a_name_it_cannot_encode/db");
   let mut config: ArchivePackConfig = ArchivePackConfig::new(&source, &destination, "packed");
 
-  config.include_folders = vec![ArchivePackFolder {
+  config.include_directories = vec![ArchivePackDirectory {
     path: String::new(),
     is_recursive: true,
   }];

@@ -7017,7 +7017,6 @@ name = "xrf-pack"
 version = "0.1.0"
 dependencies = [
  "bounded_join_set",
- "byteorder",
  "crc32fast",
  "log",
  "lzokay",

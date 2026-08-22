@@ -51,12 +51,15 @@ impl ArchiveVolumeExtension {
 
 /// One `[include_folders]` or `[exclude_folders]` entry.
 ///
+/// The section names keep the engine's spelling because they are the xrCompress dialect; everything this crate names
+/// itself says `directory`.
+///
 /// The boolean has a different meaning on each side, which is an xrCompress quirk worth stating: an
-/// included folder recurses into subfolders, while an excluded one matches by prefix rather than exactly.
+/// included directory recurses into subdirectories, while an excluded one matches by prefix rather than exactly.
 #[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct ArchivePackFolder {
+pub struct ArchivePackDirectory {
   pub path: String,
   pub is_recursive: bool,
 }
@@ -78,8 +81,8 @@ pub struct ArchivePackConfig {
   /// Base name of the volumes, which become `<name>.db0`, `<name>.db1` and so on.
   pub name: String,
   pub include_files: Vec<String>,
-  pub include_folders: Vec<ArchivePackFolder>,
-  pub exclude_folders: Vec<ArchivePackFolder>,
+  pub include_directories: Vec<ArchivePackDirectory>,
+  pub exclude_directories: Vec<ArchivePackDirectory>,
   /// Extension patterns from `[options] exclude_exts`, matched against the extension with its dot.
   pub exclude_extensions: Vec<String>,
   /// Apply the skip rules xrCompress hard-codes for editor and source leftovers.
@@ -98,8 +101,8 @@ impl ArchivePackConfig {
       destination: destination.as_ref().into(),
       name: name.into(),
       include_files: Vec::new(),
-      include_folders: Vec::new(),
-      exclude_folders: Vec::new(),
+      include_directories: Vec::new(),
+      exclude_directories: Vec::new(),
       exclude_extensions: Vec::new(),
       is_with_skip_list: true,
       header: Some(default_header()),
@@ -135,11 +138,11 @@ impl ArchivePackConfig {
     }
 
     if let Some(section) = ltx.section("include_folders") {
-      self.include_folders = section.iter().map(Self::folder_from_entry).collect();
+      self.include_directories = section.iter().map(Self::directory_from_entry).collect();
     }
 
     if let Some(section) = ltx.section("exclude_folders") {
-      self.exclude_folders = section.iter().map(Self::folder_from_entry).collect();
+      self.exclude_directories = section.iter().map(Self::directory_from_entry).collect();
     }
 
     if let Some(section) = ltx.section("header") {
@@ -185,8 +188,8 @@ impl ArchivePackConfig {
     format!("{}.{}", self.name, self.volume_extension.as_str())
   }
 
-  fn folder_from_entry((path, value): (&str, &str)) -> ArchivePackFolder {
-    ArchivePackFolder {
+  fn directory_from_entry((path, value): (&str, &str)) -> ArchivePackDirectory {
+    ArchivePackDirectory {
       // `.\` names the source root itself, which is more readable as an empty prefix.
       path: if path == ".\\" || path == "./" {
         String::new()
@@ -231,18 +234,18 @@ mod tests {
 
     assert_eq!(config.exclude_extensions, vec!["*.txt", "*.json"]);
     assert_eq!(config.include_files, vec!["gamemtl.xr", "shaders.xr"]);
-    assert_eq!(config.include_folders.len(), 2);
-    assert_eq!(config.include_folders[0].path, "configs");
-    assert!(config.include_folders[0].is_recursive);
-    assert!(!config.include_folders[1].is_recursive);
-    assert_eq!(config.exclude_folders[0].path, "levels\\build");
+    assert_eq!(config.include_directories.len(), 2);
+    assert_eq!(config.include_directories[0].path, "configs");
+    assert!(config.include_directories[0].is_recursive);
+    assert!(!config.include_directories[1].is_recursive);
+    assert_eq!(config.exclude_directories[0].path, "levels\\build");
   }
 
   #[test]
   fn reads_the_source_root_as_an_empty_prefix() {
     let config: ArchivePackConfig = config_from_ltx("[include_folders]\n.\\ = false\n");
 
-    assert_eq!(config.include_folders[0].path, "");
+    assert_eq!(config.include_directories[0].path, "");
   }
 
   #[test]

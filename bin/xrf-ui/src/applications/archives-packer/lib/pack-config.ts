@@ -1,6 +1,6 @@
 import {
   ArchivePackConfig,
-  ArchivePackFolder,
+  ArchivePackDirectory,
   ArchivePackMode,
   ArchiveVolumeExtension,
 } from "@/core/bindings/types/xrf-pack";
@@ -49,8 +49,8 @@ export const FALLBACK_PACK_CONFIG: ArchivePackConfig = {
   destination: "",
   name: "gamedata",
   includeFiles: [],
-  includeFolders: [],
-  excludeFolders: [],
+  includeDirectories: [],
+  excludeDirectories: [],
   excludeExtensions: [],
   isWithSkipList: true,
   header: `[header]\r\nauto_load = true\r\nentry_point = ${DEFAULT_ENTRY_POINT}\r\n`,
@@ -134,12 +134,12 @@ export function readHeaderEntries(header: Nullable<string>): Array<[string, stri
     .map((parts) => [parts[0].trim(), parts.slice(1).join("=").trim()] as [string, string]);
 }
 
-export function withFolderAt(
-  folders: Array<ArchivePackFolder>,
+export function withDirectoryAt(
+  directories: Array<ArchivePackDirectory>,
   index: number,
-  patch: Partial<ArchivePackFolder>
-): Array<ArchivePackFolder> {
-  return folders.map((folder, at) => (at === index ? { ...folder, ...patch } : folder));
+  patch: Partial<ArchivePackDirectory>
+): Array<ArchivePackDirectory> {
+  return directories.map((directory, at) => (at === index ? { ...directory, ...patch } : directory));
 }
 
 export function withoutAt<T>(items: Array<T>, index: number): Array<T> {
@@ -157,5 +157,5 @@ export function withValueAt(items: Array<string>, index: number, value: string):
  * worth saying out loud in the editor rather than leaving the sections looking unfinished.
  */
 export function isWholeDirectory(config: ArchivePackConfig): boolean {
-  return !config.includeFolders.length && !config.includeFiles.length;
+  return !config.includeDirectories.length && !config.includeFiles.length;
 }

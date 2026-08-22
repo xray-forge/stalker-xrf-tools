@@ -94,18 +94,18 @@ impl XrayScopedVfs<'_> {
     self.vfs.resolve_all_in(self.scope, asset_type, reference)
   }
 
-  /// Like [`XrayVfs::dds_texture`], within this view's scope.
+  /// Like [`XrayVfs::resolve_dds_texture`], within this view's scope.
   pub fn dds_texture(&self, reference: &str) -> XrfResult<Option<XrayAsset>> {
-    self.vfs.dds_texture_in(self.scope, reference)
+    self.vfs.resolve_dds_texture_in(self.scope, reference)
   }
 
-  /// Like [`XrayVfs::ogf`], within this view's scope.
+  /// Like [`XrayVfs::resolve_ogf`], within this view's scope.
   pub fn ogf(&self, reference: &str) -> XrfResult<Option<XrayAsset>> {
-    self.vfs.ogf_in(self.scope, reference)
+    self.vfs.resolve_ogf_in(self.scope, reference)
   }
 
-  /// Like [`XrayVfs::omf`], within this view's scope.
+  /// Like [`XrayVfs::resolve_omf`], within this view's scope.
   pub fn omf(&self, reference: &str) -> XrfResult<Option<XrayAsset>> {
-    self.vfs.omf_in(self.scope, reference)
+    self.vfs.resolve_omf_in(self.scope, reference)
   }
 }

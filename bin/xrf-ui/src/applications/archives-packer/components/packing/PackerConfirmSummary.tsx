@@ -1,7 +1,7 @@
 import { Alert, Stack, Typography } from "@mui/material";
 import { ReactElement } from "react";
 
-import { PackerFolderChips } from "@/applications/archives-packer/components/packing/PackerFolderChips";
+import { PackerDirectoryChips } from "@/applications/archives-packer/components/packing/PackerDirectoryChips";
 import { PackerPathText } from "@/applications/archives-packer/components/packing/PackerPathText";
 import { PackerSummaryRow } from "@/applications/archives-packer/components/packing/PackerSummaryRow";
 import {
@@ -52,8 +52,8 @@ export function PackerConfirmSummary({ config }: IPackerConfirmSummaryProps): Re
           <Typography variant={"body2"}>Everything under the source directory</Typography>
         ) : (
           <Stack spacing={0.5}>
-            {config.includeFolders.length ? (
-              <PackerFolderChips folders={config.includeFolders} recursiveSuffix={" and below"} />
+            {config.includeDirectories.length ? (
+              <PackerDirectoryChips directories={config.includeDirectories} recursiveSuffix={" and below"} />
             ) : null}
             {config.includeFiles.length ? (
               <Typography variant={"body2"}>{config.includeFiles.join(", ")}</Typography>
@@ -62,11 +62,11 @@ export function PackerConfirmSummary({ config }: IPackerConfirmSummaryProps): Re
         )}
       </PackerSummaryRow>
 
-      {config.excludeFolders.length || config.excludeExtensions.length ? (
+      {config.excludeDirectories.length || config.excludeExtensions.length ? (
         <PackerSummaryRow label={"Excluding"}>
           <Stack spacing={0.5}>
-            {config.excludeFolders.length ? (
-              <PackerFolderChips folders={config.excludeFolders} recursiveSuffix={" and below"} />
+            {config.excludeDirectories.length ? (
+              <PackerDirectoryChips directories={config.excludeDirectories} recursiveSuffix={" and below"} />
             ) : null}
             {config.excludeExtensions.length ? (
               <Typography variant={"body2"}>{config.excludeExtensions.join(", ")}</Typography>

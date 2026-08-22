@@ -2,10 +2,10 @@
 
 use xrf_ltx::Ltx;
 
-use crate::pack::archive_pack_config::{ArchivePackConfig, ArchivePackFolder};
+use crate::pack::archive_pack_config::{ArchivePackConfig, ArchivePackDirectory};
 
-fn folder(path: &str, is_recursive: bool) -> ArchivePackFolder {
-  ArchivePackFolder {
+fn directory(path: &str, is_recursive: bool) -> ArchivePackDirectory {
+  ArchivePackDirectory {
     path: path.into(),
     is_recursive,
   }
@@ -34,8 +34,8 @@ fn populated() -> ArchivePackConfig {
 
   config.exclude_extensions = vec![String::from("*.txt"), String::from("*.json")];
   config.include_files = vec![String::from("gamemtl.xr"), String::from("shaders.xr")];
-  config.include_folders = vec![folder("configs", true), folder("spawns", false)];
-  config.exclude_folders = vec![folder("levels\\build", true)];
+  config.include_directories = vec![directory("configs", true), directory("spawns", false)];
+  config.exclude_directories = vec![directory("levels\\build", true)];
   config.header = Some(String::from(
     "[header]\r\nauto_load = true\r\nentry_point = $fs_root$\\gamedata\\\r\n",
   ));
@@ -49,12 +49,12 @@ fn selection_rules_survive_a_round_trip() {
 
   assert_eq!(restored.exclude_extensions, vec!["*.txt", "*.json"]);
   assert_eq!(restored.include_files, vec!["gamemtl.xr", "shaders.xr"]);
-  assert_eq!(restored.include_folders.len(), 2);
-  assert_eq!(restored.include_folders[0].path, "configs");
-  assert!(restored.include_folders[0].is_recursive);
-  assert_eq!(restored.include_folders[1].path, "spawns");
-  assert!(!restored.include_folders[1].is_recursive);
-  assert_eq!(restored.exclude_folders[0].path, "levels\\build");
+  assert_eq!(restored.include_directories.len(), 2);
+  assert_eq!(restored.include_directories[0].path, "configs");
+  assert!(restored.include_directories[0].is_recursive);
+  assert_eq!(restored.include_directories[1].path, "spawns");
+  assert!(!restored.include_directories[1].is_recursive);
+  assert_eq!(restored.exclude_directories[0].path, "levels\\build");
 }
 
 #[test]
@@ -70,11 +70,11 @@ fn the_header_survives_a_round_trip() {
 fn the_packed_root_survives_as_itself() {
   let mut config: ArchivePackConfig = ArchivePackConfig::new("gamedata", "db", "configs");
 
-  config.include_folders = vec![folder("", false)];
+  config.include_directories = vec![directory("", false)];
 
   // An empty path means the packed root, which the dialect spells `.\` and must not become a literal.
   assert!(write_config(&config).contains(".\\"));
-  assert_eq!(round_trip(&config).include_folders[0].path, "");
+  assert_eq!(round_trip(&config).include_directories[0].path, "");
 }
 
 #[test]
@@ -86,7 +86,7 @@ fn an_empty_config_writes_nothing_to_mislead_a_reader() {
     !written.contains("include_folders"),
     "no sections are invented: {written}"
   );
-  assert!(round_trip(&config).include_folders.is_empty());
+  assert!(round_trip(&config).include_directories.is_empty());
 }
 
 #[test]

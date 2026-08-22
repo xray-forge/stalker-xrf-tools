@@ -2,6 +2,7 @@ use std::borrow::Cow;
 use std::fs;
 use std::path::{Path, PathBuf};
 
+use xrf_archive::ArchiveDescriptor;
 use xrf_error::XrfResult;
 
 use crate::mount::xray_root::{find_implied_asset_root, implied_install_root};
@@ -253,13 +254,9 @@ impl XrayMountPlan {
     fs::read_dir(path).is_ok_and(|entries| entries.flatten().any(|entry| Self::is_volume(&entry.path())))
   }
 
-  /// Checks whether a file extension begins with `db`, including numbered volumes such as `.db0` and `.db1`.
+  /// Whether a file is an archive volume, asked of the crate that owns the format.
   fn is_volume(path: &Path) -> bool {
-    path.is_file()
-      && path
-        .extension()
-        .and_then(|extension| extension.to_str())
-        .is_some_and(|extension| extension.to_ascii_lowercase().starts_with("db"))
+    path.is_file() && ArchiveDescriptor::is_valid_db_path(path)
   }
 
   /// Whether a loose directory is the installation's gamedata root rather than one of its subdirectories.

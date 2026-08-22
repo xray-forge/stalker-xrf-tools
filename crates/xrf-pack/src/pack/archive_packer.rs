@@ -43,7 +43,6 @@ const COMPRESSION_MARGIN: usize = 16;
 struct ArchiveAlias {
   path: PathBuf,
   offset: u32,
-  size_real: u32,
   size_compressed: u32,
 }
 
@@ -72,7 +71,7 @@ impl ArchivePacker {
 
     fs::create_dir_all(&config.destination)?;
 
-    let mut state: PackState = PackState::new(config, source.folders.clone())?;
+    let mut state: PackState = PackState::new(config, source.directories.clone())?;
 
     state.result.files_skipped = source.skipped;
     state.result.files_total = source.entries.len();
@@ -123,13 +122,22 @@ struct PackState {
   /// Payloads already written to this volume, keyed by size and checksum.
   aliases: HashMap<(u32, u32), Vec<ArchiveAlias>>,
   /// Directory rows, written into every volume so any one of them can list the tree.
-  folders: Vec<String>,
+  ///
+  /// Encoded once: they are identical in every volume, and they carry no payload, so nothing about them varies with
+  /// what a volume holds.
+  directory_rows: Vec<u8>,
   volume_index: usize,
   result: ArchivePackResult,
 }
 
 impl PackState {
-  fn new(config: &ArchivePackConfig, folders: Vec<String>) -> XrfResult<Self> {
+  fn new(config: &ArchivePackConfig, directories: Vec<String>) -> XrfResult<Self> {
+    let mut directory_rows: Vec<u8> = Vec::new();
+
+    for directory in &directories {
+      Self::push_descriptor_row(&mut directory_rows, directory, 0, 0, 0, 0)?;
+    }
+
     let mut state: Self = Self {
       writer: None,
       path: PathBuf::new(),
@@ -137,7 +145,7 @@ impl PackState {
       data_size_position: 0,
       descriptors: Vec::new(),
       aliases: HashMap::new(),
-      folders,
+      directory_rows,
       volume_index: 0,
       result: ArchivePackResult::default(),
     };
@@ -176,9 +184,7 @@ impl PackState {
     self.writer = Some(writer);
 
     // Directory rows carry no payload, so they can be written up front.
-    for folder in &self.folders.clone() {
-      self.push_descriptor(folder, 0, 0, 0, 0)?;
-    }
+    self.descriptors.extend_from_slice(&self.directory_rows);
 
     Ok(())
   }
@@ -251,7 +257,6 @@ impl PackState {
     self.aliases.entry((size_real, crc)).or_default().push(ArchiveAlias {
       path: entry.path.clone(),
       offset,
-      size_real,
       size_compressed,
     });
 
@@ -311,9 +316,24 @@ impl PackState {
     Ok(None)
   }
 
-  /// Append one descriptor row: sizes, checksum, windows-1251 name, and the payload's absolute offset.
+  /// Append one descriptor row for this volume's table.
   fn push_descriptor(
     &mut self,
+    name: &str,
+    size_real: u32,
+    size_compressed: u32,
+    crc: u32,
+    offset: u32,
+  ) -> XrfResult<()> {
+    Self::push_descriptor_row(&mut self.descriptors, name, size_real, size_compressed, crc, offset)
+  }
+
+  /// Append one descriptor row to a table: sizes, checksum, windows-1251 name, and the payload's absolute offset.
+  ///
+  /// Takes the table rather than `self` so the directory rows, which are the same in every volume, can be encoded once
+  /// before any volume is open.
+  fn push_descriptor_row(
+    descriptors: &mut Vec<u8>,
     name: &str,
     size_real: u32,
     size_compressed: u32,
@@ -329,12 +349,12 @@ impl PackState {
     let row_size: u16 = u16::try_from(encoded.len() + DESCRIPTOR_ROW_OVERHEAD)
       .map_err(|_| XrfError::new_invalid_error(format!("File name '{name}' is too long for a descriptor row")))?;
 
-    self.descriptors.extend_from_slice(&row_size.to_le_bytes());
-    self.descriptors.extend_from_slice(&size_real.to_le_bytes());
-    self.descriptors.extend_from_slice(&size_compressed.to_le_bytes());
-    self.descriptors.extend_from_slice(&crc.to_le_bytes());
-    self.descriptors.extend_from_slice(&encoded);
-    self.descriptors.extend_from_slice(&offset.to_le_bytes());
+    descriptors.extend_from_slice(&row_size.to_le_bytes());
+    descriptors.extend_from_slice(&size_real.to_le_bytes());
+    descriptors.extend_from_slice(&size_compressed.to_le_bytes());
+    descriptors.extend_from_slice(&crc.to_le_bytes());
+    descriptors.extend_from_slice(&encoded);
+    descriptors.extend_from_slice(&offset.to_le_bytes());
 
     Ok(())
   }

@@ -12,7 +12,7 @@ fn resolves_a_texture_reference_against_a_mounted_root() {
     .expect("root mounts");
 
   let location: XrayAsset = vfs
-    .dds_texture("wpn\\wpn_ak74")
+    .resolve_dds_texture("wpn\\wpn_ak74")
     .expect("lookup succeeds")
     .expect("texture resolves");
 

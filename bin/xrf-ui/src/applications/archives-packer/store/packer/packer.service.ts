@@ -27,9 +27,9 @@ export enum EPackerSection {
  */
 function toSavedState(config: ArchivePackConfig): string {
   return JSON.stringify([
-    config.includeFolders,
+    config.includeDirectories,
     config.includeFiles,
-    config.excludeFolders,
+    config.excludeDirectories,
     config.excludeExtensions,
     config.header,
   ]);

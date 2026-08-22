@@ -68,6 +68,16 @@ fn plans_a_directory_of_volumes_as_an_archive() {
 }
 
 #[test]
+fn plans_xdb_volumes_the_engine_mounts_just_the_same() {
+  // The detection rule belongs to `xrf-archive`; a second copy here had drifted to `.db*` only, so a directory of
+  // `.xdb` volumes planned as no archive at all and its assets simply never resolved.
+  let plan: XrayMountPlan = plan("xdb_volumes", &["db\\textures\\textures.xdb0"]);
+
+  assert_eq!(plan.len(), 1);
+  assert_eq!(plan.get_mounts()[0].kind, XraySourceKind::Archive);
+}
+
+#[test]
 fn leaves_output_directories_out_of_the_plan() {
   // appdata holds saves and screenshots. Mounting it as an asset source would put them in the same table as textures.
   let plan: XrayMountPlan = plan(

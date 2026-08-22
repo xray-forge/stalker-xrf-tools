@@ -10,7 +10,7 @@ use xrf_test_utils::utils::build_absolute_generated_test_resource_path;
 use xrf_vfs::XrayArchiveSource;
 use xrf_vfs::{XrayAssetContainer, XrayAssetSource, XrayLookupScope, XraySourceKind, XrayVfs};
 
-use crate::pack::archive_pack_config::{ArchivePackConfig, ArchivePackFolder};
+use crate::pack::archive_pack_config::{ArchivePackConfig, ArchivePackDirectory};
 use crate::pack::archive_packer::ArchivePacker;
 
 const TEXTURE: &[u8] = &[0x44, 0x44, 0x53, 0x20, 0x01, 0x02, 0x03, 0xfe];
@@ -33,7 +33,7 @@ fn mount(scope: &str, files: &[(&str, &[u8])]) -> XrayArchiveSource {
 
   let mut config: ArchivePackConfig = ArchivePackConfig::new(&source, &destination, "packed");
 
-  config.include_folders = vec![ArchivePackFolder {
+  config.include_directories = vec![ArchivePackDirectory {
     is_recursive: true,
     path: String::new(),
   }];

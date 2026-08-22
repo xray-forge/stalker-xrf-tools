@@ -10,7 +10,6 @@ path = "src/lib.rs"
 
 [dependencies]
 bounded_join_set = "0.3.0"
-byteorder = { workspace = true }
 crc32fast = "1.5.0"
 log = { workspace = true }
 lzokay = { workspace = true }

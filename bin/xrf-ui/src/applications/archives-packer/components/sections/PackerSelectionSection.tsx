@@ -1,7 +1,7 @@
 import { Alert, Stack } from "@mui/material";
 import { ReactElement } from "react";
 
-import { PackerFolderList } from "@/applications/archives-packer/components/controls/PackerFolderList";
+import { PackerDirectoryList } from "@/applications/archives-packer/components/controls/PackerDirectoryList";
 import { PackerStringList } from "@/applications/archives-packer/components/controls/PackerStringList";
 import { isWholeDirectory } from "@/applications/archives-packer/lib/pack-config";
 import { ArchivePackConfig } from "@/core/bindings/types/xrf-pack";
@@ -21,21 +21,21 @@ export function PackerSelectionSection({ config, isDisabled, onChange }: IPacker
     <Stack spacing={2}>
       {isWholeDirectory(config) ? (
         <Alert severity={"info"}>
-          Nothing is selected, so the whole source directory is packed. Add a folder or a file to narrow it.
+          Nothing is selected, so the whole source directory is packed. Add a directory or a file to narrow it.
         </Alert>
       ) : null}
 
       <FormRow
-        label={"Included folders"}
-        description={"Folders to pack, relative to the source. Recursive folders take their subfolders too"}
+        label={"Included directories"}
+        description={"Directories to pack, relative to the source. Recursive directories take their children too"}
       >
-        <PackerFolderList
-          folders={config.includeFolders}
+        <PackerDirectoryList
+          directories={config.includeDirectories}
           isDisabled={isDisabled}
-          addLabel={"Add folder"}
-          emptyLabel={"No folders listed."}
+          addLabel={"Add directory"}
+          emptyLabel={"No directories listed."}
           recursiveLabel={"Recursive"}
-          onChange={(includeFolders) => onChange({ includeFolders })}
+          onChange={(includeDirectories) => onChange({ includeDirectories })}
         />
       </FormRow>
 
@@ -51,16 +51,18 @@ export function PackerSelectionSection({ config, isDisabled, onChange }: IPacker
       </FormRow>
 
       <FormRow
-        label={"Excluded folders"}
-        description={"Folders to leave out. A prefix match drops everything beneath it, otherwise only the exact path"}
+        label={"Excluded directories"}
+        description={
+          "Directories to leave out. A prefix match drops everything beneath it, otherwise only the exact path"
+        }
       >
-        <PackerFolderList
-          folders={config.excludeFolders}
+        <PackerDirectoryList
+          directories={config.excludeDirectories}
           isDisabled={isDisabled}
           addLabel={"Add exclusion"}
           emptyLabel={"No exclusions."}
           recursiveLabel={"Prefix"}
-          onChange={(excludeFolders) => onChange({ excludeFolders })}
+          onChange={(excludeDirectories) => onChange({ excludeDirectories })}
         />
       </FormRow>
 

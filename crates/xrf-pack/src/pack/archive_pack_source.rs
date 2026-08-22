@@ -3,7 +3,7 @@ use std::path::{Path, PathBuf};
 use walkdir::WalkDir;
 use xrf_error::XrfResult;
 
-use crate::pack::archive_pack_config::{ArchivePackConfig, ArchivePackFolder};
+use crate::pack::archive_pack_config::{ArchivePackConfig, ArchivePackDirectory};
 
 /// One file selected for packing.
 #[derive(Clone, Debug)]
@@ -19,7 +19,7 @@ pub(crate) struct ArchivePackEntry {
 pub(crate) struct ArchivePackSource {
   pub(crate) entries: Vec<ArchivePackEntry>,
   /// Directory names, which the archive carries as zero-size rows so the engine can list them.
-  pub(crate) folders: Vec<String>,
+  pub(crate) directories: Vec<String>,
   /// Files the rules rejected, reported so a surprising omission is visible rather than silent.
   pub(crate) skipped: usize,
 }
@@ -33,26 +33,26 @@ impl ArchivePackSource {
     let mut source: Self = Self::default();
 
     // A config that names nothing packs the whole tree, which is what xrCompress does when handed a
-    // folder and no LTX. Naming nothing is far more likely to mean "everything" than "an empty archive".
-    if config.include_folders.is_empty() && config.include_files.is_empty() {
-      source.collect_folder(
+    // directory and no LTX. Naming nothing is far more likely to mean "everything" than "an empty archive".
+    if config.include_directories.is_empty() && config.include_files.is_empty() {
+      source.collect_directory(
         config,
-        &ArchivePackFolder {
+        &ArchivePackDirectory {
           path: String::new(),
           is_recursive: true,
         },
       )?;
     }
 
-    for folder in &config.include_folders {
-      source.collect_folder(config, folder)?;
+    for directory in &config.include_directories {
+      source.collect_directory(config, directory)?;
     }
 
     for name in &config.include_files {
       let name: String = normalize_name(name);
       let path: PathBuf = config.source.join(name.replace('\\', "/"));
 
-      // Listed files bypass the folder rules, exactly as `[include_files]` does in xrCompress, but a
+      // Listed files bypass the directory rules, exactly as `[include_files]` does in xrCompress, but a
       // name that does not resolve is a configuration error rather than something to pass over.
       let size: u64 = path.metadata()?.len();
 
@@ -61,26 +61,26 @@ impl ArchivePackSource {
 
     source.entries.sort_by(|left, right| left.name.cmp(&right.name));
     source.entries.dedup_by(|left, right| left.name == right.name);
-    source.folders.sort();
-    source.folders.dedup();
+    source.directories.sort();
+    source.directories.dedup();
 
     Ok(source)
   }
 
-  fn collect_folder(&mut self, config: &ArchivePackConfig, folder: &ArchivePackFolder) -> XrfResult<()> {
-    let root: PathBuf = if folder.path.is_empty() {
+  fn collect_directory(&mut self, config: &ArchivePackConfig, directory: &ArchivePackDirectory) -> XrfResult<()> {
+    let root: PathBuf = if directory.path.is_empty() {
       config.source.clone()
     } else {
-      config.source.join(folder.path.replace('\\', "/"))
+      config.source.join(directory.path.replace('\\', "/"))
     };
 
     if !root.exists() {
       return Ok(());
     }
 
-    // A non-recursive include still names its immediate subfolders, matching `FS_ListFolders` without
+    // A non-recursive include still names its immediate subdirectories, matching `FS_ListFolders` without
     // `FS_RootOnly`, so the archive lists them even when their contents stay out.
-    let walk: WalkDir = if folder.is_recursive {
+    let walk: WalkDir = if directory.is_recursive {
       WalkDir::new(&root)
     } else {
       WalkDir::new(&root).max_depth(1)
@@ -92,12 +92,12 @@ impl ArchivePackSource {
         continue;
       };
 
-      if name.is_empty() || is_excluded_folder(config, &name) {
+      if name.is_empty() || is_excluded_directory(config, &name) {
         continue;
       }
 
       if entry.file_type().is_dir() {
-        self.folders.push(name);
+        self.directories.push(name);
       } else if entry.file_type().is_file() {
         if is_skipped_file(config, &name) {
           self.skipped += 1;
@@ -126,13 +126,13 @@ fn normalize_name(name: &str) -> String {
   name.replace('/', "\\").trim_matches('\\').to_string()
 }
 
-/// An excluded folder matches by prefix when recursive, and by exact name otherwise.
-fn is_excluded_folder(config: &ArchivePackConfig, name: &str) -> bool {
-  config.exclude_folders.iter().any(|folder| {
-    if folder.is_recursive {
-      name.starts_with(&folder.path)
+/// An excluded directory matches by prefix when recursive, and by exact name otherwise.
+fn is_excluded_directory(config: &ArchivePackConfig, name: &str) -> bool {
+  config.exclude_directories.iter().any(|directory| {
+    if directory.is_recursive {
+      name.starts_with(&directory.path)
     } else {
-      name == folder.path
+      name == directory.path
     }
   })
 }

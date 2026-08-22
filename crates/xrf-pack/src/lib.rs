@@ -5,11 +5,11 @@
 #[cfg(test)]
 mod asset_source_tests;
 pub(crate) mod pack;
-pub(crate) mod types;
+pub(crate) mod path;
 pub(crate) mod unpack;
 
 pub use crate::pack::archive_pack_config::{
-  ArchivePackConfig, ArchivePackFolder, ArchivePackMode, ArchiveVolumeExtension, VOLUME_SIZE_MAX,
+  ArchivePackConfig, ArchivePackDirectory, ArchivePackMode, ArchiveVolumeExtension, VOLUME_SIZE_MAX,
 };
 pub use crate::pack::archive_pack_result::ArchivePackResult;
 pub use crate::pack::archive_packer::ArchivePacker;

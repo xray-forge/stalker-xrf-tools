@@ -3,45 +3,45 @@ import { default as DeleteIcon } from "@mui/icons-material/Delete";
 import { Box, Button, FormControlLabel, IconButton, Stack, Switch, TextField, Typography } from "@mui/material";
 import { ChangeEvent, ReactElement } from "react";
 
-import { withFolderAt, withoutAt } from "@/applications/archives-packer/lib/pack-config";
-import { ArchivePackFolder } from "@/core/bindings/types/xrf-pack";
+import { withDirectoryAt, withoutAt } from "@/applications/archives-packer/lib/pack-config";
+import { ArchivePackDirectory } from "@/core/bindings/types/xrf-pack";
 
-interface IPackerFolderListProps {
-  folders: Array<ArchivePackFolder>;
+interface IPackerDirectoryListProps {
+  directories: Array<ArchivePackDirectory>;
   isDisabled?: boolean;
   addLabel: string;
   emptyLabel: string;
   /** What the per-row switch means, which differs between including and excluding. */
   recursiveLabel: string;
-  onChange: (folders: Array<ArchivePackFolder>) => void;
+  onChange: (directories: Array<ArchivePackDirectory>) => void;
 }
 
 /**
- * Editable list of folder rules, each a path relative to the packed root plus its recursive flag.
+ * Editable list of directory rules, each a path relative to the packed root plus its recursive flag.
  */
-export function PackerFolderList({
-  folders,
+export function PackerDirectoryList({
+  directories,
   isDisabled,
   addLabel,
   emptyLabel,
   recursiveLabel,
   onChange,
-}: IPackerFolderListProps): ReactElement {
+}: IPackerDirectoryListProps): ReactElement {
   return (
     <Stack spacing={1}>
-      {folders.length ? (
-        folders.map((folder, index) => (
+      {directories.length ? (
+        directories.map((directory, index) => (
           <Stack key={index} direction={"row"} spacing={1} sx={{ alignItems: "center" }}>
             <TextField
               size={"small"}
               fullWidth
               disabled={isDisabled}
-              value={folder.path}
+              value={directory.path}
               // An empty path is the packed root itself rather than a missing value.
               placeholder={"root of the source directory"}
-              slotProps={{ htmlInput: { "aria-label": `Folder ${index + 1}` } }}
+              slotProps={{ htmlInput: { "aria-label": `Directory ${index + 1}` } }}
               onChange={(event: ChangeEvent<HTMLInputElement>) =>
-                onChange(withFolderAt(folders, index, { path: event.target.value }))
+                onChange(withDirectoryAt(directories, index, { path: event.target.value }))
               }
             />
 
@@ -51,10 +51,10 @@ export function PackerFolderList({
                 <Switch
                   size={"small"}
                   disabled={isDisabled}
-                  checked={folder.isRecursive}
-                  slotProps={{ input: { "aria-label": `${recursiveLabel} for ${folder.path || "the root"}` } }}
+                  checked={directory.isRecursive}
+                  slotProps={{ input: { "aria-label": `${recursiveLabel} for ${directory.path || "the root"}` } }}
                   onChange={(event: ChangeEvent<HTMLInputElement>) =>
-                    onChange(withFolderAt(folders, index, { isRecursive: event.target.checked }))
+                    onChange(withDirectoryAt(directories, index, { isRecursive: event.target.checked }))
                   }
                 />
               }
@@ -62,10 +62,10 @@ export function PackerFolderList({
             />
 
             <IconButton
+              aria-label={`Remove ${directory.path || "the root"}`}
               size={"small"}
               disabled={isDisabled}
-              aria-label={`Remove ${folder.path || "the root"}`}
-              onClick={() => onChange(withoutAt(folders, index))}
+              onClick={() => onChange(withoutAt(directories, index))}
             >
               <DeleteIcon fontSize={"small"} />
             </IconButton>
@@ -82,7 +82,7 @@ export function PackerFolderList({
           size={"small"}
           disabled={isDisabled}
           startIcon={<AddIcon />}
-          onClick={() => onChange([...folders, { path: "", isRecursive: true }])}
+          onClick={() => onChange([...directories, { path: "", isRecursive: true }])}
         >
           {addLabel}
         </Button>

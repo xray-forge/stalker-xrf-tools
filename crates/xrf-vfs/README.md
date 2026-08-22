@@ -128,8 +128,8 @@ use xrf_vfs::{XrayAssetType, XrayMountMode, XrayVfs};
 # fn main() -> xrf_error::XrfResult {
 let vfs: XrayVfs = XrayVfs::open(XrayMountMode::Auto, "C:\\Games\\Anomaly")?;
 
-let texture = vfs.dds_texture("wpn\\wpn_ak74")?; // textures\wpn\wpn_ak74.dds
-let visual = vfs.ogf("weapons\\ak74\\wpn_ak74_hud")?; // meshes\weapons\ak74\wpn_ak74_hud.ogf
+let texture = vfs.resolve_dds_texture("wpn\\wpn_ak74")?; // textures\wpn\wpn_ak74.dds
+let visual = vfs.resolve_ogf("weapons\\ak74\\wpn_ak74_hud")?; // meshes\weapons\ak74\wpn_ak74_hud.ogf
 let motions = vfs.resolve_all(XrayAssetType::Omf, "wpn\\wpn_ak74_*")?; // every matching animation set
 
 println!("{:?} {:?} {}", texture.is_some(), visual.is_some(), motions.len());

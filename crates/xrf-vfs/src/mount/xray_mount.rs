@@ -70,18 +70,18 @@ impl XrayMount {
 
   /// Converts a logical path to a source-relative path, or returns `None` when it lies outside the mount's base.
   ///
-  /// Borrowed for the common case: most mounts sit at the logical root, where the source path *is* the logical path, and
-  /// this runs once per mount on every lookup — allocating a copy of each probed path was the cost of saying nothing.
-  pub(crate) fn to_source_path<'a>(&self, logical_path: &'a str) -> Option<Cow<'a, str>> {
+  /// Always a borrow of the caller's path: a root mount's source path *is* the logical path, and a based mount's is a
+  /// tail of it. This runs once per mount on every lookup.
+  pub(crate) fn to_source_path<'a>(&self, logical_path: &'a str) -> Option<&'a str> {
     if self.base.is_empty() {
-      return Some(Cow::Borrowed(logical_path));
+      return Some(logical_path);
     }
 
     if !is_component_prefix(logical_path, &self.base) {
       return None;
     }
 
-    Some(Cow::Borrowed(logical_path[self.base.len()..].trim_start_matches('\\')))
+    Some(logical_path[self.base.len()..].trim_start_matches('\\'))
   }
 
   /// Applies this mount's base to a source-relative path.
@@ -113,7 +113,7 @@ impl XrayMount {
       return Some(if inner.is_empty() {
         None
       } else {
-        Some(inner.into_owned())
+        Some(inner.to_string())
       });
     }
 

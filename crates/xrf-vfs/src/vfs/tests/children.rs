@@ -120,6 +120,54 @@ fn answers_an_empty_listing_for_a_directory_nothing_holds() {
 }
 
 #[test]
+fn a_scoped_view_lists_nothing_for_a_directory_outside_its_subtree() {
+  // The view's own guard: `find` and `read` refuse to answer outside the scope's subtree, and listing must not be the
+  // one read-path operation that reaches past it.
+  let vfs: XrayVfs = mounted(
+    "children_scope_escape",
+    &["configs/system.ltx", "textures/wpn/wpn_ak74.dds"],
+  );
+  let configs: XrayLookupScope = XrayLookupScope::all().with_prefix("configs").expect("prefix");
+
+  assert!(
+    vfs
+      .scoped(&configs)
+      .list_children("textures")
+      .expect("listing")
+      .is_empty(),
+    "a scoped listing must not reach into a sibling subtree"
+  );
+  assert_eq!(
+    vfs
+      .scoped(&configs)
+      .list_children("configs")
+      .expect("listing")
+      .files
+      .len(),
+    1,
+    "its own subtree still lists"
+  );
+}
+
+#[test]
+fn a_scoped_view_keeps_its_own_subtree_when_listing_an_ancestor() {
+  // Listing the root of a view narrowed below it shows the way down, not everything the VFS holds.
+  let vfs: XrayVfs = mounted(
+    "children_scope_ancestor",
+    &["configs/weapons/w_ak74.ltx", "configs/system.ltx", "textures/wpn/a.dds"],
+  );
+  let weapons: XrayLookupScope = XrayLookupScope::all().with_prefix("configs\\weapons").expect("prefix");
+
+  let listing: XrayDirectoryListing = vfs.scoped(&weapons).list_children("configs").expect("listing");
+
+  assert_eq!(listing.directories, vec!["weapons"]);
+  assert!(
+    listing.files.is_empty(),
+    "`configs\\system.ltx` sits outside the view, even though it sits inside the directory"
+  );
+}
+
+#[test]
 fn rejects_a_directory_that_is_not_a_logical_path() {
   let vfs: XrayVfs = mounted("children_invalid", &["configs/system.ltx"]);
 
