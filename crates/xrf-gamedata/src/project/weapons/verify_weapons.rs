@@ -68,8 +68,8 @@ impl GamedataProject {
 
     xrf_output::info!(
       options.output,
-      "Verified gamedata weapons in {} sec, {}/{} valid",
-      duration.as_secs_f64(),
+      "Verified gamedata weapons in {}, {}/{} valid",
+      xrf_utils::format_duration(duration),
       checked_weapons_count - invalid_weapons_count,
       checked_weapons_count
     );

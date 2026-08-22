@@ -68,8 +68,8 @@ impl GamedataProject {
 
     xrf_output::info!(
       options.output,
-      "Verified gamedata spawn files in {} sec, {}/{} are valid",
-      duration.as_secs_f64(),
+      "Verified gamedata spawn files in {}, {}/{} are valid",
+      xrf_utils::format_duration(duration),
       total_spawns - invalid_spawns,
       total_spawns
     );

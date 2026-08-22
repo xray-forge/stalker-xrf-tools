@@ -22,8 +22,8 @@ impl GamedataProject {
 
     xrf_output::info!(
       options.output,
-      "Verified gamedata ltx files in {} sec",
-      duration.as_secs_f64(),
+      "Verified gamedata ltx files in {}",
+      xrf_utils::format_duration(duration),
     );
 
     Ok(GamedataLtxVerificationResult {

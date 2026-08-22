@@ -42,8 +42,8 @@ impl GamedataProject {
 
     xrf_output::info!(
       options.output,
-      "Verified gamedata animations in {} sec, {}",
-      result.duration.as_secs_f64(),
+      "Verified gamedata animations in {}, {}",
+      xrf_utils::format_duration(result.duration),
       result.get_failure_message()
     );
 

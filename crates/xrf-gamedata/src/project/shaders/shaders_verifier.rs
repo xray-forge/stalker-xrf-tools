@@ -49,8 +49,8 @@ impl<'a> ShadersVerifier<'a> {
 
     xrf_output::info!(
       self.options.output,
-      "Verified renderer shaders in {} sec, {}",
-      result.duration.as_secs_f64(),
+      "Verified renderer shaders in {}, {}",
+      xrf_utils::format_duration(result.duration),
       result.get_failure_message()
     );
 

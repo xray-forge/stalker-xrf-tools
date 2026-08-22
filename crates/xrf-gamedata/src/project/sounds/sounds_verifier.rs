@@ -42,8 +42,8 @@ impl<'a> SoundsVerifier<'a> {
 
     xrf_output::info!(
       self.options.output,
-      "Verified gamedata sounds in {} sec, {}",
-      result.duration.as_secs_f64(),
+      "Verified gamedata sounds in {}, {}",
+      xrf_utils::format_duration(result.duration),
       result.get_failure_message()
     );
 

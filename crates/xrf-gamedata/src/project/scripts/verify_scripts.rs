@@ -82,16 +82,16 @@ impl GamedataProject {
     if checked_scripts_count > 0 {
       xrf_output::info!(
         options.output,
-        "Verified gamedata scripts in {} sec, {}/{} valid",
-        duration.as_secs_f64(),
+        "Verified gamedata scripts in {}, {}/{} valid",
+        xrf_utils::format_duration(duration),
         checked_scripts_count - invalid_scripts_count,
         checked_scripts_count
       );
     } else {
       xrf_output::info!(
         options.output,
-        "Check gamedata scripts in {} sec, no scripts found",
-        duration.as_secs_f64(),
+        "Check gamedata scripts in {}, no scripts found",
+        xrf_utils::format_duration(duration),
       );
     }
 

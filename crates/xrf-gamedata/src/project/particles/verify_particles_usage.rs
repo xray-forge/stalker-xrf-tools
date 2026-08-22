@@ -40,8 +40,8 @@ impl GamedataProject {
 
     xrf_output::info!(
       options.output,
-      "Verified gamedata particles usage in {} sec, {}/{} valid references, {}/{} spawn files inspected, {} unparsed custom data sections",
-      result.duration.as_secs_f64(),
+      "Verified gamedata particles usage in {}, {}/{} valid references, {}/{} spawn files inspected, {} unparsed custom data sections",
+      xrf_utils::format_duration(result.duration),
       result.checked_references_count - result.invalid_references_count,
       result.checked_references_count,
       result.checked_spawn_files_count - result.unreadable_spawn_files_count,

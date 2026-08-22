@@ -104,8 +104,8 @@ impl<'a> LevelsVerifier<'a> {
 
     xrf_output::info!(
       self.options.output,
-      "Verified gamedata levels in {} sec, {} graph levels, {}/{} level bundles valid, {}/{} shader references valid",
-      result.duration.as_secs_f64(),
+      "Verified gamedata levels in {}, {} graph levels, {}/{} level bundles valid, {}/{} shader references valid",
+      xrf_utils::format_duration(result.duration),
       result.roster_levels_count,
       result.checked_levels_count - result.invalid_levels_count,
       result.checked_levels_count,

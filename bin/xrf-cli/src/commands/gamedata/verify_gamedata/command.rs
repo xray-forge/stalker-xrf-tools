@@ -151,8 +151,8 @@ impl GenericCommand for VerifyGamedataCommand {
         xrf_output::success!(verify_options.output, "Project gamedata is valid");
         xrf_output::info!(
           verify_options.output,
-          "Gamedata project verified in {} sec",
-          verify_result.get_duration().as_secs_f64()
+          "Gamedata project verified in {}",
+          xrf_utils::format_duration(verify_result.get_duration())
         );
       }
       GamedataVerificationStatus::Failed
@@ -205,8 +205,8 @@ impl GenericCommand for VerifyGamedataCommand {
 
         xrf_output::error!(
           verify_options.output,
-          "Gamedata project checked in {} sec",
-          verify_result.get_duration().as_secs_f32()
+          "Gamedata project checked in {}",
+          xrf_utils::format_duration(verify_result.get_duration())
         );
       }
     }

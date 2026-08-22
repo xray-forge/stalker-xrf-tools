@@ -82,14 +82,14 @@ impl GamedataProject {
     if checked_weather_files_count == 0 {
       xrf_output::info!(
         options.output,
-        "Checked gamedata weather files in {} sec, no weather files found",
-        duration.as_secs_f64()
+        "Checked gamedata weather files in {}, no weather files found",
+        xrf_utils::format_duration(duration)
       );
     } else {
       xrf_output::info!(
         options.output,
-        "Verified gamedata weather files in {} sec, {}/{} valid",
-        duration.as_secs_f64(),
+        "Verified gamedata weather files in {}, {}/{} valid",
+        xrf_utils::format_duration(duration),
         checked_weather_files_count - invalid_weather_files_count,
         checked_weather_files_count
       );

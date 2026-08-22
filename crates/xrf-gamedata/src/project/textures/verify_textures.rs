@@ -74,8 +74,8 @@ impl GamedataProject {
 
     xrf_output::info!(
       options.output,
-      "Verified gamedata textures in {} sec, {}/{} valid, {}/{} declared bumps resolved",
-      duration.as_secs_f64(),
+      "Verified gamedata textures in {}, {}/{} valid, {}/{} declared bumps resolved",
+      xrf_utils::format_duration(duration),
       checked_textures_count - invalid_textures_count,
       checked_textures_count,
       checked_bumps_count - unresolved_bumps_count,

@@ -68,8 +68,8 @@ impl GamedataProject {
 
     xrf_output::info!(
       options.output,
-      "Verified gamedata particle files in {} sec, {}/{} valid",
-      duration.as_secs_f64(),
+      "Verified gamedata particle files in {}, {}/{} valid",
+      xrf_utils::format_duration(duration),
       checked_particle_files_count - invalid_particle_files_count,
       checked_particle_files_count
     );
