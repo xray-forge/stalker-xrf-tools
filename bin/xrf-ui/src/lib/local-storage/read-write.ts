@@ -1,3 +1,4 @@
+import { Logger } from "@/lib/logging";
 import { Nullable } from "@/lib/types/general";
 
 /**
@@ -17,7 +18,11 @@ export function getLocalStorageValue(key: string): Nullable<string> {
  * @param value - Value to persist, or `null` to clear the key.
  */
 export function setLocalStorageValue(key: string, value: Nullable<string>): void {
-  if (!window.localStorage) {
+  if (window.localStorage) {
+    Logger.debug("Write local storage value:", key);
+  } else {
+    Logger.warn("Local storage is not available during write:", key);
+
     return;
   }
 

@@ -74,10 +74,6 @@ export function SettingsForm(): ReactElement {
 
       <Divider />
 
-      {/*
-        Only the project root is configured here now. Each tool remembers its own paths, so this is a
-        fallback used to guess a first value rather than something the tools read continuously.
-      */}
       <SettingsPathField
         label={"Project"}
         description={"Root of the xrf project. Tools use it to guess a starting path when they have none."}
