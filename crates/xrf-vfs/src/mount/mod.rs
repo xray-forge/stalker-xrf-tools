@@ -8,9 +8,11 @@ mod tests;
 mod xray_mount;
 mod xray_mount_mode;
 mod xray_mount_plan;
+mod xray_probe_plan;
 mod xray_root;
 
 pub use skipped_mount::XraySkippedMount;
 pub use xray_mount::{XrayMount, XrayMountId};
 pub use xray_mount_mode::XrayMountMode;
 pub use xray_mount_plan::{XrayMountPlan, XrayPlannedMount};
+pub use xray_probe_plan::XrayProbePlan;

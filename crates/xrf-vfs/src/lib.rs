@@ -8,7 +8,7 @@
 //! - [`asset`] — what a resolved asset is, plus the per-kind rules that turn a reference into one.
 //! - [`source`] — the mountable surface, and the two sources the engine itself has.
 //! - [`mount`] — composing sources into a searchable order, and planning one from a path.
-//! - [`vfs`] — resolving and reading through that order.
+//! - [`vfs`] — resolving and reading through that order, one scope at a time or as an ordered probe.
 //! - [`fsgame`] — the declaration file an installation describes its own layout with.
 //!
 //! The `.db` volume format the archive source reads lives below this crate, in `xrf-archive`.
@@ -22,7 +22,11 @@ pub mod vfs;
 
 pub use asset::{XrayAsset, XrayAssetContainer, XrayAssetRules, XrayAssetType};
 pub use fsgame::{FsgameDeclaration, FsgameFile};
-pub use mount::{XrayMount, XrayMountId, XrayMountMode, XrayMountPlan, XrayPlannedMount, XraySkippedMount};
+pub use mount::{
+  XrayMount, XrayMountId, XrayMountMode, XrayMountPlan, XrayPlannedMount, XrayProbePlan, XraySkippedMount,
+};
 pub use path::{XrayLogicalPath, XrayPathCollision};
 pub use source::{XrayArchiveSource, XrayAssetSource, XraySourceKind};
-pub use vfs::{XrayDirectoryListing, XrayLookupScope, XrayScopedVfs, XrayVfs};
+pub use vfs::{
+  XrayDirectoryListing, XrayLookupScope, XrayProbe, XrayProbeStep, XrayResolution, XrayScopedVfs, XrayVfs,
+};
