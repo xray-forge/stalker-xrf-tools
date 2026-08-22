@@ -5,6 +5,7 @@ use std::time::Instant;
 use walkdir::{DirEntry, WalkDir};
 use xrf_error::{XrfError, XrfResult};
 
+use crate::json;
 use crate::json::read::read_json;
 use crate::language::TranslationLanguage;
 use crate::project::initialize::options::ProjectInitializeOptions;
@@ -62,7 +63,7 @@ pub fn initialize_file<P: AsRef<Path>>(
   let extension: Option<&OsStr> = path.as_ref().extension();
 
   if let Some(extension) = extension {
-    if extension == "json" {
+    if extension == json::FILE_EXTENSION {
       return initialize_json_file(path, options);
     } else {
       log::info!("Skip file {}", path.as_ref().display());

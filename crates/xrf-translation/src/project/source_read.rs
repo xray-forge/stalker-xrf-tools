@@ -3,6 +3,7 @@ use std::path::{Path, PathBuf};
 use walkdir::{DirEntry, WalkDir};
 use xrf_error::{XrfError, XrfResult};
 
+use crate::json;
 use crate::json::read::read_json;
 use crate::language::TranslationLanguage;
 use crate::project::constants::{LANGUAGE_NEUTRAL, MULTILANGUAGE};
@@ -11,6 +12,7 @@ use crate::project::descriptor::{
 };
 use crate::project::layout::{normalize, relative};
 use crate::types::{TranslationEntry, TranslationJson, TranslationVariant};
+use crate::xml;
 use crate::xml::read::read_string_table;
 
 /// Read an XRF translations source tree.
@@ -44,8 +46,8 @@ pub fn read_source<P: AsRef<Path>>(root: P) -> XrfResult<TranslationProjectDescr
     }
 
     match path.extension().and_then(|extension| extension.to_str()) {
-      Some("json") => merge_json(root, path, &mut descriptor),
-      Some("xml") => merge_xml(root, path, &mut descriptor),
+      Some(json::FILE_EXTENSION) => merge_json(root, path, &mut descriptor),
+      Some(xml::FILE_EXTENSION) => merge_xml(root, path, &mut descriptor),
       _ => {}
     }
   }

@@ -23,8 +23,8 @@ use crate::xml;
 /// not know how to write.
 pub fn apply_edits(path: &Path, language: &str, edits: &[TranslationEdit]) -> XrfResult {
   match path.extension().and_then(|extension| extension.to_str()) {
-    Some("json") => json::write::apply_edits(path, language, edits),
-    Some("xml") => xml::write::apply_edits(path, edits),
+    Some(json::FILE_EXTENSION) => json::write::apply_edits(path, language, edits),
+    Some(xml::FILE_EXTENSION) => xml::write::apply_edits(path, edits),
     _ => Err(XrfError::new_invalid_error(format!(
       "Translation '{}' is not a file this can write",
       path.display()

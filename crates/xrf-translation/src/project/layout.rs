@@ -4,6 +4,7 @@ use std::path::{Path, PathBuf};
 use crate::language::TranslationLanguage;
 use crate::project::constants::MAP_DESC_DIRECTORY;
 use crate::project::descriptor::TranslationProjectMode;
+use crate::{json, xml};
 
 /// Report which layout a directory looks like.
 ///
@@ -27,8 +28,8 @@ pub fn detect_mode(root: &Path) -> TranslationProjectMode {
     // A source tree is recognised by what only it has: JSON maps and language-suffixed XML.
     if path.is_file() {
       match path.extension().and_then(|extension| extension.to_str()) {
-        Some("json") => return TranslationProjectMode::Source,
-        Some("xml") if TranslationLanguage::from_file_name(&path).is_some() => {
+        Some(json::FILE_EXTENSION) => return TranslationProjectMode::Source,
+        Some(xml::FILE_EXTENSION) if TranslationLanguage::from_file_name(&path).is_some() => {
           return TranslationProjectMode::Source;
         }
         _ => {}

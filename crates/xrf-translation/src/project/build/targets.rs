@@ -5,8 +5,10 @@ use std::path::{Component, Path, PathBuf};
 
 use xrf_error::{XrfError, XrfResult};
 
+use crate::json;
 use crate::language::TranslationLanguage;
 use crate::project::build::options::ProjectBuildOptions;
+use crate::xml;
 
 /// Open the file a source builds to, creating the directories above it.
 ///
@@ -62,7 +64,7 @@ pub(crate) fn target_path(
     destination
       .join(language.to_string())
       .join(relative_source)
-      .with_extension("xml"),
+      .with_extension(xml::FILE_EXTENSION),
   )
 }
 
@@ -97,14 +99,14 @@ pub(crate) fn validate_targets(source_files: &[PathBuf], options: &ProjectBuildO
 
 pub(crate) fn target_languages_for_source(path: &Path, options: &ProjectBuildOptions) -> Vec<TranslationLanguage> {
   match path.extension().and_then(OsStr::to_str) {
-    Some("json") => {
+    Some(json::FILE_EXTENSION) => {
       if options.language == TranslationLanguage::All {
         TranslationLanguage::get_all()
       } else {
         vec![options.language]
       }
     }
-    Some("xml") => match TranslationLanguage::from_file_name(path) {
+    Some(xml::FILE_EXTENSION) => match TranslationLanguage::from_file_name(path) {
       Some(locale) if options.language == TranslationLanguage::All || options.language == locale => vec![locale],
       Some(_) => Vec::new(),
       None if options.language == TranslationLanguage::All => TranslationLanguage::get_all(),

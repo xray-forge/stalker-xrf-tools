@@ -10,6 +10,7 @@ use crate::project::descriptor::{
 };
 use crate::project::layout::normalize;
 use crate::types::{TranslationEntry, TranslationVariant};
+use crate::xml;
 use crate::xml::encoding::read_decoded;
 use crate::xml::read::read_string_table;
 
@@ -41,7 +42,7 @@ pub fn read_gamedata<P: AsRef<Path>>(root: P) -> XrfResult<TranslationProjectDes
       .filter(|entry| {
         Path::new(&entry.file_name())
           .extension()
-          .is_some_and(|extension| extension.eq_ignore_ascii_case("xml"))
+          .is_some_and(|extension| extension.eq_ignore_ascii_case(xml::FILE_EXTENSION))
       })
       .map(|entry| entry.file_name().to_string_lossy().into_owned())
       .collect();

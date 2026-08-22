@@ -5,6 +5,7 @@ use std::time::Instant;
 use walkdir::{DirEntry, WalkDir};
 use xrf_error::{XrfError, XrfResult};
 
+use crate::json;
 use crate::json::read::read_json;
 use crate::language::TranslationLanguage;
 use crate::project::verify::options::ProjectVerifyOptions;
@@ -58,7 +59,7 @@ pub fn verify_file<P: AsRef<Path>>(path: &P, options: &ProjectVerifyOptions) -> 
   let extension: Option<&OsStr> = path.as_ref().extension();
 
   if let Some(extension) = extension {
-    if extension == "json" {
+    if extension == json::FILE_EXTENSION {
       return verify_json_file(path, options);
     } else {
       log::info!("Skip file {}", path.as_ref().display());

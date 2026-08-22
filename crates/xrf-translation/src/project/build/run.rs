@@ -8,6 +8,7 @@ use walkdir::{DirEntry, WalkDir};
 use xrf_error::{XrfError, XrfResult};
 use xrf_utils::encode_string_to_bytes;
 
+use crate::json;
 use crate::json::read::read_json;
 use crate::language::TranslationLanguage;
 use crate::project::build::compile::compile_by_language;
@@ -15,6 +16,7 @@ use crate::project::build::options::ProjectBuildOptions;
 use crate::project::build::result::ProjectBuildResult;
 use crate::project::build::targets::{ensure_output_outside_source, prepare_target_file, validate_targets};
 use crate::types::TranslationJson;
+use crate::xml;
 
 /// Build every translation source in a directory.
 ///
@@ -77,9 +79,9 @@ pub fn build_file<P: AsRef<Path>>(path: &P, options: &ProjectBuildOptions) -> Xr
   let mut result: ProjectBuildResult = ProjectBuildResult::new();
 
   if let Some(extension) = extension {
-    if extension == "xml" {
+    if extension == xml::FILE_EXTENSION {
       build_xml_file(path, options)?;
-    } else if extension == "json" {
+    } else if extension == json::FILE_EXTENSION {
       build_json_file(path, options)?;
     } else {
       log::info!("Skip file {}", path.as_ref().display());
