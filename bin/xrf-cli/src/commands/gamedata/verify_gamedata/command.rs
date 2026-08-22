@@ -1,7 +1,7 @@
 use std::path::PathBuf;
-use std::process;
 
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
+use xrf_error::XrfError;
 use xrf_gamedata::{
   GamedataProject, GamedataProjectReadOptions, GamedataProjectVerifyOptions, GamedataVerificationResult,
   GamedataVerificationStatus, GamedataVerificationType,
@@ -9,6 +9,7 @@ use xrf_gamedata::{
 use xrf_output::OutputOptions;
 
 use super::verification_report::GamedataVerificationReportWriter;
+use crate::core::command_error::CommandError;
 use crate::core::generic_command::{CommandResult, GenericCommand};
 use crate::core::output::TerminalOutput;
 
@@ -154,6 +155,8 @@ impl GenericCommand for VerifyGamedataCommand {
           "Gamedata project verified in {}",
           xrf_utils::format_duration(verify_result.get_duration())
         );
+
+        Ok(())
       }
       GamedataVerificationStatus::Failed
       | GamedataVerificationStatus::Error
@@ -208,13 +211,21 @@ impl GenericCommand for VerifyGamedataCommand {
           "Gamedata project checked in {}",
           xrf_utils::format_duration(verify_result.get_duration())
         );
+
+        if status == GamedataVerificationStatus::Failed {
+          let findings: usize = verify_result
+            .get_failure_reports()
+            .map(|report| report.get_findings().len())
+            .sum::<usize>()
+            .max(1);
+
+          Err(CommandError::new_check_failed(findings))
+        } else {
+          // Error, incomplete, and skipped runs did not judge the content to the end, so they are
+          // execution failures rather than check verdicts.
+          Err(XrfError::new_verify_error(status_message).into())
+        }
       }
     }
-
-    if status != GamedataVerificationStatus::Passed {
-      process::exit(1);
-    }
-
-    Ok(())
   }
 }

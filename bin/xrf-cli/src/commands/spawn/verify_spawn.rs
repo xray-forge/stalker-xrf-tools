@@ -3,8 +3,11 @@ use std::path::PathBuf;
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use xrf_db::{SpawnFile, XRayByteOrder};
 use xrf_error::XrfError;
+use xrf_output::OutputOptions;
 
+use crate::core::command_error::CommandError;
 use crate::core::generic_command::{CommandResult, GenericCommand};
+use crate::core::output::TerminalOutput;
 
 #[derive(Default)]
 pub struct VerifySpawnCommand;
@@ -49,6 +52,8 @@ impl GenericCommand for VerifySpawnCommand {
       .get_one::<_>("path")
       .expect("Expected valid path to be provided");
 
+    let output: OutputOptions = TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
+
     log::info!("Verify spawn file {}", path.display());
 
     match SpawnFile::read_from_path::<XRayByteOrder, _>(path) {
@@ -57,10 +62,12 @@ impl GenericCommand for VerifySpawnCommand {
 
         Ok(())
       }
+      // An unreadable file is an execution failure; only judged content is a check failure.
+      Err(error @ XrfError::Io { .. }) => Err(error.into()),
       Err(error) => {
-        log::error!("Provided spawn file is invalid: {}", error);
+        xrf_output::failure!(output, "Provided spawn file is invalid: {error}");
 
-        Err(XrfError::new_parsing_error(format!("Verification of spawn file failed: {}", error)).into())
+        Err(CommandError::new_check_failed(1))
       }
     }
   }

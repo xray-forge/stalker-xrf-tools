@@ -1,13 +1,16 @@
-use std::process;
+use std::process::ExitCode;
 
 use clap::{ArgMatches, Command};
 
 use crate::core::generic_command::GenericCommand;
-use crate::core::output::TerminalOutput;
 use crate::registry::setup_subcommands;
 
 /// Assemble the CLI from the registered commands and run the one the caller asked for.
-pub fn run() {
+///
+/// The only place a command outcome becomes a process exit. Every failure ends with exactly one
+/// final stderr line, printed unconditionally so `--silent` can never hide that a run failed;
+/// commands themselves report finding details and never exit.
+pub fn run() -> ExitCode {
   let commands: Vec<Box<dyn GenericCommand>> = setup_subcommands();
 
   let mut application: Command = Command::new("xrf-tool")
@@ -30,12 +33,12 @@ pub fn run() {
     unreachable!("clap matched '{name}', which no registered command declares")
   };
 
-  if let Err(error) = command.execute(arguments) {
-    xrf_output::error!(
-      TerminalOutput::from_options(false, false),
-      "Execution of command '{name}' failed, error: {error}",
-    );
+  match command.execute(arguments) {
+    Ok(()) => ExitCode::SUCCESS,
+    Err(error) => {
+      eprintln!("{error}");
 
-    process::exit(1);
+      ExitCode::from(error.exit_code())
+    }
   }
 }

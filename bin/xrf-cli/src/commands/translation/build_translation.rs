@@ -2,6 +2,7 @@ use std::path::PathBuf;
 use std::str::FromStr;
 
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
+use xrf_error::XrfError;
 use xrf_output::OutputOptions;
 use xrf_translation::{ProjectBuildOptions, ProjectBuildResult, TranslationLanguage, build_dir, build_file};
 
@@ -102,7 +103,7 @@ impl GenericCommand for BuildTranslationCommand {
       output,
       path: path.clone(),
       output_dir: output_dir.clone(),
-      language: TranslationLanguage::from_str(language)?,
+      language: TranslationLanguage::from_str(language).map_err(XrfError::new_unknown_language_error)?,
     };
 
     let result: ProjectBuildResult = if path.is_dir() {

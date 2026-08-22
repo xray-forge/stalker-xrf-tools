@@ -10,6 +10,7 @@ use xrf_export::{
 };
 use xrf_output::OutputOptions;
 
+use crate::core::command_error::CommandError;
 use crate::core::generic_command::{CommandResult, GenericCommand};
 use crate::core::output::TerminalOutput;
 
@@ -114,16 +115,26 @@ impl GenericCommand for ExportExternsCommand {
 
     let path: &PathBuf = check.expect("Checked path is required after validation");
 
-    Self::verify_artifact(path, format, &parsed.manifest, line_endings)?;
+    match Self::verify_artifact(path, format, &parsed.manifest, line_endings) {
+      Ok(()) => {
+        xrf_output::info!(
+          output,
+          "Extern artifact '{}' matches {} declarations.",
+          path.display(),
+          parsed.manifest.exports.len()
+        );
 
-    xrf_output::info!(
-      output,
-      "Extern artifact '{}' matches {} declarations.",
-      path.display(),
-      parsed.manifest.exports.len()
-    );
+        Ok(())
+      }
+      // A mismatched or unparseable artifact is the judged content failing the check; an
+      // unreadable one is an execution failure.
+      Err(error @ (XrfError::Verify { .. } | XrfError::Invalid { .. })) => {
+        xrf_output::failure!(output, "{error}");
 
-    Ok(())
+        Err(CommandError::new_check_failed(1))
+      }
+      Err(error) => Err(error.into()),
+    }
   }
 }
 

@@ -1,12 +1,13 @@
 use std::path::PathBuf;
-use std::process;
 use std::str::FromStr;
 
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
+use xrf_error::{XrfError, XrfResult};
 use xrf_output::OutputOptions;
 use xrf_translation::{ProjectVerifyOptions, ProjectVerifyResult, TranslationLanguage, verify_dir, verify_file};
 
 use super::translation_verification_report::TranslationVerificationReportWriter;
+use crate::core::command_error::CommandError;
 use crate::core::generic_command::{CommandResult, GenericCommand};
 use crate::core::output::TerminalOutput;
 
@@ -100,13 +101,24 @@ impl GenericCommand for VerifyTranslationCommand {
       is_strict,
       output,
       path: path.clone(),
-      language: TranslationLanguage::from_str(language)?,
+      language: TranslationLanguage::from_str(language).map_err(XrfError::new_unknown_language_error)?,
     };
 
-    let result: ProjectVerifyResult = if path.is_dir() {
-      verify_dir(path, &options)?
+    let verify_result: XrfResult<ProjectVerifyResult> = if path.is_dir() {
+      verify_dir(path, &options)
     } else {
-      verify_file(path, &options)?
+      verify_file(path, &options)
+    };
+
+    let result: ProjectVerifyResult = match verify_result {
+      Ok(result) => result,
+      // An unreadable source is an execution failure; only judged content is a check failure.
+      Err(error @ XrfError::Io { .. }) => return Err(error.into()),
+      Err(error) => {
+        xrf_output::failure!(options.output, "Provided translations are invalid: {error}");
+
+        return Err(CommandError::new_check_failed(1));
+      }
     };
 
     if let Some(report_path) = report_path {
@@ -122,8 +134,9 @@ impl GenericCommand for VerifyTranslationCommand {
     );
 
     if options.is_strict && result.missing_translations_count > 0 {
-      log::error!("Failing with non-zero error code, missing translation found");
-      process::exit(1);
+      return Err(CommandError::new_check_failed(
+        result.missing_translations_count as usize,
+      ));
     }
 
     Ok(())

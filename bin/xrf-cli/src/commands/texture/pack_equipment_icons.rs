@@ -1,9 +1,9 @@
 use std::path::PathBuf;
-use std::process;
 use std::time::Instant;
 
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use xrf_dds::ImageFormat;
+use xrf_error::XrfError;
 use xrf_ltx::Ltx;
 use xrf_output::OutputOptions;
 use xrf_texture::{PackEquipmentOptions, PackEquipmentProcessor};
@@ -98,8 +98,13 @@ impl GenericCommand for PackEquipmentIconsCommand {
       TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
 
     if !source.is_dir() {
-      xrf_output::error!(output_options, "Expected valid source folder containing DDS icons");
-      process::exit(1);
+      return Err(
+        XrfError::new_read_error(format!(
+          "Expected valid source folder containing DDS icons, got: {}",
+          source.display()
+        ))
+        .into(),
+      );
     }
 
     xrf_output::info!(output_options, "Starting packing DDS icons file, parallel");

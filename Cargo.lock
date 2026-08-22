@@ -7037,6 +7037,7 @@ name = "xrf-report"
 version = "0.1.0"
 dependencies = [
  "serde",
+ "xrf-error",
 ]
 
 [[package]]

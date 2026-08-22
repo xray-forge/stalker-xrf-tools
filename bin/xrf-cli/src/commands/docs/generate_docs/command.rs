@@ -6,6 +6,7 @@ use xrf_output::OutputOptions;
 
 use super::command_reference::GroupReference;
 use super::markdown_renderer::ReferenceMarkdownRenderer;
+use crate::core::command_error::CommandError;
 use crate::core::generic_command::{CommandResult, GenericCommand};
 use crate::core::output::TerminalOutput;
 
@@ -126,14 +127,17 @@ impl GenerateDocsCommand {
 
       Ok(())
     } else {
-      Err(
-        format!(
-          "CLI documentation in {} is stale, regenerate it with 'xrf-cli generate-docs':\n{}",
-          directory.display(),
-          stale.join("\n")
-        )
-        .into(),
-      )
+      xrf_output::failure!(
+        output,
+        "CLI documentation in {} is stale, regenerate it with 'xrf-cli generate-docs':",
+        directory.display()
+      );
+
+      for name in &stale {
+        xrf_output::failure!(output, "  {name}");
+      }
+
+      Err(CommandError::new_check_failed(stale.len()))
     }
   }
 

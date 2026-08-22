@@ -1,11 +1,12 @@
 use std::path::PathBuf;
-use std::process;
 
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
+use xrf_error::XrfError;
 use xrf_ltx::Ltx;
 use xrf_output::OutputOptions;
 use xrf_texture::{EquipmentGridOverlap, VerifyEquipmentGridProcessor};
 
+use crate::core::command_error::CommandError;
 use crate::core::generic_command::{CommandResult, GenericCommand};
 use crate::core::output::TerminalOutput;
 
@@ -57,7 +58,18 @@ impl GenericCommand for VerifyEquipmentIconsCommand {
 
     let output: OutputOptions = TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
 
-    let ltx: Ltx = Ltx::read_from_file_full(path)?;
+    // The system ltx is the judged content: an unparseable file fails the check, while an
+    // unreadable one is an execution failure.
+    let ltx: Ltx = match Ltx::read_from_file_full(path) {
+      Ok(ltx) => ltx,
+      Err(error @ XrfError::Io { .. }) => return Err(error.into()),
+      Err(error) => {
+        xrf_output::failure!(output, "Provided system ltx is invalid: {error}");
+
+        return Err(CommandError::new_check_failed(1));
+      }
+    };
+
     let overlaps: Vec<EquipmentGridOverlap> = VerifyEquipmentGridProcessor::find_overlaps(&ltx);
 
     if overlaps.is_empty() {
@@ -80,6 +92,6 @@ impl GenericCommand for VerifyEquipmentIconsCommand {
 
     xrf_output::error!(output, "Found {} overlapping icon rect pair(s)", overlaps.len());
 
-    process::exit(1);
+    Err(CommandError::new_check_failed(overlaps.len()))
   }
 }

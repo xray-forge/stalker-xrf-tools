@@ -2,6 +2,7 @@ use std::error::Error;
 use std::fmt::{Display, Formatter};
 
 use serde::Serialize;
+use xrf_error::XrfError;
 
 /// Error returned when a stable report identifier is empty.
 #[derive(Debug, Eq, PartialEq)]
@@ -22,6 +23,16 @@ impl Display for IdentifierError {
 }
 
 impl Error for IdentifierError {}
+
+// Lets fallible identifier construction propagate with `?` where a caller returns `XrfResult`,
+// instead of forcing an `expect` at every dynamic call site.
+impl From<IdentifierError> for XrfError {
+  fn from(value: IdentifierError) -> Self {
+    Self::Invalid {
+      message: value.to_string(),
+    }
+  }
+}
 
 macro_rules! identifier {
   ($name:ident, $kind:literal) => {

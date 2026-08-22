@@ -1,8 +1,8 @@
-use std::error::Error;
-
 use clap::{ArgMatches, Command};
 
-pub type CommandResult<T = ()> = Result<T, Box<dyn Error>>;
+use crate::core::command_error::CommandError;
+
+pub type CommandResult<T = ()> = Result<T, CommandError>;
 
 /// Named set of related commands; drives both CLI registration order and generated documentation layout.
 pub struct CommandGroup {

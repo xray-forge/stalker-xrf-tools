@@ -4,6 +4,9 @@ use std::sync::Arc;
 use crate::{NoopOutput, Output};
 
 /// Controls which live workflow messages are rendered.
+///
+/// Verbosity gates chatter only: `Silent` mutes headings, successes, warnings, info, and verbose
+/// detail, while `error` and `failure` always reach the output so a failing run is never silent.
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub enum OutputVerbosity {
   #[default]
@@ -43,9 +46,7 @@ impl OutputOptions {
   }
 
   pub fn failure(&self, message: impl Display) {
-    if self.verbosity != OutputVerbosity::Silent {
-      self.output.failure(&message);
-    }
+    self.output.failure(&message);
   }
 
   pub fn info(&self, message: impl Display) {
@@ -55,9 +56,7 @@ impl OutputOptions {
   }
 
   pub fn error(&self, message: impl Display) {
-    if self.verbosity != OutputVerbosity::Silent {
-      self.output.error(&message);
-    }
+    self.output.error(&message);
   }
 
   pub fn verbose(&self, message: impl Display) {
@@ -143,6 +142,25 @@ mod tests {
         String::from("info:normal"),
         String::from("error:error"),
       ]
+    );
+  }
+
+  #[test]
+  fn silent_verbosity_mutes_chatter_but_never_failures() {
+    let output: Arc<RecordingOutput> = Arc::new(RecordingOutput::default());
+    let options: OutputOptions = OutputOptions::new(output.clone(), OutputVerbosity::Silent);
+
+    options.heading("heading");
+    options.success("success");
+    options.warning("warning");
+    options.failure("failure");
+    options.info("normal");
+    options.error("error");
+    options.verbose("verbose");
+
+    assert_eq!(
+      *output.messages.lock().unwrap(),
+      vec![String::from("failure:failure"), String::from("error:error")]
     );
   }
 

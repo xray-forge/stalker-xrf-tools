@@ -68,9 +68,7 @@ impl GenericCommand for RepackSpawnCommand {
     let spawn_file: Box<SpawnFile> = Box::new(SpawnFile::read_from_path::<XRayByteOrder, _>(path)?);
     let read_duration: Duration = started_at.elapsed();
 
-    spawn_file
-      .write_to_path::<XRayByteOrder, _>(destination)
-      .expect("Correctly written spawn file");
+    spawn_file.write_to_path::<XRayByteOrder, _>(destination)?;
 
     let write_duration: Duration = started_at.elapsed() - read_duration;
 

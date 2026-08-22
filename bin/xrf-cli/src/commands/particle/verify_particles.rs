@@ -2,9 +2,11 @@ use std::path::PathBuf;
 
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use xrf_db::{ParticlesFile, XRayByteOrder};
-use xrf_error::XrfError;
+use xrf_error::{XrfError, XrfResult};
 
+use crate::core::command_error::CommandError;
 use crate::core::generic_command::{CommandResult, GenericCommand};
+use crate::core::output::TerminalOutput;
 
 #[derive(Default)]
 pub struct VerifyParticlesCommand;
@@ -47,10 +49,10 @@ impl GenericCommand for VerifyParticlesCommand {
 
     log::info!("Verify particle file {}, unpacked: {}", path.display(), unpacked);
 
-    let particles_file_result: CommandResult<ParticlesFile> = if unpacked {
-      ParticlesFile::import_from_path(path).map_err(Into::into)
+    let particles_file_result: XrfResult<ParticlesFile> = if unpacked {
+      ParticlesFile::import_from_path(path)
     } else {
-      ParticlesFile::read_from_path::<XRayByteOrder, _>(path).map_err(Into::into)
+      ParticlesFile::read_from_path::<XRayByteOrder, _>(path)
     };
 
     match particles_file_result {
@@ -63,10 +65,15 @@ impl GenericCommand for VerifyParticlesCommand {
 
         Ok(())
       }
+      // An unreadable file is an execution failure; only judged content is a check failure.
+      Err(error @ XrfError::Io { .. }) => Err(error.into()),
       Err(error) => {
-        log::error!("Provided particle file is invalid: {}", error);
+        xrf_output::failure!(
+          TerminalOutput::from_options(false, false),
+          "Provided particle file is invalid: {error}"
+        );
 
-        Err(XrfError::new_parsing_error(format!("Verification of particle file failed: {}", error)).into())
+        Err(CommandError::new_check_failed(1))
       }
     }
   }

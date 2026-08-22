@@ -81,7 +81,7 @@ impl GenericCommand for UnpackEquipmentIconsCommand {
 
     xrf_output::info!(output_options, "Opening DDS file: {}", source.display());
 
-    let source_file: DdsFile = DdsFile::read_from_path(source).expect("Expected path to valid DDS source file");
+    let source_file: DdsFile = DdsFile::read_from_path(source)?;
     let metadata = source_file.metadata();
 
     xrf_output::info!(
@@ -93,9 +93,7 @@ impl GenericCommand for UnpackEquipmentIconsCommand {
       metadata.dx10_format
     );
 
-    let source_dds = source_file
-      .decode_rgba(0)
-      .expect("Expected path to valid DDS source file");
+    let source_dds = source_file.decode_rgba(0)?;
     let system_ltx: Ltx = Ltx::read_from_file_full(system_ltx_path)?;
 
     xrf_output::info!(

@@ -86,7 +86,15 @@ impl LtxFormatSelection {
   fn select_path(path: &Path, files: &mut Vec<PathBuf>, visited: &mut HashSet<PathBuf>) -> XrfResult<()> {
     if path.is_dir() {
       for entry in WalkDir::new(path) {
-        let entry: DirEntry = entry.map_err(|error| error.into_io_error().unwrap())?;
+        // A walk error without an io source (a filesystem loop) must fail cleanly, not panic.
+        let entry: DirEntry = entry.map_err(|error| {
+          let message: String = error.to_string();
+
+          match error.into_io_error() {
+            Some(io_error) => XrfError::from(io_error),
+            None => XrfError::new_read_error(message),
+          }
+        })?;
         let entry_path: &Path = entry.path();
 
         if entry_path.is_file()

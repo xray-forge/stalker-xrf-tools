@@ -1,11 +1,11 @@
 use std::path::PathBuf;
 
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
-use xrf_error::XrfError;
 use xrf_ltx::{LtxFilesFormatter, LtxFormatOptions, LtxProjectFormatResult};
 use xrf_output::OutputOptions;
 
 use crate::commands::ltx::format_ltx::ltx_format_selection::LtxFormatSelection;
+use crate::core::command_error::CommandError;
 use crate::core::generic_command::{CommandResult, GenericCommand};
 use crate::core::output::TerminalOutput;
 
@@ -80,7 +80,7 @@ impl GenericCommand for FormatLtxCommand {
       let result: LtxProjectFormatResult = LtxFilesFormatter::check_format_opt(&files, options)?;
 
       if result.invalid_files > 0 {
-        return Err(XrfError::new_verify_error("Project includes LTX files with invalid format").into());
+        return Err(CommandError::new_check_failed(result.invalid_files));
       }
     } else {
       LtxFilesFormatter::format_opt(&files, options)?;

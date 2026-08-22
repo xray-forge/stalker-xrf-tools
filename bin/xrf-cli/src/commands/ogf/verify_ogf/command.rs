@@ -1,12 +1,13 @@
 use std::collections::BTreeMap;
 use std::path::PathBuf;
-use std::process;
 
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
+use xrf_error::XrfError;
 use xrf_output::OutputOptions;
 use xrf_report::Status;
 
 use crate::commands::ogf::verify_ogf::ogf_verifier::{OgfVerificationCensus, OgfVerificationResult, OgfVerifier};
+use crate::core::command_error::CommandError;
 use crate::core::generic_command::{CommandResult, GenericCommand};
 use crate::core::output::TerminalOutput;
 
@@ -80,16 +81,31 @@ impl GenericCommand for VerifyOgfCommand {
     let status: Status = result.report.status();
 
     match status {
-      Status::Passed | Status::Skipped => xrf_output::success!(output, "Verification passed, status: {}", status),
-      Status::Incomplete => xrf_output::warning!(output, "Verification incomplete, status: {}", status),
-      Status::Error | Status::Failed => xrf_output::failure!(output, "Verification failed, status: {}", status),
-    }
+      Status::Passed => {
+        xrf_output::success!(output, "Verification passed, status: {}", status);
 
-    if status != Status::Passed {
-      process::exit(1);
-    }
+        Ok(())
+      }
+      Status::Failed => {
+        let findings: usize = result
+          .report
+          .checks()
+          .iter()
+          .map(|check| check.findings().len())
+          .sum::<usize>()
+          .max(1);
 
-    Ok(())
+        Err(CommandError::new_check_failed(findings))
+      }
+      // The sweep did not judge the content to the end, so this is an execution failure rather
+      // than a check verdict.
+      Status::Error | Status::Incomplete | Status::Skipped => Err(
+        XrfError::new_verify_error(format!(
+          "Verification of ogf visuals did not complete, status: {status}"
+        ))
+        .into(),
+      ),
+    }
   }
 }
 
