@@ -3,6 +3,14 @@
 macro_rules! for_each_tauri_command_domain {
   ($consumer:ident) => {
     $consumer! {
+      // Bytes of any mounted asset, for every domain: a texture of a model, an entry of an archive, a level's own tree.
+      // Reading is generic, so it lives here rather than being reimplemented per domain; what an asset *means* stays with
+      // the domain that parses it.
+      assets => "assets" {
+      }
+      @raw {
+        read_asset(world: "AssetWorldSpec", logicalPath: "string") => crate::plugins::assets::commands::read_asset::assets_read_asset,
+      }
       archives => "archives" {
         close_project => crate::plugins::archives::commands::close_project::archives_close_project,
         default_pack_config => crate::plugins::archives::commands::default_pack_config::archives_default_pack_config,
@@ -66,7 +74,6 @@ macro_rules! for_each_tauri_command_domain {
       // the Specta collection.
       @raw {
         read_geometry(source: "VisualSource") => crate::plugins::visuals::commands::read_geometry::visuals_read_geometry,
-        read_texture(source: "VisualSource", reference: "string", fallbackRoot: "string | null") => crate::plugins::visuals::commands::read_texture::visuals_read_texture,
       }
       translations => "translations" {
         close_project => crate::plugins::translations::commands::close_project::translations_close_project,

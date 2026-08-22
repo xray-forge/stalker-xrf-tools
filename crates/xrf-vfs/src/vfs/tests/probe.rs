@@ -216,3 +216,33 @@ fn reads_a_located_asset_through_the_probed_vfs() {
 
   assert_eq!(probe.read_asset(asset).expect("bytes are readable"), b"volume".to_vec());
 }
+
+#[test]
+fn finds_an_exact_logical_path_in_step_order() {
+  let (vfs, near_id, far_id, near, _) = two_roots(
+    "find",
+    &["textures/wpn/wpn_ak74.dds"],
+    &["textures/wpn/wpn_ak74.dds", "textures/wpn/wpn_abakan.dds"],
+  );
+
+  let probe: XrayProbe = vfs
+    .probe()
+    .with_step("near", XrayLookupScope::only([near_id]))
+    .with_step("far", XrayLookupScope::only([far_id]));
+
+  let resolution: XrayResolution = probe.find("textures\\wpn\\wpn_ak74.dds").expect("lookup succeeds");
+
+  assert_eq!(resolution.get_step(), Some("near"));
+  assert_eq!(
+    resolution.get_asset().and_then(|it| it.get_root()),
+    Some(near.as_path())
+  );
+
+  assert!(
+    matches!(
+      probe.find("textures\\wpn\\wpn_absent.dds").expect("lookup succeeds"),
+      XrayResolution::Missing { .. }
+    ),
+    "an exact path that no step holds is missing, not an error"
+  );
+}

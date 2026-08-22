@@ -5,8 +5,8 @@ use crate::data::visual_description::VisualDescription;
 
 /// One texture a visual's submesh declares, and what the reference came to.
 ///
-/// Paired with the submesh index rather than positioned in a list, so an outcome cannot be joined to the wrong submesh by
-/// a caller that reorders or resolves in parallel.
+/// Paired with the submesh index rather than positioned in a list, so an outcome cannot be joined to the wrong
+/// submesh by a caller that reorders or resolves in parallel.
 ///
 /// A submesh declaring no texture has no entry here at all — that is the normal case for a skeleton's own record, and
 /// absence says it more plainly than a variant meaning "nothing was asked".

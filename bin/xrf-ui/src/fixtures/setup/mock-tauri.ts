@@ -23,6 +23,13 @@ export function mockTauri(): void {
     },
   }));
 
+  // The submodule as well as the root, since production code imports `@tauri-apps/api/path` directly and its real
+  // implementation would go to the backend for every join - answering null through the invoke harness.
+  jest.mock("@tauri-apps/api/path", () => ({
+    join: async (...parts: Array<string>) => parts.join("\\"),
+    resolve: async (...parts: Array<string>) => parts.join("\\"),
+  }));
+
   jest.mock("@tauri-apps/plugin-dialog", () => ({
     open: jest.fn(async () => null),
     save: jest.fn(async () => null),

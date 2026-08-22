@@ -2,24 +2,25 @@ import { useInjection } from "@wirestate/react";
 import { ReactElement } from "react";
 
 import { VisualMotionNames } from "@/applications/visuals-viewer/components/panels/VisualMotionsPanel/VisualMotionNames";
+import { VisualMotionRow } from "@/applications/visuals-viewer/components/panels/VisualMotionsPanel/VisualMotionRow";
 import { VisualPanel } from "@/applications/visuals-viewer/components/panels/VisualPanel";
 import { VisualPanelEmpty } from "@/applications/visuals-viewer/components/panels/VisualPanelEmpty";
 import { VisualPanelSection } from "@/applications/visuals-viewer/components/panels/VisualPanelSection";
 import { VisualsService } from "@/applications/visuals-viewer/store/visuals";
-import { VisualDescription } from "@/core/bindings/types/xrf-visual";
+import { VisualDescription, VisualMotionDependency } from "@/core/bindings/types/xrf-visual";
 import { Nullable } from "@/lib/types/general";
 
 /**
- * What this visual can animate from, listed but not playable.
+ * What this visual can animate from, resolved but not playable.
  *
- * Referenced omf files are named rather than resolved: finding them needs a gamedata root, which the application does
- * not model yet, and playback is a later phase either way.
+ * A referenced omf file is looked for in the same order the model's textures are, so a missing animation set is
+ * reported the same way a missing texture is. Playback is a later phase.
  */
 export function VisualMotionsPanel(): ReactElement {
   const visualsService: VisualsService = useInjection(VisualsService);
   const description: Nullable<VisualDescription> = visualsService.visual.value?.selected.description ?? null;
 
-  const refs: Array<string> = description?.motionRefs ?? [];
+  const refs: Array<VisualMotionDependency> = visualsService.visual.value?.selected.dependencies.motions ?? [];
   const embedded: Array<string> = description?.embeddedMotions ?? [];
 
   if (refs.length === 0 && embedded.length === 0) {
@@ -34,7 +35,9 @@ export function VisualMotionsPanel(): ReactElement {
     <VisualPanel title={"Motions"}>
       {refs.length > 0 ? (
         <VisualPanelSection title={`Motion refs (${refs.length})`} caption={"Omf files the engine loads"} isFirst>
-          <VisualMotionNames names={refs} />
+          {refs.map((motion: VisualMotionDependency) => (
+            <VisualMotionRow key={motion.reference} motion={motion} />
+          ))}
         </VisualPanelSection>
       ) : null}
 

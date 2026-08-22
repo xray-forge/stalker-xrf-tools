@@ -1,10 +1,11 @@
-import { SelectedVisualDescription, SubmeshTexture } from "@/core/bindings/types/xrf-app";
+import { SelectedVisualDescription } from "@/core/bindings/types/xrf-app";
 import {
   VisualBounds,
   VisualDescription,
   VisualGeometry,
   VisualSection,
   VisualSubmesh,
+  VisualTextureDependency,
 } from "@/core/bindings/types/xrf-visual";
 
 const ALIGNMENT: number = 4;
@@ -178,30 +179,33 @@ export function mockSelectedVisual(overrides: Partial<SelectedVisualDescription>
   return {
     source: { kind: "file", path: "C:\\gamedata\\meshes\\wpn_ak74.ogf" },
     description: mockVisualDescription(),
-    textures: [],
+    dependencies: { motions: [], textures: [] },
     ...overrides,
   };
 }
 
 /**
- * Creates a resolved submesh texture fixture.
+ * Creates a resolved submesh texture dependency fixture.
  *
  * @param overrides - Field values to override.
- * @returns A submesh texture fixture that resolved to a file.
+ * @returns A texture dependency fixture that resolved to a file.
  */
-export function mockSubmeshTexture(overrides: Partial<SubmeshTexture> = {}): SubmeshTexture {
+export function mockTextureDependency(overrides: Partial<VisualTextureDependency> = {}): VisualTextureDependency {
   return {
     reference: "wpn\\wpn_ak74",
     resolution: {
       kind: "resolved",
-      location: {
-        container: {
-          kind: "directory",
-          relativePath: "textures\\wpn\\wpn_ak74.dds",
-          root: "C:\\gamedata",
+      step: "asset root",
+      assets: [
+        {
+          container: {
+            kind: "directory",
+            relativePath: "textures\\wpn\\wpn_ak74.dds",
+            root: "C:\\gamedata",
+          },
+          logicalPath: "textures\\wpn\\wpn_ak74.dds",
         },
-        logicalPath: "textures\\wpn\\wpn_ak74.dds",
-      },
+      ],
     },
     submeshIndex: 0,
     ...overrides,

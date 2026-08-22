@@ -8,12 +8,13 @@ import {
 } from "@/applications/visuals-viewer/components/panels/VisualMaterialsPanel/VisualSubmeshTexture.utils";
 import { VisualSubmeshTextureSource } from "@/applications/visuals-viewer/components/panels/VisualMaterialsPanel/VisualSubmeshTextureSource";
 import { VisualPanelRow } from "@/applications/visuals-viewer/components/panels/VisualPanelRow";
-import { SubmeshTexture } from "@/core/bindings/types/xrf-app";
-import { EVisualTextureState, IVisualTextureStatus } from "@/core/visuals/lib/visual-texture";
+import { XrayAsset } from "@/core/bindings/types/xrf-vfs";
+import { VisualTextureDependency } from "@/core/bindings/types/xrf-visual";
+import { EVisualTextureState, getLocatedAsset, IVisualTextureStatus } from "@/core/visuals/lib/visual-texture";
 import { Nullable } from "@/lib/types/general";
 
 export interface IVisualSubmeshTextureProps {
-  texture: Nullable<SubmeshTexture>;
+  texture: Nullable<VisualTextureDependency>;
   status: Nullable<IVisualTextureStatus>;
 }
 
@@ -29,6 +30,7 @@ export function VisualSubmeshTexture({ texture, status }: IVisualSubmeshTextureP
   }
 
   const { resolution } = texture;
+  const located: Nullable<XrayAsset> = getLocatedAsset(resolution);
   const state: EVisualTextureState = status?.state ?? EVisualTextureState.ABSENT;
   const descriptor: IVisualTextureStateDescriptor = describeTextureState(state);
 
@@ -40,13 +42,13 @@ export function VisualSubmeshTexture({ texture, status }: IVisualSubmeshTextureP
       />
       <VisualPanelRow label={"Resolution"} value={describeResolution(resolution)} />
 
-      {resolution.kind === "resolved" || resolution.kind === "substituted" ? (
-        <VisualSubmeshTextureSource container={resolution.location.container} />
-      ) : null}
+      {located ? <VisualSubmeshTextureSource container={located.container} /> : null}
 
       {resolution.kind === "missing"
-        ? resolution.roots.map((root) => <VisualPanelRow key={root} label={"Searched"} value={root} />)
+        ? resolution.roots.map((root: string) => <VisualPanelRow key={root} label={"Searched"} value={root} />)
         : null}
+
+      {resolution.kind === "rejected" ? <VisualPanelRow label={"Rejected"} value={resolution.reason} /> : null}
 
       {status?.reason ? <VisualPanelRow label={"Texture error"} value={status.reason} /> : null}
     </>

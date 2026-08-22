@@ -4,8 +4,7 @@ import { ReactElement } from "react";
 import { VisualSubmeshTexture } from "@/applications/visuals-viewer/components/panels/VisualMaterialsPanel/VisualSubmeshTexture";
 import { VisualPanelRow } from "@/applications/visuals-viewer/components/panels/VisualPanelRow";
 import { VisualPanelSection } from "@/applications/visuals-viewer/components/panels/VisualPanelSection";
-import { SubmeshTexture } from "@/core/bindings/types/xrf-app";
-import { VisualSubmesh } from "@/core/bindings/types/xrf-visual";
+import { VisualSubmesh, VisualTextureDependency } from "@/core/bindings/types/xrf-visual";
 import { IVisualTextureStatus } from "@/core/visuals/lib/visual-texture";
 import { ABSENT_VALUE } from "@/lib/format/number";
 import { Nullable } from "@/lib/types/general";
@@ -14,7 +13,7 @@ export interface IVisualSubmeshSectionProps {
   submesh: VisualSubmesh;
   isFirst: boolean;
   /** What the backend resolved this submesh's reference to, absent when the model reports no textures at all. */
-  texture?: Nullable<SubmeshTexture>;
+  texture?: Nullable<VisualTextureDependency>;
   /** What the frontend then did with it. */
   status?: Nullable<IVisualTextureStatus>;
 }

@@ -1,13 +1,13 @@
 //! Resolves and inspects textures referenced by OGF visuals.
 //!
-//! Each reference is resolved against the visual's implied X-Ray root. DDS header results, including failures, are
-//! cached by resolved texture path.
+//! Each reference is resolved against the visual's implied X-Ray root, through the shared asset probe. DDS header
+//! results, including failures, are cached by resolved texture path.
 
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
 use xrf_dds::{DdsFile, DdsFormat, DdsMetadata};
-use xrf_vfs::{XrayLookupScope, XrayMountPlan, XrayVfs};
+use xrf_vfs::{XrayAssetType, XrayMountPlan, XrayProbePlan, XrayProbeStep, XrayResolution, XrayVfs};
 
 /// The outcome of resolving and reading one texture reference.
 pub enum TextureResolution {
@@ -35,34 +35,15 @@ pub struct OgfTextureResolver {
 }
 
 impl OgfTextureResolver {
+  /// Names the one place verification looks, so a report says where a reference was expected.
+  const VISUAL_ROOT_STEP: &'static str = "visual root";
+
   pub fn resolve(&mut self, visual: &Path, reference: &str) -> TextureResolution {
     let Some(root) = XrayMountPlan::implied_root(visual) else {
       return TextureResolution::NoRoot;
     };
 
-    let Ok(mount) = self
-      .vfs
-      .mount_directory("", &root)
-      .inspect_err(|error| log::warn!("Failed to mount root {}: {error}", root.display()))
-    else {
-      return TextureResolution::Missing { root };
-    };
-
-    // Search only the visual's tree; a fallback mount would hide gaps that verification must report.
-    //
-    // Do not widen this scope to installation archives: archive reads load complete entries, while verification needs
-    // only DDS metadata. Add header-only archive reads before including them.
-    let scope: XrayLookupScope = XrayLookupScope::only([mount]);
-
-    let located: Option<PathBuf> = self
-      .vfs
-      .scoped(&scope)
-      .dds_texture(reference)
-      .ok()
-      .flatten()
-      .and_then(|location| location.to_physical_path());
-
-    let Some(path) = located else {
+    let Some(path) = self.locate(&root, reference) else {
       return TextureResolution::Missing { root };
     };
 
@@ -70,6 +51,34 @@ impl OgfTextureResolver {
       Ok((format, metadata)) => TextureResolution::Resolved { path, format, metadata },
       Err(reason) => TextureResolution::Unreadable { path, reason },
     }
+  }
+
+  /// Resolves one reference in the visual's own tree, as a physical path to read a header from.
+  ///
+  /// One probe step and no fallback reference, deliberately narrower than the viewer's search: substituting the
+  /// engine's dummy would report a missing texture as a present one, and a fallback root would hide the gap that
+  /// verification exists to find.
+  ///
+  /// Do not widen this to installation archives: archive reads load complete entries, while verification needs only DDS
+  /// metadata. Add header-only archive reads before including them.
+  fn locate(&mut self, root: &Path, reference: &str) -> Option<PathBuf> {
+    let steps: Vec<XrayProbeStep> = XrayProbePlan::new()
+      .with_root(Self::VISUAL_ROOT_STEP, root)
+      .inspect_err(|error| log::warn!("Failed to plan root {}: {error}", root.display()))
+      .ok()?
+      .mount_into(&mut self.vfs)
+      .inspect_err(|error| log::warn!("Failed to mount root {}: {error}", root.display()))
+      .ok()?;
+
+    let resolution: XrayResolution = self
+      .vfs
+      .probe()
+      .with_steps(steps)
+      .resolve(XrayAssetType::Dds, reference)
+      .inspect_err(|error| log::warn!("Rejected texture reference '{reference}': {error}"))
+      .ok()?;
+
+    resolution.get_asset()?.to_physical_path()
   }
 
   /// Returns cached DDS header facts by value.

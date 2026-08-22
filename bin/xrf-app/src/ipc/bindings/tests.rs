@@ -10,6 +10,7 @@ use crate::ipc::bindings::output::reset_directory;
 use crate::ipc::bindings::ownership::TypeOwnership;
 use crate::ipc::bindings::types_module::export_type_modules;
 use crate::plugins::archives::plugin::ArchivesPlugin;
+use crate::plugins::assets::plugin::AssetsPlugin;
 use crate::plugins::configs::plugin::ConfigsPlugin;
 use crate::plugins::equipment_icons::plugin::EquipmentIconsPlugin;
 use crate::plugins::exports::plugin::ExportsPlugin;
@@ -18,7 +19,9 @@ use crate::plugins::system::plugin::SystemPlugin;
 use crate::plugins::translations::plugin::TranslationsPlugin;
 use crate::plugins::visuals::plugin::VisualsPlugin;
 
-/// Every Tauri plugin whose commands are mirrored, as `(plugin name, Specta builder)`.
+/// Every Tauri plugin whose typed commands are mirrored, as `(plugin name, Specta builder)`.
+///
+/// A raw-only domain is absent: it has no typed module to write, only the generated wrappers below.
 fn command_modules<R: tauri::Runtime>() -> Vec<(&'static str, tauri_specta::Builder<R>)> {
   vec![
     (ArchivesPlugin::NAME, ArchivesPlugin::specta_builder::<R>()),
@@ -63,6 +66,13 @@ fn export_typescript_bindings() {
   for (plugin, _) in &plugins {
     finalize_command_module(&commands_output.join(format!("{plugin}.ts")), plugin, &ownership);
   }
+
+  export_raw_commands(
+    &commands_output.join(format!("{}-raw.ts", crate::ipc::registry::assets::NAME)),
+    crate::ipc::registry::assets::NAME,
+    crate::ipc::registry::assets::RAW_COMMANDS,
+    &ownership,
+  );
 
   export_raw_commands(
     &commands_output.join(format!("{}-raw.ts", crate::ipc::registry::visuals::NAME)),

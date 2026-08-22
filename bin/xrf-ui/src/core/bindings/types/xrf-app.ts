@@ -1,8 +1,7 @@
 // Auto-generated rust bindings. Do not edit it manually.
 
 import { InventorySpriteDescriptor } from "@/core/bindings/types/xrf-texture";
-import { XrayAsset } from "@/core/bindings/types/xrf-vfs";
-import { VisualDescription } from "@/core/bindings/types/xrf-visual";
+import { VisualDependencies, VisualDescription } from "@/core/bindings/types/xrf-visual";
 
 /** The X-Ray source parameters carried in a sound's first vorbis comment. */
 export type ArchiveAudioParameters = {
@@ -31,6 +30,21 @@ export type ArchiveImagePreview = {
   base64: string;
 };
 
+/**
+ * Where a caller wants an asset looked for, named rather than handed over.
+ *
+ * Self-describing on purpose: a world is identified by what it is made of, never by a handle the backend issued. A
+ * webview reload therefore loses nothing, and a surface that did not open a world can still address assets in it —
+ * which is what lets one plugin's selection be read by another's preview.
+ *
+ * The subject asset is not part of a spec. A command that already names one — a model being opened — passes it
+ * separately, and its own tree and installation are searched ahead of these roots.
+ */
+export type AssetWorldSpec = {
+  /** Roots searched in the order given. */
+  roots: Array<string>;
+};
+
 export type EquipmentSpriteMetadata = {
   path: string;
   name: string;
@@ -41,49 +55,14 @@ export type EquipmentSpriteMetadata = {
 /**
  * What the viewer is showing, paired with where it came from.
  *
- * The source travels back so a frontend that reloaded knows what to ask geometry for, without having
- * to remember anything of its own across the reload.
+ * The source travels back so a frontend that reloaded knows what to ask geometry for, without having to remember
+ * anything of its own across the reload.
  */
 export type SelectedVisualDescription = {
   source: VisualSource;
   description: VisualDescription;
-  textures: Array<SubmeshTexture>;
+  dependencies: VisualDependencies;
 };
-
-/**
- * One submesh texture reference and its resolution outcome.
- *
- * When present, the reference is retained for `read_texture` regardless of the resolution outcome.
- */
-export type SubmeshTexture = {
-  /** Submesh index used to pair this outcome without relying on response order. */
-  submeshIndex: number;
-  /** X-Ray texture reference declared by the submesh, or `None` when omitted. */
-  reference: string | null;
-  resolution: SubmeshTextureResolution;
-};
-
-/**
- * The outcome of resolving one submesh texture reference.
- *
- * Separate variants distinguish an omitted reference, an unavailable search root, a missing texture, and a located
- * asset. Located assets use `XrayAsset` to describe either a directory or archive container.
- */
-export type SubmeshTextureResolution =
-  /** The submesh declares no texture, as is normal for a skeleton root record. */
-  | { kind: "none" }
-  /** No visual or fallback root was available, so no lookup was attempted. */
-  | { kind: "noRoot" }
-  /** The reference resolved within the search scope. */
-  | { kind: "resolved"; location: XrayAsset }
-  /** The reference was absent, but the engine's fallback texture resolved. */
-  | { kind: "substituted"; location: XrayAsset }
-  /**
-   * Neither the reference nor the engine's fallback texture resolved.
-   *
-   * `roots` lists every source searched by the scope.
-   */
-  | { kind: "missing"; roots: Array<string> };
 
 /** Where a visual is read from. */
 export type VisualSource =

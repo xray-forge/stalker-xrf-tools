@@ -1,4 +1,4 @@
-import { SubmeshTextureResolution } from "@/core/bindings/types/xrf-app";
+import { XrayResolution } from "@/core/bindings/types/xrf-vfs";
 import { EVisualTextureState } from "@/core/visuals/lib/visual-texture";
 
 /** How a texture state reads in the panel, and how loudly. */
@@ -40,23 +40,24 @@ export function describeTextureState(state: EVisualTextureState): IVisualTexture
  * What the backend did with the reference, in the user's terms.
  *
  * Substitution is called out rather than presented as a plain resolution, because the file on screen is then not the
- * file the model asked for - which is what the game does too, and is worth knowing when a mesh looks wrong.
+ * file the model asked for - which is what the game does too, and is worth knowing when a mesh looks wrong. A resolved
+ * outcome names the step that answered, since with overlay trees which tree won is the thing that explains a surprise.
  */
-export function describeResolution(resolution: SubmeshTextureResolution): string {
+export function describeResolution(resolution: XrayResolution): string {
   switch (resolution.kind) {
     case "resolved":
-      return "Resolved";
+      return `Resolved in ${resolution.step}`;
 
     case "substituted":
-      return "Missing, showing the engine placeholder";
+      return `Missing, showing the engine placeholder from ${resolution.step}`;
 
     case "missing":
-      return "Not present under the root";
+      return "Not present in any searched source";
 
-    case "noRoot":
-      return "No gamedata root found for this visual";
+    case "noScope":
+      return "No source was searchable for this visual";
 
-    case "none":
-      return "No texture declared";
+    case "rejected":
+      return "Reference is not a usable asset path";
   }
 }

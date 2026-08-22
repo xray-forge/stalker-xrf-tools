@@ -28,6 +28,7 @@
     "shell:default",
     "dialog:default",
     "fs:default",
+    "assets:default",
     "archives:default",
     "configs:default",
     "exports:default",

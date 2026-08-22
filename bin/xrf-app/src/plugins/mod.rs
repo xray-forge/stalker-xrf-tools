@@ -5,6 +5,7 @@
 //! same tokens.
 
 pub mod archives;
+pub mod assets;
 pub mod configs;
 pub mod equipment_icons;
 pub mod exports;

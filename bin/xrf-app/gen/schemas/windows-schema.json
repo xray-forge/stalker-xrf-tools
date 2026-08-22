@@ -2385,6 +2385,24 @@
           "markdownDescription": "Denies the unpack_directory command without any pre-configured scope."
         },
         {
+          "description": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-read-asset`",
+          "type": "string",
+          "const": "assets:default",
+          "markdownDescription": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-read-asset`"
+        },
+        {
+          "description": "Enables the read_asset command without any pre-configured scope.",
+          "type": "string",
+          "const": "assets:allow-read-asset",
+          "markdownDescription": "Enables the read_asset command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the read_asset command without any pre-configured scope.",
+          "type": "string",
+          "const": "assets:deny-read-asset",
+          "markdownDescription": "Denies the read_asset command without any pre-configured scope."
+        },
+        {
           "description": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-check-directory-format`\n- `allow-format-directory`\n- `allow-verify-directory`",
           "type": "string",
           "const": "configs:default",
@@ -6729,10 +6747,10 @@
           "markdownDescription": "Denies the validate_text command without any pre-configured scope."
         },
         {
-          "description": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-close-model`\n- `allow-get-model`\n- `allow-open-model`\n- `allow-read-geometry`\n- `allow-read-texture`",
+          "description": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-close-model`\n- `allow-get-model`\n- `allow-open-model`\n- `allow-read-geometry`",
           "type": "string",
           "const": "visuals:default",
-          "markdownDescription": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-close-model`\n- `allow-get-model`\n- `allow-open-model`\n- `allow-read-geometry`\n- `allow-read-texture`"
+          "markdownDescription": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-close-model`\n- `allow-get-model`\n- `allow-open-model`\n- `allow-read-geometry`"
         },
         {
           "description": "Enables the close_model command without any pre-configured scope.",
@@ -6759,12 +6777,6 @@
           "markdownDescription": "Enables the read_geometry command without any pre-configured scope."
         },
         {
-          "description": "Enables the read_texture command without any pre-configured scope.",
-          "type": "string",
-          "const": "visuals:allow-read-texture",
-          "markdownDescription": "Enables the read_texture command without any pre-configured scope."
-        },
-        {
           "description": "Denies the close_model command without any pre-configured scope.",
           "type": "string",
           "const": "visuals:deny-close-model",
@@ -6787,12 +6799,6 @@
           "type": "string",
           "const": "visuals:deny-read-geometry",
           "markdownDescription": "Denies the read_geometry command without any pre-configured scope."
-        },
-        {
-          "description": "Denies the read_texture command without any pre-configured scope.",
-          "type": "string",
-          "const": "visuals:deny-read-texture",
-          "markdownDescription": "Denies the read_texture command without any pre-configured scope."
         }
       ]
     },

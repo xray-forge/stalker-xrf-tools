@@ -2,9 +2,10 @@ import { EventBus, inject, Injectable, OnDeactivation, OnProvision } from "@wire
 import { BoundAction, Computed, makeObservable, Observable, runInAction } from "@wirestate/mobx";
 import { Texture } from "three";
 
+import { assetsRawCommands } from "@/core/bindings/commands/assets-raw";
 import { visualsCommands } from "@/core/bindings/commands/visuals";
 import { visualsRawCommands } from "@/core/bindings/commands/visuals-raw";
-import { SelectedVisualDescription, SubmeshTexture, VisualSource } from "@/core/bindings/types/xrf-app";
+import { AssetWorldSpec, SelectedVisualDescription, VisualSource } from "@/core/bindings/types/xrf-app";
 import { transformError } from "@/core/error/lib";
 import { releaseEditorProject } from "@/core/ipc/release";
 import { emitNotification, ENotificationSeverity } from "@/core/notifications/lib";
@@ -15,6 +16,7 @@ import { describeVisualSource } from "@/core/visuals/lib/visual-source";
 import {
   createDdsTexture,
   EVisualTextureState,
+  ILoadableTexture,
   IVisualTextureStatus,
   toInitialTextureState,
   toLoadableTextures,
@@ -153,7 +155,7 @@ export class VisualsService {
         return this.requestId;
       });
 
-      const selected: SelectedVisualDescription = await visualsCommands.openModel(source, await this.getFallbackRoot());
+      const selected: SelectedVisualDescription = await visualsCommands.openModel(source, await this.getWorld());
 
       await this.loadGeometry(selected, request);
     } catch (error: unknown) {
@@ -201,9 +203,9 @@ export class VisualsService {
       this.visual = this.visual.asReady({ selected, views });
       this.releaseTextures();
       this.textureStatuses = new Map(
-        selected.textures.map((texture) => [
+        selected.dependencies.textures.map((texture) => [
           texture.submeshIndex,
-          { reason: null, state: toInitialTextureState(texture), submeshIndex: texture.submeshIndex },
+          { reason: null, state: toInitialTextureState(texture.resolution), submeshIndex: texture.submeshIndex },
         ])
       );
     });
@@ -218,7 +220,7 @@ export class VisualsService {
    * @param request - Request identity used to discard stale textures.
    */
   private async loadTextures(selected: SelectedVisualDescription, request: number): Promise<void> {
-    const loadable: Array<SubmeshTexture & { reference: string }> = toLoadableTextures(selected.textures);
+    const loadable: Array<ILoadableTexture> = toLoadableTextures(selected.dependencies.textures);
 
     if (!loadable.length) {
       return;
@@ -226,27 +228,24 @@ export class VisualsService {
 
     this.log.info(`Loading ${loadable.length} textures for:`, describeVisualSource(selected.source));
 
-    const fallbackRoot: Nullable<string> = await this.getFallbackRoot();
+    const world: AssetWorldSpec = await this.getWorld();
 
-    await Promise.all(loadable.map((texture) => this.loadTexture(selected.source, texture, fallbackRoot, request)));
+    await Promise.all(loadable.map((texture) => this.loadTexture(texture, world, request)));
   }
 
   /**
    * One texture, from bytes to an uploaded texture or to a stated reason it is not one.
    *
-   * @param source - Visual source that declared the texture.
-   * @param texture - Loadable texture reference and submesh identity.
-   * @param fallbackRoot - Project gamedata root searched after the visual's own root.
+   * Read by the logical path the open already resolved, so the bytes come from the file the description named — a
+   * substituted dummy included — rather than from a second lookup that could answer differently.
+   *
+   * @param texture - Submesh identity and the logical path resolution located.
+   * @param world - The mounted world the asset is read from.
    * @param request - Request identity used to discard a late response.
    */
-  private async loadTexture(
-    source: VisualSource,
-    texture: SubmeshTexture & { reference: string },
-    fallbackRoot: Nullable<string>,
-    request: number
-  ): Promise<void> {
+  private async loadTexture(texture: ILoadableTexture, world: AssetWorldSpec, request: number): Promise<void> {
     try {
-      const bytes: ArrayBuffer = await visualsRawCommands.readTexture(source, texture.reference, fallbackRoot);
+      const bytes: ArrayBuffer = await assetsRawCommands.readAsset(world, texture.logicalPath);
 
       if (request !== this.requestId) {
         return;
@@ -268,7 +267,7 @@ export class VisualsService {
     } catch (error: unknown) {
       const transformed: Error = transformError(error);
 
-      this.log.error(`Failed to load texture '${texture.reference}':`, transformed);
+      this.log.error(`Failed to load texture '${texture.logicalPath}':`, transformed);
 
       if (request !== this.requestId) {
         return;
@@ -303,14 +302,15 @@ export class VisualsService {
   }
 
   /**
-   * The root to fall back to when a visual's own tree does not answer.
+   * The world a visual's references are searched in, after the visual's own tree.
    *
-   * Only the frontend knows which project is configured, which is why the backend takes it as an argument rather than
-   * deriving it: it can derive the per-visual root, but not an ambient one.
+   * Only the frontend knows which project is configured, which is why the world is named on every call rather than
+   * derived by the backend: it can derive the roots implied by an asset, but not an ambient one. Naming it rather than
+   * holding a handle is also what lets a reload pick up where it left off, and another surface address the same assets.
    */
-  private async getFallbackRoot(): Promise<Nullable<string>> {
+  private async getWorld(): Promise<AssetWorldSpec> {
     const projectPath: Nullable<string> = this.projectService.xrfProjectPath;
 
-    return projectPath ? getProjectGamedataPath(projectPath) : null;
+    return { roots: projectPath ? [await getProjectGamedataPath(projectPath)] : [] };
   }
 }

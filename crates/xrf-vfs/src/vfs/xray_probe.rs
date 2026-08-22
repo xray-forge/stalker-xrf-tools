@@ -166,6 +166,37 @@ impl<'a> XrayProbe<'a> {
     }
   }
 
+  /// Finds an exact logical path, step by step, first hit winning.
+  ///
+  /// The counterpart of [`Self::resolve`] for a path already in engine form — a bundle file, or an asset a previous
+  /// lookup located — where there is no reference to interpret and no kind to interpret it as.
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when the path is not a valid X-Ray logical path.
+  pub fn find(&self, logical_path: &str) -> XrfResult<XrayResolution> {
+    if self.is_empty() {
+      return Ok(XrayResolution::NoScope);
+    }
+
+    for step in &self.steps {
+      if !self.has_mounts(step) {
+        continue;
+      }
+
+      if let Some(asset) = self.vfs.scoped(step.get_scope()).find(logical_path)? {
+        return Ok(XrayResolution::Resolved {
+          step: step.get_label().to_string(),
+          assets: vec![asset],
+        });
+      }
+    }
+
+    Ok(XrayResolution::Missing {
+      roots: self.list_roots(),
+    })
+  }
+
   /// Reads a located asset through the VFS this probe searches.
   ///
   /// # Errors

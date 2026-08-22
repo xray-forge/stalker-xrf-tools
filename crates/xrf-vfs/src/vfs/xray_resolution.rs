@@ -4,8 +4,8 @@ use crate::XrayAsset;
 
 /// What one reference lookup came to.
 ///
-/// A fact about a lookup, not about the kind of thing looked up: a texture, a motion set and a level asset all end in one
-/// of these four states, so a consumer renders one shape and a domain crate pairs the outcome with its own reference
+/// A fact about a lookup, not about the kind of thing looked up: a texture, a motion set and a level asset all end in
+/// one of these states, so a consumer renders one shape and a domain crate pairs the outcome with its own reference
 /// identity rather than defining its own vocabulary.
 ///
 /// A missing asset is a state rather than an error, because it is one in the engine too — `Missing` carries where the
@@ -33,7 +33,7 @@ pub enum XrayResolution {
   Missing { roots: Vec<String> },
   /// There was nothing to search: the probe had no step, or no step selected a mounted source.
   ///
-  /// Distinct from `Missing` because it says the question could not be asked rather than that the answer was no, which is
+  /// Distinct from `Missing` because the question could not be asked rather than the answer being no, which is
   /// the difference between an unconfigured project and an absent asset.
   NoScope,
   /// The reference could not be turned into a lookup at all, so none was attempted.

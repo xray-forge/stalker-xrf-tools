@@ -1,7 +1,8 @@
 import { CompressedPixelFormat, CompressedTexture, LinearFilter, RepeatWrapping } from "three";
 import { DDS, DDSLoader } from "three/examples/jsm/loaders/DDSLoader.js";
 
-import { SubmeshTexture, SubmeshTextureResolution } from "@/core/bindings/types/xrf-app";
+import { XrayAsset, XrayResolution } from "@/core/bindings/types/xrf-vfs";
+import { VisualTextureDependency } from "@/core/bindings/types/xrf-visual";
 import { Nullable } from "@/lib/types/general";
 
 /** Shared parser, since `DDSLoader.parse` keeps no state between calls and constructing one per texture is waste. */
@@ -19,9 +20,9 @@ export enum EVisualTextureState {
   APPLIED = "applied",
   /** Located, but stored in a format three.js cannot upload. */
   UNSUPPORTED_FORMAT = "unsupportedFormat",
-  /** Nothing to load: no root was found, or neither the reference nor the engine's dummy resolved. */
+  /** Nothing to load: no source was searchable, or neither the reference nor the engine's dummy resolved. */
   UNRESOLVED = "unresolved",
-  /** Located, but reading or parsing the file failed. */
+  /** Located, but reading or parsing the file failed, or the reference was not a usable one. */
   FAILED = "failed",
 }
 
@@ -36,34 +37,47 @@ export interface IVisualTextureStatus {
 }
 
 /**
- * Whether a resolution gives the frontend anything to fetch.
+ * The asset a resolution located, or null when it located none.
  *
  * A substituted reference counts: the engine's dummy is a real file and rendering it is what the game does, which
  * is the point of substituting rather than leaving the submesh blank.
  */
-export function isLoadableResolution(resolution: SubmeshTextureResolution): boolean {
-  return resolution.kind === "resolved" || resolution.kind === "substituted";
+export function getLocatedAsset(resolution: XrayResolution): Nullable<XrayAsset> {
+  return resolution.kind === "resolved" || resolution.kind === "substituted" ? (resolution.assets[0] ?? null) : null;
+}
+
+/** A submesh texture whose bytes can be fetched, and the located file to fetch them from. */
+export interface ILoadableTexture {
+  submeshIndex: number;
+  logicalPath: string;
 }
 
 /**
- * Submeshes worth fetching bytes for, which is those with both a reference and a located file.
+ * Submeshes worth fetching bytes for, paired with the logical path to fetch.
+ *
+ * The path comes from the outcome rather than from the reference, so the read lands on the file resolution named — a
+ * substituted dummy included — instead of resolving a second time and possibly differently.
  */
-export function toLoadableTextures(textures: Array<SubmeshTexture>): Array<SubmeshTexture & { reference: string }> {
-  return textures.filter(
-    (texture): texture is SubmeshTexture & { reference: string } =>
-      texture.reference !== null && isLoadableResolution(texture.resolution)
-  );
+export function toLoadableTextures(textures: Array<VisualTextureDependency>): Array<ILoadableTexture> {
+  return textures.flatMap((texture) => {
+    const asset: Nullable<XrayAsset> = getLocatedAsset(texture.resolution);
+
+    return asset ? [{ submeshIndex: texture.submeshIndex, logicalPath: asset.logicalPath }] : [];
+  });
 }
 
 /**
  * The state a submesh starts in, before any bytes are asked for.
+ *
+ * A rejected reference is a failure rather than an absence: the name in the mesh header is unusable, which is worth
+ * saying rather than showing the submesh as having nothing to load.
  */
-export function toInitialTextureState(texture: SubmeshTexture): EVisualTextureState {
-  if (texture.reference === null) {
-    return EVisualTextureState.ABSENT;
+export function toInitialTextureState(resolution: XrayResolution): EVisualTextureState {
+  if (getLocatedAsset(resolution)) {
+    return EVisualTextureState.LOADING;
   }
 
-  return isLoadableResolution(texture.resolution) ? EVisualTextureState.LOADING : EVisualTextureState.UNRESOLVED;
+  return resolution.kind === "rejected" ? EVisualTextureState.FAILED : EVisualTextureState.UNRESOLVED;
 }
 
 /**

@@ -1,6 +1,7 @@
 // Auto-generated rust bindings. Do not edit it manually.
 
 import { Vector3d } from "@/core/bindings/types/xrf-db";
+import { XrayResolution } from "@/core/bindings/types/xrf-vfs";
 
 /**
  * One bone of a visual's skeleton, as a name and the name of its parent.
@@ -33,6 +34,18 @@ export type VisualBounds = {
 export type VisualBox = {
   min: Vector3d;
   max: Vector3d;
+};
+
+/**
+ * Everything a visual needs from outside itself, resolved.
+ *
+ * The crate that parses a visual is the crate that knows what it references, so extraction lives beside the parser. It
+ * resolves through a borrowed probe and never mounts or plans: which sources exist, and in what order, is the calling
+ * binary's policy, and a viewer, a sweep and a level editor each answer it differently.
+ */
+export type VisualDependencies = {
+  textures: Array<VisualTextureDependency>;
+  motions: Array<VisualMotionDependency>;
 };
 
 /**
@@ -96,6 +109,17 @@ export type VisualGeometry = {
    */
   windows: Array<VisualSlideWindow>;
   bounds: VisualBounds;
+};
+
+/**
+ * One motion file set a visual animates from, and what the reference came to.
+ *
+ * A reference may be a mask — `wpn\wpn_ak74_*.omf` names every matching file — so one entry can hold several located
+ * assets. Embedded motions are not here: they are inside the visual and there is nothing to resolve.
+ */
+export type VisualMotionDependency = {
+  reference: string;
+  resolution: XrayResolution;
 };
 
 /**
@@ -166,3 +190,18 @@ export type VisualSubmesh = {
 export type VisualSubmeshContent =
   | { kind: "packed"; geometry: VisualGeometry }
   | { kind: "skipped"; cause: VisualSkipCause; reason: string };
+
+/**
+ * One texture a visual's submesh declares, and what the reference came to.
+ *
+ * Paired with the submesh index rather than positioned in a list, so an outcome cannot be joined to the wrong
+ * submesh by a caller that reorders or resolves in parallel.
+ *
+ * A submesh declaring no texture has no entry here at all — that is the normal case for a skeleton's own record, and
+ * absence says it more plainly than a variant meaning "nothing was asked".
+ */
+export type VisualTextureDependency = {
+  submeshIndex: number;
+  reference: string;
+  resolution: XrayResolution;
+};

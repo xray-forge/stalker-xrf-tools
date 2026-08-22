@@ -1,65 +1,71 @@
 import { describe, expect, it } from "@jest/globals";
 import { CompressedTexture, LinearFilter, RepeatWrapping, RGB_S3TC_DXT1_Format, RGBA_S3TC_DXT5_Format } from "three";
 
-import { SubmeshTexture } from "@/core/bindings/types/xrf-app";
 import { XrayAsset } from "@/core/bindings/types/xrf-vfs";
+import { VisualTextureDependency } from "@/core/bindings/types/xrf-visual";
 import {
   createDdsTexture,
   EVisualTextureState,
-  isLoadableResolution,
+  getLocatedAsset,
   toInitialTextureState,
   toLoadableTextures,
 } from "@/core/visuals/lib/visual-texture";
 import { mockDdsFile, mockDx10DdsFile, mockUncompressedDdsFile } from "@/fixtures/mocks/dds.mocks";
-import { mockSubmeshTexture } from "@/fixtures/mocks/visual.mocks";
+import { mockTextureDependency } from "@/fixtures/mocks/visual.mocks";
 import { Nullable } from "@/lib/types/general";
 
-describe("isLoadableResolution", () => {
-  it("counts a substituted reference as loadable", () => {
-    // The engine's dummy is a real file and rendering it is what the game does, so it is fetched like any other.
-    const location: XrayAsset = {
-      container: {
-        kind: "directory",
-        relativePath: "textures\\ed\\ed_not_existing_texture.dds",
-        root: "C:\\gamedata",
-      },
-      logicalPath: "textures\\ed\\ed_not_existing_texture.dds",
-    };
+const DUMMY: XrayAsset = {
+  container: {
+    kind: "directory",
+    relativePath: "textures\\ed\\ed_not_existing_texture.dds",
+    root: "C:\\gamedata",
+  },
+  logicalPath: "textures\\ed\\ed_not_existing_texture.dds",
+};
 
-    expect(isLoadableResolution({ kind: "resolved", location })).toBe(true);
-    expect(isLoadableResolution({ kind: "substituted", location })).toBe(true);
+describe("getLocatedAsset", () => {
+  it("counts a substituted reference as located", () => {
+    // The engine's dummy is a real file and rendering it is what the game does, so it is fetched like any other.
+    expect(getLocatedAsset({ assets: [DUMMY], kind: "resolved", step: "asset root" })).toBe(DUMMY);
+    expect(
+      getLocatedAsset({
+        assets: [DUMMY],
+        fallback: "ed\\ed_not_existing_texture",
+        kind: "substituted",
+        step: "install",
+      })
+    ).toBe(DUMMY);
   });
 
-  it("counts every outcome without a file as not loadable", () => {
-    expect(isLoadableResolution({ kind: "none" })).toBe(false);
-    expect(isLoadableResolution({ kind: "noRoot" })).toBe(false);
-    expect(isLoadableResolution({ kind: "missing", roots: ["C:\\gamedata"] })).toBe(false);
+  it("locates nothing for every outcome without a file", () => {
+    expect(getLocatedAsset({ kind: "missing", roots: ["C:\\gamedata"] })).toBeNull();
+    expect(getLocatedAsset({ kind: "noScope" })).toBeNull();
+    expect(getLocatedAsset({ kind: "rejected", reason: "not a logical path" })).toBeNull();
   });
 });
 
 describe("toLoadableTextures", () => {
-  it("keeps only submeshes with both a reference and a located file", () => {
-    const textures: Array<SubmeshTexture> = [
-      mockSubmeshTexture({ submeshIndex: 0 }),
-      mockSubmeshTexture({ reference: null, resolution: { kind: "none" }, submeshIndex: 1 }),
-      mockSubmeshTexture({ resolution: { kind: "missing", roots: ["C:\\gamedata"] }, submeshIndex: 2 }),
-      mockSubmeshTexture({ resolution: { kind: "noRoot" }, submeshIndex: 3 }),
+  it("keeps the submeshes whose reference located a file, addressed by that file", () => {
+    const textures: Array<VisualTextureDependency> = [
+      mockTextureDependency({ submeshIndex: 0 }),
+      mockTextureDependency({ resolution: { kind: "missing", roots: ["C:\\gamedata"] }, submeshIndex: 1 }),
+      mockTextureDependency({ resolution: { kind: "noScope" }, submeshIndex: 2 }),
+      mockTextureDependency({ resolution: { kind: "rejected", reason: "not a logical path" }, submeshIndex: 3 }),
     ];
 
-    expect(toLoadableTextures(textures).map((it) => it.submeshIndex)).toEqual([0]);
+    expect(toLoadableTextures(textures)).toEqual([
+      { logicalPath: "textures\\wpn\\wpn_ak74.dds", submeshIndex: 0 },
+    ]);
   });
 });
 
 describe("toInitialTextureState", () => {
-  it("separates a submesh with no texture from one whose texture was not found", () => {
-    // Both end up untextured, but only one of them is a problem, so the panel must not report them the same way.
-    expect(toInitialTextureState(mockSubmeshTexture({ reference: null, resolution: { kind: "none" } }))).toBe(
-      EVisualTextureState.ABSENT
-    );
-    expect(toInitialTextureState(mockSubmeshTexture({ resolution: { kind: "noRoot" } }))).toBe(
-      EVisualTextureState.UNRESOLVED
-    );
-    expect(toInitialTextureState(mockSubmeshTexture())).toBe(EVisualTextureState.LOADING);
+  it("separates a texture that was not found from a reference that was never usable", () => {
+    // Both end up untextured, and only one is the model's fault, so the panel must not report them the same way.
+    expect(toInitialTextureState({ kind: "noScope" })).toBe(EVisualTextureState.UNRESOLVED);
+    expect(toInitialTextureState({ kind: "missing", roots: ["C:\\gamedata"] })).toBe(EVisualTextureState.UNRESOLVED);
+    expect(toInitialTextureState({ kind: "rejected", reason: "not a logical path" })).toBe(EVisualTextureState.FAILED);
+    expect(toInitialTextureState(mockTextureDependency().resolution)).toBe(EVisualTextureState.LOADING);
   });
 });
 

@@ -1,12 +1,17 @@
 import { beforeEach, describe, expect, it } from "@jest/globals";
+import { waitFor } from "@testing-library/react";
 import { isComputedProp, isObservableProp } from "@wirestate/mobx";
 
 import { VisualsService } from "@/applications/visuals-viewer/store/visuals";
 import { SelectedVisualDescription } from "@/core/bindings/types/xrf-app";
+import { ProjectService } from "@/core/settings/services/project/project.service";
+import { EVisualTextureState } from "@/core/visuals/lib/visual-texture";
+import { mockDdsFile } from "@/fixtures/mocks/dds.mocks";
 import { resetMockInvoke, setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import {
   mockPackedSubmesh,
   mockSelectedVisual,
+  mockTextureDependency,
   MockVisualBuffer,
   mockVisualDescription,
 } from "@/fixtures/mocks/visual.mocks";
@@ -139,6 +144,41 @@ describe("VisualsService opening", () => {
     await opening;
 
     expect(service.sourceLabel).toBe("C:\\gamedata\\second.ogf");
+  });
+
+  it("reads a texture by the path the open resolved, in the world it named", async () => {
+    // Reading by resolved path rather than by reference is what keeps the bytes and the reported outcome describing the
+    // same file - including a substituted dummy, which by reference would resolve to nothing.
+    const { selected, buffer } = mockOpenableVisual();
+    const { container, service } = mockInjectedService(VisualsService);
+
+    container.get(ProjectService).setXrfProjectPath("C:\\project");
+
+    let readParameters: Nullable<Record<string, unknown>> = null;
+
+    setMockInvokeResponses({
+      ["plugin:visuals|open_model"]: {
+        ...selected,
+        dependencies: { motions: [], textures: [mockTextureDependency({ submeshIndex: 0 })] },
+      },
+      ["plugin:visuals|read_geometry"]: buffer,
+      ["plugin:assets|read_asset"]: (parameters?: Record<string, unknown>) => {
+        readParameters = parameters ?? null;
+
+        return mockDdsFile({ fourCC: "DXT1", height: 4, mipmapCount: 1, width: 4 });
+      },
+    });
+
+    await service.openFile("C:\\gamedata\\wpn_ak74.ogf");
+
+    // Textures are loaded beside the open rather than inside it, so a model shows its geometry without waiting on them.
+    await waitFor(() => expect(service.textures.size).toBe(1));
+
+    expect(readParameters).toEqual({
+      logicalPath: "textures\\wpn\\wpn_ak74.dds",
+      world: { roots: ["C:\\project\\target\\gamedata"] },
+    });
+    expect(service.textureStatuses.get(0)?.state).toBe(EVisualTextureState.APPLIED);
   });
 
   it("clears the model when closed", async () => {
