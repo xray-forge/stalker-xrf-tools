@@ -9,9 +9,6 @@ use xrf_pack::{ArchivePackConfig, ArchivePackMode, ArchivePackResult, ArchivePac
 use crate::core::generic_command::{CommandResult, GenericCommand};
 use crate::core::output::TerminalOutput;
 
-/// Bytes in the megabytes `--max-size` is given in, matching the `-max_size` unit of xrCompress.
-const BYTES_PER_MEGABYTE: u64 = 1024 * 1024;
-
 #[derive(Default)]
 pub struct PackArchiveCommand;
 
@@ -147,7 +144,8 @@ impl GenericCommand for PackArchiveCommand {
     if matches.value_source("max-size") == Some(ValueSource::CommandLine)
       && let Some(size) = matches.get_one::<u64>("max-size")
     {
-      config = config.with_max_volume_size(size.saturating_mul(BYTES_PER_MEGABYTE))?;
+      // `--max-size` is given in megabytes, matching the `-max_size` unit of xrCompress.
+      config = config.with_max_volume_size(xrf_utils::megabytes_to_bytes(*size))?;
     }
 
     xrf_output::info!(output, "Pack source: {}", path.display());
@@ -171,10 +169,10 @@ impl GenericCommand for PackArchiveCommand {
 
     xrf_output::info!(
       output,
-      "Packed {} file(s) into {} volume(s), took {} sec",
+      "Packed {} file(s) into {} volume(s), took {}",
       result.files_total,
       result.volumes.len(),
-      result.duration as f64 / 1000.0,
+      xrf_utils::format_duration(result.duration),
     );
 
     xrf_output::info!(
@@ -186,12 +184,10 @@ impl GenericCommand for PackArchiveCommand {
       result.files_skipped,
     );
 
-    xrf_output::info!(
-      output,
-      "Size: {:.3} MB source, {:.3} MB written",
-      (result.size_source as f64) / 1024.0 / 1024.0,
-      (result.size_written as f64) / 1024.0 / 1024.0,
-    );
+    let (size_source, size_written): (String, String) =
+      xrf_utils::format_bytes_pair(result.size_source, result.size_written);
+
+    xrf_output::info!(output, "Size: {size_source} source, {size_written} written");
 
     Ok(())
   }

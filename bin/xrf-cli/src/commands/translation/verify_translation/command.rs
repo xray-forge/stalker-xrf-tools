@@ -115,8 +115,8 @@ impl GenericCommand for VerifyTranslationCommand {
 
     xrf_output::info!(
       options.output,
-      "Verified translation files in {} sec, {} checked, {} missing",
-      (result.duration as f64) / 1000.0,
+      "Verified translation files in {}, {} checked, {} missing",
+      xrf_utils::format_duration(result.duration),
       result.checked_translations_count,
       result.missing_translations_count
     );

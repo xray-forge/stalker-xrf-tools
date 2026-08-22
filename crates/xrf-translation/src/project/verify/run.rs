@@ -38,12 +38,12 @@ pub fn verify_dir(dir: &Path, options: &ProjectVerifyOptions) -> XrfResult<Proje
     }
   }
 
-  result.duration = started_at.elapsed().as_millis();
+  result.duration = started_at.elapsed();
 
   log::info!(
-    "Verified dir {} in {} sec",
+    "Verified dir {} in {}",
     dir.display(),
-    (result.duration as f64) / 1000.0
+    xrf_utils::format_duration(result.duration)
   );
 
   Ok(result)
@@ -109,12 +109,12 @@ pub fn verify_json_file<P: AsRef<Path>>(path: &P, options: &ProjectVerifyOptions
   }
 
   result.checked_translations_count = parsed.len() as u32;
-  result.duration = started_at.elapsed().as_millis();
+  result.duration = started_at.elapsed();
 
   log::info!(
-    "Verified file {} in {} sec",
+    "Verified file {} in {}",
     path_display,
-    (result.duration as f64) / 1000.0
+    xrf_utils::format_duration(result.duration)
   );
 
   Ok(result)

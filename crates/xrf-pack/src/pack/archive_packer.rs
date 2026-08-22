@@ -105,7 +105,7 @@ impl ArchivePacker {
       result.volumes = vec![renamed];
     }
 
-    result.duration = started_at.elapsed().as_millis();
+    result.duration = started_at.elapsed();
 
     Ok(result)
   }

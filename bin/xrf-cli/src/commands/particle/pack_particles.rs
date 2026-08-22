@@ -84,8 +84,11 @@ impl GenericCommand for PackParticlesCommand {
 
     let write_duration: Duration = started_at.elapsed() - read_duration;
 
-    log::info!("Read particle file took: {}ms", read_duration.as_millis());
-    log::info!("Writing packed particle file took: {}ms", write_duration.as_millis());
+    log::info!("Read particle file took: {}", xrf_utils::format_duration(read_duration));
+    log::info!(
+      "Writing packed particle file took: {}",
+      xrf_utils::format_duration(write_duration)
+    );
 
     Ok(())
   }

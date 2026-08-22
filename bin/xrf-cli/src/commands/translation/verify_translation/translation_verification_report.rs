@@ -11,7 +11,7 @@ use crate::core::generic_command::CommandResult;
 struct TranslationVerificationReportOutput {
   checked_translations_count: u32,
   checks: Vec<TranslationVerificationCheckOutput>,
-  duration_ms: u128,
+  duration_ms: u64,
   missing_translations_count: u32,
   status: String,
 }
@@ -19,7 +19,7 @@ struct TranslationVerificationReportOutput {
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 struct TranslationVerificationCheckOutput {
-  duration_ms: Option<u128>,
+  duration_ms: Option<u64>,
   findings: Vec<TranslationVerificationFindingOutput>,
   id: String,
   status: String,
@@ -58,7 +58,7 @@ impl<'a> TranslationVerificationReportWriter<'a> {
     TranslationVerificationReportOutput {
       checked_translations_count: self.result.checked_translations_count,
       checks,
-      duration_ms: self.result.duration,
+      duration_ms: xrf_utils::duration_to_millis(self.result.duration),
       missing_translations_count: self.result.missing_translations_count,
       status: report.status().to_string(),
     }
@@ -66,7 +66,7 @@ impl<'a> TranslationVerificationReportWriter<'a> {
 
   fn check_output(report: &CheckReport) -> TranslationVerificationCheckOutput {
     TranslationVerificationCheckOutput {
-      duration_ms: report.duration().map(|duration| duration.as_millis()),
+      duration_ms: report.duration().map(xrf_utils::duration_to_millis),
       findings: report.findings().iter().map(Self::finding_output).collect(),
       id: report.id().to_string(),
       status: report.status().to_string(),

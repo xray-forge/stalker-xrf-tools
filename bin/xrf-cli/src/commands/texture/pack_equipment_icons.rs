@@ -130,7 +130,10 @@ impl GenericCommand for PackEquipmentIconsCommand {
       output.display()
     );
 
-    log::info!("Pack equipment took: {}ms", started_at.elapsed().as_millis());
+    log::info!(
+      "Pack equipment took: {}",
+      xrf_utils::format_duration(started_at.elapsed())
+    );
 
     Ok(())
   }

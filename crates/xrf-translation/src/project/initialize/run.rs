@@ -39,12 +39,12 @@ pub fn initialize_dir<P: AsRef<Path>>(
     }
   }
 
-  result.duration = started_at.elapsed().as_millis();
+  result.duration = started_at.elapsed();
 
   log::info!(
-    "Initialize dir {} in {} sec",
+    "Initialize dir {} in {}",
     dir.as_ref().display(),
-    (result.duration as f64) / 1000.0
+    xrf_utils::format_duration(result.duration)
   );
 
   Ok(result)
@@ -122,20 +122,20 @@ pub fn initialize_json_file<P: AsRef<Path>>(
     write_file_staged(path.as_ref(), &serialized)?;
   }
 
-  result.duration = started_at.elapsed().as_millis();
+  result.duration = started_at.elapsed();
 
   if initialized_count > 0 {
     log::info!(
-      "Initialized file {} in {} sec, {} keys added",
+      "Initialized file {} in {}, {} keys added",
       path_display,
-      (result.duration as f64) / 1000.0,
+      xrf_utils::format_duration(result.duration),
       initialized_count
     );
   } else {
     log::info!(
-      "Skip file {}, checked in {} sec",
+      "Skip file {}, checked in {}",
       path_display,
-      (result.duration as f64) / 1000.0
+      xrf_utils::format_duration(result.duration)
     );
   }
 

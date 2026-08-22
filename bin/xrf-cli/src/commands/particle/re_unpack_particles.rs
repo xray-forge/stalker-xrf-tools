@@ -57,8 +57,14 @@ impl GenericCommand for ReUnpackParticlesCommand {
 
     let export_duration: Duration = started_at.elapsed() - import_duration;
 
-    log::info!("Import particle file took: {}ms", import_duration.as_millis());
-    log::info!("Export particle file took: {}ms", export_duration.as_millis());
+    log::info!(
+      "Import particle file took: {}",
+      xrf_utils::format_duration(import_duration)
+    );
+    log::info!(
+      "Export particle file took: {}",
+      xrf_utils::format_duration(export_duration)
+    );
 
     log::info!("Particles file was re-unpacked into {}", destination.display());
 

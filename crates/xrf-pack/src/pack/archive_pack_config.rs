@@ -5,7 +5,7 @@ use xrf_error::{XrfError, XrfResult};
 use xrf_ltx::Ltx;
 
 /// Largest volume the engine will open, and the default (`XRP_MAX_SIZE` in `xrCompress.h`).
-pub const VOLUME_SIZE_MAX: u64 = 1024 * 1024 * 1900;
+pub const VOLUME_SIZE_MAX: u64 = 1900 * xrf_utils::BYTES_PER_MEGABYTE;
 
 /// Where a packed `gamedata` tree mounts, which is what nearly every archive is.
 pub const DEFAULT_ENTRY_POINT: &str = "$fs_root$\\gamedata\\";

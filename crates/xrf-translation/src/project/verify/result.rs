@@ -7,7 +7,8 @@ use xrf_report::{CheckId, CheckReport, Finding, Report, RuleId, Status};
 #[derive(Debug, Default, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ProjectVerifyResult {
-  pub duration: u128,
+  #[serde(with = "xrf_utils::duration_ms")]
+  pub duration: Duration,
   pub checked_translations_count: u32,
   pub missing_translations_count: u32,
   #[serde(skip_serializing)]
@@ -17,7 +18,7 @@ pub struct ProjectVerifyResult {
 impl ProjectVerifyResult {
   pub fn new() -> Self {
     Self {
-      duration: 0,
+      duration: Duration::ZERO,
       checked_translations_count: 0,
       missing_translations_count: 0,
       findings: Vec::new(),
@@ -33,12 +34,10 @@ impl ProjectVerifyResult {
   }
 
   pub fn to_report(&self) -> Report {
-    let duration_millis: u64 = self.duration.min(u128::from(u64::MAX)) as u64;
-
     Report::new(vec![CheckReport::new(
       CheckId::new("translations").expect("Expected a non-empty translation check ID"),
       self.status(),
-      Some(Duration::from_millis(duration_millis)),
+      Some(self.duration),
       self.findings.clone(),
     )])
   }

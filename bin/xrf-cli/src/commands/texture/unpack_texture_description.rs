@@ -128,8 +128,8 @@ impl GenericCommand for UnpackTextureDescriptionCommand {
     })?;
 
     log::info!(
-      "Unpack texture descriptions took: {}ms",
-      started_at.elapsed().as_millis()
+      "Unpack texture descriptions took: {}",
+      xrf_utils::format_duration(started_at.elapsed())
     );
 
     Ok(())

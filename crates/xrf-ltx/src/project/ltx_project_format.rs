@@ -36,7 +36,7 @@ impl LtxProject {
       result.record_checked(self.path_of(logical_path), Ltx::is_formatted(&contents)?, &options);
     }
 
-    result.duration = started_at.elapsed().as_millis();
+    result.duration = started_at.elapsed();
 
     LtxFilesFormatter::report_check(&result, &options);
 

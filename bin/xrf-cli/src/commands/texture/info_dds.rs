@@ -57,16 +57,16 @@ impl GenericCommand for InfoDdsCommand {
 
     xrf_output::info!(
       output,
-      "File size: {} ({}kb)",
+      "File size: {} ({})",
       metadata.file_size,
-      metadata.file_size / 1024
+      xrf_utils::format_bytes(metadata.file_size)
     );
     xrf_output::info!(output, "Metadata size: {} ", metadata.metadata_size);
     xrf_output::info!(
       output,
-      "Data size: {} ({}kb)",
+      "Data size: {} ({})",
       metadata.data_size,
-      metadata.data_size / 1024
+      xrf_utils::format_bytes(metadata.data_size as u64)
     );
     xrf_output::info!(output, "Size: {} x {}", metadata.width, metadata.height);
     xrf_output::info!(

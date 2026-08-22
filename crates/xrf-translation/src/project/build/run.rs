@@ -54,12 +54,12 @@ pub fn build_dir(dir: &Path, options: &ProjectBuildOptions) -> XrfResult<Project
     build_file(&source_file, options)?;
   }
 
-  result.duration = started_at.elapsed().as_millis();
+  result.duration = started_at.elapsed();
 
   log::info!(
-    "Built dir {} in {} sec",
+    "Built dir {} in {}",
     dir.display(),
-    (result.duration as f64) / 1_000.0
+    xrf_utils::format_duration(result.duration)
   );
 
   Ok(result)
@@ -87,12 +87,12 @@ pub fn build_file<P: AsRef<Path>>(path: &P, options: &ProjectBuildOptions) -> Xr
     }
   }
 
-  result.duration = started_at.elapsed().as_millis();
+  result.duration = started_at.elapsed();
 
   log::info!(
-    "Built file {} in {} sec",
+    "Built file {} in {}",
     path.as_ref().display(),
-    (result.duration as f64) / 1000.0
+    xrf_utils::format_duration(result.duration)
   );
 
   Ok(result)

@@ -103,13 +103,16 @@ impl GenericCommand for UnpackArchiveCommand {
 
     let archive_project: Box<ArchiveProject> = Box::new(ArchiveProject::new(path)?);
 
+    let (compressed_size, real_size): (String, String) =
+      xrf_utils::format_bytes_pair(archive_project.get_compressed_size(), archive_project.get_real_size());
+
     xrf_output::info!(
       output,
-      "Summary: {} archive(s), {} file(s), {:.3} MB compressed, {:.3} MB real",
+      "Summary: {} archive(s), {} file(s), {} compressed, {} real",
       archive_project.archives.len(),
       archive_project.files.len(),
-      (archive_project.get_compressed_size() as f64) / 1024.0 / 1024.0,
-      (archive_project.get_real_size() as f64) / 1024.0 / 1024.0,
+      compressed_size,
+      real_size,
     );
 
     xrf_output::info!(output, "Unpacking files, parallel {parallel}");
@@ -123,10 +126,10 @@ impl GenericCommand for UnpackArchiveCommand {
 
       xrf_output::info!(
         output,
-        "Unpacked archive, took {} sec (preparation {} sec, unpack {} sec)",
-        result.duration as f64 / 1000.0,
-        result.prepare_duration as f64 / 1000.0,
-        result.unpack_duration as f64 / 1000.0,
+        "Unpacked archive, took {} (preparation {}, unpack {})",
+        xrf_utils::format_duration(result.duration),
+        xrf_utils::format_duration(result.prepare_duration),
+        xrf_utils::format_duration(result.unpack_duration),
       );
     }
 

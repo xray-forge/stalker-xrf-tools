@@ -84,8 +84,11 @@ impl GenericCommand for UnpackParticlesCommand {
 
     let unpack_duration: Duration = started_at.elapsed() - read_duration;
 
-    log::info!("Read particle file took: {}ms", read_duration.as_millis());
-    log::info!("Export particle file took: {}ms", unpack_duration.as_millis());
+    log::info!("Read particle file took: {}", xrf_utils::format_duration(read_duration));
+    log::info!(
+      "Export particle file took: {}",
+      xrf_utils::format_duration(unpack_duration)
+    );
 
     Ok(())
   }

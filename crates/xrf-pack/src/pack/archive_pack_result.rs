@@ -1,4 +1,5 @@
 use std::path::PathBuf;
+use std::time::Duration;
 
 use serde::Serialize;
 
@@ -18,5 +19,7 @@ pub struct ArchivePackResult {
   pub files_aliased: usize,
   pub size_source: u64,
   pub size_written: u64,
-  pub duration: u128,
+  #[serde(with = "xrf_utils::duration_ms")]
+  #[cfg_attr(feature = "typescript-bindings", specta(type = u64))]
+  pub duration: Duration,
 }

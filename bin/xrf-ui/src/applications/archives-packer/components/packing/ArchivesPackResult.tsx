@@ -7,7 +7,7 @@ import { CommandResult, ICommandResultStat } from "@/core/ui/command-result/Comm
 import { CommandResultFindings } from "@/core/ui/command-result/CommandResultFindings";
 import { RevealPathButton } from "@/core/ui/reveal/RevealPathButton";
 import { formatDuration } from "@/lib/format/duration";
-import { bytesToMegabytes } from "@/lib/memory/size";
+import { formatBytesPair } from "@/lib/memory/format";
 
 interface IArchivesPackResultProps {
   result: ArchivePackResult;
@@ -21,8 +21,11 @@ export function ArchivesPackResult({ result }: IArchivesPackResultProps): ReactE
 
   const rows: Array<{ volume: string }> = useMemo(() => result.volumes.map((volume) => ({ volume })), [result.volumes]);
 
-  const stats: Array<ICommandResultStat> = useMemo(
-    () => [
+  const stats: Array<ICommandResultStat> = useMemo(() => {
+    // One unit for both sizes, so the compression ratio stays readable at a glance.
+    const [sizeSource, sizeWritten] = formatBytesPair(result.sizeSource, result.sizeWritten);
+
+    return [
       { label: "volumes", value: result.volumes.length },
       { label: "packed", value: result.filesTotal },
       { label: "compressed", value: result.filesCompressed },
@@ -30,12 +33,11 @@ export function ArchivesPackResult({ result }: IArchivesPackResultProps): ReactE
       // Aliased and skipped are the two counts that explain a surprising size or a missing file.
       { label: "aliased", value: result.filesAliased },
       { label: "skipped", value: result.filesSkipped },
-      { label: "source", value: `${bytesToMegabytes(result.sizeSource).toFixed(1)} MB` },
-      { label: "written", value: `${bytesToMegabytes(result.sizeWritten).toFixed(1)} MB` },
+      { label: "source", value: sizeSource },
+      { label: "written", value: sizeWritten },
       { label: "elapsed", value: formatDuration(result.duration) },
-    ],
-    [result]
-  );
+    ];
+  }, [result]);
 
   return (
     <CommandResult

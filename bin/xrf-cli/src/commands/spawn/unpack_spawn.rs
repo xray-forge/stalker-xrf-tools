@@ -103,8 +103,16 @@ impl GenericCommand for UnpackSpawnCommand {
 
     let unpack_duration: Duration = started_at.elapsed() - read_duration;
 
-    xrf_output::info!(output, "Read spawn file took: {}ms", read_duration.as_millis());
-    xrf_output::info!(output, "Export spawn file took: {}ms", unpack_duration.as_millis());
+    xrf_output::info!(
+      output,
+      "Read spawn file took: {}",
+      xrf_utils::format_duration(read_duration)
+    );
+    xrf_output::info!(
+      output,
+      "Export spawn file took: {}",
+      xrf_utils::format_duration(unpack_duration)
+    );
 
     Ok(())
   }

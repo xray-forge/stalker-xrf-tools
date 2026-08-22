@@ -99,8 +99,11 @@ impl GenericCommand for PackSpawnCommand {
 
     let write_duration: Duration = started_at.elapsed() - read_duration;
 
-    log::info!("Read spawn file took: {}ms", read_duration.as_millis());
-    log::info!("Writing packed spawn file took: {}ms", write_duration.as_millis());
+    log::info!("Read spawn file took: {}", xrf_utils::format_duration(read_duration));
+    log::info!(
+      "Writing packed spawn file took: {}",
+      xrf_utils::format_duration(write_duration)
+    );
 
     Ok(())
   }

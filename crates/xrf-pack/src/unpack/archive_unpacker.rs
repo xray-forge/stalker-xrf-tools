@@ -179,9 +179,9 @@ impl ArchiveUnpacker {
         .map(|it| it.path.to_str().unwrap().into())
         .collect(),
       destination: destination.to_str().unwrap().into(),
-      duration: unpacked_at.as_millis(),
-      prepare_duration: prepared_at.as_millis(),
-      unpack_duration: unpacked_at.as_millis() - prepared_at.as_millis(),
+      duration: unpacked_at,
+      prepare_duration: prepared_at,
+      unpack_duration: unpacked_at.saturating_sub(prepared_at),
       unpacked_size: project.get_real_size(),
     }
   }

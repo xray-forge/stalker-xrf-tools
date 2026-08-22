@@ -36,14 +36,14 @@ impl LtxFilesFormatter {
       result.total_files += 1;
     }
 
-    result.duration = started_at.elapsed().as_millis();
+    result.duration = started_at.elapsed();
 
     xrf_output::info!(
       options.output,
-      "Formatted {}/{} files in {} sec",
+      "Formatted {}/{} files in {}",
       result.invalid_files,
       result.total_files,
-      (result.duration as f64) / 1000.0
+      xrf_utils::format_duration(result.duration)
     );
 
     Ok(result)
@@ -64,7 +64,7 @@ impl LtxFilesFormatter {
       result.record_checked(file.clone(), Ltx::is_formatted(&fs::read(file)?)?, &options);
     }
 
-    result.duration = started_at.elapsed().as_millis();
+    result.duration = started_at.elapsed();
 
     Self::report_check(&result, &options);
 
@@ -88,19 +88,19 @@ impl LtxFilesFormatter {
   /// Shared with [`crate::LtxProject::check_format_all_files_opt`], which reads its configs through a VFS rather than from
   /// files but reports the same way.
   pub(crate) fn report_check(result: &LtxProjectFormatResult, options: &LtxFormatOptions) {
-    let duration: f64 = (result.duration as f64) / 1000.0;
+    let duration: String = xrf_utils::format_duration(result.duration);
 
     if result.invalid_files == 0 {
       xrf_output::success!(
         options.output,
-        "All {} files are formatted, checked in {} sec",
+        "All {} files are formatted, checked in {}",
         result.total_files,
         duration
       );
     } else {
       xrf_output::warning!(
         options.output,
-        "Format issues with {}/{} files in {} sec",
+        "Format issues with {}/{} files in {}",
         result.invalid_files,
         result.total_files,
         duration

@@ -92,7 +92,7 @@ impl PackEquipmentProcessor {
     );
 
     Ok(PackEquipmentResult {
-      duration: started_at.elapsed().as_millis(),
+      duration: started_at.elapsed(),
       saved_at: options.output_path.clone(),
       saved_width: image.width(),
       saved_height: image.height(),

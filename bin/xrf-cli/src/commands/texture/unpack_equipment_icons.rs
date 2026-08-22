@@ -116,7 +116,10 @@ impl GenericCommand for UnpackEquipmentIconsCommand {
 
     xrf_output::info!(output_options, "Successfully DDS equipment file based on LTX sections");
 
-    log::info!("Unpack equipment took: {}ms", started_at.elapsed().as_millis());
+    log::info!(
+      "Unpack equipment took: {}",
+      xrf_utils::format_duration(started_at.elapsed())
+    );
 
     Ok(())
   }

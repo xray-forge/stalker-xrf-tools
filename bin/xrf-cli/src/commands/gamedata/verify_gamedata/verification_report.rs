@@ -10,14 +10,14 @@ use crate::core::generic_command::CommandResult;
 #[serde(rename_all = "camelCase")]
 struct GamedataVerificationReportOutput {
   checks: Vec<GamedataVerificationCheckReportOutput>,
-  duration_ms: u128,
+  duration_ms: u64,
   status: String,
 }
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 struct GamedataVerificationCheckReportOutput {
-  duration_ms: Option<u128>,
+  duration_ms: Option<u64>,
   findings: Vec<GamedataVerificationFindingOutput>,
   status: String,
   summary: String,
@@ -61,7 +61,7 @@ impl<'a> GamedataVerificationReportWriter<'a> {
 
     Ok(GamedataVerificationReportOutput {
       checks,
-      duration_ms: self.report.duration().as_millis(),
+      duration_ms: xrf_utils::duration_to_millis(self.report.duration()),
       status: self.report.status().to_string(),
     })
   }
@@ -78,7 +78,7 @@ impl<'a> GamedataVerificationReportWriter<'a> {
       .collect();
 
     GamedataVerificationCheckReportOutput {
-      duration_ms: report.duration().map(|duration| duration.as_millis()),
+      duration_ms: report.duration().map(xrf_utils::duration_to_millis),
       findings,
       status: report.status().to_string(),
       summary: gamedata_report.summary().to_string(),

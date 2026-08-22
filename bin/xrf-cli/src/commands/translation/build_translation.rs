@@ -113,8 +113,8 @@ impl GenericCommand for BuildTranslationCommand {
 
     xrf_output::info!(
       options.output,
-      "Built translation files in {} sec",
-      (result.duration as f64) / 1000.0
+      "Built translation files in {}",
+      xrf_utils::format_duration(result.duration)
     );
 
     Ok(())

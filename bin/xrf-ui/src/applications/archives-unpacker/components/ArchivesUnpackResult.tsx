@@ -7,7 +7,7 @@ import { CommandResult, ICommandResultStat } from "@/core/ui/command-result/Comm
 import { CommandResultFindings } from "@/core/ui/command-result/CommandResultFindings";
 import { RevealPathButton } from "@/core/ui/reveal/RevealPathButton";
 import { formatDuration } from "@/lib/format/duration";
-import { bytesToMegabytes } from "@/lib/memory/size";
+import { formatBytes } from "@/lib/memory/format";
 
 interface IArchivesUnpackResultProps {
   result: ArchiveUnpackResult;
@@ -27,7 +27,7 @@ export function ArchivesUnpackResult({ result }: IArchivesUnpackResultProps): Re
   const stats: Array<ICommandResultStat> = useMemo(
     () => [
       { label: "archives", value: result.archives.length },
-      { label: "unpacked", value: `${bytesToMegabytes(result.unpackedSize).toFixed(1)} MB` },
+      { label: "unpacked", value: formatBytes(result.unpackedSize) },
       { label: "prepare", value: formatDuration(result.prepareDuration) },
       { label: "unpack", value: formatDuration(result.unpackDuration) },
       { label: "elapsed", value: formatDuration(result.duration) },

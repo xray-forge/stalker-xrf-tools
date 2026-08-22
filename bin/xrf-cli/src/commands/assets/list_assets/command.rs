@@ -128,10 +128,10 @@ impl GenericCommand for ListAssetsCommand {
 
     xrf_output::success!(
       output,
-      "{} asset(s) across {} mount(s) in {}ms",
+      "{} asset(s) across {} mount(s) in {}",
       listing.entries.len(),
       listing.mounts.len(),
-      listing.duration.as_millis()
+      xrf_utils::format_duration(listing.duration)
     );
 
     Ok(())

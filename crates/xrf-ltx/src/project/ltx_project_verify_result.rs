@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use serde::Serialize;
 use xrf_error::XrfError;
 
@@ -7,7 +9,9 @@ use xrf_error::XrfError;
 pub struct LtxProjectVerifyResult {
   pub checked_fields: usize,
   pub checked_sections: usize,
-  pub duration: u128,
+  #[serde(with = "xrf_utils::duration_ms")]
+  #[cfg_attr(feature = "typescript-bindings", specta(type = u64))]
+  pub duration: Duration,
   pub errors: Vec<XrfError>,
   pub invalid_sections: usize,
   pub skipped_sections: usize,
@@ -21,7 +25,7 @@ impl LtxProjectVerifyResult {
     Self {
       checked_fields: 0,
       checked_sections: 0,
-      duration: 0,
+      duration: Duration::ZERO,
       errors: Vec::new(),
       invalid_sections: 0,
       skipped_sections: 0,

@@ -141,7 +141,7 @@ impl LtxProject {
       }
     }
 
-    result.duration = started_at.elapsed().as_millis();
+    result.duration = started_at.elapsed();
 
     for error in &result.errors {
       xrf_output::error!(options.output, "{error}");
@@ -149,10 +149,10 @@ impl LtxProject {
 
     xrf_output::info!(
       options.output,
-      "Checked {} files, {} sections in {} sec",
+      "Checked {} files, {} sections in {}",
       self.ltx_files.len(),
       result.total_sections,
-      (result.duration as f64) / 1000.0
+      xrf_utils::format_duration(result.duration)
     );
     xrf_output::info!(
       options.output,

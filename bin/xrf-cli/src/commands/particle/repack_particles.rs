@@ -57,8 +57,11 @@ impl GenericCommand for RepackParticlesCommand {
 
     let write_duration: Duration = started_at.elapsed() - read_duration;
 
-    log::info!("Read particle file took: {}ms", read_duration.as_millis());
-    log::info!("Write particle file took: {}ms", write_duration.as_millis());
+    log::info!("Read particle file took: {}", xrf_utils::format_duration(read_duration));
+    log::info!(
+      "Write particle file took: {}",
+      xrf_utils::format_duration(write_duration)
+    );
 
     log::info!("Particles file was repacked into {}", destination.display());
 

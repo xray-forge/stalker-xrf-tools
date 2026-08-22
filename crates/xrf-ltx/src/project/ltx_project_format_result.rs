@@ -1,4 +1,5 @@
 use std::path::PathBuf;
+use std::time::Duration;
 
 use serde::Serialize;
 
@@ -8,7 +9,9 @@ use crate::LtxFormatOptions;
 #[derive(Debug, Default, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct LtxProjectFormatResult {
-  pub duration: u128,
+  #[serde(with = "xrf_utils::duration_ms")]
+  #[cfg_attr(feature = "typescript-bindings", specta(type = u64))]
+  pub duration: Duration,
   pub invalid_files: usize,
   pub to_format: Vec<PathBuf>,
   pub total_files: usize,
@@ -18,7 +21,7 @@ pub struct LtxProjectFormatResult {
 impl LtxProjectFormatResult {
   pub fn new() -> Self {
     Self {
-      duration: 0,
+      duration: Duration::ZERO,
       invalid_files: 0,
       to_format: Vec::new(),
       total_files: 0,

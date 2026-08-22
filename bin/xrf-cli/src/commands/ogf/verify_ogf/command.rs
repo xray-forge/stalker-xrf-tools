@@ -99,9 +99,9 @@ impl VerifyOgfCommand {
 
     xrf_output::info!(
       output,
-      "Swept {} visuals in {}ms",
+      "Swept {} visuals in {}",
       census.files,
-      result.duration.as_millis()
+      xrf_utils::format_duration(result.duration)
     );
     xrf_output::info!(
       output,

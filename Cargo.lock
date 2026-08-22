@@ -6879,6 +6879,7 @@ dependencies = [
  "xrf-report",
  "xrf-texture",
  "xrf-translation",
+ "xrf-utils",
  "xrf-vfs",
  "xrf-visual",
 ]
@@ -7119,6 +7120,7 @@ version = "0.1.0"
 dependencies = [
  "base64 0.23.1",
  "encoding_rs",
+ "serde",
  "xrf-error",
 ]
 

@@ -2,6 +2,7 @@ import { Box, Chip, Grid } from "@mui/material";
 import { ReactElement } from "react";
 
 import { IPackEquipmentResult } from "@/core/equipment-icons";
+import { formatDuration } from "@/lib/format/duration";
 
 interface IEquipmentPackResultProps {
   result: IPackEquipmentResult;
@@ -11,7 +12,7 @@ export function EquipmentPackResult({ result }: IEquipmentPackResultProps): Reac
   return (
     <Box sx={{ display: "flex", flexDirection: "column", padding: 2, maxWidth: 540 }}>
       <Grid container sx={{ justifyContent: "center", gap: 1 }}>
-        <Chip variant={"outlined"} color={"success"} label={`${result.duration / 1000} sec`} />
+        <Chip variant={"outlined"} color={"success"} label={formatDuration(result.duration)} />
         <Chip
           variant={"outlined"}
           color={"success"}
