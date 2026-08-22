@@ -9,12 +9,13 @@ import {
   EApplicationStatus,
   IApplicationDescriptor,
 } from "@/core/routing/application";
+import { VisualLoadService } from "@/core/visuals/services/visual-load.service";
 
 export const VISUALS_EXPLORER_APPLICATION: IApplicationDescriptor = {
   Component: lazy(() =>
     import("./VisualsExplorerApplication").then((it) => ({ default: it.VisualsExplorerApplication }))
   ),
-  container: { bindings: [VisualsService, VisualsBrowseService] },
+  container: { bindings: [VisualLoadService, VisualsService, VisualsBrowseService] },
   preload: () => import("./VisualsExplorerApplication"),
   description: "Browse and preview game visuals in 3D",
   group: EApplicationGroupId.VISUALS,

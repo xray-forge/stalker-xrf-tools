@@ -2,7 +2,6 @@ import { default as ArchiveIcon } from "@mui/icons-material/Archive";
 import { lazy } from "react";
 
 import { ArchivesService } from "@/applications/archives-explorer/services/archives";
-import { ArchiveVisualsService } from "@/applications/archives-explorer/services/visuals";
 import { AssetService } from "@/core/assets/services";
 import {
   EApplicationGroupId,
@@ -10,9 +9,10 @@ import {
   EApplicationStatus,
   IApplicationDescriptor,
 } from "@/core/routing/application";
+import { VisualLoadService } from "@/core/visuals/services";
 
 export const ARCHIVES_EXPLORER_APPLICATION: IApplicationDescriptor = {
-  container: { bindings: [AssetService, ArchivesService, ArchiveVisualsService] },
+  container: { bindings: [AssetService, ArchivesService, VisualLoadService] },
   Component: lazy(() =>
     import("./ArchivesExplorerApplication").then((it) => ({ default: it.ArchivesExplorerApplication }))
   ),

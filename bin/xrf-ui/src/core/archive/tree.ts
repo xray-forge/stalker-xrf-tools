@@ -1,10 +1,5 @@
 import { ArchiveFileDescriptor } from "@/core/bindings/types/xrf-archive";
-import {
-  IPathDirectoryTreeItem,
-  IPathFileTreeItem,
-  IPathTreeItem,
-  parsePathTree,
-} from "@/core/ui/tree/path-tree";
+import { IPathDirectoryTreeItem, IPathFileTreeItem, IPathTreeItem, parsePathTree } from "@/core/ui/tree/path-tree";
 
 /**
  * Whether an archived file would be written when its directory is extracted.

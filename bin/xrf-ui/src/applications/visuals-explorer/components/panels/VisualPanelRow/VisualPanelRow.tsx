@@ -18,7 +18,8 @@ export function VisualPanelRow({
   "data-testid": dataTestId = "visual-panel-row",
   id,
   className,
-  label, value,
+  label,
+  value,
 }: IVisualPanelRowProps): ReactElement {
   return (
     <Box

@@ -128,7 +128,7 @@ export function VisualsExplorerOpenForm({ onFinished }: IVisualsExplorerOpenForm
       {mode === "folder" ? (
         <PathFormRow
           label={"Meshes root"}
-          description={"Gamedata or meshes directory to browse"}
+          description={"Gamedata directory to browse"}
           isDisabled={isLoading}
           field={root}
         />

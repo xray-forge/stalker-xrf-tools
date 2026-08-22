@@ -9,11 +9,13 @@ import { useEditorStatus } from "@/core/shell/EditorStatusContext";
 import { IEditorPanel, useEditorPanels } from "@/core/shell/panel/context";
 import { DelayedProgress } from "@/core/ui/layout/DelayedProgress";
 import { EmptyState } from "@/core/ui/layout/EmptyState";
-import { DEFAULT_VISUAL_PREVIEW_VIEW_OPTIONS, IVisualPreviewViewOptions } from "@/core/visuals";
+import {
+  VisualPreviewAnimationBar,
+  VisualPreviewToolbar,
+  VisualPreviewViewport,
+} from "@/core/visuals/components/preview";
+import { DEFAULT_VISUAL_PREVIEW_VIEW_OPTIONS, IVisualPreviewViewOptions } from "@/core/visuals/components/scene";
 import { IVisualModelViews } from "@/core/visuals/lib/visual-views";
-import { VisualPreviewAnimationBar } from "@/core/visuals/preview/VisualPreviewAnimationBar";
-import { VisualPreviewToolbar } from "@/core/visuals/preview/VisualPreviewToolbar";
-import { VisualPreviewViewport } from "@/core/visuals/preview/VisualPreviewViewport";
 import { BaseComponentProps } from "@/lib/dom/element-types";
 import { Nullable } from "@/lib/types/general";
 

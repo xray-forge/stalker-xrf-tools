@@ -5,9 +5,10 @@ import { VISUAL_EXPLORER_PANELS } from "@/applications/visuals-explorer/componen
 import { VisualsMenu } from "@/applications/visuals-explorer/components/tree/VisualsMenu";
 import { VisualsExplorerOpenForm } from "@/applications/visuals-explorer/components/VisualsExplorerOpenForm";
 import { VisualsBrowseService } from "@/applications/visuals-explorer/store/browse";
-import { IOpenVisual, VisualsService } from "@/applications/visuals-explorer/store/visuals";
+import { VisualsService } from "@/applications/visuals-explorer/store/visuals";
 import { ApplicationLoader } from "@/core/shell/loading/ApplicationLoader";
-import { VisualPreviewLayout } from "@/core/visuals/preview/VisualPreviewLayout";
+import { VisualPreviewLayout } from "@/core/visuals/components/preview/VisualPreviewLayout";
+import { IOpenVisual } from "@/core/visuals/services";
 import { BaseComponentProps } from "@/lib/dom/element-types";
 import { Nullable } from "@/lib/types/general";
 

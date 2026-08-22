@@ -10,7 +10,7 @@ import { Divider, IconButton, Tooltip } from "@mui/material";
 import { ReactElement, useCallback } from "react";
 
 import { EditorToolbar } from "@/core/shell/editor/EditorToolbar";
-import { IVisualPreviewViewOptions } from "@/core/visuals";
+import { IVisualPreviewViewOptions } from "@/core/visuals/components/scene";
 import { BaseComponentProps } from "@/lib/dom/element-types";
 
 interface IVisualPreviewToolbarProps extends BaseComponentProps {

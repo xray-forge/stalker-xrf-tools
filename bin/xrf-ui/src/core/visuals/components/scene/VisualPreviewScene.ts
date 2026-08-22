@@ -15,9 +15,12 @@ import {
 } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 
+import {
+  DEFAULT_VISUAL_PREVIEW_SCENE_CONFIG,
+  IVisualPreviewSceneConfig,
+} from "@/core/visuals/components/scene/scene-config";
+import { createCheckerTexture, createSubmeshGeometry } from "@/core/visuals/components/scene/VisualPreviewScene.utils";
 import { IVisualModelViews } from "@/core/visuals/lib/visual-views";
-import { DEFAULT_VISUAL_PREVIEW_SCENE_CONFIG, IVisualPreviewSceneConfig } from "@/core/visuals/scene/scene-config";
-import { createCheckerTexture, createSubmeshGeometry } from "@/core/visuals/scene/VisualPreviewScene.utils";
 import { Nullable } from "@/lib/types/general";
 
 /**

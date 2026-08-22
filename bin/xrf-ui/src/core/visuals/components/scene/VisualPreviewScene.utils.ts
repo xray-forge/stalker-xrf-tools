@@ -1,7 +1,7 @@
 import { BufferAttribute, BufferGeometry, DataTexture, NearestFilter, RepeatWrapping, RGBAFormat } from "three";
 
+import { IVisualPreviewSceneConfig } from "@/core/visuals/components/scene/scene-config";
 import { IVisualSubmeshViews } from "@/core/visuals/lib/visual-views";
-import { IVisualPreviewSceneConfig } from "@/core/visuals/scene/scene-config";
 
 /**
  * A small procedural checkerboard, built as raw pixels rather than through a canvas so it needs no dom.

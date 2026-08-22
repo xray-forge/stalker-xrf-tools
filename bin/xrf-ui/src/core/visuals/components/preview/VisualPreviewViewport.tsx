@@ -2,7 +2,7 @@ import { Box } from "@mui/material";
 import { ReactElement, useEffect, useRef } from "react";
 import { Texture } from "three";
 
-import { IVisualPreviewViewOptions, VisualPreviewScene } from "@/core/visuals";
+import { IVisualPreviewViewOptions, VisualPreviewScene } from "@/core/visuals/components/scene";
 import { IVisualModelViews } from "@/core/visuals/lib/visual-views";
 import { Nullable } from "@/lib/types/general";
 

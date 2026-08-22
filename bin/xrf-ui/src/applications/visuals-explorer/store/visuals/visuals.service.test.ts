@@ -7,6 +7,7 @@ import { AssetWorldSpec, SelectedVisualDescription, VisualSource } from "@/core/
 import { ProjectService } from "@/core/settings/services/project/project.service";
 import { describeVisualSource } from "@/core/visuals/lib/visual-source";
 import { EVisualTextureState } from "@/core/visuals/lib/visual-texture";
+import { VisualLoadService } from "@/core/visuals/services/visual-load.service";
 import { mockDdsFile } from "@/fixtures/mocks/dds.mocks";
 import { resetMockInvoke, setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import {
@@ -41,7 +42,7 @@ describe("VisualsService observability", () => {
     // A service whose constructor forgets `makeObservable` still passes every behavioural test here,
     // because nothing in jest reacts to its state - and then does nothing at all in the running app.
     // Assert the annotations directly, which is the only place this is cheap to catch.
-    const { service } = mockInjectedService(VisualsService);
+    const { service } = mockInjectedService(VisualsService, [VisualLoadService]);
 
     expect(isObservableProp(service, "visual")).toBe(true);
     expect(isObservableProp(service, "isReady")).toBe(true);
@@ -56,7 +57,7 @@ describe("VisualsService opening", () => {
 
   it("builds views from the description and the buffer it describes", async () => {
     const { selected, buffer } = mockOpenableVisual();
-    const { service } = mockInjectedService(VisualsService);
+    const { service } = mockInjectedService(VisualsService, [VisualLoadService]);
 
     setMockInvokeResponses({
       ["plugin:visuals|open_model"]: selected,
@@ -71,7 +72,7 @@ describe("VisualsService opening", () => {
   });
 
   it("reports a failed open without leaving a stale model on screen", async () => {
-    const { service } = mockInjectedService(VisualsService);
+    const { service } = mockInjectedService(VisualsService, [VisualLoadService]);
 
     setMockInvokeResponses({
       ["plugin:visuals|open_model"]: () => {
@@ -89,7 +90,7 @@ describe("VisualsService opening", () => {
   it("restores whatever the backend still has selected", async () => {
     // A reload re-provisions the service, and the backend keeps the selection for exactly this reason.
     const { selected, buffer } = mockOpenableVisual("C:\\gamedata\\stalker.ogf");
-    const { service } = mockInjectedService(VisualsService);
+    const { service } = mockInjectedService(VisualsService, [VisualLoadService]);
 
     setMockInvokeResponses({
       ["plugin:visuals|get_model"]: selected,
@@ -103,7 +104,7 @@ describe("VisualsService opening", () => {
   });
 
   it("becomes ready with nothing open when the backend has no selection", async () => {
-    const { service } = mockInjectedService(VisualsService);
+    const { service } = mockInjectedService(VisualsService, [VisualLoadService]);
 
     setMockInvokeResponses({ ["plugin:visuals|get_model"]: null });
 
@@ -118,7 +119,7 @@ describe("VisualsService opening", () => {
     // description would upload one model's bytes under another's byte ranges.
     const first = mockOpenableVisual("C:\\gamedata\\first.ogf");
     const second = mockOpenableVisual("C:\\gamedata\\second.ogf");
-    const { service } = mockInjectedService(VisualsService);
+    const { service } = mockInjectedService(VisualsService, [VisualLoadService]);
 
     let releaseFirstGeometry: Nullable<() => void> = null;
 
@@ -153,7 +154,7 @@ describe("VisualsService opening", () => {
     // Reading by resolved path rather than by reference is what keeps the bytes and the reported outcome describing the
     // same file - including a substituted dummy, which by reference would resolve to nothing.
     const { selected, buffer } = mockOpenableVisual();
-    const { container, service } = mockInjectedService(VisualsService);
+    const { container, service } = mockInjectedService(VisualsService, [VisualLoadService]);
 
     container.get(ProjectService).setXrfProjectPath("C:\\project");
 
@@ -189,7 +190,7 @@ describe("VisualsService opening", () => {
 
   it("clears the model when closed", async () => {
     const { selected, buffer } = mockOpenableVisual();
-    const { service } = mockInjectedService(VisualsService);
+    const { service } = mockInjectedService(VisualsService, [VisualLoadService]);
 
     setMockInvokeResponses({
       ["plugin:visuals|open_model"]: selected,

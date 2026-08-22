@@ -3,12 +3,12 @@ import { useInjection } from "@wirestate/react";
 import { ReactElement, useEffect, useState } from "react";
 
 import { ArchivesService } from "@/applications/archives-explorer/services/archives";
-import { ArchiveVisualsService, IPreviewedVisual } from "@/applications/archives-explorer/services/visuals";
 import { ArchiveProject } from "@/core/bindings/types/xrf-archive";
 import { DelayedProgress } from "@/core/ui/layout/DelayedProgress";
 import { EmptyState } from "@/core/ui/layout/EmptyState";
-import { DEFAULT_VISUAL_PREVIEW_VIEW_OPTIONS } from "@/core/visuals";
-import { VisualPreviewViewport } from "@/core/visuals/preview/VisualPreviewViewport";
+import { VisualPreviewViewport } from "@/core/visuals/components/preview";
+import { DEFAULT_VISUAL_PREVIEW_VIEW_OPTIONS } from "@/core/visuals/components/scene";
+import { IOpenVisual, VisualLoadService } from "@/core/visuals/services";
 import { BaseComponentProps } from "@/lib/dom/element-types";
 import { Loadable } from "@/lib/loadable";
 import { Nullable } from "@/lib/types/general";
@@ -31,21 +31,21 @@ export function ArchiveModelPreview({
   name,
 }: IArchiveModelPreviewProps): ReactElement {
   const archivesService: ArchivesService = useInjection(ArchivesService);
-  const visualsService: ArchiveVisualsService = useInjection(ArchiveVisualsService);
+  const loadService: VisualLoadService = useInjection(VisualLoadService);
 
   const project: Nullable<ArchiveProject> = archivesService.project.value;
   const root: Nullable<string> = project?.root ?? null;
-  const visual: Loadable<Nullable<IPreviewedVisual>> = visualsService.visual;
+  const visual: Loadable<Nullable<IOpenVisual>> = loadService.visual;
 
   const [cameraResetToken, setCameraResetToken] = useState(0);
 
   useEffect(() => {
     if (root) {
-      void visualsService.preview(root, name);
+      void loadService.load({ kind: "asset", logicalPath: name }, { asset: null, roots: [root] });
     }
 
-    return () => visualsService.clear();
-  }, [name, root, visualsService]);
+    return () => loadService.clear();
+  }, [loadService, name, root]);
 
   // Refit once the model is on screen. The scene fits its camera when the geometry lands, but this viewport mounts with
   // the selection rather than with the application, so at that moment the panel is still taking its width - and a fit
@@ -67,7 +67,7 @@ export function ArchiveModelPreview({
         model={visual.value?.views ?? null}
         options={DEFAULT_VISUAL_PREVIEW_VIEW_OPTIONS}
         cameraResetToken={cameraResetToken}
-        textures={visualsService.textures}
+        textures={loadService.textures}
       />
 
       {visual.isLoading ? (

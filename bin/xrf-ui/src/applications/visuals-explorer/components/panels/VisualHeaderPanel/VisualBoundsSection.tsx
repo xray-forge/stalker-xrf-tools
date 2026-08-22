@@ -19,7 +19,9 @@ export function VisualBoundsSection({
   "data-testid": dataTestId = "visual-bounds-section",
   id,
   className,
-  title, caption, bounds,
+  title,
+  caption,
+  bounds,
 }: IVisualBoundsSectionProps): ReactElement {
   return (
     <VisualPanelSection data-testid={dataTestId} id={id} className={className} title={title} caption={caption}>

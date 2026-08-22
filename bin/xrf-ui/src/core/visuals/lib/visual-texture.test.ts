@@ -53,9 +53,7 @@ describe("toLoadableTextures", () => {
       mockTextureDependency({ resolution: { kind: "rejected", reason: "not a logical path" }, submeshIndex: 3 }),
     ];
 
-    expect(toLoadableTextures(textures)).toEqual([
-      { logicalPath: "textures\\wpn\\wpn_ak74.dds", submeshIndex: 0 },
-    ]);
+    expect(toLoadableTextures(textures)).toEqual([{ logicalPath: "textures\\wpn\\wpn_ak74.dds", submeshIndex: 0 }]);
   });
 });
 
