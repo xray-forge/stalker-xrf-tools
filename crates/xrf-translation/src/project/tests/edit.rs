@@ -4,9 +4,9 @@ use indexmap::IndexMap;
 use xrf_error::XrfResult;
 use xrf_test_utils::utils::write_generated_test_resource;
 
-use crate::constants::LANGUAGE_NEUTRAL;
 use crate::edit::TranslationEdit;
 use crate::json::read::read_json;
+use crate::project::constants::LANGUAGE_NEUTRAL;
 use crate::project::descriptor::TranslationProjectDescriptor;
 use crate::project::edit::{apply_edits, find_unwritable_character};
 use crate::types::TranslationVariant;

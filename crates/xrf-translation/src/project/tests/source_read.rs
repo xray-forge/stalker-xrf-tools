@@ -1,7 +1,7 @@
 use xrf_test_utils::utils::{build_absolute_generated_test_resource_path, write_generated_test_resource};
 
 use super::table;
-use crate::constants::LANGUAGE_NEUTRAL;
+use crate::project::constants::LANGUAGE_NEUTRAL;
 use crate::project::source_read::read_source;
 
 #[test]

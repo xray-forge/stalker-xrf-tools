@@ -4,10 +4,10 @@ use xrf_error::{XrfError, XrfResult};
 use xrf_utils::XRayEncoding;
 use xrf_xml::encoding_from_label;
 
-use crate::constants::LANGUAGE_NEUTRAL;
 use crate::edit::TranslationEdit;
 use crate::json;
 use crate::language::{TranslationLanguage, find_unencodable_character};
+use crate::project::constants::LANGUAGE_NEUTRAL;
 use crate::project::descriptor::TranslationProjectDescriptor;
 use crate::xml;
 

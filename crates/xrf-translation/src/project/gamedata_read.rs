@@ -3,8 +3,8 @@ use std::path::{Path, PathBuf};
 
 use xrf_error::XrfResult;
 
-use crate::constants::{MAP_DESC_DIRECTORY, OPENXRAY_XML};
 use crate::language::TranslationLanguage;
+use crate::project::constants::{MAP_DESC_DIRECTORY, OPENXRAY_XML};
 use crate::project::descriptor::{
   TranslationFile, TranslationFinding, TranslationProjectDescriptor, TranslationProjectMode,
 };

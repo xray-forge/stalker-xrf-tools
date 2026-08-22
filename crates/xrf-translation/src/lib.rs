@@ -4,7 +4,6 @@
 //! end to end, and `project` owns whole trees of them - discovery, description, editing, and the
 //! build, verify and initialize passes.
 
-pub(crate) mod constants;
 pub(crate) mod edit;
 pub(crate) mod json;
 pub(crate) mod language;
@@ -13,12 +12,12 @@ pub(crate) mod staged_write;
 pub(crate) mod types;
 pub(crate) mod xml;
 
-pub use crate::constants::{LANGUAGE_NEUTRAL, MULTILANGUAGE};
 pub use crate::edit::TranslationEdit;
 pub use crate::language::TranslationLanguage;
 pub use crate::project::build::options::ProjectBuildOptions;
 pub use crate::project::build::result::ProjectBuildResult;
 pub use crate::project::build::run::{build_dir, build_file};
+pub use crate::project::constants::{LANGUAGE_NEUTRAL, MULTILANGUAGE};
 pub use crate::project::descriptor::{
   TranslationFile, TranslationFinding, TranslationProjectDescriptor, TranslationProjectMode,
 };

@@ -3,9 +3,9 @@ use std::path::{Path, PathBuf};
 use walkdir::{DirEntry, WalkDir};
 use xrf_error::{XrfError, XrfResult};
 
-use crate::constants::{LANGUAGE_NEUTRAL, MULTILANGUAGE};
 use crate::json::read::read_json;
 use crate::language::TranslationLanguage;
+use crate::project::constants::{LANGUAGE_NEUTRAL, MULTILANGUAGE};
 use crate::project::descriptor::{
   TranslationFile, TranslationFinding, TranslationProjectDescriptor, TranslationProjectMode,
 };

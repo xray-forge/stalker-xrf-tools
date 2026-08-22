@@ -1,8 +1,8 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 
-use crate::constants::MAP_DESC_DIRECTORY;
 use crate::language::TranslationLanguage;
+use crate::project::constants::MAP_DESC_DIRECTORY;
 use crate::project::descriptor::TranslationProjectMode;
 
 /// Report which layout a directory looks like.
