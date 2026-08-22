@@ -85,7 +85,7 @@ mod tests {
   use xrf_test_utils::FileSlice;
   use xrf_test_utils::file::read_file_as_string;
   use xrf_test_utils::utils::{
-    get_absolute_generated_test_resource_path, get_relative_test_sample_file_path,
+    build_absolute_generated_test_resource_path, build_relative_test_sample_file_path,
     open_generated_test_resource_as_slice, overwrite_generated_test_resource_as_file,
   };
 
@@ -101,7 +101,7 @@ mod tests {
   #[test]
   fn test_read_write() -> XrfResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
+    let filename: String = build_relative_test_sample_file_path(file!(), "read_write.chunk");
 
     let original: AlifeActor = AlifeActor {
       base: AlifeObjectActor {
@@ -174,7 +174,7 @@ mod tests {
 
   #[test]
   fn test_import_export() -> XrfResult {
-    let ltx_filename: String = get_relative_test_sample_file_path(file!(), "import_export.ltx");
+    let ltx_filename: String = build_relative_test_sample_file_path(file!(), "import_export.ltx");
     let mut ltx: Ltx = Ltx::new();
 
     let original: AlifeActor = AlifeActor {
@@ -230,7 +230,7 @@ mod tests {
 
     ltx.write_to(&mut overwrite_generated_test_resource_as_file(&ltx_filename)?)?;
 
-    let source: Ltx = Ltx::read_from_path(get_absolute_generated_test_resource_path(&ltx_filename))?;
+    let source: Ltx = Ltx::read_from_path(build_absolute_generated_test_resource_path(&ltx_filename))?;
 
     assert_eq!(AlifeActor::import("data", &source)?, original);
 
@@ -288,7 +288,7 @@ mod tests {
       save_marker: 1,
     };
 
-    let mut file: File = overwrite_generated_test_resource_as_file(&get_relative_test_sample_file_path(
+    let mut file: File = overwrite_generated_test_resource_as_file(&build_relative_test_sample_file_path(
       file!(),
       "serialize_deserialize.json",
     ))?;

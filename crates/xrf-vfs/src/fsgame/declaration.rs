@@ -69,7 +69,7 @@ impl FsgameDeclaration {
   }
 
   /// Returns the addition without trailing separators, or `None` when it is empty.
-  pub fn addition_segment(&self) -> Option<&str> {
+  pub fn get_addition_segment(&self) -> Option<&str> {
     self
       .addition
       .as_deref()

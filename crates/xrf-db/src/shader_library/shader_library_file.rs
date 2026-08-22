@@ -83,7 +83,7 @@ mod tests {
   use xrf_error::XrfResult;
   use xrf_test_utils::FileSlice;
   use xrf_test_utils::utils::{
-    get_absolute_generated_test_sample_file_path, get_relative_test_sample_file_path,
+    build_absolute_generated_test_sample_file_path, build_relative_test_sample_file_path,
     open_generated_test_resource_as_slice, overwrite_generated_test_resource_as_file,
   };
 
@@ -91,7 +91,7 @@ mod tests {
 
   #[test]
   fn test_read() -> XrfResult {
-    let filename: String = get_relative_test_sample_file_path(file!(), "read.chunk");
+    let filename: String = build_relative_test_sample_file_path(file!(), "read.chunk");
     let contents: Vec<u8> = shader_library_contents(&["models\\model", "models\\model_pn_hm"])?;
     let mut file = overwrite_generated_test_resource_as_file(&filename)?;
 
@@ -102,7 +102,7 @@ mod tests {
     assert_eq!(file.bytes_remaining(), contents.len());
 
     let library: ShaderLibraryFile =
-      ShaderLibraryFile::read_from_path(get_absolute_generated_test_sample_file_path(file!(), "read.chunk"))?;
+      ShaderLibraryFile::read_from_path(build_absolute_generated_test_sample_file_path(file!(), "read.chunk"))?;
 
     assert!(library.contains_blender("models\\model"));
     assert!(library.contains_blender("models\\model_pn_hm"));

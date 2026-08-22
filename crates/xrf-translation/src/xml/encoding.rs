@@ -2,7 +2,7 @@ use std::fs;
 use std::path::Path;
 
 use xrf_error::{XrfError, XrfResult};
-use xrf_utils::{XRayEncoding, decode_bytes_to_string_without_bom_handling, get_utf8_encoder};
+use xrf_utils::{XRayEncoding, decode_bytes_to_string_without_bom_handling, new_utf8_encoder};
 use xrf_xml::declared_xml_encoding;
 
 use crate::language::TranslationLanguage;
@@ -24,7 +24,7 @@ pub(crate) fn resolve_encoding(path: &Path, data: &[u8]) -> XrfResult<XRayEncodi
   let declared: Option<XRayEncoding> = declared_xml_encoding(data)?;
 
   if let (Some(declared), Some(language)) = (declared, language)
-    && declared != language.get_language_encoder()
+    && declared != language.new_language_encoder()
   {
     log::warn!(
       "Translation XML '{}' declares {}, but '{}' expects {}",
@@ -35,7 +35,7 @@ pub(crate) fn resolve_encoding(path: &Path, data: &[u8]) -> XrfResult<XRayEncodi
     );
   }
 
-  Ok(declared.unwrap_or_else(|| language.unwrap_or(TranslationLanguage::English).get_language_encoder()))
+  Ok(declared.unwrap_or_else(|| language.unwrap_or(TranslationLanguage::English).new_language_encoder()))
 }
 
 /// Read a string table into text, with the byte order mark and encoding needed to write it back.
@@ -57,7 +57,7 @@ pub(crate) fn read_decoded(path: &Path) -> XrfResult<(Vec<u8>, XRayEncoding, Str
   let encoding: XRayEncoding = if mark.is_empty() {
     resolve_encoding(path, body)?
   } else {
-    get_utf8_encoder()
+    new_utf8_encoder()
   };
 
   Ok((

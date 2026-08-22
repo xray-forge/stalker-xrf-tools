@@ -35,16 +35,16 @@ pub(crate) fn label_from_path(path: &Path) -> String {
 /// a subtree. Sources are `Send + Sync` because the mounted VFS is shared across application commands.
 pub trait XrayAssetSource: Debug + Send + Sync {
   /// Short name for reporting, such as a directory or volume-set name.
-  fn label(&self) -> &str;
+  fn get_label(&self) -> &str;
 
   /// Classifies the source's physical storage.
-  fn kind(&self) -> XrayMountKind;
+  fn get_kind(&self) -> XrayMountKind;
 
   /// Whether existing entries can be overwritten through [`Self::write`].
   fn is_writable(&self) -> bool;
 
   /// Returns the directory root or the directory containing the archive volumes.
-  fn root_path(&self) -> &Path;
+  fn get_root_path(&self) -> &Path;
 
   /// Checks whether the source contains a source-relative logical path.
   ///
@@ -73,20 +73,20 @@ pub trait XrayAssetSource: Debug + Send + Sync {
   fn create(&self, path: &str, bytes: &[u8]) -> XrfResult<()>;
 
   /// Enumerates source-relative logical paths, optionally restricted to a component prefix.
-  fn entries<'a>(&'a self, prefix: Option<&'a str>) -> Box<dyn Iterator<Item = String> + 'a>;
+  fn list_entries<'a>(&'a self, prefix: Option<&'a str>) -> Box<dyn Iterator<Item = String> + 'a>;
 
   /// Size in bytes of an entry this source holds, without reading it.
   ///
   /// Answered from metadata rather than from a read, because the callers are size gates: a level's cform is checked against
   /// its header size precisely to avoid parsing a truncated file. An archive knows this from its name table, so neither
   /// container has to decompress anything.
-  fn size(&self, path: &str) -> Option<u64>;
+  fn get_size(&self, path: &str) -> Option<u64>;
 
   /// Files this source holds but cannot reach, because another file already claims their engine identity.
   ///
   /// Defaults to none, which is correct for a source whose names are unique by construction: an archive volume keys entries
   /// by name, so two entries cannot collide inside one set.
-  fn collisions(&self) -> &[XrayPathCollision] {
+  fn get_collisions(&self) -> &[XrayPathCollision] {
     &[]
   }
 }

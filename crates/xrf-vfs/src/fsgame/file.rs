@@ -2,7 +2,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 use xrf_error::{XrfError, XrfResult};
-use xrf_utils::{decode_bytes_to_string, get_windows1251_encoder};
+use xrf_utils::{decode_bytes_to_string, new_windows1251_encoder};
 
 use crate::fsgame::declaration::{FS_ROOT_ALIAS, FsgameDeclaration};
 
@@ -33,7 +33,7 @@ impl FsgameFile {
     let bytes: Vec<u8> = fs::read(&path)
       .map_err(|error| XrfError::new_read_error(format!("failed to read {}: {error}", path.display())))?;
 
-    Self::parse(root, &decode_bytes_to_string(&bytes, get_windows1251_encoder())?)
+    Self::parse(root, &decode_bytes_to_string(&bytes, new_windows1251_encoder())?)
   }
 
   /// Parses declarations out of file contents.
@@ -65,17 +65,17 @@ impl FsgameFile {
   }
 
   /// Returns the installation directory represented by `$fs_root$`.
-  pub fn root(&self) -> &Path {
+  pub fn get_root(&self) -> &Path {
     &self.root
   }
 
   /// Returns declarations in file order.
-  pub fn declarations(&self) -> &[FsgameDeclaration] {
+  pub fn get_declarations(&self) -> &[FsgameDeclaration] {
     &self.declarations
   }
 
   /// Finds an alias by its exact spelling.
-  pub fn declaration(&self, alias: &str) -> Option<&FsgameDeclaration> {
+  pub fn find_declaration(&self, alias: &str) -> Option<&FsgameDeclaration> {
     self.declarations.iter().find(|it| it.alias == alias)
   }
 
@@ -96,9 +96,9 @@ impl FsgameFile {
         return Some(path);
       }
 
-      let declaration: &FsgameDeclaration = self.declaration(current)?;
+      let declaration: &FsgameDeclaration = self.find_declaration(current)?;
 
-      if let Some(addition) = declaration.addition_segment() {
+      if let Some(addition) = declaration.get_addition_segment() {
         segments.push(addition);
       }
 

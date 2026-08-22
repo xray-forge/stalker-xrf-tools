@@ -7,7 +7,7 @@ use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
 use xrf_dds::{DdsFile, DdsFormat, DdsMetadata};
-use xrf_vfs::{XrayLookupScope, XrayVfs, implied_asset_root};
+use xrf_vfs::{XrayLookupScope, XrayVfs, find_implied_asset_root};
 
 /// The outcome of resolving and reading one texture reference.
 pub enum TextureResolution {
@@ -36,7 +36,7 @@ pub struct OgfTextureResolver {
 
 impl OgfTextureResolver {
   pub fn resolve(&mut self, visual: &Path, reference: &str) -> TextureResolution {
-    let Some(root) = implied_asset_root(visual) else {
+    let Some(root) = find_implied_asset_root(visual) else {
       return TextureResolution::NoRoot;
     };
 
@@ -59,7 +59,7 @@ impl OgfTextureResolver {
       .dds_texture(&scope, reference)
       .ok()
       .flatten()
-      .and_then(|location| location.physical_path());
+      .and_then(|location| location.to_physical_path());
 
     let Some(path) = located else {
       return TextureResolution::Missing { root };

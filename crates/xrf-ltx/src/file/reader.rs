@@ -4,7 +4,7 @@ use std::path::{Path, PathBuf};
 
 use xrf_error::XrfResult;
 use xrf_utils::{
-  decode_bytes_to_string, encode_w1251_bytes_to_string, get_windows1251_encoder, read_as_string_from_w1251_encoded,
+  decode_bytes_to_string, encode_w1251_bytes_to_string, new_windows1251_encoder, read_as_string_from_w1251_encoded,
 };
 use xrf_vfs::{XrayLookupScope, XrayVfs};
 
@@ -94,7 +94,7 @@ impl Ltx {
   pub fn read_included_from_vfs(vfs: &XrayVfs, scope: &XrayLookupScope, logical_path: &str) -> XrfResult<LtxIncluded> {
     let bytes: Vec<u8> = vfs.read(scope, logical_path)?;
 
-    Self::read_included_from_str(&decode_bytes_to_string(&bytes, get_windows1251_encoder())?)
+    Self::read_included_from_str(&decode_bytes_to_string(&bytes, new_windows1251_encoder())?)
   }
 
   /// Load include statements from a reader.
@@ -142,7 +142,7 @@ mod test {
   use std::path::PathBuf;
 
   use xrf_test_utils::file::read_file_as_normalized_win_endl_string;
-  use xrf_test_utils::utils::{get_absolute_test_file_path, get_absolute_test_resource_as_file};
+  use xrf_test_utils::utils::{build_absolute_test_file_path, build_absolute_test_resource_as_file};
 
   use crate::Ltx;
   use crate::file::types::LtxIncluded;
@@ -163,10 +163,11 @@ mod test {
 
   #[test]
   fn format_from_file_one() {
-    let formatted: String = Ltx::format_from_file(get_absolute_test_file_path(file!(), "not_formatted_1.ltx")).unwrap();
+    let formatted: String =
+      Ltx::format_from_file(build_absolute_test_file_path(file!(), "not_formatted_1.ltx")).unwrap();
 
     let expected: String = read_file_as_normalized_win_endl_string(
-      &mut get_absolute_test_resource_as_file(file!(), "formatted_1.ltx").unwrap(),
+      &mut build_absolute_test_resource_as_file(file!(), "formatted_1.ltx").unwrap(),
     )
     .unwrap();
 
@@ -175,10 +176,11 @@ mod test {
 
   #[test]
   fn format_from_file_two() {
-    let formatted: String = Ltx::format_from_file(get_absolute_test_file_path(file!(), "not_formatted_2.ltx")).unwrap();
+    let formatted: String =
+      Ltx::format_from_file(build_absolute_test_file_path(file!(), "not_formatted_2.ltx")).unwrap();
 
     let expected: String = read_file_as_normalized_win_endl_string(
-      &mut get_absolute_test_resource_as_file(file!(), "formatted_2.ltx").unwrap(),
+      &mut build_absolute_test_resource_as_file(file!(), "formatted_2.ltx").unwrap(),
     )
     .unwrap();
 
@@ -187,10 +189,11 @@ mod test {
 
   #[test]
   fn format_from_file_three() {
-    let formatted: String = Ltx::format_from_file(get_absolute_test_file_path(file!(), "not_formatted_3.ltx")).unwrap();
+    let formatted: String =
+      Ltx::format_from_file(build_absolute_test_file_path(file!(), "not_formatted_3.ltx")).unwrap();
 
     let expected: String = read_file_as_normalized_win_endl_string(
-      &mut get_absolute_test_resource_as_file(file!(), "formatted_3.ltx").unwrap(),
+      &mut build_absolute_test_resource_as_file(file!(), "formatted_3.ltx").unwrap(),
     )
     .unwrap();
 
@@ -199,10 +202,11 @@ mod test {
 
   #[test]
   fn format_from_file_four() {
-    let formatted: String = Ltx::format_from_file(get_absolute_test_file_path(file!(), "not_formatted_4.ltx")).unwrap();
+    let formatted: String =
+      Ltx::format_from_file(build_absolute_test_file_path(file!(), "not_formatted_4.ltx")).unwrap();
 
     let expected: String = read_file_as_normalized_win_endl_string(
-      &mut get_absolute_test_resource_as_file(file!(), "formatted_4.ltx").unwrap(),
+      &mut build_absolute_test_resource_as_file(file!(), "formatted_4.ltx").unwrap(),
     )
     .unwrap();
 

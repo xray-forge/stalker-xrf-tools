@@ -129,9 +129,9 @@ impl<'a> ShadersVerifier<'a> {
     let scope: XrayLookupScope = self.scope.clone().with_prefix(renderer_prefix)?;
     let mut entries: Vec<String> = self
       .vfs
-      .entries(&scope)
+      .list_entries(&scope)
       .into_iter()
-      .map(|location| location.logical_path().to_string())
+      .map(|location| location.get_logical_path().to_string())
       .collect();
 
     entries.sort();
@@ -146,7 +146,7 @@ impl<'a> ShadersVerifier<'a> {
     result: &mut GamedataShadersVerificationResult,
   ) {
     // Scripts sit directly in the renderer root, so this is a directory listing rather than a walk.
-    let listing = match self.vfs.children(self.scope, renderer_prefix) {
+    let listing = match self.vfs.list_children(self.scope, renderer_prefix) {
       Ok(listing) => listing,
       Err(error) => {
         result.add_finding(GamedataFindingFactory::for_asset(
@@ -161,18 +161,18 @@ impl<'a> ShadersVerifier<'a> {
 
     for file in listing.files {
       if !file
-        .logical_path()
+        .get_logical_path()
         .has_extension(&format!(".{SHADER_SCRIPT_FILE_EXTENSION}"))
       {
         continue;
       }
 
       // `xrf-shaders` keys sources by path, and for this project those keys are engine identities.
-      let path: PathBuf = PathBuf::from(file.logical_path().as_str());
+      let path: PathBuf = PathBuf::from(file.get_logical_path().as_str());
 
       result.increment_checked_scripts_count();
 
-      match self.read_script(file.logical_path().as_str()) {
+      match self.read_script(file.get_logical_path().as_str()) {
         Ok(source) => {
           if let Err(error) = XRayShaderScript::parse(&path, &source) {
             result.add_finding(GamedataFindingFactory::for_asset(

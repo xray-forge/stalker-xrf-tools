@@ -193,10 +193,10 @@ impl LtxProject {
   fn collect_logical_paths(vfs: &XrayVfs, scope: &XrayLookupScope) -> XrfResult<Vec<XrayPath>> {
     let mut paths: Vec<XrayPath> = Vec::new();
 
-    for location in vfs.entries(scope) {
+    for location in vfs.list_entries(scope) {
       // Already an engine identity, so nothing is re-validated here.
-      if location.logical_path().has_extension(&format!(".{LTX_EXTENSION}")) {
-        paths.push(location.logical_path().clone());
+      if location.get_logical_path().has_extension(&format!(".{LTX_EXTENSION}")) {
+        paths.push(location.get_logical_path().clone());
       }
     }
 
@@ -254,7 +254,7 @@ impl LtxProject {
       .find(&self.scope, logical_path.as_str())
       .ok()
       .flatten()
-      .and_then(|location| location.physical_path())
+      .and_then(|location| location.to_physical_path())
   }
 
   /// Reads one project file with included files merged and inherited sections resolved.
@@ -279,7 +279,7 @@ impl LtxProject {
   ///
   /// Returns an error when the resulting path is not a valid logical path.
   pub fn config_path(&self, relative_path: &str) -> XrfResult<XrayPath> {
-    match self.scope.prefix() {
+    match self.scope.get_prefix() {
       Some(prefix) => XrayPath::new(prefix)?.join(relative_path),
       None => XrayPath::new(relative_path),
     }

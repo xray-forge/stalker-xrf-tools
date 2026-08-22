@@ -3,7 +3,7 @@ use std::str::FromStr;
 
 use derive_more::Display;
 use xrf_error::{XrfError, XrfResult};
-use xrf_utils::{XRayEncoding, get_windows1250_encoder, get_windows1251_encoder, get_windows1252_encoder};
+use xrf_utils::{XRayEncoding, new_windows1250_encoder, new_windows1251_encoder, new_windows1252_encoder};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Display)]
 pub enum TranslationLanguage {
@@ -55,11 +55,11 @@ impl TranslationLanguage {
     }
   }
 
-  pub fn get_language_encoder(&self) -> XRayEncoding {
+  pub fn new_language_encoder(&self) -> XRayEncoding {
     match self {
-      Self::Russian | Self::Ukrainian => get_windows1251_encoder(),
-      Self::German | Self::Polish => get_windows1250_encoder(),
-      _ => get_windows1252_encoder(),
+      Self::Russian | Self::Ukrainian => new_windows1251_encoder(),
+      Self::German | Self::Polish => new_windows1250_encoder(),
+      _ => new_windows1252_encoder(),
     }
   }
 

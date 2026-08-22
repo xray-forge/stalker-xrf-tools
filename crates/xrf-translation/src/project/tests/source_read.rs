@@ -1,4 +1,4 @@
-use xrf_test_utils::utils::{get_absolute_generated_test_resource_path, write_generated_test_resource};
+use xrf_test_utils::utils::{build_absolute_generated_test_resource_path, write_generated_test_resource};
 
 use super::table;
 use crate::constants::LANGUAGE_NEUTRAL;
@@ -14,7 +14,7 @@ fn reads_a_json_map_as_one_file_carrying_every_language() {
   )
   .expect("Expected a written test file");
 
-  let descriptor = read_source(get_absolute_generated_test_resource_path(root)).unwrap();
+  let descriptor = read_source(build_absolute_generated_test_resource_path(root)).unwrap();
 
   assert_eq!(descriptor.languages, vec![String::from("eng"), String::from("ukr")]);
 
@@ -34,7 +34,7 @@ fn groups_language_suffixed_xml_under_one_entry() {
   write_generated_test_resource(&format!("{root}/dialogs.ukr.xml"), table("st_hi", "Pryvit"))
     .expect("Expected a written test file");
 
-  let descriptor = read_source(get_absolute_generated_test_resource_path(root)).unwrap();
+  let descriptor = read_source(build_absolute_generated_test_resource_path(root)).unwrap();
   let file = descriptor
     .files
     .get("dialogs.multilang.xml")
@@ -53,7 +53,7 @@ fn treats_an_unsuffixed_xml_as_language_neutral() {
   write_generated_test_resource(&format!("{root}/example.xml"), table("st_example", "example"))
     .expect("Expected a written test file");
 
-  let descriptor = read_source(get_absolute_generated_test_resource_path(root)).unwrap();
+  let descriptor = read_source(build_absolute_generated_test_resource_path(root)).unwrap();
   let file = descriptor.files.get("example.xml").expect("Expected the file");
 
   // The build copies this to every language, so calling it English would misreport its reach.
@@ -71,7 +71,7 @@ fn sorts_neutral_text_last_rather_than_under_a() {
   write_generated_test_resource(&format!("{root}/st_test.json"), r#"{"st_hello":{"eng":"Hello"}}"#)
     .expect("Expected a written test file");
 
-  let descriptor = read_source(get_absolute_generated_test_resource_path(root)).unwrap();
+  let descriptor = read_source(build_absolute_generated_test_resource_path(root)).unwrap();
 
   assert_eq!(
     descriptor.languages,
@@ -87,7 +87,7 @@ fn opens_a_project_whose_json_is_broken_and_reports_it() {
     .expect("Expected a written test file");
   write_generated_test_resource(&format!("{root}/bad.json"), "{ not json").expect("Expected a written test file");
 
-  let descriptor = read_source(get_absolute_generated_test_resource_path(root)).unwrap();
+  let descriptor = read_source(build_absolute_generated_test_resource_path(root)).unwrap();
 
   assert!(descriptor.files.contains_key("good.json"));
   assert!(
@@ -107,7 +107,7 @@ fn reports_an_id_defined_in_two_files_instead_of_refusing_to_open() {
   write_generated_test_resource(&format!("{root}/second.json"), r#"{"st_same":{"eng":"second"}}"#)
     .expect("Expected a written test file");
 
-  let descriptor = read_source(get_absolute_generated_test_resource_path(root)).unwrap();
+  let descriptor = read_source(build_absolute_generated_test_resource_path(root)).unwrap();
 
   assert_eq!(descriptor.files.len(), 2);
   assert!(
@@ -125,7 +125,7 @@ fn records_the_code_page_each_language_will_be_built_in() {
   write_generated_test_resource(&format!("{root}/st_test.json"), r#"{"st_hello":{"eng":"a","ukr":"b"}}"#)
     .expect("Expected a written test file");
 
-  let descriptor = read_source(get_absolute_generated_test_resource_path(root)).unwrap();
+  let descriptor = read_source(build_absolute_generated_test_resource_path(root)).unwrap();
 
   assert_eq!(
     descriptor.encodings.get("eng").map(String::as_str),

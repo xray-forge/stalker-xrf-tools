@@ -4,7 +4,7 @@ use byteorder::ByteOrder;
 use serde::{Deserialize, Serialize};
 use xrf_chunk::{ChunkDataSource, ChunkReadWrite, ChunkReader, ChunkWriter};
 use xrf_error::XrfResult;
-use xrf_utils::{decode_bytes_to_string, encode_string_to_bytes, get_windows1251_encoder};
+use xrf_utils::{decode_bytes_to_string, encode_string_to_bytes, new_windows1251_encoder};
 
 /// Level of detail visual of a skeleton, `OGF_S_LODS` in the engine.
 ///
@@ -25,12 +25,12 @@ impl ChunkReadWrite for OgfLodsChunk {
     let bytes: Vec<u8> = reader.read_remaining()?;
 
     Ok(Self {
-      lods: decode_bytes_to_string(&bytes, get_windows1251_encoder())?,
+      lods: decode_bytes_to_string(&bytes, new_windows1251_encoder())?,
     })
   }
 
   fn write<T: ByteOrder>(&self, writer: &mut ChunkWriter) -> XrfResult {
-    writer.write_all(&encode_string_to_bytes(&self.lods, get_windows1251_encoder())?)?;
+    writer.write_all(&encode_string_to_bytes(&self.lods, new_windows1251_encoder())?)?;
 
     Ok(())
   }
@@ -44,7 +44,7 @@ mod tests {
   use xrf_error::XrfResult;
   use xrf_test_utils::FileSlice;
   use xrf_test_utils::utils::{
-    get_relative_test_sample_file_path, open_generated_test_resource_as_slice,
+    build_relative_test_sample_file_path, open_generated_test_resource_as_slice,
     overwrite_generated_test_resource_as_file,
   };
 
@@ -52,7 +52,7 @@ mod tests {
 
   /// Round trip the given text through a real chunk, the way the reader sees it on disk.
   fn write_then_read(name: &str, lods: &str) -> XrfResult<OgfLodsChunk> {
-    let filename: String = get_relative_test_sample_file_path(file!(), name);
+    let filename: String = build_relative_test_sample_file_path(file!(), name);
     let mut writer: ChunkWriter = ChunkWriter::new();
 
     OgfLodsChunk {

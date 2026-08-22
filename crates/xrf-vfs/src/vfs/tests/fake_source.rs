@@ -3,7 +3,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 use xrf_error::{XrfError, XrfResult};
-use xrf_test_utils::utils::get_absolute_generated_test_resource_path;
+use xrf_test_utils::utils::build_absolute_generated_test_resource_path;
 
 use crate::{XrayAssetContainer, XrayAssetSource, XrayMountKind};
 
@@ -48,11 +48,11 @@ impl FakeArchiveSource {
 }
 
 impl XrayAssetSource for FakeArchiveSource {
-  fn label(&self) -> &str {
+  fn get_label(&self) -> &str {
     &self.label
   }
 
-  fn kind(&self) -> XrayMountKind {
+  fn get_kind(&self) -> XrayMountKind {
     XrayMountKind::Archive
   }
 
@@ -60,7 +60,7 @@ impl XrayAssetSource for FakeArchiveSource {
     false
   }
 
-  fn root_path(&self) -> &Path {
+  fn get_root_path(&self) -> &Path {
     &self.root
   }
 
@@ -90,7 +90,7 @@ impl XrayAssetSource for FakeArchiveSource {
     Err(XrfError::new_asset_error("archive is read only"))
   }
 
-  fn entries<'a>(&'a self, prefix: Option<&'a str>) -> Box<dyn Iterator<Item = String> + 'a> {
+  fn list_entries<'a>(&'a self, prefix: Option<&'a str>) -> Box<dyn Iterator<Item = String> + 'a> {
     Box::new(
       self
         .entries
@@ -100,17 +100,17 @@ impl XrayAssetSource for FakeArchiveSource {
     )
   }
 
-  fn size(&self, path: &str) -> Option<u64> {
+  fn get_size(&self, path: &str) -> Option<u64> {
     self.entries.get(path).map(|bytes| bytes.len() as u64)
   }
 
-  fn collisions(&self) -> &[crate::XrayPathCollision] {
+  fn get_collisions(&self) -> &[crate::XrayPathCollision] {
     &self.collisions
   }
 }
 
 pub fn directory(name: &str, files: &[&str]) -> PathBuf {
-  let root: PathBuf = get_absolute_generated_test_resource_path(&format!("xray_vfs/{name}"));
+  let root: PathBuf = build_absolute_generated_test_resource_path(&format!("xray_vfs/{name}"));
 
   let _ = fs::remove_dir_all(&root);
 

@@ -111,9 +111,9 @@ impl VerifyLtxCommand {
       xrf_output::info!(
         output,
         "Source: {:?} {} ({})",
-        mount.kind(),
-        mount.source().root_path().display(),
-        mount.label()
+        mount.get_kind(),
+        mount.get_source().get_root_path().display(),
+        mount.get_label()
       );
     }
   }

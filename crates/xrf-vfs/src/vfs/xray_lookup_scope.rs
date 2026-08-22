@@ -69,12 +69,12 @@ impl XrayLookupScope {
     Ok(self)
   }
 
-  pub(crate) fn selection(&self) -> &XrayMountSelection {
+  pub(crate) fn get_selection(&self) -> &XrayMountSelection {
     &self.selection
   }
 
   /// Returns the normalized logical subtree restriction, if any.
-  pub fn prefix(&self) -> Option<&str> {
+  pub fn get_prefix(&self) -> Option<&str> {
     self.prefix.as_deref()
   }
 
@@ -82,9 +82,9 @@ impl XrayLookupScope {
   pub fn includes(&self, mount: &XrayMount) -> bool {
     match &self.selection {
       XrayMountSelection::All => true,
-      XrayMountSelection::Only(ids) => ids.contains(&mount.id()),
+      XrayMountSelection::Only(ids) => ids.contains(&mount.get_id()),
       XrayMountSelection::Writable => mount.is_writable(),
-      XrayMountSelection::OfKind(kind) => mount.kind() == *kind,
+      XrayMountSelection::OfKind(kind) => mount.get_kind() == *kind,
     }
   }
 }
@@ -96,8 +96,8 @@ mod tests {
 
   #[test]
   fn defaults_to_everything() {
-    assert_eq!(XrayLookupScope::all().selection(), &XrayMountSelection::All);
-    assert_eq!(XrayLookupScope::all().prefix(), None);
+    assert_eq!(XrayLookupScope::all().get_selection(), &XrayMountSelection::All);
+    assert_eq!(XrayLookupScope::all().get_prefix(), None);
   }
 
   #[test]
@@ -106,7 +106,7 @@ mod tests {
       .with_prefix("Configs/Weapons")
       .expect("prefix is valid");
 
-    assert_eq!(scope.prefix(), Some("configs\\weapons"));
+    assert_eq!(scope.get_prefix(), Some("configs\\weapons"));
   }
 
   #[test]
@@ -117,7 +117,7 @@ mod tests {
   #[test]
   fn selects_by_kind() {
     assert_eq!(
-      XrayLookupScope::of_kind(XrayMountKind::Archive).selection(),
+      XrayLookupScope::of_kind(XrayMountKind::Archive).get_selection(),
       &XrayMountSelection::OfKind(XrayMountKind::Archive)
     );
   }

@@ -21,25 +21,25 @@ pub const STANDARD_B64_ENGINE: GeneralPurpose = GeneralPurpose::new(&alphabet::S
 
 /// Return encoding factory for windows1250.
 #[inline]
-pub fn get_windows1250_encoder() -> XRayEncoding {
+pub fn new_windows1250_encoder() -> XRayEncoding {
   WINDOWS_1250
 }
 
 /// Return encoding factory for windows1251.
 #[inline]
-pub fn get_windows1251_encoder() -> XRayEncoding {
+pub fn new_windows1251_encoder() -> XRayEncoding {
   WINDOWS_1251
 }
 
 /// Return encoding factory for windows1252.
 #[inline]
-pub fn get_windows1252_encoder() -> XRayEncoding {
+pub fn new_windows1252_encoder() -> XRayEncoding {
   WINDOWS_1252
 }
 
 /// Return encoding factory for UTF-8.
 #[inline]
-pub fn get_utf8_encoder() -> XRayEncoding {
+pub fn new_utf8_encoder() -> XRayEncoding {
   UTF_8
 }
 

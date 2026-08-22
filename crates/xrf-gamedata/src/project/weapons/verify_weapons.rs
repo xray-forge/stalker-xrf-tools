@@ -179,7 +179,7 @@ impl GamedataProject {
         .ogf(it)
         .ok()
         .flatten()
-        .map(|location| location.logical_path().to_string())
+        .map(|location| location.get_logical_path().to_string())
     }) {
       if let Err(error) = self
         .read_asset_chunks(visual)
@@ -225,7 +225,7 @@ impl GamedataProject {
         .ogf(it)
         .ok()
         .flatten()
-        .map(|location| location.logical_path().to_string())
+        .map(|location| location.get_logical_path().to_string())
     }) {
       match self
         .read_asset_chunks(visual_path)
@@ -240,7 +240,7 @@ impl GamedataProject {
                 .omf(motion_ref)
                 .ok()
                 .flatten()
-                .map(|location| location.logical_path().to_string())
+                .map(|location| location.get_logical_path().to_string())
               {
                 match self
                   .read_asset_chunks(&motion_file_path)

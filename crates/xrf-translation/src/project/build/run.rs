@@ -180,7 +180,7 @@ fn build_json_by_language(
 ) -> XrfResult {
   let data: Vec<u8> = encode_string_to_bytes(
     &compile_by_language(path, source, language, options)?,
-    language.get_language_encoder(),
+    language.new_language_encoder(),
   )?;
 
   prepare_target_file(&path, &options.output_dir, language, options)?.write_all(&data)?;

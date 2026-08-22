@@ -96,7 +96,7 @@ mod tests {
   use xrf_test_utils::FileSlice;
   use xrf_test_utils::file::read_file_as_string;
   use xrf_test_utils::utils::{
-    get_absolute_generated_test_sample_file_path, get_relative_test_sample_file_path,
+    build_absolute_generated_test_sample_file_path, build_relative_test_sample_file_path,
     open_generated_test_resource_as_slice, overwrite_generated_test_resource_as_file,
   };
 
@@ -122,14 +122,14 @@ mod tests {
     assert_eq!(writer.bytes_written(), 28);
 
     let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
-      &mut overwrite_generated_test_resource_as_file(&get_relative_test_sample_file_path(file!(), &filename))?,
+      &mut overwrite_generated_test_resource_as_file(&build_relative_test_sample_file_path(file!(), &filename))?,
       0,
     )?;
 
     assert_eq!(bytes_written, 28);
 
     let file: FileSlice =
-      open_generated_test_resource_as_slice(&get_relative_test_sample_file_path(file!(), &filename))?;
+      open_generated_test_resource_as_slice(&build_relative_test_sample_file_path(file!(), &filename))?;
 
     assert_eq!(file.bytes_remaining(), 28 + 8);
 
@@ -153,7 +153,7 @@ mod tests {
       guid: uuid!("23e55044-10b1-426f-9247-bb680e5fe0c8"),
     };
 
-    let config_path: &Path = &get_absolute_generated_test_sample_file_path(file!(), "import_export.ltx");
+    let config_path: &Path = &build_absolute_generated_test_sample_file_path(file!(), "import_export.ltx");
     let mut file: File = overwrite_generated_test_resource_as_file(config_path.to_str().expect("Valid path"))?;
     let mut ltx: Ltx = Ltx::new();
 
@@ -179,7 +179,7 @@ mod tests {
       guid: uuid!("67e55044-10b1-426f-9247-bb680e5fe0c8"),
     };
 
-    let mut file: File = overwrite_generated_test_resource_as_file(&get_relative_test_sample_file_path(
+    let mut file: File = overwrite_generated_test_resource_as_file(&build_relative_test_sample_file_path(
       file!(),
       "serialize_deserialize.json",
     ))?;

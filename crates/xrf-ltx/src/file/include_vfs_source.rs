@@ -1,7 +1,7 @@
 use std::path::{Path, PathBuf};
 
 use xrf_error::XrfResult;
-use xrf_utils::{decode_bytes_to_string, get_windows1251_encoder};
+use xrf_utils::{decode_bytes_to_string, new_windows1251_encoder};
 use xrf_vfs::{XrayLookupScope, XrayPath, XrayVfs, normalize_logical};
 
 use crate::Ltx;
@@ -26,7 +26,7 @@ impl<'a> LtxIncludeVfsSource<'a> {
   /// Reads and parses one logical path, with its logical location recorded so nested includes resolve against it.
   pub fn read_ltx(&self, logical_path: &str) -> XrfResult<Ltx> {
     let bytes: Vec<u8> = self.vfs.read(self.scope, logical_path)?;
-    let contents: String = decode_bytes_to_string(&bytes, get_windows1251_encoder())?;
+    let contents: String = decode_bytes_to_string(&bytes, new_windows1251_encoder())?;
     let mut ltx: Ltx = Ltx::read_from_str(&contents)?;
     let path: XrayPath = XrayPath::new(logical_path)?;
 
@@ -75,12 +75,12 @@ impl LtxIncludeSource for LtxIncludeVfsSource<'_> {
     // `#include "sections\*.ltx"` means that one directory, so this asks for its children rather than everything below it.
     let mut resolved: Vec<PathBuf> = self
       .vfs
-      .children(self.scope, &prefix)?
+      .list_children(self.scope, &prefix)?
       .files
       .into_iter()
-      .filter(|location| LtxIncludeConvertor::matches_wildcard_mask(location.logical_path().file_name(), &mask))
+      .filter(|location| LtxIncludeConvertor::matches_wildcard_mask(location.get_logical_path().file_name(), &mask))
       // The documented crossing back into `PathBuf`: an include source carries logical paths that way for both backends.
-      .map(|location| PathBuf::from(location.logical_path().as_str()))
+      .map(|location| PathBuf::from(location.get_logical_path().as_str()))
       .collect();
 
     // Sorted so section merging is deterministic, matching what the filesystem source guarantees.

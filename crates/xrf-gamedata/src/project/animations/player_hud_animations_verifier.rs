@@ -89,7 +89,7 @@ impl<'a> PlayerHudAnimationsVerifier<'a> {
         .ogf(self.project.scope(), it)
         .ok()
         .flatten()
-        .map(|location| location.logical_path().to_string())
+        .map(|location| location.get_logical_path().to_string())
     }) {
       xrf_output::verbose!(
         self.options.output,
@@ -244,7 +244,7 @@ impl<'a> PlayerHudAnimationsVerifier<'a> {
         .resolve_all(self.project.scope(), AssetType::Omf, motion_ref)?
       {
         if location.is_type(AssetType::Omf) {
-          assets.insert(location.logical_path().to_string());
+          assets.insert(location.get_logical_path().to_string());
         }
       }
     }

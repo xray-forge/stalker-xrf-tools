@@ -6,13 +6,13 @@
 use std::fs;
 use std::path::PathBuf;
 
-use xrf_test_utils::utils::get_absolute_generated_test_resource_path;
+use xrf_test_utils::utils::build_absolute_generated_test_resource_path;
 use xrf_vfs::{XrayLookupScope, XrayVfs};
 
 use crate::Ltx;
 
 fn mount(name: &str, files: &[(&str, &str)]) -> (XrayVfs, XrayLookupScope) {
-  let root: PathBuf = get_absolute_generated_test_resource_path(&format!("ltx_vfs_includes/{name}"));
+  let root: PathBuf = build_absolute_generated_test_resource_path(&format!("ltx_vfs_includes/{name}"));
 
   let _ = fs::remove_dir_all(&root);
 

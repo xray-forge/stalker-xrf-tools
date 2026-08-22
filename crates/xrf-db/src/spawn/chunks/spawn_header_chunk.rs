@@ -112,8 +112,8 @@ mod tests {
   use xrf_test_utils::FileSlice;
   use xrf_test_utils::file::read_file_as_string;
   use xrf_test_utils::utils::{
-    get_absolute_generated_test_resource_path, get_relative_test_sample_file_directory,
-    get_relative_test_sample_file_path, open_generated_test_resource_as_slice, open_test_resource_as_slice,
+    build_absolute_generated_test_resource_path, build_relative_test_sample_file_directory,
+    build_relative_test_sample_file_path, open_generated_test_resource_as_slice, open_test_resource_as_slice,
     overwrite_generated_test_resource_as_file,
   };
 
@@ -123,7 +123,7 @@ mod tests {
   #[test]
   fn test_read_empty() -> XrfResult {
     let mut reader: ChunkReader = ChunkReader::from_slice(open_test_resource_as_slice(
-      &get_relative_test_sample_file_path(file!(), "read_empty.chunk"),
+      &build_relative_test_sample_file_path(file!(), "read_empty.chunk"),
     )?)?
     .read_child_by_index(0)?;
 
@@ -136,7 +136,7 @@ mod tests {
 
   #[test]
   fn test_read_write() -> XrfResult {
-    let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
+    let filename: String = build_relative_test_sample_file_path(file!(), "read_write.chunk");
 
     let original: SpawnHeaderChunk = SpawnHeaderChunk {
       version: 20,
@@ -181,7 +181,7 @@ mod tests {
     };
 
     let export_directory: &Path =
-      &get_absolute_generated_test_resource_path(&get_relative_test_sample_file_directory(file!()));
+      &build_absolute_generated_test_resource_path(&build_relative_test_sample_file_directory(file!()));
     std::fs::create_dir_all(export_directory)?;
 
     original.export(&export_directory)?;
@@ -201,7 +201,7 @@ mod tests {
       levels_count: 31,
     };
 
-    let mut file: File = overwrite_generated_test_resource_as_file(&get_relative_test_sample_file_path(
+    let mut file: File = overwrite_generated_test_resource_as_file(&build_relative_test_sample_file_path(
       file!(),
       "serialize_deserialize.json",
     ))?;

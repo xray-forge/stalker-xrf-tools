@@ -168,7 +168,7 @@ impl fmt::Debug for ChunkReader {
 mod tests {
   use fileslice::FileSlice;
   use xrf_error::XrfResult;
-  use xrf_test_utils::utils::{get_relative_test_sample_sub_dir, open_test_resource_as_slice};
+  use xrf_test_utils::utils::{build_relative_test_sample_sub_dir, open_test_resource_as_slice};
 
   use crate::reader::chunk_reader::ChunkReader;
 
@@ -193,7 +193,7 @@ mod tests {
 
   #[test]
   fn test_read_empty_chunk() -> XrfResult {
-    let filename: String = get_relative_test_sample_sub_dir("empty_nested_single.chunk");
+    let filename: String = build_relative_test_sample_sub_dir("empty_nested_single.chunk");
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
 
     assert_eq!(file.start_pos(), 0);
@@ -208,14 +208,14 @@ mod tests {
 
   #[test]
   fn test_read_empty_children() -> XrfResult {
-    let filename: String = get_relative_test_sample_sub_dir("empty_nested_single.chunk");
+    let filename: String = build_relative_test_sample_sub_dir("empty_nested_single.chunk");
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
     let chunks: Vec<ChunkReader> = ChunkReader::from_slice(file)?.get_children_cloned()?;
 
     assert_eq!(chunks.len(), 1, "Expect single chunk");
     assert_eq!(chunks.first().unwrap().size, 0);
 
-    let filename: String = get_relative_test_sample_sub_dir("empty_nested_five.chunk");
+    let filename: String = build_relative_test_sample_sub_dir("empty_nested_five.chunk");
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
     let chunks: Vec<ChunkReader> = ChunkReader::from_slice(file)?.get_children_cloned()?;
 
@@ -231,7 +231,7 @@ mod tests {
 
   #[test]
   fn test_read_empty_unordered_children() -> XrfResult {
-    let filename: String = get_relative_test_sample_sub_dir("empty_nested_five_unordered.chunk");
+    let filename: String = build_relative_test_sample_sub_dir("empty_nested_five_unordered.chunk");
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
     let chunks: Vec<ChunkReader> = ChunkReader::from_slice(file)?.get_children_cloned()?;
 
@@ -252,14 +252,14 @@ mod tests {
 
   #[test]
   fn test_read_dummy_children() -> XrfResult {
-    let filename: String = get_relative_test_sample_sub_dir("dummy_nested_single.chunk");
+    let filename: String = build_relative_test_sample_sub_dir("dummy_nested_single.chunk");
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
     let chunks: Vec<ChunkReader> = ChunkReader::from_slice(file)?.get_children_cloned()?;
 
     assert_eq!(chunks.len(), 1, "Expect single chunk");
     assert_eq!(chunks.first().unwrap().size, 8);
 
-    let filename: String = get_relative_test_sample_sub_dir("dummy_nested_five.chunk");
+    let filename: String = build_relative_test_sample_sub_dir("dummy_nested_five.chunk");
     let file: FileSlice = open_test_resource_as_slice(&filename)?;
     let chunks: Vec<ChunkReader> = ChunkReader::from_slice(file)?.get_children_cloned()?;
 

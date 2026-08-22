@@ -35,9 +35,9 @@ impl<'a> MeshAssetsVerifier<'a> {
     let mesh_paths: Vec<String> = self
       .project
       .vfs()
-      .entries_of_type(&self.project.scope, AssetType::Ogf)
+      .list_entries_of_type(&self.project.scope, AssetType::Ogf)
       .into_iter()
-      .map(|location| location.logical_path().to_string())
+      .map(|location| location.get_logical_path().to_string())
       .collect();
 
     let checked_meshes_count: u32 = u32::try_from(mesh_paths.len())
@@ -136,7 +136,7 @@ impl<'a> MeshAssetsVerifier<'a> {
           .vfs()
           .resolve_all(&self.project.scope, AssetType::Omf, motion_ref)?
           .into_iter()
-          .map(|location| location.logical_path().to_string())
+          .map(|location| location.get_logical_path().to_string())
           .collect();
 
         if motion_paths.is_empty() {

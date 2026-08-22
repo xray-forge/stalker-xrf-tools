@@ -129,7 +129,7 @@ impl VisualTextureResolver {
     self
       .vfs
       .scoped(scope)
-      .map(|mount| mount.source().root_path().display().to_string())
+      .map(|mount| mount.get_source().get_root_path().display().to_string())
       .collect()
   }
 }

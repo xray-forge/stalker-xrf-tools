@@ -28,9 +28,9 @@ impl<'a> SoundsVerifier<'a> {
     let sound_paths: Vec<String> = self
       .project
       .vfs()
-      .entries_of_type(&self.project.scope, AssetType::Ogg)
+      .list_entries_of_type(&self.project.scope, AssetType::Ogg)
       .into_iter()
-      .map(|location| location.logical_path().to_string())
+      .map(|location| location.get_logical_path().to_string())
       .collect();
 
     let sound_files = SoundFilesVerifier::new(self.project, self.options, &sound_paths).verify()?;

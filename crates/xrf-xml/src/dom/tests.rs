@@ -1,4 +1,4 @@
-use xrf_utils::{encode_string_to_bytes, get_windows1251_encoder};
+use xrf_utils::{encode_string_to_bytes, new_windows1251_encoder};
 
 use crate::dom::{XmlDocument, XmlElement};
 use crate::options::XmlParseOptions;
@@ -22,7 +22,7 @@ fn parses_elements_attributes_and_text() {
 #[test]
 fn parses_declared_windows_1251_encoding() {
   let source: &str = "<?xml version=\"1.0\" encoding=\"windows-1251\"?><root><text>Привет</text></root>";
-  let encoded: Vec<u8> = encode_string_to_bytes(source, get_windows1251_encoder()).unwrap();
+  let encoded: Vec<u8> = encode_string_to_bytes(source, new_windows1251_encoder()).unwrap();
 
   let document: XmlDocument = XmlDocument::parse_bytes(&encoded, XmlParseOptions::default()).unwrap();
 

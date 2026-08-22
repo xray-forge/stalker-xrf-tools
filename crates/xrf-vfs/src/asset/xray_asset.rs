@@ -37,7 +37,7 @@ impl XrayAsset {
   /// Creates a location from an engine path and a source-reported container.
   ///
   /// The caller is responsible for passing the normalized logical path returned by the VFS. A loose container's
-  /// `relative_path` is joined to its `root` only when [`Self::physical_path`] is asked for; the logical path stays the
+  /// `relative_path` is joined to its `root` only when [`Self::to_physical_path`] is asked for; the logical path stays the
   /// engine identity used for lookups and IPC.
   pub fn new(logical_path: XrayPath, container: XrayAssetContainer) -> Self {
     Self {
@@ -47,12 +47,12 @@ impl XrayAsset {
   }
 
   /// Returns the normalized X-Ray path, including any mount base.
-  pub fn logical_path(&self) -> &XrayPath {
+  pub fn get_logical_path(&self) -> &XrayPath {
     &self.logical_path
   }
 
   /// Returns the physical container that supplied this location.
-  pub fn container(&self) -> &XrayAssetContainer {
+  pub fn get_container(&self) -> &XrayAssetContainer {
     &self.container
   }
 
@@ -60,17 +60,17 @@ impl XrayAsset {
   ///
   /// Derived from the logical path rather than stored, because the path is the only evidence: a container says where the
   /// bytes are, not what they mean.
-  pub fn asset_type(&self) -> Option<XrayAssetType> {
+  pub fn get_asset_type(&self) -> Option<XrayAssetType> {
     XrayAssetType::from_logical_path(self.logical_path.as_str())
   }
 
   /// Whether this asset's extension identifies the requested kind.
   pub fn is_type(&self, asset_type: XrayAssetType) -> bool {
-    self.asset_type() == Some(asset_type)
+    self.get_asset_type() == Some(asset_type)
   }
 
   /// Returns the containing tree for a loose asset, or `None` for an archived asset.
-  pub fn root(&self) -> Option<&Path> {
+  pub fn get_root(&self) -> Option<&Path> {
     match &self.container {
       XrayAssetContainer::Directory { root, .. } => Some(root),
       XrayAssetContainer::Archive { .. } => None,
@@ -80,7 +80,7 @@ impl XrayAsset {
   /// Returns a readable filesystem path for a loose asset.
   ///
   /// Archived assets return `None`; callers that support both containers should read through [`crate::XrayVfs`].
-  pub fn physical_path(&self) -> Option<PathBuf> {
+  pub fn to_physical_path(&self) -> Option<PathBuf> {
     match &self.container {
       XrayAssetContainer::Directory { relative_path, root } => Some(root.join(relative_path)),
       XrayAssetContainer::Archive { .. } => None,
@@ -88,7 +88,7 @@ impl XrayAsset {
   }
 
   /// Describes the containing tree or archive volume set for display.
-  pub fn describe_container(&self) -> String {
+  pub fn format_container(&self) -> String {
     match &self.container {
       XrayAssetContainer::Directory { root, .. } => root.display().to_string(),
       XrayAssetContainer::Archive { path } => format!("{} (archive)", path.display()),
@@ -116,13 +116,13 @@ mod tests {
       },
     );
 
-    assert_eq!(asset.root(), Some(root.as_path()));
+    assert_eq!(asset.get_root(), Some(root.as_path()));
     assert_eq!(
-      asset.physical_path(),
+      asset.to_physical_path(),
       Some(root.join("textures").join("wpn").join("wpn_ak74.dds"))
     );
     assert_eq!(
-      asset.logical_path().as_str(),
+      asset.get_logical_path().as_str(),
       "textures\\wpn\\wpn_ak74.dds",
       "the engine identity keeps backslashes on every platform, unlike the host path beside it"
     );
@@ -138,9 +138,9 @@ mod tests {
       },
     );
 
-    assert_eq!(location.root(), None);
-    assert_eq!(location.physical_path(), None);
-    assert!(matches!(location.container(), XrayAssetContainer::Archive { .. }));
-    assert!(location.describe_container().ends_with("(archive)"));
+    assert_eq!(location.get_root(), None);
+    assert_eq!(location.to_physical_path(), None);
+    assert!(matches!(location.get_container(), XrayAssetContainer::Archive { .. }));
+    assert!(location.format_container().ends_with("(archive)"));
   }
 }

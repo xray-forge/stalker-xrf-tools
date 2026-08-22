@@ -6,7 +6,7 @@ use xrf_error::XrfResult;
 
 use crate::mount::xray_root::implied_install_root;
 use crate::path::{normalize, normalize_base};
-use crate::{FsgameFile, XrayMountKind, implied_asset_root};
+use crate::{FsgameFile, XrayMountKind, find_implied_asset_root};
 
 /// One source to mount before it is opened or indexed.
 ///
@@ -61,7 +61,7 @@ impl XrayMountPlan {
 
   /// Plans the root implied by an asset path, or returns an empty plan when none is found.
   pub fn implied(asset: impl AsRef<Path>) -> XrfResult<Self> {
-    match implied_asset_root(asset.as_ref()) {
+    match find_implied_asset_root(asset.as_ref()) {
       Some(root) => Self::new().with(root, "", "implied"),
       None => Ok(Self::new()),
     }
@@ -99,7 +99,7 @@ impl XrayMountPlan {
     let mut plan: Self = Self::new();
 
     // Reversed: last declared wins, so it must be searched first.
-    for declaration in fsgame.declarations().iter().rev() {
+    for declaration in fsgame.get_declarations().iter().rev() {
       let Some(path) = fsgame.resolve(&declaration.alias) else {
         continue;
       };
@@ -194,7 +194,7 @@ impl XrayMountPlan {
   }
 
   /// Returns mounts in priority order.
-  pub fn mounts(&self) -> &[XrayPlannedMount] {
+  pub fn get_mounts(&self) -> &[XrayPlannedMount] {
     &self.mounts
   }
 

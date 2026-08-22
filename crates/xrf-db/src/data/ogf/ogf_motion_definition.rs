@@ -159,7 +159,7 @@ mod tests {
   use xrf_error::XrfResult;
   use xrf_test_utils::FileSlice;
   use xrf_test_utils::utils::{
-    get_relative_test_sample_file_path, open_generated_test_resource_as_slice,
+    build_relative_test_sample_file_path, open_generated_test_resource_as_slice,
     overwrite_generated_test_resource_as_file,
   };
 
@@ -185,7 +185,7 @@ mod tests {
 
   #[test]
   fn test_read_write_list_v4_with_marks() -> XrfResult {
-    let filename: String = get_relative_test_sample_file_path(file!(), "read_write_v4.chunk");
+    let filename: String = build_relative_test_sample_file_path(file!(), "read_write_v4.chunk");
 
     let original: Vec<OgfMotionDefinition> = vec![
       OgfMotionDefinition::new_mock(vec![OgfMotionMark {
@@ -202,7 +202,7 @@ mod tests {
 
   #[test]
   fn test_read_write_list_v3_without_marks() -> XrfResult {
-    let filename: String = get_relative_test_sample_file_path(file!(), "read_write_v3.chunk");
+    let filename: String = build_relative_test_sample_file_path(file!(), "read_write_v3.chunk");
 
     let original: Vec<OgfMotionDefinition> = vec![OgfMotionDefinition::new_mock(Vec::new())];
 

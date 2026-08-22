@@ -110,12 +110,12 @@ mod tests {
   use std::fs;
   use std::path::PathBuf;
 
-  use xrf_test_utils::utils::get_absolute_generated_test_resource_path;
+  use xrf_test_utils::utils::build_absolute_generated_test_resource_path;
 
   use super::XrayMountMode;
 
   fn install(name: &str) -> PathBuf {
-    let root: PathBuf = get_absolute_generated_test_resource_path(&format!("xray_mount_mode/{name}"));
+    let root: PathBuf = build_absolute_generated_test_resource_path(&format!("xray_mount_mode/{name}"));
 
     let _ = fs::remove_dir_all(&root);
 
@@ -146,7 +146,7 @@ mod tests {
     let plan = XrayMountMode::Auto.plan(&configs).expect("plan");
 
     assert_eq!(plan.len(), 1, "only the named directory is planned");
-    assert!(plan.mounts()[0].path.ends_with("configs"));
+    assert!(plan.get_mounts()[0].path.ends_with("configs"));
   }
 
   #[test]
@@ -158,7 +158,7 @@ mod tests {
 
     assert!(
       plan
-        .mounts()
+        .get_mounts()
         .iter()
         .any(|mount| mount.path.ends_with("gamedata") && mount.base.is_empty()),
       "the installation above the path is planned, not the path itself"
@@ -172,7 +172,7 @@ mod tests {
     let plan = XrayMountMode::ContainingInstallation.plan(&root).expect("plan");
 
     assert!(
-      plan.mounts().iter().any(|mount| mount.path.ends_with("gamedata")),
+      plan.get_mounts().iter().any(|mount| mount.path.ends_with("gamedata")),
       "a declaration here wins before the search walks up"
     );
   }
@@ -184,7 +184,7 @@ mod tests {
     let plan = XrayMountMode::Directory.plan(&root).expect("plan");
 
     assert_eq!(plan.len(), 1);
-    assert_eq!(plan.mounts()[0].origin, "root");
+    assert_eq!(plan.get_mounts()[0].origin, "root");
   }
 
   #[test]

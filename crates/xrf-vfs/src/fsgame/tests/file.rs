@@ -30,7 +30,7 @@ fn file() -> FsgameFile {
 fn keeps_declarations_in_the_order_the_file_lists_them() {
   // Order is the override rule: `$arch_dir$` before `$game_data$` is what makes loose files win.
   let file: FsgameFile = file();
-  let aliases: Vec<&str> = file.declarations().iter().map(|it| it.alias.as_str()).collect();
+  let aliases: Vec<&str> = file.get_declarations().iter().map(|it| it.alias.as_str()).collect();
 
   assert_eq!(
     aliases,
@@ -87,9 +87,9 @@ fn a_cycle_terminates_instead_of_recursing() {
 fn resolves_every_declared_alias() {
   let file: FsgameFile = file();
 
-  assert_eq!(file.declarations().len(), 6);
+  assert_eq!(file.get_declarations().len(), 6);
 
-  for declaration in file.declarations() {
+  for declaration in file.get_declarations() {
     assert!(
       file.resolve(&declaration.alias).is_some(),
       "every alias of a well-formed file resolves: {}",

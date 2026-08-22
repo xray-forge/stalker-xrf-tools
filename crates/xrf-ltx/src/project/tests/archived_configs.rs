@@ -35,11 +35,11 @@ impl ArchivedConfigs {
 }
 
 impl XrayAssetSource for ArchivedConfigs {
-  fn label(&self) -> &str {
+  fn get_label(&self) -> &str {
     "configs"
   }
 
-  fn kind(&self) -> XrayMountKind {
+  fn get_kind(&self) -> XrayMountKind {
     XrayMountKind::Archive
   }
 
@@ -47,7 +47,7 @@ impl XrayAssetSource for ArchivedConfigs {
     false
   }
 
-  fn root_path(&self) -> &Path {
+  fn get_root_path(&self) -> &Path {
     &self.root
   }
 
@@ -77,11 +77,11 @@ impl XrayAssetSource for ArchivedConfigs {
     Err(XrfError::new_asset_error("archive is read only"))
   }
 
-  fn entries<'a>(&'a self, _prefix: Option<&'a str>) -> Box<dyn Iterator<Item = String> + 'a> {
+  fn list_entries<'a>(&'a self, _prefix: Option<&'a str>) -> Box<dyn Iterator<Item = String> + 'a> {
     Box::new(self.entries.keys().cloned())
   }
 
-  fn size(&self, path: &str) -> Option<u64> {
+  fn get_size(&self, path: &str) -> Option<u64> {
     self.entries.get(path).map(|bytes| bytes.len() as u64)
   }
 }

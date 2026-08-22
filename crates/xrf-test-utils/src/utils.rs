@@ -7,7 +7,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use fileslice::FileSlice;
 
 /// Get absolute path to provided test resource.
-pub fn get_absolute_test_resource_path(resource_path: &str) -> PathBuf {
+pub fn build_absolute_test_resource_path(resource_path: &str) -> PathBuf {
   let mut path: PathBuf = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
 
   path.push("resources");
@@ -18,9 +18,9 @@ pub fn get_absolute_test_resource_path(resource_path: &str) -> PathBuf {
 }
 
 /// Get Absolute path to sample resource.
-pub fn get_absolute_test_file_path(file: &str, resource: &str) -> PathBuf {
-  get_absolute_test_resource_path(
-    &get_relative_test_file_path(file, resource)
+pub fn build_absolute_test_file_path(file: &str, resource: &str) -> PathBuf {
+  build_absolute_test_resource_path(
+    &build_relative_test_file_path(file, resource)
       .into_os_string()
       .into_string()
       .unwrap(),
@@ -28,7 +28,7 @@ pub fn get_absolute_test_file_path(file: &str, resource: &str) -> PathBuf {
 }
 
 /// Get relative path to sample resource.
-pub fn get_relative_test_file_path(file: &str, resource: &str) -> PathBuf {
+pub fn build_relative_test_file_path(file: &str, resource: &str) -> PathBuf {
   let mut path: PathBuf = PathBuf::new();
 
   path.push(Path::new(file).file_stem().unwrap());
@@ -38,7 +38,7 @@ pub fn get_relative_test_file_path(file: &str, resource: &str) -> PathBuf {
 }
 
 /// Get relative path to sample resource.
-pub fn get_relative_test_sample_file_path(file: &str, resource: &str) -> String {
+pub fn build_relative_test_sample_file_path(file: &str, resource: &str) -> String {
   let mut path: PathBuf = PathBuf::new();
 
   path.push(Path::new(file).file_stem().unwrap());
@@ -48,12 +48,12 @@ pub fn get_relative_test_sample_file_path(file: &str, resource: &str) -> String 
 }
 
 /// Get Absolute path to sample resource.
-pub fn get_absolute_test_sample_file_path(file: &str, resource: &str) -> PathBuf {
-  get_absolute_test_resource_path(&get_relative_test_sample_file_path(file, resource))
+pub fn build_absolute_test_sample_file_path(file: &str, resource: &str) -> PathBuf {
+  build_absolute_test_resource_path(&build_relative_test_sample_file_path(file, resource))
 }
 
 /// Get absolute path to a generated test resource.
-pub fn get_absolute_generated_test_resource_path(resource_path: &str) -> PathBuf {
+pub fn build_absolute_generated_test_resource_path(resource_path: &str) -> PathBuf {
   static GENERATED_TEST_RESOURCE_ROOT: OnceLock<PathBuf> = OnceLock::new();
 
   let root: &PathBuf = GENERATED_TEST_RESOURCE_ROOT.get_or_init(|| {
@@ -81,13 +81,13 @@ pub fn get_absolute_generated_test_resource_path(resource_path: &str) -> PathBuf
 }
 
 /// Get absolute path to a generated sample resource.
-pub fn get_absolute_generated_test_sample_file_path(file: &str, resource: &str) -> PathBuf {
-  get_absolute_generated_test_resource_path(&get_relative_test_sample_file_path(file, resource))
+pub fn build_absolute_generated_test_sample_file_path(file: &str, resource: &str) -> PathBuf {
+  build_absolute_generated_test_resource_path(&build_relative_test_sample_file_path(file, resource))
 }
 
 /// Open file from test resources.
-pub fn get_absolute_test_resource_as_file(file: &str, resource: &str) -> IoResult<File> {
-  let path: PathBuf = get_absolute_test_file_path(file, resource);
+pub fn build_absolute_test_resource_as_file(file: &str, resource: &str) -> IoResult<File> {
+  let path: PathBuf = build_absolute_test_file_path(file, resource);
 
   match File::open(&path) {
     Ok(file) => Ok(file),
@@ -99,7 +99,7 @@ pub fn get_absolute_test_resource_as_file(file: &str, resource: &str) -> IoResul
 }
 
 /// Get relative path to sample resource of current test file.
-pub fn get_relative_test_sample_file_directory(file: &str) -> String {
+pub fn build_relative_test_sample_file_directory(file: &str) -> String {
   let mut path: PathBuf = PathBuf::new();
 
   path.push(Path::new(file).file_stem().unwrap());
@@ -108,7 +108,7 @@ pub fn get_relative_test_sample_file_directory(file: &str) -> String {
 }
 
 /// Get relative path to sample resource.
-pub fn get_relative_test_sample_sub_dir(resource: &str) -> String {
+pub fn build_relative_test_sample_sub_dir(resource: &str) -> String {
   let mut path: PathBuf = PathBuf::new();
 
   path.push(resource);
@@ -118,7 +118,7 @@ pub fn get_relative_test_sample_sub_dir(resource: &str) -> String {
 
 /// Open file from test resources as slice.
 pub fn open_test_resource_as_slice(resource_path: &str) -> IoResult<FileSlice> {
-  let path: PathBuf = get_absolute_test_resource_path(resource_path);
+  let path: PathBuf = build_absolute_test_resource_path(resource_path);
 
   match File::open(path.clone()) {
     Ok(file) => Ok(FileSlice::new(file)),
@@ -131,7 +131,7 @@ pub fn open_test_resource_as_slice(resource_path: &str) -> IoResult<FileSlice> {
 
 /// Open file from test resources.
 pub fn open_test_resource_as_file(resource_path: &str) -> IoResult<File> {
-  let path: PathBuf = get_absolute_test_resource_path(resource_path);
+  let path: PathBuf = build_absolute_test_resource_path(resource_path);
 
   match File::open(path.clone()) {
     Ok(file) => Ok(file),
@@ -144,7 +144,7 @@ pub fn open_test_resource_as_file(resource_path: &str) -> IoResult<File> {
 
 /// Open a generated test resource as a slice.
 pub fn open_generated_test_resource_as_slice(resource_path: &str) -> IoResult<FileSlice> {
-  let path: PathBuf = get_absolute_generated_test_resource_path(resource_path);
+  let path: PathBuf = build_absolute_generated_test_resource_path(resource_path);
 
   match File::open(path.clone()) {
     Ok(file) => Ok(FileSlice::new(file)),
@@ -157,7 +157,7 @@ pub fn open_generated_test_resource_as_slice(resource_path: &str) -> IoResult<Fi
 
 /// Open a generated test resource.
 pub fn open_generated_test_resource_as_file(resource_path: &str) -> IoResult<File> {
-  let path: PathBuf = get_absolute_generated_test_resource_path(resource_path);
+  let path: PathBuf = build_absolute_generated_test_resource_path(resource_path);
 
   match File::open(path.clone()) {
     Ok(file) => Ok(file),
@@ -170,7 +170,7 @@ pub fn open_generated_test_resource_as_file(resource_path: &str) -> IoResult<Fil
 
 /// Create and open a generated test resource, overwriting any previous output.
 pub fn overwrite_generated_test_resource_as_file(resource_path: &str) -> IoResult<File> {
-  let path: PathBuf = get_absolute_generated_test_resource_path(resource_path);
+  let path: PathBuf = build_absolute_generated_test_resource_path(resource_path);
 
   std::fs::create_dir_all(path.parent().expect("Parent directory"))?;
 
@@ -202,7 +202,7 @@ pub fn write_generated_test_resource<C: AsRef<[u8]>>(resource_path: &str, conten
   file.write_all(contents.as_ref())?;
   drop(file);
 
-  Ok(get_absolute_generated_test_resource_path(resource_path))
+  Ok(build_absolute_generated_test_resource_path(resource_path))
 }
 
 /// Create and open file by path, overwrite existing one.
@@ -235,7 +235,7 @@ mod tests {
     let path: PathBuf = write_generated_test_resource("utils/written.txt", "contents")?;
 
     assert_eq!(fs::read(&path)?, b"contents");
-    assert_eq!(path, get_absolute_generated_test_resource_path("utils/written.txt"));
+    assert_eq!(path, build_absolute_generated_test_resource_path("utils/written.txt"));
 
     Ok(())
   }
@@ -272,7 +272,7 @@ mod tests {
 
   #[test]
   fn generated_resources_stay_under_target() {
-    let path: PathBuf = get_absolute_generated_test_resource_path("utils/generated.bin");
+    let path: PathBuf = build_absolute_generated_test_resource_path("utils/generated.bin");
     let manifest_dir: PathBuf = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     let workspace_root: &Path = manifest_dir
       .parent()
@@ -285,7 +285,7 @@ mod tests {
   #[test]
   fn generated_resources_do_not_modify_static_fixtures() -> IoResult<()> {
     let resource: &str = "empty";
-    let static_path: PathBuf = get_absolute_test_resource_path(resource);
+    let static_path: PathBuf = build_absolute_test_resource_path(resource);
     let static_contents: Vec<u8> = fs::read(&static_path)?;
     let mut generated_file: File = overwrite_generated_test_resource_as_file(resource)?;
 
@@ -294,7 +294,7 @@ mod tests {
 
     assert_eq!(fs::read(static_path)?, static_contents);
     assert_eq!(
-      fs::read(get_absolute_generated_test_resource_path(resource))?,
+      fs::read(build_absolute_generated_test_resource_path(resource))?,
       b"generated"
     );
     assert_eq!(

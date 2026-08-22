@@ -1,4 +1,4 @@
-use xrf_test_utils::utils::{get_absolute_generated_test_resource_path, write_generated_test_resource};
+use xrf_test_utils::utils::{build_absolute_generated_test_resource_path, write_generated_test_resource};
 
 use crate::project::descriptor::TranslationProjectMode;
 use crate::project::layout::detect_mode;
@@ -11,7 +11,7 @@ fn language_directories_look_like_gamedata() {
     .expect("Expected a written test file");
 
   assert_eq!(
-    detect_mode(&get_absolute_generated_test_resource_path(root)),
+    detect_mode(&build_absolute_generated_test_resource_path(root)),
     TranslationProjectMode::Gamedata
   );
 }
@@ -24,7 +24,7 @@ fn a_json_map_looks_like_a_source_tree() {
     .expect("Expected a written test file");
 
   assert_eq!(
-    detect_mode(&get_absolute_generated_test_resource_path(root)),
+    detect_mode(&build_absolute_generated_test_resource_path(root)),
     TranslationProjectMode::Source
   );
 }
@@ -37,7 +37,7 @@ fn a_language_suffixed_xml_looks_like_a_source_tree() {
     .expect("Expected a written test file");
 
   assert_eq!(
-    detect_mode(&get_absolute_generated_test_resource_path(root)),
+    detect_mode(&build_absolute_generated_test_resource_path(root)),
     TranslationProjectMode::Source
   );
 }
@@ -46,7 +46,7 @@ fn a_language_suffixed_xml_looks_like_a_source_tree() {
 fn an_unreadable_directory_falls_back_to_source() {
   // Guessing gamedata for something unreadable would preselect the mode that rewrites shipped files.
   assert_eq!(
-    detect_mode(&get_absolute_generated_test_resource_path("layout/does_not_exist")),
+    detect_mode(&build_absolute_generated_test_resource_path("layout/does_not_exist")),
     TranslationProjectMode::Source
   );
 }

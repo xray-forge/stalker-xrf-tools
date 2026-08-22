@@ -58,7 +58,7 @@ pub(crate) fn compile_by_language(
 
 fn validate_entry_encoding(path: &Path, language: &TranslationLanguage, id: &str, text: &str) -> XrfResult {
   for (field, value) in [("id", id), ("text", text)] {
-    if let Some(character) = find_unencodable_character(value, language.get_language_encoder()) {
+    if let Some(character) = find_unencodable_character(value, language.new_language_encoder()) {
       return Err(XrfError::new_encoding_error(format!(
         "Translation '{}' entry '{}' {} cannot be encoded as {}: '{}' (U+{:04X})",
         path.display(),

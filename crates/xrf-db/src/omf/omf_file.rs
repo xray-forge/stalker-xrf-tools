@@ -169,7 +169,7 @@ mod tests {
   use xrf_error::XrfResult;
   use xrf_test_utils::FileSlice;
   use xrf_test_utils::utils::{
-    get_absolute_generated_test_resource_path, get_relative_test_sample_file_path,
+    build_absolute_generated_test_resource_path, build_relative_test_sample_file_path,
     open_generated_test_resource_as_slice,
   };
 
@@ -214,10 +214,10 @@ mod tests {
 
   #[test]
   fn test_write_read_file() -> XrfResult {
-    let filename: String = get_relative_test_sample_file_path(file!(), "write_read.omf");
+    let filename: String = build_relative_test_sample_file_path(file!(), "write_read.omf");
     let original: OmfFile = new_mock(4);
 
-    original.write_to_path::<XRayByteOrder, _>(&get_absolute_generated_test_resource_path(&filename))?;
+    original.write_to_path::<XRayByteOrder, _>(&build_absolute_generated_test_resource_path(&filename))?;
 
     let file: FileSlice = open_generated_test_resource_as_slice(&filename)?;
     let chunks: Vec<ChunkReader> = ChunkReader::from_slice(file)?.read_children()?;

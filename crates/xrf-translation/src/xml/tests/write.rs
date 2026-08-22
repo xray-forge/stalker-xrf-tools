@@ -3,7 +3,7 @@ use std::path::Path;
 
 use xrf_error::XrfResult;
 use xrf_test_utils::utils::write_generated_test_resource;
-use xrf_utils::{encode_string_to_bytes, get_windows1251_encoder, get_windows1252_encoder};
+use xrf_utils::{encode_string_to_bytes, new_windows1251_encoder, new_windows1252_encoder};
 
 use crate::edit::TranslationEdit;
 use crate::types::TranslationVariant;
@@ -33,7 +33,7 @@ fn splice(edits: &[TranslationEdit]) -> String {
     Path::new("st_test.xml"),
     String::from(SOURCE),
     edits,
-    get_windows1252_encoder(),
+    new_windows1252_encoder(),
   )
   .expect("Expected a spliced document")
 }
@@ -107,7 +107,7 @@ fn a_value_the_encoding_cannot_hold_is_refused_with_the_character_named() {
     Path::new("st_test.xml"),
     String::from(SOURCE),
     &[set("st_first", "Привет")],
-    get_windows1252_encoder(),
+    new_windows1252_encoder(),
   )
   .unwrap_err();
 
@@ -120,14 +120,14 @@ fn writing_a_file_leaves_every_untouched_byte_alone() -> XrfResult {
   let relative_path: &str = "xml_write/in_place.rus.xml";
   let path = write_generated_test_resource(
     relative_path,
-    encode_string_to_bytes(SOURCE, get_windows1251_encoder())?,
+    encode_string_to_bytes(SOURCE, new_windows1251_encoder())?,
   )?;
 
   apply_edits(&path, &[set("st_first", "Привет")])?;
 
   let expected: Vec<u8> = encode_string_to_bytes(
     &SOURCE.replace("<text>first</text>", "<text>Привет</text>"),
-    get_windows1251_encoder(),
+    new_windows1251_encoder(),
   )?;
 
   assert_eq!(fs::read(&path)?, expected);

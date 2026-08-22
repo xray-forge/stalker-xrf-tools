@@ -41,7 +41,7 @@ impl XrayVfs {
   /// Empty for a VFS assembled by hand. Populated by [`crate::mount_plan`], which is tolerant of a source that fails to
   /// open — so a caller that reports on what this VFS holds must report these too, or a mount that silently vanished
   /// looks like content that is silently missing.
-  pub fn skipped_mounts(&self) -> &[XraySkippedMount] {
+  pub fn get_skipped_mounts(&self) -> &[XraySkippedMount] {
     &self.skipped
   }
 
@@ -59,7 +59,7 @@ impl XrayVfs {
       .planned
       .get(path)
       .copied()
-      .filter(|id| self.mounts.get(id.0).is_some_and(|mount| mount.kind() == kind))
+      .filter(|id| self.mounts.get(id.0).is_some_and(|mount| mount.get_kind() == kind))
   }
 
   /// Remembers which mount a planned path produced.
@@ -75,7 +75,7 @@ impl XrayVfs {
   pub fn mount(&mut self, base: &str, source: Box<dyn XrayAssetSource>) -> XrfResult<XrayMountId> {
     let id: XrayMountId = XrayMountId(self.mounts.len());
 
-    log::info!("Mounting {} at base '{base}' as {id:?}", source.label());
+    log::info!("Mounting {} at base '{base}' as {id:?}", source.get_label());
 
     self.mounts.push(XrayMount::new(id, base, source)?);
 
@@ -92,7 +92,7 @@ impl XrayVfs {
   pub fn mount_directory(&mut self, base: &str, root: impl AsRef<Path>) -> XrfResult<XrayMountId> {
     let root: &Path = root.as_ref();
 
-    if let Some(mount) = self.directory_mount_at(root) {
+    if let Some(mount) = self.find_directory_mount(root) {
       return Ok(mount);
     }
 
@@ -100,16 +100,16 @@ impl XrayVfs {
   }
 
   /// Returns the mount already covering a directory root.
-  pub fn directory_mount_at(&self, root: &Path) -> Option<XrayMountId> {
+  pub fn find_directory_mount(&self, root: &Path) -> Option<XrayMountId> {
     self
       .mounts
       .iter()
-      .find(|mount| mount.kind() == XrayMountKind::Directory && mount.source().root_path() == root)
-      .map(XrayMount::id)
+      .find(|mount| mount.get_kind() == XrayMountKind::Directory && mount.get_source().get_root_path() == root)
+      .map(XrayMount::get_id)
   }
 
   /// Returns mounts in search priority order.
-  pub fn mounts(&self) -> &[XrayMount] {
+  pub fn get_mounts(&self) -> &[XrayMount] {
     &self.mounts
   }
 
@@ -172,7 +172,7 @@ impl XrayVfs {
     let logical_path: Cow<str> = normalize(logical_path)?;
 
     match self.winner_in_scope(scope, &logical_path) {
-      Some((mount, source_path)) => mount.source().read(&source_path),
+      Some((mount, source_path)) => mount.get_source().read(&source_path),
       // Absence is `NotFound` throughout this crate, so a consumer can tell "the asset is not here" from "the source
       // holding it failed" without reading the message.
       None => Err(XrfError::new_not_found_error(format!(
@@ -194,7 +194,7 @@ impl XrayVfs {
   /// Returns a not-found error when no mount in this VFS holds the asset's container — most often because the asset came
   /// from a different VFS, or its mount has since been replaced.
   pub fn read_asset(&self, asset: &XrayAsset) -> XrfResult<Vec<u8>> {
-    let container_root: &Path = match asset.container() {
+    let container_root: &Path = match asset.get_container() {
       XrayAssetContainer::Directory { root, .. } => root,
       XrayAssetContainer::Archive { path } => path,
     };
@@ -206,23 +206,23 @@ impl XrayVfs {
     let Some(mount) = self
       .mounts
       .iter()
-      .find(|mount| mount.source().root_path() == container_root)
+      .find(|mount| mount.get_source().get_root_path() == container_root)
     else {
       return Err(XrfError::new_not_found_error(format!(
         "cannot read '{}': no mount in this VFS holds {}",
-        asset.logical_path(),
+        asset.get_logical_path(),
         container_root.display()
       )));
     };
 
-    let Some(source_path) = mount.to_source_path(asset.logical_path().as_str()) else {
+    let Some(source_path) = mount.to_source_path(asset.get_logical_path().as_str()) else {
       return Err(XrfError::new_not_found_error(format!(
         "cannot read '{}': it falls outside the base of the mount holding it",
-        asset.logical_path()
+        asset.get_logical_path()
       )));
     };
 
-    mount.source().read(&source_path)
+    mount.get_source().read(&source_path)
   }
 
   /// Size in bytes of the winning entry, without reading it.
@@ -232,11 +232,11 @@ impl XrayVfs {
   ///
   /// Answers `None` both for an absent asset and for a path that is not a valid logical path — a size gate has nothing
   /// useful to do with the difference, and every caller would discard it.
-  pub fn size(&self, scope: &XrayLookupScope, logical_path: &str) -> Option<u64> {
+  pub fn read_size(&self, scope: &XrayLookupScope, logical_path: &str) -> Option<u64> {
     let logical_path: Cow<str> = normalize(logical_path).ok()?;
     let (mount, source_path) = self.winner_in_scope(scope, &logical_path)?;
 
-    mount.source().size(&source_path)
+    mount.get_source().get_size(&source_path)
   }
 
   /// Returns winning entries in scope, one per logical path, ordered by that path.
@@ -245,13 +245,13 @@ impl XrayVfs {
   /// otherwise arbitrary and unstable between runs. Every consumer that shows or diffs a listing needs a deterministic
   /// order, and two shipped defects came from a caller forgetting to impose one. Sorting ~47,000 entries costs
   /// milliseconds against the enumeration itself.
-  pub fn entries(&self, scope: &XrayLookupScope) -> Vec<XrayAsset> {
-    let mut located: Vec<XrayAsset> = self.entries_all(scope);
+  pub fn list_entries(&self, scope: &XrayLookupScope) -> Vec<XrayAsset> {
+    let mut located: Vec<XrayAsset> = self.list_entries_all(scope);
 
     // `entries_all` sorts stably by logical path after collecting in mount order, so within one path the
     // highest-priority mount comes first — which is exactly the entry `dedup_by` keeps. Deduping the sort we already
     // need costs nothing, where a seen-set cost a hash and an owned copy of every path enumerated.
-    located.dedup_by(|first, second| first.logical_path() == second.logical_path());
+    located.dedup_by(|first, second| first.get_logical_path() == second.get_logical_path());
 
     located
   }
@@ -263,9 +263,9 @@ impl XrayVfs {
   /// enumeration that means "every texture in this project".
   ///
   /// Narrow with a scope prefix when a caller wants one subtree.
-  pub fn entries_of_type(&self, scope: &XrayLookupScope, asset_type: XrayAssetType) -> Vec<XrayAsset> {
+  pub fn list_entries_of_type(&self, scope: &XrayLookupScope, asset_type: XrayAssetType) -> Vec<XrayAsset> {
     self
-      .entries(scope)
+      .list_entries(scope)
       .into_iter()
       .filter(|entry| entry.is_type(asset_type))
       .collect()
@@ -280,16 +280,16 @@ impl XrayVfs {
   /// # Errors
   ///
   /// Returns an error when `suffix` is not a valid X-Ray logical path fragment.
-  pub fn entries_with_suffix(&self, scope: &XrayLookupScope, suffix: &str) -> XrfResult<Vec<XrayAsset>> {
+  pub fn list_entries_with_suffix(&self, scope: &XrayLookupScope, suffix: &str) -> XrfResult<Vec<XrayAsset>> {
     let suffix: Cow<str> = normalize(suffix)?;
 
     Ok(
       self
-        .entries(scope)
+        .list_entries(scope)
         .into_iter()
         .filter(|entry| {
           entry
-            .logical_path()
+            .get_logical_path()
             .as_str()
             .strip_suffix(suffix.as_ref())
             .is_some_and(|rest| rest.is_empty() || rest.ends_with('\\'))
@@ -302,16 +302,16 @@ impl XrayVfs {
   ///
   /// An authoring problem to report rather than a reason to refuse the VFS: nothing here affects what resolves, only what a
   /// person should be told is unreachable.
-  pub fn collisions(&self, scope: &XrayLookupScope) -> Vec<XrayPathCollision> {
+  pub fn list_collisions(&self, scope: &XrayLookupScope) -> Vec<XrayPathCollision> {
     self
       .scoped(scope)
-      .flat_map(|mount| mount.source().collisions().iter().cloned())
+      .flat_map(|mount| mount.get_source().get_collisions().iter().cloned())
       .collect()
   }
 
   /// Returns what sits directly inside one logical directory, as a browser or a tree view needs it.
   ///
-  /// Separate from [`Self::entries`], which answers everything *below* a prefix: listing `textures` with a prefix scope
+  /// Separate from [`Self::list_entries`], which answers everything *below* a prefix: listing `textures` with a prefix scope
   /// yields every texture in the tree, while this yields its handful of folders and files. That is the difference between
   /// expanding one node and loading the whole tree.
   ///
@@ -322,7 +322,7 @@ impl XrayVfs {
   /// # Errors
   ///
   /// Returns an error when `directory` is not a valid X-Ray logical path. An empty `directory` lists the logical root.
-  pub fn children(&self, scope: &XrayLookupScope, directory: &str) -> XrfResult<XrayDirectoryListing> {
+  pub fn list_children(&self, scope: &XrayLookupScope, directory: &str) -> XrfResult<XrayDirectoryListing> {
     let directory: Cow<str> = if directory.is_empty() {
       Cow::Borrowed("")
     } else {
@@ -338,8 +338,8 @@ impl XrayVfs {
     let mut listing: XrayDirectoryListing = Default::default();
     let mut directories: HashSet<String> = HashSet::new();
 
-    for entry in self.entries(&scope) {
-      let Some(remainder) = Self::remainder_under(entry.logical_path().as_str(), &directory) else {
+    for entry in self.list_entries(&scope) {
+      let Some(remainder) = Self::remainder_under(entry.get_logical_path().as_str(), &directory) else {
         continue;
       };
 
@@ -354,7 +354,9 @@ impl XrayVfs {
     }
 
     listing.directories.sort();
-    listing.files.sort_by(|a, b| a.logical_path().cmp(b.logical_path()));
+    listing
+      .files
+      .sort_by(|a, b| a.get_logical_path().cmp(b.get_logical_path()));
 
     Ok(listing)
   }
@@ -373,15 +375,15 @@ impl XrayVfs {
   /// Returns every entry in scope, including shadowed copies, ordered by logical path.
   ///
   /// Copies of one path stay in mount priority order, so the winner precedes the entries it shadows.
-  pub fn entries_all(&self, scope: &XrayLookupScope) -> Vec<XrayAsset> {
+  pub fn list_entries_all(&self, scope: &XrayLookupScope) -> Vec<XrayAsset> {
     let mut located: Vec<XrayAsset> = Vec::new();
 
     for mount in self.scoped(scope) {
-      let Some(source_prefix) = mount.to_source_prefix(scope.prefix()) else {
+      let Some(source_prefix) = mount.to_source_prefix(scope.get_prefix()) else {
         continue;
       };
 
-      for source_path in mount.source().entries(source_prefix.as_deref()) {
+      for source_path in mount.get_source().list_entries(source_prefix.as_deref()) {
         if let Ok(logical_path) = mount.to_logical_path(&source_path)
           && let Some(location) = Self::locate_in(mount, &logical_path)
         {
@@ -391,7 +393,7 @@ impl XrayVfs {
     }
 
     // Stable, so copies of one logical path keep the mount order they were enumerated in.
-    located.sort_by(|first, second| first.logical_path().cmp(second.logical_path()));
+    located.sort_by(|first, second| first.get_logical_path().cmp(second.get_logical_path()));
 
     located
   }
@@ -411,15 +413,15 @@ impl XrayVfs {
     if !mount.is_writable() {
       return Err(XrfError::new_asset_error(format!(
         "cannot write '{logical_path}': it is held by {} '{}', which is read only",
-        match mount.kind() {
+        match mount.get_kind() {
           XrayMountKind::Archive => "archive",
           XrayMountKind::Directory => "directory",
         },
-        mount.label()
+        mount.get_label()
       )));
     }
 
-    mount.source().write(&source_path, bytes)
+    mount.get_source().write(&source_path, bytes)
   }
 
   /// Creates a loose override in the highest-priority writable mount in scope.
@@ -443,7 +445,7 @@ impl XrayVfs {
     let Some((id, source_path)) = self
       .scoped(scope)
       .find(|mount| mount.is_writable())
-      .map(|mount| (mount.id(), mount.to_source_path(&logical_path)))
+      .map(|mount| (mount.get_id(), mount.to_source_path(&logical_path)))
     else {
       return Err(XrfError::new_asset_error(format!(
         "cannot override '{logical_path}': no writable mount is in scope"
@@ -456,7 +458,7 @@ impl XrayVfs {
       )));
     };
 
-    self.mounts[id.0].source().create(&source_path, bytes)?;
+    self.mounts[id.0].get_source().create(&source_path, bytes)?;
     self.remount(id)?;
 
     self.find(scope, &logical_path)?.ok_or_else(|| {
@@ -476,12 +478,12 @@ impl XrayVfs {
       return Err(XrfError::new_asset_error(format!("no mount {id:?} to remount")));
     };
 
-    if mount.kind() != XrayMountKind::Directory {
+    if mount.get_kind() != XrayMountKind::Directory {
       return Ok(());
     }
 
-    let base: String = mount.base().to_string();
-    let root: PathBuf = mount.source().root_path().to_path_buf();
+    let base: String = mount.get_base().to_string();
+    let root: PathBuf = mount.get_source().get_root_path().to_path_buf();
 
     self.mounts[id.0] = XrayMount::new(id, &base, Box::new(XrayDirectorySource::read(&root)?))?;
 
@@ -505,7 +507,7 @@ impl XrayVfs {
   ) -> XrfResult<Option<XrayAsset>> {
     let rules: XrayAssetRules = Self::rules_of(asset_type)?;
 
-    self.find_in(scope, rules.directory, &rules.logical_path(reference))
+    self.find_in(scope, rules.directory, &rules.to_logical_path(reference))
   }
 
   /// Resolves every asset of one kind a reference names, which may be a `*` mask.
@@ -530,7 +532,7 @@ impl XrayVfs {
 
     let rules: XrayAssetRules = Self::rules_of(asset_type)?;
 
-    let mask: String = crate::path::join(rules.directory, &rules.logical_path(reference))?;
+    let mask: String = crate::path::join(rules.directory, &rules.to_logical_path(reference))?;
     let Some((start, end)) = mask.split_once('*') else {
       return Ok(Vec::new());
     };
@@ -543,10 +545,10 @@ impl XrayVfs {
 
     Ok(
       self
-        .entries(&scope.clone().with_prefix(rules.directory)?)
+        .list_entries(&scope.clone().with_prefix(rules.directory)?)
         .into_iter()
         .filter(|entry| {
-          let path: &str = entry.logical_path().as_str();
+          let path: &str = entry.get_logical_path().as_str();
 
           path.starts_with(start) && path.ends_with(end)
         })
@@ -591,7 +593,7 @@ impl XrayVfs {
   ///
   /// Returns an error naming the kind when it has no single directory to resolve under.
   fn rules_of(asset_type: XrayAssetType) -> XrfResult<XrayAssetRules> {
-    asset_type.rules().ok_or_else(|| {
+    asset_type.get_rules().ok_or_else(|| {
       XrfError::new_asset_error(format!(
         "asset kind {asset_type:?} has no single directory to resolve under"
       ))
@@ -601,7 +603,7 @@ impl XrayVfs {
   /// Checks whether a logical path falls inside the scope's subtree.
   fn within_prefix(scope: &XrayLookupScope, logical_path: &str) -> bool {
     scope
-      .prefix()
+      .get_prefix()
       .is_none_or(|prefix| crate::path::is_component_prefix(logical_path, prefix))
   }
 
@@ -622,7 +624,7 @@ impl XrayVfs {
     self.scoped(scope).find_map(|mount| {
       mount
         .to_source_path(logical_path)
-        .filter(|source_path| mount.source().contains(source_path))
+        .filter(|source_path| mount.get_source().contains(source_path))
         .map(|source_path| (mount, source_path))
     })
   }
@@ -636,7 +638,7 @@ impl XrayVfs {
 
   /// Pairs a logical path with its container, for a mount already known to hold the source path.
   fn locate_at(mount: &XrayMount, logical_path: &str, source_path: &str) -> Option<XrayAsset> {
-    let container: XrayAssetContainer = mount.source().locate(source_path)?;
+    let container: XrayAssetContainer = mount.get_source().locate(source_path)?;
 
     Some(XrayAsset::new(
       XrayPath::from_normalized(logical_path.to_string()),

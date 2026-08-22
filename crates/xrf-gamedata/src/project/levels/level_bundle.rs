@@ -69,9 +69,9 @@ impl<'a> LevelBundle<'a> {
   /// tree. `$game_saves$` is probed in between, but it is not part of gamedata.
   pub(crate) fn resolves_texture(&self, reference: &str) -> bool {
     let logical: String = XrayAssetType::Dds
-      .rules()
+      .get_rules()
       .expect("dds has rules")
-      .logical_path(reference);
+      .to_logical_path(reference);
 
     let in_bundle: bool = self
       .project

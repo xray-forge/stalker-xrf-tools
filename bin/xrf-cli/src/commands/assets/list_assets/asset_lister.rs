@@ -97,7 +97,7 @@ impl AssetLister {
     let started: Instant = Instant::now();
     let vfs: XrayVfs = open_plan(&self.mode.plan(&self.path)?.ignoring(&self.ignored)?)?;
     let scope: XrayLookupScope = self.scope()?;
-    let entries: Vec<XrayAsset> = vfs.entries(&scope);
+    let entries: Vec<XrayAsset> = vfs.list_entries(&scope);
     let shadowed: Vec<XrayAsset> = if self.is_shadowed_included {
       Self::shadowed(&vfs, &scope, &entries)
     } else {
@@ -105,7 +105,7 @@ impl AssetLister {
     };
 
     Ok(AssetListing {
-      collisions: vfs.collisions(&scope),
+      collisions: vfs.list_collisions(&scope),
       duration: started.elapsed(),
       entries,
       mounts: vfs
@@ -113,15 +113,15 @@ impl AssetLister {
         .map(|mount| {
           format!(
             "{:<9} {} ({})",
-            format!("{:?}", mount.kind()),
-            mount.source().root_path().display(),
-            mount.label()
+            format!("{:?}", mount.get_kind()),
+            mount.get_source().get_root_path().display(),
+            mount.get_label()
           )
         })
         .collect(),
       origin: format!("{} {}", self.mode, self.path.display()),
       shadowed,
-      skipped: vfs.skipped_mounts().to_vec(),
+      skipped: vfs.get_skipped_mounts().to_vec(),
     })
   }
 
@@ -143,14 +143,14 @@ impl AssetLister {
   /// The result removes winning path and container pairs from the complete enumeration. Indexed rather than scanned: an
   /// installation enumerates ~48,000 entries, and a linear search per entry made this quadratic.
   fn shadowed(vfs: &XrayVfs, scope: &XrayLookupScope, winners: &[XrayAsset]) -> Vec<XrayAsset> {
-    let mut shadowed: Vec<XrayAsset> = vfs.entries_all(scope);
+    let mut shadowed: Vec<XrayAsset> = vfs.list_entries_all(scope);
 
     let winning: HashSet<(&XrayPath, &XrayAssetContainer)> = winners
       .iter()
-      .map(|winner| (winner.logical_path(), winner.container()))
+      .map(|winner| (winner.get_logical_path(), winner.get_container()))
       .collect();
 
-    shadowed.retain(|entry| !winning.contains(&(entry.logical_path(), entry.container())));
+    shadowed.retain(|entry| !winning.contains(&(entry.get_logical_path(), entry.get_container())));
 
     shadowed
   }

@@ -6,14 +6,14 @@
 use std::fs;
 use std::path::PathBuf;
 
-use xrf_test_utils::utils::get_absolute_generated_test_resource_path;
+use xrf_test_utils::utils::build_absolute_generated_test_resource_path;
 use xrf_vfs::{XrayLookupScope, XrayVfs};
 
 use crate::Ltx;
 
 /// Builds a config tree and mounts it, returning the VFS and an all-mounts scope.
 fn mount(name: &str, files: &[(&str, &str)]) -> (XrayVfs, XrayLookupScope) {
-  let root: PathBuf = get_absolute_generated_test_resource_path(&format!("ltx_vfs_read/{name}"));
+  let root: PathBuf = build_absolute_generated_test_resource_path(&format!("ltx_vfs_read/{name}"));
 
   let _ = fs::remove_dir_all(&root);
 
@@ -179,8 +179,8 @@ fn records_that_location_as_the_normalized_identity() {
 #[test]
 fn a_loose_config_overrides_one_lower_in_the_mount_order() {
   // What the whole layer is for: an override in front of a base tree is what the reader sees.
-  let overlay: PathBuf = get_absolute_generated_test_resource_path("ltx_vfs_read/override_overlay");
-  let base: PathBuf = get_absolute_generated_test_resource_path("ltx_vfs_read/override_base");
+  let overlay: PathBuf = build_absolute_generated_test_resource_path("ltx_vfs_read/override_overlay");
+  let base: PathBuf = build_absolute_generated_test_resource_path("ltx_vfs_read/override_base");
 
   for (root, value) in [(&overlay, "overridden"), (&base, "base")] {
     let _ = fs::remove_dir_all(root);

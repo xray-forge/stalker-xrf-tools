@@ -91,7 +91,7 @@ impl<'a> HudMotionCollisionsVerifier<'a> {
       .project
       .vfs()
       .ogf(self.project.scope(), visual)
-      .map(|it| it.map(|location| location.logical_path().to_string()))
+      .map(|it| it.map(|location| location.get_logical_path().to_string()))
     else {
       return Vec::new();
     };
@@ -147,7 +147,7 @@ impl<'a> HudMotionCollisionsVerifier<'a> {
         .resolve_all(self.project.scope(), AssetType::Omf, motion_ref)?
       {
         if location.is_type(AssetType::Omf) {
-          assets.push(location.logical_path().to_string());
+          assets.push(location.get_logical_path().to_string());
         }
       }
     }

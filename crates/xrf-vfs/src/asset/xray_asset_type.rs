@@ -55,7 +55,7 @@ impl XrayAssetType {
   /// `None` covers two different cases, and both are deliberate rather than gaps to fill in speculatively: a kind whose
   /// home is not one directory — `Level` names a directory per level, `Shader` loads a dozen extensions — and a kind no
   /// caller resolves by reference yet. Add a row when a consumer needs one, with evidence from a real tree.
-  pub fn rules(self) -> Option<XrayAssetRules> {
+  pub fn get_rules(self) -> Option<XrayAssetRules> {
     let (directory, extension, authoring_extensions): (&str, &str, &[&str]) = match self {
       Self::Ogf => ("meshes", ".ogf", &[]),
       Self::Omf => ("meshes", ".omf", &[]),
@@ -121,7 +121,7 @@ impl XrayAssetRules {
   ///
   /// An authoring extension is replaced rather than appended, and a reference already carrying the loaded extension is
   /// left alone. Both comparisons ignore case, because a reference authored as `wpn\wpn_ak74.OGF` names the same asset.
-  pub fn logical_path(&self, reference: &str) -> String {
+  pub fn to_logical_path(&self, reference: &str) -> String {
     if let Some((stem, extension)) = reference.rsplit_once('.') {
       if self
         .authoring_extensions
@@ -145,39 +145,42 @@ mod tests {
   use super::{XrayAssetRules, XrayAssetType};
 
   fn rules(asset_type: XrayAssetType) -> XrayAssetRules {
-    asset_type.rules().expect("kind has a canonical home")
+    asset_type.get_rules().expect("kind has a canonical home")
   }
 
   #[test]
   fn replaces_an_authoring_extension_with_the_loaded_one() {
     assert_eq!(
-      rules(XrayAssetType::Dds).logical_path("pfx\\smoke.tga"),
+      rules(XrayAssetType::Dds).to_logical_path("pfx\\smoke.tga"),
       "pfx\\smoke.dds"
     );
     assert_eq!(
-      rules(XrayAssetType::Dds).logical_path("pfx\\smoke.TGA"),
+      rules(XrayAssetType::Dds).to_logical_path("pfx\\smoke.TGA"),
       "pfx\\smoke.dds"
     );
     assert_eq!(
-      rules(XrayAssetType::Dds).logical_path("pfx\\smoke.bmp"),
+      rules(XrayAssetType::Dds).to_logical_path("pfx\\smoke.bmp"),
       "pfx\\smoke.dds"
     );
   }
 
   #[test]
   fn appends_the_extension_when_a_reference_omits_it() {
-    assert_eq!(rules(XrayAssetType::Dds).logical_path("pfx\\smoke"), "pfx\\smoke.dds");
     assert_eq!(
-      rules(XrayAssetType::Ogg).logical_path("weapons\\ak74_shot"),
+      rules(XrayAssetType::Dds).to_logical_path("pfx\\smoke"),
+      "pfx\\smoke.dds"
+    );
+    assert_eq!(
+      rules(XrayAssetType::Ogg).to_logical_path("weapons\\ak74_shot"),
       "weapons\\ak74_shot.ogg"
     );
     assert_eq!(
-      rules(XrayAssetType::Ogg).logical_path("weapons\\ak74_shot.OGG"),
+      rules(XrayAssetType::Ogg).to_logical_path("weapons\\ak74_shot.OGG"),
       "weapons\\ak74_shot.OGG",
       "an uppercase extension is not doubled"
     );
     assert_eq!(
-      rules(XrayAssetType::Ogf).logical_path("actors\\stalker"),
+      rules(XrayAssetType::Ogf).to_logical_path("actors\\stalker"),
       "actors\\stalker.ogf"
     );
   }
@@ -186,11 +189,11 @@ mod tests {
   fn leaves_an_already_loaded_extension_alone_whatever_its_case() {
     // Appending a second extension resolves to nothing, which is how mesh references silently failed.
     assert_eq!(
-      rules(XrayAssetType::Ogf).logical_path("actors\\stalker.OGF"),
+      rules(XrayAssetType::Ogf).to_logical_path("actors\\stalker.OGF"),
       "actors\\stalker.OGF"
     );
     assert_eq!(
-      rules(XrayAssetType::Dds).logical_path("pfx\\smoke.dds"),
+      rules(XrayAssetType::Dds).to_logical_path("pfx\\smoke.dds"),
       "pfx\\smoke.dds"
     );
   }
@@ -199,7 +202,7 @@ mod tests {
   fn treats_an_unknown_extension_as_part_of_the_name() {
     // A reference is not a filename: `smoke.png` names an asset the engine loads as `smoke.png.dds`.
     assert_eq!(
-      rules(XrayAssetType::Dds).logical_path("pfx\\smoke.png"),
+      rules(XrayAssetType::Dds).to_logical_path("pfx\\smoke.png"),
       "pfx\\smoke.png.dds"
     );
   }
@@ -207,8 +210,8 @@ mod tests {
   #[test]
   fn answers_no_rules_for_kinds_without_one_home() {
     // `Level` names a directory per level and `Shader` loads a dozen extensions; neither is a directory-plus-extension pair.
-    assert!(XrayAssetType::Level.rules().is_none());
-    assert!(XrayAssetType::Shader.rules().is_none());
+    assert!(XrayAssetType::Level.get_rules().is_none());
+    assert!(XrayAssetType::Shader.get_rules().is_none());
   }
 
   #[test]

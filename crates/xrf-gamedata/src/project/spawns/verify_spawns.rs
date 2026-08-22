@@ -18,8 +18,8 @@ impl GamedataProject {
     let spawn_files: Vec<String> = self
       .entries_of_type(AssetType::Spawn)
       .into_iter()
-      .filter(|location| location.logical_path().is_under(SPAWNS_DIRECTORY).unwrap_or(false))
-      .map(|location| location.logical_path().to_string())
+      .filter(|location| location.get_logical_path().is_under(SPAWNS_DIRECTORY).unwrap_or(false))
+      .map(|location| location.get_logical_path().to_string())
       .collect();
 
     xrf_output::heading!(options.output, "{} {}", "Verify spawns:", spawn_files.len());

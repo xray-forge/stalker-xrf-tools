@@ -27,7 +27,7 @@ pub use asset::{
 };
 pub use fsgame::{FS_ROOT_ALIAS, FSGAME_FILE_NAME, FsgameDeclaration, FsgameFile};
 pub use mount::{
-  XrayMount, XrayMountId, XrayMountMode, XrayMountPlan, XrayPlannedMount, XraySkippedMount, implied_asset_root,
+  XrayMount, XrayMountId, XrayMountMode, XrayMountPlan, XrayPlannedMount, XraySkippedMount, find_implied_asset_root,
   mount_plan, open_plan, open_vfs,
 };
 pub use path::{XrayPath, XrayPathCollision, is_component_prefix, normalize_logical};

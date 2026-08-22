@@ -1,7 +1,7 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 
-use xrf_test_utils::utils::get_absolute_generated_test_resource_path;
+use xrf_test_utils::utils::build_absolute_generated_test_resource_path;
 
 use crate::{FsgameFile, XrayMountKind, XrayMountPlan};
 
@@ -19,7 +19,7 @@ $game_meshes$       = true  | true  | $game_data$ | meshes\\
 ///
 /// `files` are paths relative to the installation, so a caller writes `db\\textures\\textures.db0` to place a volume.
 fn install(name: &str, files: &[&str]) -> PathBuf {
-  let root: PathBuf = get_absolute_generated_test_resource_path(&format!("xray_mount_plan/{name}"));
+  let root: PathBuf = build_absolute_generated_test_resource_path(&format!("xray_mount_plan/{name}"));
 
   let _ = fs::remove_dir_all(&root);
 
@@ -51,11 +51,11 @@ fn plans_gamedata_ahead_of_archives() {
     &["db\\textures\\textures.db0", "gamedata\\textures\\wpn\\wpn_ak74.dds"],
   );
 
-  let origins: Vec<&str> = plan.mounts().iter().map(|it| it.origin.as_str()).collect();
+  let origins: Vec<&str> = plan.get_mounts().iter().map(|it| it.origin.as_str()).collect();
 
   assert_eq!(origins, vec!["$game_data$", "$arch_dir_textures$"]);
-  assert_eq!(plan.mounts()[0].kind, XrayMountKind::Directory);
-  assert_eq!(plan.mounts()[1].kind, XrayMountKind::Archive);
+  assert_eq!(plan.get_mounts()[0].kind, XrayMountKind::Directory);
+  assert_eq!(plan.get_mounts()[1].kind, XrayMountKind::Archive);
 }
 
 #[test]
@@ -63,8 +63,8 @@ fn plans_a_directory_of_volumes_as_an_archive() {
   let plan: XrayMountPlan = plan("volumes", &["db\\textures\\textures.db0", "db\\textures\\textures.db1"]);
 
   assert_eq!(plan.len(), 1);
-  assert_eq!(plan.mounts()[0].kind, XrayMountKind::Archive);
-  assert!(plan.mounts()[0].path.ends_with("textures"));
+  assert_eq!(plan.get_mounts()[0].kind, XrayMountKind::Archive);
+  assert!(plan.get_mounts()[0].path.ends_with("textures"));
 }
 
 #[test]
@@ -75,7 +75,7 @@ fn leaves_output_directories_out_of_the_plan() {
     &["appdata\\savedgames\\quicksave.sav", "gamedata\\configs\\system.ltx"],
   );
 
-  let origins: Vec<&str> = plan.mounts().iter().map(|it| it.origin.as_str()).collect();
+  let origins: Vec<&str> = plan.get_mounts().iter().map(|it| it.origin.as_str()).collect();
 
   assert_eq!(origins, vec!["$game_data$"]);
 }
@@ -87,7 +87,7 @@ fn plans_gamedata_once_rather_than_once_per_subdirectory_alias() {
   let plan: XrayMountPlan = plan("subdirectories", &["gamedata\\meshes\\wpn.ogf"]);
 
   assert_eq!(plan.len(), 1);
-  assert!(plan.mounts()[0].path.ends_with("gamedata"));
+  assert!(plan.get_mounts()[0].path.ends_with("gamedata"));
 }
 
 #[test]
@@ -100,10 +100,10 @@ fn plans_an_empty_gamedata_because_it_is_still_where_an_override_would_go() {
 
   let plan: XrayMountPlan = XrayMountPlan::from_fsgame(&root).expect("fsgame plans");
 
-  let origins: Vec<&str> = plan.mounts().iter().map(|it| it.origin.as_str()).collect();
+  let origins: Vec<&str> = plan.get_mounts().iter().map(|it| it.origin.as_str()).collect();
 
   assert_eq!(origins, vec!["$game_data$", "$arch_dir_textures$"]);
-  assert_eq!(plan.mounts()[0].kind, XrayMountKind::Directory);
+  assert_eq!(plan.get_mounts()[0].kind, XrayMountKind::Directory);
 }
 
 #[test]
@@ -118,21 +118,21 @@ fn plans_a_bare_root_without_any_fsgame() {
   let plan: XrayMountPlan = XrayMountPlan::root("C:\\gamedata").expect("root plans");
 
   assert_eq!(plan.len(), 1);
-  assert_eq!(plan.mounts()[0].base, "");
-  assert_eq!(plan.mounts()[0].kind, XrayMountKind::Directory);
-  assert_eq!(plan.mounts()[0].origin, "root");
+  assert_eq!(plan.get_mounts()[0].base, "");
+  assert_eq!(plan.get_mounts()[0].kind, XrayMountKind::Directory);
+  assert_eq!(plan.get_mounts()[0].origin, "root");
 }
 
 #[test]
 fn plans_a_subtree_at_its_logical_base() {
   let plan: XrayMountPlan = XrayMountPlan::subtree("C:\\loose\\weapons", "Configs/Weapons").expect("subtree plans");
 
-  assert_eq!(plan.mounts()[0].base, "configs\\weapons", "the base is normalized");
+  assert_eq!(plan.get_mounts()[0].base, "configs\\weapons", "the base is normalized");
 }
 
 #[test]
 fn plans_the_root_implied_by_an_asset_and_nothing_when_there_is_none() {
-  let root: PathBuf = get_absolute_generated_test_resource_path("xray_mount_plan/implied");
+  let root: PathBuf = build_absolute_generated_test_resource_path("xray_mount_plan/implied");
 
   let _ = fs::remove_dir_all(&root);
 
@@ -141,7 +141,7 @@ fn plans_the_root_implied_by_an_asset_and_nothing_when_there_is_none() {
 
   let implied: XrayMountPlan = XrayMountPlan::implied(root.join("meshes/dynamics/wpn.ogf")).expect("implied plans");
 
-  assert_eq!(implied.mounts()[0].path, root);
+  assert_eq!(implied.get_mounts()[0].path, root);
   assert!(
     XrayMountPlan::implied(Path::new("C:\\nowhere\\wpn.ogf"))
       .expect("implied plans")
@@ -158,14 +158,14 @@ fn chains_a_fallback_behind_a_plan_without_repeating_a_path() {
     .behind(XrayMountPlan::root("C:\\second").expect("root plans"))
     .behind(XrayMountPlan::root("C:\\first").expect("root plans"));
 
-  let paths: Vec<&Path> = chained.mounts().iter().map(|it| it.path.as_path()).collect();
+  let paths: Vec<&Path> = chained.get_mounts().iter().map(|it| it.path.as_path()).collect();
 
   assert_eq!(paths, vec![Path::new("C:\\first"), Path::new("C:\\second")]);
 }
 
 #[test]
 fn reports_an_installation_with_no_fsgame_as_an_error_rather_than_an_empty_plan() {
-  let root: PathBuf = get_absolute_generated_test_resource_path("xray_mount_plan/no_fsgame");
+  let root: PathBuf = build_absolute_generated_test_resource_path("xray_mount_plan/no_fsgame");
 
   let _ = fs::remove_dir_all(&root);
 

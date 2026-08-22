@@ -1,7 +1,7 @@
 use std::path::Path;
 use std::str::FromStr;
 
-use xrf_utils::{get_windows1250_encoder, get_windows1252_encoder};
+use xrf_utils::{new_windows1250_encoder, new_windows1252_encoder};
 
 use crate::TranslationLanguage;
 use crate::language::find_unencodable_character;
@@ -70,13 +70,13 @@ fn reads_the_language_off_a_gamedata_directory() {
 #[test]
 fn finds_the_character_an_encoding_cannot_hold() {
   assert_eq!(
-    find_unencodable_character("plain ascii", get_windows1252_encoder()),
+    find_unencodable_character("plain ascii", new_windows1252_encoder()),
     None
   );
   assert_eq!(
-    find_unencodable_character("Привет", get_windows1252_encoder()),
+    find_unencodable_character("Привет", new_windows1252_encoder()),
     Some('П')
   );
   // Cyrillic is not in 1250 either, which is what makes a Polish target refuse it.
-  assert_eq!(find_unencodable_character("Й", get_windows1250_encoder()), Some('Й'));
+  assert_eq!(find_unencodable_character("Й", new_windows1250_encoder()), Some('Й'));
 }

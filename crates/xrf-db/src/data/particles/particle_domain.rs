@@ -196,7 +196,7 @@ mod tests {
   use xrf_test_utils::FileSlice;
   use xrf_test_utils::file::read_file_as_string;
   use xrf_test_utils::utils::{
-    get_relative_test_sample_file_path, open_generated_test_resource_as_slice,
+    build_relative_test_sample_file_path, open_generated_test_resource_as_slice,
     overwrite_generated_test_resource_as_file,
   };
 
@@ -214,14 +214,14 @@ mod tests {
     assert_eq!(writer.bytes_written(), 68);
 
     let bytes_written: usize = writer.flush_chunk_into::<XRayByteOrder>(
-      &mut overwrite_generated_test_resource_as_file(&get_relative_test_sample_file_path(file!(), &filename))?,
+      &mut overwrite_generated_test_resource_as_file(&build_relative_test_sample_file_path(file!(), &filename))?,
       0,
     )?;
 
     assert_eq!(bytes_written, 68);
 
     let file: FileSlice =
-      open_generated_test_resource_as_slice(&get_relative_test_sample_file_path(file!(), &filename))?;
+      open_generated_test_resource_as_slice(&build_relative_test_sample_file_path(file!(), &filename))?;
 
     assert_eq!(file.bytes_remaining(), 68 + 8);
 
@@ -254,7 +254,7 @@ mod tests {
   fn test_serialize_deserialize() -> XrfResult {
     let original: ParticleDomain = ParticleDomain::new_mock();
 
-    let mut file: File = overwrite_generated_test_resource_as_file(&get_relative_test_sample_file_path(
+    let mut file: File = overwrite_generated_test_resource_as_file(&build_relative_test_sample_file_path(
       file!(),
       "serialize_deserialize.json",
     ))?;

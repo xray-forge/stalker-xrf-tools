@@ -137,7 +137,7 @@ mod tests {
   use xrf_test_utils::FileSlice;
   use xrf_test_utils::file::read_file_as_string;
   use xrf_test_utils::utils::{
-    get_absolute_generated_test_sample_file_path, get_relative_test_sample_file_path,
+    build_absolute_generated_test_sample_file_path, build_relative_test_sample_file_path,
     open_generated_test_resource_as_slice, overwrite_file, overwrite_generated_test_resource_as_file,
   };
 
@@ -147,7 +147,7 @@ mod tests {
   #[test]
   fn test_read_write() -> XrfResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
+    let filename: String = build_relative_test_sample_file_path(file!(), "read_write.chunk");
 
     let original: PatrolLink = PatrolLink {
       index: 1000,
@@ -179,7 +179,7 @@ mod tests {
   #[test]
   fn test_read_write_list() -> XrfResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String = get_relative_test_sample_file_path(file!(), "read_write_list.chunk");
+    let filename: String = build_relative_test_sample_file_path(file!(), "read_write_list.chunk");
 
     let original: Vec<PatrolLink> = vec![
       PatrolLink {
@@ -221,7 +221,7 @@ mod tests {
       links: vec![(10, 1.5), (11, 2.5), (12, 3.5)],
     };
 
-    let config_path: &Path = &get_absolute_generated_test_sample_file_path(file!(), "import_export.ltx");
+    let config_path: &Path = &build_absolute_generated_test_sample_file_path(file!(), "import_export.ltx");
     let mut file: File = overwrite_file(config_path)?;
     let mut ltx: Ltx = Ltx::new();
 
@@ -243,7 +243,7 @@ mod tests {
       links: vec![(10, 1.5), (11, 2.5), (12, 3.5)],
     };
 
-    let mut file: File = overwrite_file(get_absolute_generated_test_sample_file_path(
+    let mut file: File = overwrite_file(build_absolute_generated_test_sample_file_path(
       file!(),
       "serialize_deserialize.json",
     ))?;

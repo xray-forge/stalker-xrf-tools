@@ -30,7 +30,11 @@ fn an_override_creates_a_loose_file_that_then_wins() {
     .write_override(&scope, "configs\\system.ltx", b"overridden")
     .expect("override is created");
 
-  assert_eq!(location.root(), Some(loose.as_path()), "it lands in the writable mount");
+  assert_eq!(
+    location.get_root(),
+    Some(loose.as_path()),
+    "it lands in the writable mount"
+  );
   assert_eq!(
     vfs.read(&scope, "configs\\system.ltx").unwrap(),
     b"overridden",
@@ -136,7 +140,7 @@ fn an_override_lands_in_the_highest_priority_writable_mount() {
     .write_override(&XrayLookupScope::all(), "configs\\system.ltx", b"overridden")
     .expect("override is created");
 
-  assert_eq!(location.root(), Some(front.as_path()));
+  assert_eq!(location.get_root(), Some(front.as_path()));
   assert_eq!(
     vfs.read(&XrayLookupScope::all(), "configs\\system.ltx").unwrap(),
     b"overridden"
@@ -188,5 +192,5 @@ fn planning_the_same_source_twice_reuses_its_mount() {
   let second: Vec<XrayMountId> = mount_plan(&mut vfs, &plan).expect("second mount");
 
   assert_eq!(first, second, "the same mount answers both plans");
-  assert_eq!(vfs.mounts().len(), 1, "planning twice does not append a duplicate");
+  assert_eq!(vfs.get_mounts().len(), 1, "planning twice does not append a duplicate");
 }

@@ -10,7 +10,7 @@ use byteorder::ReadBytesExt;
 use regex::Regex;
 use xrf_error::{XrfError, XrfResult};
 use xrf_lzhuf::decompress;
-use xrf_utils::{XRayEncoding, assert, decode_bytes_to_string_without_bom_handling, get_windows1251_encoder};
+use xrf_utils::{XRayEncoding, assert, decode_bytes_to_string_without_bom_handling, new_windows1251_encoder};
 
 use crate::archive::archive_descriptor::ArchiveDescriptor;
 use crate::archive::archive_file_descriptor::ArchiveFileDescriptor;
@@ -69,7 +69,7 @@ impl ArchiveReader {
   /// ANSI codepage — windows-1251 for the original localization — so non-ASCII names are not valid UTF-8 and a reader that
   /// let the caller pick could only pick wrong.
   fn header_encoding() -> XRayEncoding {
-    get_windows1251_encoder()
+    new_windows1251_encoder()
   }
 
   /// Reads a volume's header chunks into a descriptor.
@@ -254,13 +254,13 @@ mod tests {
   use std::path::PathBuf;
 
   use byteorder::{LittleEndian, WriteBytesExt};
-  use xrf_test_utils::utils::get_absolute_generated_test_resource_path;
+  use xrf_test_utils::utils::build_absolute_generated_test_resource_path;
 
   use super::ArchiveReader;
 
   /// Writes raw bytes as a volume file, since malformed input is a byte-level condition.
   fn volume(name: &str, bytes: &[u8]) -> PathBuf {
-    let root: PathBuf = get_absolute_generated_test_resource_path("archive_reader");
+    let root: PathBuf = build_absolute_generated_test_resource_path("archive_reader");
 
     fs::create_dir_all(&root).expect("scratch root");
 

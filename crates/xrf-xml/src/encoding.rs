@@ -1,7 +1,7 @@
 use xrf_error::{XrfError, XrfResult};
 use xrf_utils::{
-  XRayEncoding, decode_bytes_to_string, get_utf8_encoder, get_windows1250_encoder, get_windows1251_encoder,
-  get_windows1252_encoder,
+  XRayEncoding, decode_bytes_to_string, new_utf8_encoder, new_windows1250_encoder, new_windows1251_encoder,
+  new_windows1252_encoder,
 };
 
 /// How far into a document the declaration is looked for.
@@ -33,10 +33,10 @@ pub fn encoding_from_label(label: &str) -> XrfResult<XRayEncoding> {
     .collect();
 
   match normalized.as_str() {
-    "utf8" => Ok(get_utf8_encoder()),
-    "cp1250" | "windows1250" => Ok(get_windows1250_encoder()),
-    "cp1251" | "windows1251" => Ok(get_windows1251_encoder()),
-    "cp1252" | "windows1252" => Ok(get_windows1252_encoder()),
+    "utf8" => Ok(new_utf8_encoder()),
+    "cp1250" | "windows1250" => Ok(new_windows1250_encoder()),
+    "cp1251" | "windows1251" => Ok(new_windows1251_encoder()),
+    "cp1252" | "windows1252" => Ok(new_windows1252_encoder()),
     _ => Err(XrfError::new_encoding_error(format!(
       "Unsupported XML encoding '{label}'"
     ))),
@@ -51,7 +51,7 @@ pub fn encoding_from_label(label: &str) -> XrfResult<XRayEncoding> {
 pub(crate) fn decode_xml_bytes(input: &[u8]) -> XrfResult<String> {
   Ok(decode_bytes_to_string(
     input,
-    declared_xml_encoding(input)?.unwrap_or_else(get_utf8_encoder),
+    declared_xml_encoding(input)?.unwrap_or_else(new_utf8_encoder),
   )?)
 }
 
@@ -90,14 +90,14 @@ mod tests {
   fn reads_a_declared_encoding() {
     let input: &[u8] = b"<?xml version=\"1.0\" encoding=\"windows-1251\"?><root/>";
 
-    assert_eq!(declared_xml_encoding(input).unwrap(), Some(get_windows1251_encoder()));
+    assert_eq!(declared_xml_encoding(input).unwrap(), Some(new_windows1251_encoder()));
   }
 
   #[test]
   fn accepts_single_quotes_and_odd_spacing() {
     let input: &[u8] = b"<?xml version='1.0' encoding = 'cp1250' ?><root/>";
 
-    assert_eq!(declared_xml_encoding(input).unwrap(), Some(get_windows1250_encoder()));
+    assert_eq!(declared_xml_encoding(input).unwrap(), Some(new_windows1250_encoder()));
   }
 
   #[test]
@@ -114,9 +114,9 @@ mod tests {
 
   #[test]
   fn normalizes_punctuation_and_case_in_a_label() {
-    assert_eq!(encoding_from_label("WINDOWS-1252").unwrap(), get_windows1252_encoder());
-    assert_eq!(encoding_from_label("cp_1251").unwrap(), get_windows1251_encoder());
-    assert_eq!(encoding_from_label("UTF-8").unwrap(), get_utf8_encoder());
+    assert_eq!(encoding_from_label("WINDOWS-1252").unwrap(), new_windows1252_encoder());
+    assert_eq!(encoding_from_label("cp_1251").unwrap(), new_windows1251_encoder());
+    assert_eq!(encoding_from_label("UTF-8").unwrap(), new_utf8_encoder());
   }
 
   #[test]

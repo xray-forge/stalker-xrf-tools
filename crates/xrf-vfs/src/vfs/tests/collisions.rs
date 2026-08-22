@@ -6,14 +6,14 @@
 use std::fs;
 use std::path::PathBuf;
 
-use xrf_test_utils::utils::get_absolute_generated_test_resource_path;
+use xrf_test_utils::utils::build_absolute_generated_test_resource_path;
 
 use crate::vfs::tests::fake_source::FakeArchiveSource;
 use crate::{XrayLookupScope, XrayMountKind, XrayMountPlan, XrayPath, XrayPathCollision, XrayVfs, open_plan};
 
 /// Writes a tree whose file names differ only by case, which normalize to one logical path.
 fn tree(name: &str, files: &[&str]) -> PathBuf {
-  let root: PathBuf = get_absolute_generated_test_resource_path(&format!("xray_vfs_collisions/{name}"));
+  let root: PathBuf = build_absolute_generated_test_resource_path(&format!("xray_vfs_collisions/{name}"));
 
   let _ = fs::remove_dir_all(&root);
 
@@ -50,7 +50,7 @@ fn reports_collisions_from_every_mount_in_scope() {
     )
     .expect("clashing mounts");
 
-  let collisions: Vec<XrayPathCollision> = vfs.collisions(&XrayLookupScope::all());
+  let collisions: Vec<XrayPathCollision> = vfs.list_collisions(&XrayLookupScope::all());
 
   assert_eq!(collisions.len(), 1, "reported once, from the mount that holds it");
   assert_eq!(collisions[0].logical_path.as_str(), "textures\\wpn\\wpn_ak74.dds");
@@ -68,7 +68,7 @@ fn a_clean_mount_reports_nothing() {
   let root: PathBuf = tree("clean", &["textures/wpn/wpn_ak74.dds", "configs/system.ltx"]);
   let vfs: XrayVfs = open_plan(&XrayMountPlan::root(&root).expect("plan")).expect("mounts");
 
-  assert!(vfs.collisions(&XrayLookupScope::all()).is_empty());
+  assert!(vfs.list_collisions(&XrayLookupScope::all()).is_empty());
 
   let _ = fs::remove_dir_all(root);
 }
@@ -99,7 +99,7 @@ fn an_ignored_prefix_is_absent_from_the_mount() {
       .is_some(),
     "only the named prefix is omitted"
   );
-  assert_eq!(vfs.entries(&scope).len(), 2);
+  assert_eq!(vfs.list_entries(&scope).len(), 2);
 
   let _ = fs::remove_dir_all(root);
 }
@@ -120,9 +120,9 @@ fn ignoring_matches_on_component_boundaries() {
 
   assert_eq!(
     vfs
-      .entries(&XrayLookupScope::all())
+      .list_entries(&XrayLookupScope::all())
       .iter()
-      .map(|entry| entry.logical_path().to_string())
+      .map(|entry| entry.get_logical_path().to_string())
       .collect::<Vec<_>>(),
     vec![String::from("textures\\wipers\\blade.dds")]
   );
@@ -158,12 +158,12 @@ fn a_source_that_cannot_be_opened_is_recorded_rather_than_silently_dropped() {
 
   let vfs: XrayVfs = open_plan(&plan).expect("the readable mount still opens");
 
-  assert_eq!(vfs.mounts().len(), 1, "only the directory mounted");
-  assert_eq!(vfs.skipped_mounts().len(), 1);
-  assert_eq!(vfs.skipped_mounts()[0].origin, "$arch_dir$");
-  assert_eq!(vfs.skipped_mounts()[0].path, absent);
+  assert_eq!(vfs.get_mounts().len(), 1, "only the directory mounted");
+  assert_eq!(vfs.get_skipped_mounts().len(), 1);
+  assert_eq!(vfs.get_skipped_mounts()[0].origin, "$arch_dir$");
+  assert_eq!(vfs.get_skipped_mounts()[0].path, absent);
   assert!(
-    !vfs.skipped_mounts()[0].reason.is_empty(),
+    !vfs.get_skipped_mounts()[0].reason.is_empty(),
     "the reason is what a report shows a person"
   );
 
@@ -199,9 +199,9 @@ fn enumeration_is_ordered_by_logical_path() {
     .expect("mounts");
 
   let ordered: Vec<String> = vfs
-    .entries(&XrayLookupScope::all())
+    .list_entries(&XrayLookupScope::all())
     .into_iter()
-    .map(|entry| entry.logical_path().to_string())
+    .map(|entry| entry.get_logical_path().to_string())
     .collect();
 
   assert_eq!(

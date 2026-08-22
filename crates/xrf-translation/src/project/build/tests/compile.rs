@@ -39,7 +39,7 @@ fn compiles_windows_1252_translations() {
   .unwrap();
 
   assert!(compiled.contains("encoding=\"windows-1252\""));
-  assert!(encode_string_to_bytes(&compiled, TranslationLanguage::French.get_language_encoder()).is_ok());
+  assert!(encode_string_to_bytes(&compiled, TranslationLanguage::French.new_language_encoder()).is_ok());
 }
 
 #[test]

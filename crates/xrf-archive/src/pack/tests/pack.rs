@@ -6,7 +6,7 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 
-use xrf_test_utils::utils::get_absolute_generated_test_resource_path;
+use xrf_test_utils::utils::build_absolute_generated_test_resource_path;
 
 use crate::pack::archive_pack_config::{ArchivePackConfig, ArchivePackFolder, ArchivePackMode};
 use crate::pack::archive_pack_result::ArchivePackResult;
@@ -21,7 +21,7 @@ const BINARY: &[u8] = &[0x44, 0x44, 0x53, 0x20, 0x01, 0x02, 0x03, 0xfe, 0xff, 0x
 
 /// Build a source tree under this test's scratch directory and return its root.
 fn create_source(scope: &str, files: &[(&str, &[u8])]) -> PathBuf {
-  let root: PathBuf = get_absolute_generated_test_resource_path(&format!("{scope}/gamedata"));
+  let root: PathBuf = build_absolute_generated_test_resource_path(&format!("{scope}/gamedata"));
 
   let _ = fs::remove_dir_all(&root);
 
@@ -42,7 +42,7 @@ fn pack(
   configure: impl FnOnce(&mut ArchivePackConfig),
 ) -> (ArchivePackResult, PathBuf) {
   let source: PathBuf = create_source(scope, files);
-  let destination: PathBuf = get_absolute_generated_test_resource_path(&format!("{scope}/db"));
+  let destination: PathBuf = build_absolute_generated_test_resource_path(&format!("{scope}/db"));
 
   let _ = fs::remove_dir_all(&destination);
 
@@ -185,7 +185,7 @@ fn keeps_names_the_engine_can_read() {
 #[test]
 fn refuses_a_name_it_cannot_encode() {
   let source: PathBuf = create_source("refuses_a_name_it_cannot_encode", &[("configs\\ロゴ.ltx", CONFIG)]);
-  let destination: PathBuf = get_absolute_generated_test_resource_path("refuses_a_name_it_cannot_encode/db");
+  let destination: PathBuf = build_absolute_generated_test_resource_path("refuses_a_name_it_cannot_encode/db");
   let mut config: ArchivePackConfig = ArchivePackConfig::new(&source, &destination, "packed");
 
   config.include_folders = vec![ArchivePackFolder {

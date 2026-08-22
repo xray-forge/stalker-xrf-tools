@@ -18,7 +18,7 @@ pub(crate) const TEXTURES_DIRECTORY: &str = "textures";
 /// must therefore fall through on a failed lookup rather than on a failed derivation.
 ///
 /// Returns the nearest implied root, or `None` when no ancestor looks like one.
-pub fn implied_asset_root(path: &Path) -> Option<PathBuf> {
+pub fn find_implied_asset_root(path: &Path) -> Option<PathBuf> {
   path
     .ancestors()
     .skip(1)
@@ -28,7 +28,7 @@ pub fn implied_asset_root(path: &Path) -> Option<PathBuf> {
 
 /// Finds the nearest installation containing a physical asset path.
 ///
-/// An installation is an ancestor containing `fsgame.ltx`. Unlike [`implied_asset_root`], this also finds installations
+/// An installation is an ancestor containing `fsgame.ltx`. Unlike [`find_implied_asset_root`], this also finds installations
 /// whose `gamedata/` has no loose `meshes/` and `textures/` directories. Returns `None` when no ancestor declares one.
 pub(crate) fn implied_install_root(path: &Path) -> Option<PathBuf> {
   path
@@ -43,16 +43,16 @@ mod tests {
   use std::fs;
   use std::path::{Path, PathBuf};
 
-  use xrf_test_utils::utils::get_absolute_generated_test_resource_path;
+  use xrf_test_utils::utils::build_absolute_generated_test_resource_path;
 
-  use super::implied_asset_root;
+  use super::find_implied_asset_root;
 
   /// Builds a throwaway tree, since the answer is a filesystem fact rather than a string transformation.
   ///
   /// Written to the generated scratch root, never to a committed fixture directory, and scoped by name because tests in
   /// one binary share that root and run in parallel.
   fn tree(name: &str, directories: &[&str]) -> PathBuf {
-    let root: PathBuf = get_absolute_generated_test_resource_path(&format!("xray_root/{name}"));
+    let root: PathBuf = build_absolute_generated_test_resource_path(&format!("xray_root/{name}"));
 
     let _ = fs::remove_dir_all(&root);
 
@@ -68,7 +68,7 @@ mod tests {
     let root: PathBuf = tree("gamedata", &["meshes/actors", "textures/act"]);
     let visual: PathBuf = root.join("meshes/actors/stalker.ogf");
 
-    assert_eq!(implied_asset_root(&visual).as_deref(), Some(root.as_path()));
+    assert_eq!(find_implied_asset_root(&visual).as_deref(), Some(root.as_path()));
   }
 
   #[test]
@@ -76,14 +76,14 @@ mod tests {
     let root: PathBuf = tree("loose", &["desktop"]);
     let visual: PathBuf = root.join("desktop/wpn_m4_hud.ogf");
 
-    assert_eq!(implied_asset_root(&visual), None);
+    assert_eq!(find_implied_asset_root(&visual), None);
   }
 
   #[test]
   fn requires_both_directories_rather_than_either() {
     let root: PathBuf = tree("meshes_only", &["meshes/dynamics"]);
 
-    assert_eq!(implied_asset_root(&root.join("meshes/dynamics/wpn.ogf")), None);
+    assert_eq!(find_implied_asset_root(&root.join("meshes/dynamics/wpn.ogf")), None);
   }
 
   #[test]
@@ -96,7 +96,7 @@ mod tests {
     let inner: PathBuf = outer.join("mods/addon");
     let visual: PathBuf = inner.join("meshes/wpn.ogf");
 
-    assert_eq!(implied_asset_root(&visual).as_deref(), Some(inner.as_path()));
+    assert_eq!(find_implied_asset_root(&visual).as_deref(), Some(inner.as_path()));
   }
 
   #[test]
@@ -105,11 +105,11 @@ mod tests {
     let root: PathBuf = tree("misleading", &["meshes/meshes", "textures"]);
     let visual: PathBuf = root.join("meshes/meshes/wpn.ogf");
 
-    assert_eq!(implied_asset_root(&visual).as_deref(), Some(root.as_path()));
+    assert_eq!(find_implied_asset_root(&visual).as_deref(), Some(root.as_path()));
   }
 
   #[test]
   fn answers_none_for_a_path_with_no_parent() {
-    assert_eq!(implied_asset_root(Path::new("wpn.ogf")), None);
+    assert_eq!(find_implied_asset_root(Path::new("wpn.ogf")), None);
   }
 }

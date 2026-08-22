@@ -3,7 +3,7 @@
 use std::fs;
 use std::path::PathBuf;
 
-use xrf_test_utils::utils::get_absolute_generated_test_resource_path;
+use xrf_test_utils::utils::build_absolute_generated_test_resource_path;
 use xrf_vfs::XrayMountMode;
 
 use crate::{GamedataProject, GamedataProjectReadOptions};
@@ -24,7 +24,7 @@ fn options(root: PathBuf) -> GamedataProjectReadOptions {
 
 /// Builds an installation whose `gamedata\configs` holds a minimal `system.ltx`.
 fn install(name: &str) -> PathBuf {
-  let root: PathBuf = get_absolute_generated_test_resource_path(&format!("gamedata_opening/{name}"));
+  let root: PathBuf = build_absolute_generated_test_resource_path(&format!("gamedata_opening/{name}"));
   let configs: PathBuf = root.join("gamedata").join("configs");
 
   let _ = fs::remove_dir_all(&root);
@@ -105,7 +105,7 @@ fn names_an_ignored_prefix_that_would_hide_the_root_config() {
 
 #[test]
 fn refuses_a_directory_that_resolves_no_system_ltx() {
-  let root: PathBuf = get_absolute_generated_test_resource_path("gamedata_opening/empty");
+  let root: PathBuf = build_absolute_generated_test_resource_path("gamedata_opening/empty");
 
   let _ = fs::remove_dir_all(&root);
 

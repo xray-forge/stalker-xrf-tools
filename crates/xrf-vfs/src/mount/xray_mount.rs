@@ -38,18 +38,18 @@ impl XrayMount {
     })
   }
 
-  pub fn id(&self) -> XrayMountId {
+  pub fn get_id(&self) -> XrayMountId {
     self.id
   }
 
   /// Returns the normalized logical base assigned to this mount.
-  pub fn base(&self) -> &str {
+  pub fn get_base(&self) -> &str {
     &self.base
   }
 
   /// Returns whether the mount stores loose files or archive entries.
-  pub fn kind(&self) -> XrayMountKind {
-    self.source.kind()
+  pub fn get_kind(&self) -> XrayMountKind {
+    self.source.get_kind()
   }
 
   /// Returns whether writes through this mount can update existing entries.
@@ -58,12 +58,12 @@ impl XrayMount {
   }
 
   /// Returns the source label used in diagnostics.
-  pub fn label(&self) -> &str {
-    self.source.label()
+  pub fn get_label(&self) -> &str {
+    self.source.get_label()
   }
 
   /// Borrows the mounted source for source-specific inspection.
-  pub fn source(&self) -> &dyn XrayAssetSource {
+  pub fn get_source(&self) -> &dyn XrayAssetSource {
     self.source.as_ref()
   }
 

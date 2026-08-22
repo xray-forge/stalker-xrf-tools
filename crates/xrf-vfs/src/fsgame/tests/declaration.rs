@@ -10,7 +10,7 @@ fn parses_a_declaration_with_every_field() {
   assert!(declaration.is_recursive);
   assert!(declaration.is_notified);
   assert_eq!(declaration.root_alias, "$game_data$");
-  assert_eq!(declaration.addition_segment(), Some("meshes"));
+  assert_eq!(declaration.get_addition_segment(), Some("meshes"));
   assert_eq!(declaration.extensions.as_deref(), Some("*.ogf;*.omf"));
   assert_eq!(declaration.description.as_deref(), Some("Game Object files"));
 }
@@ -22,7 +22,7 @@ fn parses_a_declaration_that_names_its_root_and_nothing_else() {
     FsgameDeclaration::parse("$downloads$ = false | false | $app_data_root$").expect("line parses");
 
   assert!(!declaration.is_recursive);
-  assert_eq!(declaration.addition_segment(), None);
+  assert_eq!(declaration.get_addition_segment(), None);
   assert_eq!(declaration.root_alias, "$app_data_root$");
 }
 
@@ -32,7 +32,7 @@ fn treats_the_installation_root_as_an_alias_like_any_other() {
     FsgameDeclaration::parse("$arch_dir$ = false | false | $fs_root$ | db\\").expect("line parses");
 
   assert_eq!(declaration.root_alias, FS_ROOT_ALIAS);
-  assert_eq!(declaration.addition_segment(), Some("db"));
+  assert_eq!(declaration.get_addition_segment(), Some("db"));
 }
 
 #[test]
@@ -41,7 +41,7 @@ fn tolerates_the_tabs_and_trailing_spaces_real_files_carry() {
     FsgameDeclaration::parse("$textures_ui$ \t= true \t| true\t| $textures$\t | ui\\   ").expect("line parses");
 
   assert_eq!(declaration.alias, "$textures_ui$");
-  assert_eq!(declaration.addition_segment(), Some("ui"));
+  assert_eq!(declaration.get_addition_segment(), Some("ui"));
 }
 
 #[test]

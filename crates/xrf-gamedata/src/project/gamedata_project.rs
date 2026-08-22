@@ -149,7 +149,7 @@ impl GamedataProject {
   ///
   /// Reported rather than refused at open time: a tool has to be able to load a project and say what is wrong with it.
   pub fn collisions(&self) -> Vec<XrayPathCollision> {
-    self.vfs().collisions(&self.scope)
+    self.vfs().list_collisions(&self.scope)
   }
 
   /// Sources this project's installation declared that could not be opened.
@@ -157,7 +157,7 @@ impl GamedataProject {
   /// Every check runs over what mounted, so a skipped source silently shrinks what verification covers — its assets are
   /// reported missing, or simply never counted. Any report of this project's results has to state these alongside them.
   pub fn skipped_mounts(&self) -> &[XraySkippedMount] {
-    self.vfs().skipped_mounts()
+    self.vfs().get_skipped_mounts()
   }
 
   /// Whether an ignored prefix would hide the root config every check reads.
@@ -187,17 +187,17 @@ impl GamedataProject {
 
   /// Size of an asset without reading it, for a gate that exists to avoid parsing a truncated file.
   pub(crate) fn size(&self, logical_path: &str) -> Option<u64> {
-    self.vfs().size(&self.scope, logical_path)
+    self.vfs().read_size(&self.scope, logical_path)
   }
 
   /// Every asset the project resolves, one per logical path, ordered by that path.
   pub(crate) fn entries(&self) -> Vec<XrayAsset> {
-    self.vfs().entries(&self.scope)
+    self.vfs().list_entries(&self.scope)
   }
 
   /// Every asset whose extension identifies one kind, wherever in the tree it lives.
   pub(crate) fn entries_of_type(&self, asset_type: XrayAssetType) -> Vec<XrayAsset> {
-    self.vfs().entries_of_type(&self.scope, asset_type)
+    self.vfs().list_entries_of_type(&self.scope, asset_type)
   }
 
   /// Every asset whose logical path ends with `suffix` on a component boundary.
@@ -206,7 +206,7 @@ impl GamedataProject {
   ///
   /// Returns an error when `suffix` is not a valid X-Ray logical path fragment.
   pub(crate) fn entries_with_suffix(&self, suffix: &str) -> XrfResult<Vec<XrayAsset>> {
-    self.vfs().entries_with_suffix(&self.scope, suffix)
+    self.vfs().list_entries_with_suffix(&self.scope, suffix)
   }
 
   /// Resolves a raw engine reference of one kind under that kind's directory and extension.

@@ -170,7 +170,7 @@ mod tests {
   use xrf_test_utils::FileSlice;
   use xrf_test_utils::file::read_file_as_string;
   use xrf_test_utils::utils::{
-    get_absolute_generated_test_sample_file_path, get_relative_test_sample_file_path,
+    build_absolute_generated_test_sample_file_path, build_relative_test_sample_file_path,
     open_generated_test_resource_as_slice, overwrite_file, overwrite_generated_test_resource_as_file,
   };
 
@@ -180,7 +180,7 @@ mod tests {
   #[test]
   fn test_read_write_list() -> XrfResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String = get_relative_test_sample_file_path(file!(), "read_write_list.chunk");
+    let filename: String = build_relative_test_sample_file_path(file!(), "read_write_list.chunk");
 
     let original: Vec<Shape> = vec![
       Shape::Sphere((
@@ -238,7 +238,7 @@ mod tests {
   #[test]
   fn test_read_write_sphere() -> XrfResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String = get_relative_test_sample_file_path(file!(), "read_write_sphere.chunk");
+    let filename: String = build_relative_test_sample_file_path(file!(), "read_write_sphere.chunk");
 
     let original: Shape = Shape::Sphere((
       Vector3d {
@@ -272,7 +272,7 @@ mod tests {
   #[test]
   fn test_read_write_box() -> XrfResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String = get_relative_test_sample_file_path(file!(), "read_write_box.chunk");
+    let filename: String = build_relative_test_sample_file_path(file!(), "read_write_box.chunk");
 
     let original: Shape = Shape::Box((
       Vector3d { x: 1.5, y: 1.7, z: 1.0 },
@@ -303,7 +303,7 @@ mod tests {
 
   #[test]
   fn test_import_export() -> XrfResult {
-    let config_path: &Path = &get_absolute_generated_test_sample_file_path(file!(), "test_import_export.ltx");
+    let config_path: &Path = &build_absolute_generated_test_sample_file_path(file!(), "test_import_export.ltx");
     let mut ltx: Ltx = Ltx::new();
 
     let original: Vec<Shape> = vec![
@@ -361,7 +361,7 @@ mod tests {
       52.0,
     ));
 
-    let mut file: File = overwrite_generated_test_resource_as_file(&get_relative_test_sample_file_path(
+    let mut file: File = overwrite_generated_test_resource_as_file(&build_relative_test_sample_file_path(
       file!(),
       "serialize_deserialize_sphere.json",
     ))?;
@@ -402,7 +402,7 @@ mod tests {
       },
     ));
 
-    let mut file: File = overwrite_generated_test_resource_as_file(&get_relative_test_sample_file_path(
+    let mut file: File = overwrite_generated_test_resource_as_file(&build_relative_test_sample_file_path(
       file!(),
       "serialize_deserialize_box.json",
     ))?;

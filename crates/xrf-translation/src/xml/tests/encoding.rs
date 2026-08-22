@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use xrf_error::XrfResult;
 use xrf_test_utils::utils::write_generated_test_resource;
-use xrf_utils::{encode_string_to_bytes, get_windows1251_encoder, get_windows1252_encoder};
+use xrf_utils::{encode_string_to_bytes, new_windows1251_encoder, new_windows1252_encoder};
 
 use crate::xml::read::read_string_table;
 
@@ -18,7 +18,7 @@ fn reads_xml_using_its_declared_windows_1251_encoding() -> XrfResult {
   let relative_path: &str = "xml_encoding/declared.ukr.xml";
   let source: &str = "<?xml version=\"1.0\" encoding=\"windows-1251\"?><string_table><string id=\"st_test\"><text>Привіт</text></string></string_table>";
 
-  let path: PathBuf = write_encoded(relative_path, source, get_windows1251_encoder())?;
+  let path: PathBuf = write_encoded(relative_path, source, new_windows1251_encoder())?;
 
   let entries = read_string_table(&path)?;
 
@@ -32,7 +32,7 @@ fn declarationless_xml_uses_the_language_code_page_fallback() -> XrfResult {
   let relative_path: &str = "xml_encoding/declarationless.xml";
   let source: &str = "<string_table><string id=\"st_test\"><text>À bientôt</text></string></string_table>";
 
-  let path: PathBuf = write_encoded(relative_path, source, get_windows1252_encoder())?;
+  let path: PathBuf = write_encoded(relative_path, source, new_windows1252_encoder())?;
 
   let entries = read_string_table(&path)?;
 
@@ -48,7 +48,7 @@ fn a_declaration_outranks_the_filename_suffix() -> XrfResult {
 
   // The name says English, which would mean 1252 and mangle every Cyrillic byte. What the file itself
   // declares is what it was written with, so that is what it is read with.
-  let path: PathBuf = write_encoded(relative_path, source, get_windows1251_encoder())?;
+  let path: PathBuf = write_encoded(relative_path, source, new_windows1251_encoder())?;
 
   let entries = read_string_table(&path)?;
 
@@ -63,7 +63,7 @@ fn a_gamedata_directory_supplies_the_encoding_when_nothing_else_does() -> XrfRes
   let source: &str = "<string_table><string id=\"st_test\"><text>Привет</text></string></string_table>";
 
   // No declaration and no suffix, so the only statement of language is the directory it sits in.
-  let path: PathBuf = write_encoded(relative_path, source, get_windows1251_encoder())?;
+  let path: PathBuf = write_encoded(relative_path, source, new_windows1251_encoder())?;
 
   let entries = read_string_table(&path)?;
 

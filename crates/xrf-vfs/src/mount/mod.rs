@@ -16,4 +16,4 @@ pub use skipped_mount::XraySkippedMount;
 pub use xray_mount::{XrayMount, XrayMountId};
 pub use xray_mount_mode::XrayMountMode;
 pub use xray_mount_plan::{XrayMountPlan, XrayPlannedMount};
-pub use xray_root::implied_asset_root;
+pub use xray_root::find_implied_asset_root;

@@ -164,7 +164,7 @@ mod tests {
   use xrf_chunk::{ChunkWriter, XRayByteOrder};
   use xrf_error::XrfResult;
   use xrf_test_utils::utils::{
-    get_absolute_generated_test_resource_path, get_relative_test_sample_file_path,
+    build_absolute_generated_test_resource_path, build_relative_test_sample_file_path,
     overwrite_generated_test_resource_as_file,
   };
 
@@ -191,12 +191,12 @@ mod tests {
     opaque_writer.flush_chunk_into::<XRayByteOrder>(&mut file, 9)?;
     refs_writer.flush_chunk_into::<XRayByteOrder>(&mut file, refs_chunk_id)?;
 
-    Ok(get_absolute_generated_test_resource_path(filename))
+    Ok(build_absolute_generated_test_resource_path(filename))
   }
 
   #[test]
   fn test_write_motion_refs_reproduces_source_when_unchanged() -> XrfResult {
-    let filename: String = get_relative_test_sample_file_path(file!(), "unchanged.ogf");
+    let filename: String = build_relative_test_sample_file_path(file!(), "unchanged.ogf");
     let refs: Vec<String> = vec![String::from("dynamics\\weapons\\wpn_ak74\\anim")];
     let path: PathBuf = write_sample(&filename, OgfKinematicsChunk::CHUNK_ID, &refs)?;
 
@@ -214,7 +214,7 @@ mod tests {
 
   #[test]
   fn test_write_motion_refs_preserves_other_chunks() -> XrfResult {
-    let filename: String = get_relative_test_sample_file_path(file!(), "preserves_chunks.ogf");
+    let filename: String = build_relative_test_sample_file_path(file!(), "preserves_chunks.ogf");
     let path: PathBuf = write_sample(&filename, OgfKinematicsChunk::CHUNK_ID, &[String::from("old\\ref")])?;
 
     let patched: Vec<u8> = OgfMotionRefsProcessor::write_motion_refs_to_buffer::<XRayByteOrder>(
@@ -245,7 +245,7 @@ mod tests {
 
   #[test]
   fn test_write_motion_refs_preserves_old_chunk_id() -> XrfResult {
-    let filename: String = get_relative_test_sample_file_path(file!(), "old_chunk_id.ogf");
+    let filename: String = build_relative_test_sample_file_path(file!(), "old_chunk_id.ogf");
     let path: PathBuf = write_sample(&filename, OgfKinematicsChunk::CHUNK_ID_OLD, &[String::from("old\\ref")])?;
 
     let patched: Vec<u8> = OgfMotionRefsProcessor::write_motion_refs_to_buffer::<XRayByteOrder>(
@@ -277,13 +277,13 @@ mod tests {
 
   #[test]
   fn test_write_motion_refs_requires_refs_chunk() -> XrfResult {
-    let filename: String = get_relative_test_sample_file_path(file!(), "without_refs.ogf");
+    let filename: String = build_relative_test_sample_file_path(file!(), "without_refs.ogf");
     let mut opaque_writer: ChunkWriter = ChunkWriter::new();
 
     opaque_writer.write_all(&OPAQUE_PAYLOAD)?;
     opaque_writer.flush_chunk_into::<XRayByteOrder>(&mut overwrite_generated_test_resource_as_file(&filename)?, 9)?;
 
-    let path: PathBuf = get_absolute_generated_test_resource_path(&filename);
+    let path: PathBuf = build_absolute_generated_test_resource_path(&filename);
 
     assert!(
       OgfMotionRefsProcessor::write_motion_refs_to_buffer::<XRayByteOrder>(File::open(&path)?, &[String::from("any")])

@@ -163,7 +163,7 @@ mod tests {
   use xrf_test_utils::FileSlice;
   use xrf_test_utils::file::read_file_as_string;
   use xrf_test_utils::utils::{
-    get_relative_test_sample_file_path, open_generated_test_resource_as_slice,
+    build_relative_test_sample_file_path, open_generated_test_resource_as_slice,
     overwrite_generated_test_resource_as_file,
   };
 
@@ -204,7 +204,7 @@ mod tests {
   #[test]
   fn test_read_write() -> XrfResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
+    let filename: String = build_relative_test_sample_file_path(file!(), "read_write.chunk");
 
     let original: Time = Time {
       year: 22,
@@ -239,7 +239,7 @@ mod tests {
   #[test]
   fn test_read_write_optional_some() -> XrfResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String = get_relative_test_sample_file_path(file!(), "read_write_optional_some.chunk");
+    let filename: String = build_relative_test_sample_file_path(file!(), "read_write_optional_some.chunk");
 
     let original: Time = Time {
       year: 22,
@@ -274,7 +274,7 @@ mod tests {
   #[test]
   fn test_read_write_optional_none() -> XrfResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String = get_relative_test_sample_file_path(file!(), "read_write_optional_none.chunk");
+    let filename: String = build_relative_test_sample_file_path(file!(), "read_write_optional_none.chunk");
 
     Time::write_optional::<XRayByteOrder>(&mut writer, None)?;
 
@@ -346,7 +346,7 @@ mod tests {
       millis: 100,
     };
 
-    let mut file: File = overwrite_generated_test_resource_as_file(&get_relative_test_sample_file_path(
+    let mut file: File = overwrite_generated_test_resource_as_file(&build_relative_test_sample_file_path(
       file!(),
       "serialize_deserialize.json",
     ))?;

@@ -53,7 +53,7 @@ impl ArchiveAssetSource {
     })
   }
 
-  pub fn project(&self) -> &ArchiveProject {
+  pub fn get_project(&self) -> &ArchiveProject {
     &self.project
   }
 }
@@ -82,11 +82,11 @@ fn is_directory_entry(name: &str, size_real: u32) -> bool {
 }
 
 impl XrayAssetSource for ArchiveAssetSource {
-  fn label(&self) -> &str {
+  fn get_label(&self) -> &str {
     &self.label
   }
 
-  fn kind(&self) -> XrayMountKind {
+  fn get_kind(&self) -> XrayMountKind {
     XrayMountKind::Archive
   }
 
@@ -96,7 +96,7 @@ impl XrayAssetSource for ArchiveAssetSource {
     false
   }
 
-  fn root_path(&self) -> &Path {
+  fn get_root_path(&self) -> &Path {
     &self.project.root
   }
 
@@ -123,7 +123,7 @@ impl XrayAssetSource for ArchiveAssetSource {
   }
 
   /// Answers from the volume's name table, so no entry is decompressed to learn its size.
-  fn size(&self, path: &str) -> Option<u64> {
+  fn get_size(&self, path: &str) -> Option<u64> {
     self
       .entries
       .get(path)
@@ -146,7 +146,7 @@ impl XrayAssetSource for ArchiveAssetSource {
     )))
   }
 
-  fn entries<'a>(&'a self, prefix: Option<&'a str>) -> Box<dyn Iterator<Item = String> + 'a> {
+  fn list_entries<'a>(&'a self, prefix: Option<&'a str>) -> Box<dyn Iterator<Item = String> + 'a> {
     Box::new(
       self
         .entries

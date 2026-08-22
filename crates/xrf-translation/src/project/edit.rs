@@ -49,7 +49,7 @@ pub fn find_unwritable_character(
   let candidates: Vec<(String, XRayEncoding)> = if language == LANGUAGE_NEUTRAL {
     TranslationLanguage::get_all()
       .into_iter()
-      .map(|known| (known.to_string(), known.get_language_encoder()))
+      .map(|known| (known.to_string(), known.new_language_encoder()))
       .collect()
   } else {
     match descriptor.encodings.get(language) {

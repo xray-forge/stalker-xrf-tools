@@ -96,7 +96,8 @@ mod tests {
   use xrf_chunk::{ChunkReadWrite, ChunkWriter, XRayByteOrder};
   use xrf_error::XrfResult;
   use xrf_test_utils::utils::{
-    get_relative_test_sample_file_path, open_generated_test_resource_as_file, overwrite_generated_test_resource_as_file,
+    build_relative_test_sample_file_path, open_generated_test_resource_as_file,
+    overwrite_generated_test_resource_as_file,
   };
 
   use crate::data::generic::vector_3d::Vector3d;
@@ -123,11 +124,11 @@ mod tests {
     assert_eq!(writer.bytes_written() as u64, LevelCformHeader::SIZE);
 
     writer.flush_raw_into(&mut overwrite_generated_test_resource_as_file(
-      &get_relative_test_sample_file_path(file!(), &filename),
+      &build_relative_test_sample_file_path(file!(), &filename),
     )?)?;
 
     let read: LevelCformFile = LevelCformFile::read_from_file::<XRayByteOrder>(open_generated_test_resource_as_file(
-      &get_relative_test_sample_file_path(file!(), &filename),
+      &build_relative_test_sample_file_path(file!(), &filename),
     )?)?;
 
     assert_eq!(read.header, original);
@@ -146,12 +147,12 @@ mod tests {
 
     bytes.truncate(LevelCformHeader::SIZE as usize - 1);
 
-    overwrite_generated_test_resource_as_file(&get_relative_test_sample_file_path(file!(), &filename))?
+    overwrite_generated_test_resource_as_file(&build_relative_test_sample_file_path(file!(), &filename))?
       .write_all(&bytes)?;
 
     assert!(
       LevelCformFile::read_from_file::<XRayByteOrder>(open_generated_test_resource_as_file(
-        &get_relative_test_sample_file_path(file!(), &filename)
+        &build_relative_test_sample_file_path(file!(), &filename)
       )?)
       .is_err(),
       "Expected truncated collision form header to fail reading"

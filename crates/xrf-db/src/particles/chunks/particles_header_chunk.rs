@@ -109,8 +109,8 @@ mod tests {
   use xrf_test_utils::FileSlice;
   use xrf_test_utils::file::read_file_as_string;
   use xrf_test_utils::utils::{
-    get_absolute_generated_test_resource_path, get_relative_test_sample_file_directory,
-    get_relative_test_sample_file_path, open_generated_test_resource_as_slice,
+    build_absolute_generated_test_resource_path, build_relative_test_sample_file_directory,
+    build_relative_test_sample_file_path, open_generated_test_resource_as_slice,
     overwrite_generated_test_resource_as_file,
   };
 
@@ -119,7 +119,7 @@ mod tests {
 
   #[test]
   fn test_read_write_incorrect() -> XrfResult {
-    let filename: String = get_relative_test_sample_file_path(file!(), "read_write_incorrect.chunk");
+    let filename: String = build_relative_test_sample_file_path(file!(), "read_write_incorrect.chunk");
 
     let original: ParticlesHeaderChunk = ParticlesHeaderChunk { version: 2 };
 
@@ -154,7 +154,7 @@ mod tests {
 
   #[test]
   fn test_read_write() -> XrfResult {
-    let filename: String = get_relative_test_sample_file_path(file!(), "read_write.chunk");
+    let filename: String = build_relative_test_sample_file_path(file!(), "read_write.chunk");
 
     let original: ParticlesHeaderChunk = ParticlesHeaderChunk { version: 1 };
 
@@ -187,7 +187,7 @@ mod tests {
     let original: ParticlesHeaderChunk = ParticlesHeaderChunk { version: 1 };
 
     let export_directory: &Path =
-      &get_absolute_generated_test_resource_path(&get_relative_test_sample_file_directory(file!()));
+      &build_absolute_generated_test_resource_path(&build_relative_test_sample_file_directory(file!()));
     std::fs::create_dir_all(export_directory)?;
 
     original.export(&export_directory)?;
@@ -203,7 +203,7 @@ mod tests {
   fn test_serialize_deserialize() -> XrfResult {
     let original: ParticlesHeaderChunk = ParticlesHeaderChunk { version: 1 };
 
-    let mut file: File = overwrite_generated_test_resource_as_file(&get_relative_test_sample_file_path(
+    let mut file: File = overwrite_generated_test_resource_as_file(&build_relative_test_sample_file_path(
       file!(),
       "serialize_deserialize.json",
     ))?;

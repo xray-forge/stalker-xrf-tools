@@ -10,7 +10,7 @@ use crate::{XrayAssetContainer, XrayAssetSource, XrayMountKind, XrayPathCollisio
 
 /// A directory of loose files, indexed once at mount time.
 ///
-/// Two files inside it normalizing to one logical path are reported through [`XrayAssetSource::collisions`] rather than
+/// Two files inside it normalizing to one logical path are reported through [`XrayAssetSource::get_collisions`] rather than
 /// refused, since only shadowing *between* mounts has a priority order to appeal to.
 #[derive(Debug)]
 pub struct XrayDirectorySource {
@@ -47,11 +47,11 @@ impl XrayDirectorySource {
 }
 
 impl XrayAssetSource for XrayDirectorySource {
-  fn label(&self) -> &str {
+  fn get_label(&self) -> &str {
     &self.label
   }
 
-  fn kind(&self) -> XrayMountKind {
+  fn get_kind(&self) -> XrayMountKind {
     XrayMountKind::Directory
   }
 
@@ -59,7 +59,7 @@ impl XrayAssetSource for XrayDirectorySource {
     true
   }
 
-  fn root_path(&self) -> &Path {
+  fn get_root_path(&self) -> &Path {
     self.index.root()
   }
 
@@ -84,7 +84,7 @@ impl XrayAssetSource for XrayDirectorySource {
       // Absent, not unreadable: the distinction lets a caller fall back rather than fail.
       return Err(XrfError::new_not_found_error(format!(
         "no asset '{path}' under root {}",
-        self.root_path().display()
+        self.get_root_path().display()
       )));
     };
 
@@ -101,7 +101,7 @@ impl XrayAssetSource for XrayDirectorySource {
     let Some(absolute) = self.index.find(path).ok().flatten().map(|asset| asset.absolute_path()) else {
       return Err(XrfError::new_asset_error(format!(
         "no asset '{path}' under root {} to write",
-        self.root_path().display()
+        self.get_root_path().display()
       )));
     };
 
@@ -120,11 +120,11 @@ impl XrayAssetSource for XrayDirectorySource {
     if self.contains(path) {
       return Err(XrfError::new_asset_error(format!(
         "asset '{path}' already exists under root {}",
-        self.root_path().display()
+        self.get_root_path().display()
       )));
     }
 
-    let absolute: PathBuf = self.root_path().join(to_host_relative(path));
+    let absolute: PathBuf = self.get_root_path().join(to_host_relative(path));
 
     if let Some(parent) = absolute.parent() {
       fs::create_dir_all(parent)
@@ -135,7 +135,7 @@ impl XrayAssetSource for XrayDirectorySource {
       .map_err(|error| XrfError::new_asset_error(format!("failed to create '{}': {error}", absolute.display())))
   }
 
-  fn entries<'a>(&'a self, prefix: Option<&'a str>) -> Box<dyn Iterator<Item = String> + 'a> {
+  fn list_entries<'a>(&'a self, prefix: Option<&'a str>) -> Box<dyn Iterator<Item = String> + 'a> {
     Box::new(
       self
         .index
@@ -145,7 +145,7 @@ impl XrayAssetSource for XrayDirectorySource {
     )
   }
 
-  fn size(&self, path: &str) -> Option<u64> {
+  fn get_size(&self, path: &str) -> Option<u64> {
     self
       .index
       .find(path)
@@ -155,7 +155,7 @@ impl XrayAssetSource for XrayDirectorySource {
       .map(|metadata| metadata.len())
   }
 
-  fn collisions(&self) -> &[XrayPathCollision] {
+  fn get_collisions(&self) -> &[XrayPathCollision] {
     self.index.collisions()
   }
 }
@@ -165,13 +165,13 @@ mod tests {
   use std::fs;
   use std::path::PathBuf;
 
-  use xrf_test_utils::utils::get_absolute_generated_test_resource_path;
+  use xrf_test_utils::utils::build_absolute_generated_test_resource_path;
 
   use crate::XrayAssetSource;
   use crate::source::{XrayDirectorySource, XrayMountKind};
 
   fn source(name: &str, files: &[&str]) -> XrayDirectorySource {
-    let root: PathBuf = get_absolute_generated_test_resource_path(&format!("xray_directory_source/{name}"));
+    let root: PathBuf = build_absolute_generated_test_resource_path(&format!("xray_directory_source/{name}"));
 
     let _ = fs::remove_dir_all(&root);
 
@@ -189,7 +189,7 @@ mod tests {
   fn reports_itself_as_a_writable_directory() {
     let source: XrayDirectorySource = source("writable", &["textures/wpn/wpn_ak74.dds"]);
 
-    assert_eq!(source.kind(), XrayMountKind::Directory);
+    assert_eq!(source.get_kind(), XrayMountKind::Directory);
     assert!(source.is_writable());
   }
 
@@ -232,8 +232,8 @@ mod tests {
       ],
     );
 
-    let all: Vec<String> = source.entries(None).collect();
-    let configs: Vec<String> = source.entries(Some("configs")).collect();
+    let all: Vec<String> = source.list_entries(None).collect();
+    let configs: Vec<String> = source.list_entries(Some("configs")).collect();
 
     assert_eq!(all.len(), 3);
     assert_eq!(configs.len(), 2);
@@ -245,6 +245,6 @@ mod tests {
     // `configs_backup` must not be swept up by a `configs` prefix, or a scoped operation would touch a sibling tree.
     let source: XrayDirectorySource = source("boundaries", &["configs/system.ltx", "configs_backup/system.ltx"]);
 
-    assert_eq!(source.entries(Some("configs")).count(), 1);
+    assert_eq!(source.list_entries(Some("configs")).count(), 1);
   }
 }

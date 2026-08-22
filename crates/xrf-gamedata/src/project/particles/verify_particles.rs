@@ -20,7 +20,7 @@ impl GamedataProject {
     let particle_paths: Vec<String> = self
       .entries_with_suffix("particles.xr")?
       .into_iter()
-      .map(|location| location.logical_path().to_string())
+      .map(|location| location.get_logical_path().to_string())
       .collect();
 
     let checked_particle_files_count: u32 = u32::try_from(particle_paths.len())
@@ -98,7 +98,7 @@ impl GamedataProject {
           .dds_texture(texture_relative_path)
           .ok()
           .flatten()
-          .map(|asset| asset.logical_path().to_string())
+          .map(|asset| asset.get_logical_path().to_string())
         {
           match self.verify_texture_by_path(options, &texture) {
             Ok(result) => {

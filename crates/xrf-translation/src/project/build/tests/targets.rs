@@ -2,7 +2,7 @@ use std::fs;
 use std::path::PathBuf;
 
 use xrf_error::XrfResult;
-use xrf_test_utils::utils::{get_absolute_generated_test_resource_path, write_generated_test_resource};
+use xrf_test_utils::utils::{build_absolute_generated_test_resource_path, write_generated_test_resource};
 
 use crate::language::TranslationLanguage;
 use crate::project::build::options::ProjectBuildOptions;
@@ -24,8 +24,8 @@ fn options(path: PathBuf, output_dir: PathBuf) -> ProjectBuildOptions {
 #[test]
 fn directory_builds_preserve_relative_source_paths() -> XrfResult {
   let test_root: &str = "build_targets/relative_paths";
-  let source_root = get_absolute_generated_test_resource_path(&format!("{test_root}/source"));
-  let output_root = get_absolute_generated_test_resource_path(&format!("{test_root}/output"));
+  let source_root = build_absolute_generated_test_resource_path(&format!("{test_root}/source"));
+  let output_root = build_absolute_generated_test_resource_path(&format!("{test_root}/output"));
 
   if output_root.exists() {
     fs::remove_dir_all(&output_root)?;
@@ -47,8 +47,8 @@ fn directory_builds_preserve_relative_source_paths() -> XrfResult {
 #[test]
 fn directory_builds_reject_colliding_json_and_xml_targets() -> XrfResult {
   let test_root: &str = "build_targets/colliding";
-  let source_root = get_absolute_generated_test_resource_path(&format!("{test_root}/source"));
-  let output_root = get_absolute_generated_test_resource_path(&format!("{test_root}/output"));
+  let source_root = build_absolute_generated_test_resource_path(&format!("{test_root}/source"));
+  let output_root = build_absolute_generated_test_resource_path(&format!("{test_root}/output"));
 
   write_generated_test_resource(&format!("{test_root}/source/common.json"), SOURCE_JSON)?;
   write_generated_test_resource(
@@ -66,7 +66,7 @@ fn directory_builds_reject_colliding_json_and_xml_targets() -> XrfResult {
 #[test]
 fn directory_builds_reject_output_inside_the_source_tree() -> XrfResult {
   let test_root: &str = "build_targets/output_inside_source";
-  let source_root = get_absolute_generated_test_resource_path(&format!("{test_root}/source"));
+  let source_root = build_absolute_generated_test_resource_path(&format!("{test_root}/source"));
 
   write_generated_test_resource(&format!("{test_root}/source/common.json"), SOURCE_JSON)?;
 

@@ -33,7 +33,7 @@ impl<'a> LevelReconciliationVerifier<'a> {
       self
         .project
         .vfs()
-        .children(self.project.scope(), LEVELS_DIRECTORY)?
+        .list_children(self.project.scope(), LEVELS_DIRECTORY)?
         .directories
         .into_iter()
         .collect(),
@@ -95,7 +95,7 @@ impl<'a> LevelReconciliationVerifier<'a> {
       (MULTIPLAYER_MAPS_FILE, MULTIPLAYER_MAPS_SECTION),
     ] {
       for location in self.project.entries_with_suffix(file)? {
-        let path: &str = location.logical_path().as_str();
+        let path: &str = location.get_logical_path().as_str();
 
         // Malformed configurations are reported by the ltx check, not this one.
         let Ok(ltx) = Ltx::read_from_vfs_full(self.project.vfs(), self.project.scope(), path) else {

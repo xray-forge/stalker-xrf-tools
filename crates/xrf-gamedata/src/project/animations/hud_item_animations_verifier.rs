@@ -155,7 +155,7 @@ impl<'a> HudItemAnimationsVerifier<'a> {
       .project
       .vfs()
       .ogf(&self.project.scope, visual)?
-      .map(|location| location.logical_path().to_string())
+      .map(|location| location.get_logical_path().to_string())
     else {
       return Err(XrfError::new_not_found_error(format!(
         "Visual '{visual}' was not found"
@@ -199,7 +199,7 @@ impl<'a> HudItemAnimationsVerifier<'a> {
         .resolve_all(&self.project.scope, AssetType::Omf, motion_ref)?
       {
         if location.is_type(AssetType::Omf) {
-          assets.insert(location.logical_path().to_string());
+          assets.insert(location.get_logical_path().to_string());
         }
       }
     }

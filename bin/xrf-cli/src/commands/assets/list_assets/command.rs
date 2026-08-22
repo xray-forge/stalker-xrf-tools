@@ -145,8 +145,8 @@ impl ListAssetsCommand {
       xrf_output::info!(
         output,
         "  {} [{}]",
-        location.logical_path(),
-        location.describe_container()
+        location.get_logical_path(),
+        location.format_container()
       );
     }
 
@@ -233,8 +233,8 @@ impl ListAssetsCommand {
       xrf_output::warning!(
         output,
         "  {} hidden in [{}]",
-        location.logical_path(),
-        location.describe_container()
+        location.get_logical_path(),
+        location.format_container()
       );
     }
 

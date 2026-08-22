@@ -80,7 +80,7 @@ mod tests {
   use xrf_error::XrfResult;
   use xrf_test_utils::FileSlice;
   use xrf_test_utils::utils::{
-    get_relative_test_sample_file_path, open_generated_test_resource_as_slice,
+    build_relative_test_sample_file_path, open_generated_test_resource_as_slice,
     overwrite_generated_test_resource_as_file,
   };
 
@@ -89,7 +89,7 @@ mod tests {
   #[test]
   fn test_read_write_list() -> XrfResult {
     let mut writer: ChunkWriter = ChunkWriter::new();
-    let filename: String = get_relative_test_sample_file_path(file!(), "read_write_list.chunk");
+    let filename: String = build_relative_test_sample_file_path(file!(), "read_write_list.chunk");
 
     let original: Vec<OgfPart> = vec![
       OgfPart {

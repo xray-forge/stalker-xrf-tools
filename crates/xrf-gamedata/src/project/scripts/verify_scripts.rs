@@ -22,7 +22,7 @@ impl GamedataProject {
     let script_paths: Vec<String> = self
       .entries_of_type(AssetType::Script)
       .into_iter()
-      .map(|location| location.logical_path().to_string())
+      .map(|location| location.get_logical_path().to_string())
       .filter(|path| is_runtime_script(path))
       .collect();
 
@@ -38,7 +38,7 @@ impl GamedataProject {
           .find(relative_path)
           .ok()
           .flatten()
-          .map(|location| location.logical_path().to_string())
+          .map(|location| location.get_logical_path().to_string())
         else {
           xrf_output::info!(options.output, "Script path not found: {relative_path}");
 

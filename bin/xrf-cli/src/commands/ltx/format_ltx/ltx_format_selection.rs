@@ -58,14 +58,14 @@ impl LtxFormatSelection {
     declined: &mut Vec<String>,
     visited: &mut HashSet<PathBuf>,
   ) -> XrfResult<()> {
-    for location in vfs.entries(&XrayLookupScope::all()) {
-      if !location.logical_path().has_extension(&format!(".{LTX_EXTENSION}")) {
+    for location in vfs.list_entries(&XrayLookupScope::all()) {
+      if !location.get_logical_path().has_extension(&format!(".{LTX_EXTENSION}")) {
         continue;
       }
 
-      match location.container() {
+      match location.get_container() {
         XrayAssetContainer::Directory { .. } => {
-          if let Some(physical) = location.physical_path()
+          if let Some(physical) = location.to_physical_path()
             && visited.insert(physical.clone())
           {
             files.push(physical);
@@ -117,6 +117,6 @@ impl LtxFormatSelection {
   }
 
   fn describe_declined(location: &XrayAsset) -> String {
-    format!("{} in {}", location.logical_path(), location.describe_container())
+    format!("{} in {}", location.get_logical_path(), location.format_container())
   }
 }

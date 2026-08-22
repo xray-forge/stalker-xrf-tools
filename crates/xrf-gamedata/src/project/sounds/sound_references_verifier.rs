@@ -91,14 +91,14 @@ impl<'a> SoundReferencesVerifier<'a> {
     // Enumerated and read through the VFS, so an installation's archived UI XML is inspected too. Reported by the path a
     // person can act on, which for an archived entry is its logical path.
     for location in self.project.entries() {
-      let logical_path: &XrayPath = location.logical_path();
+      let logical_path: &XrayPath = location.get_logical_path();
 
       if !logical_path.is_under(CONFIGS_DIRECTORY).unwrap_or(false) || !logical_path.has_extension(".xml") {
         continue;
       }
 
       let path: PathBuf = location
-        .physical_path()
+        .to_physical_path()
         .unwrap_or_else(|| PathBuf::from(logical_path.as_str()));
 
       let contents: Vec<u8> = match self.project.read_asset(logical_path.as_str()) {

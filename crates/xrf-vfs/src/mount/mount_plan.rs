@@ -9,13 +9,13 @@ use crate::{XrayMountId, XrayMountKind, XrayMountPlan, XrayPlannedMount, XraySki
 /// Planning is a decision about the filesystem; this is the construction of the sources it named.
 ///
 /// A source that fails to open is omitted rather than fatal, so one corrupt volume does not stop a tool from reading the
-/// rest of an installation. Each omission is recorded on the VFS through [`XrayVfs::skipped_mounts`] — reporting it is
+/// rest of an installation. Each omission is recorded on the VFS through [`XrayVfs::get_skipped_mounts`] — reporting it is
 /// the caller's job, because a check enumerating a mount that never opened would otherwise present a read failure as
 /// missing content. The returned mount IDs preserve plan order.
 pub fn mount_plan(vfs: &mut XrayVfs, plan: &XrayMountPlan) -> XrfResult<Vec<XrayMountId>> {
   let mut mounted: Vec<XrayMountId> = Vec::with_capacity(plan.len());
 
-  for planned in plan.mounts() {
+  for planned in plan.get_mounts() {
     match mount_one(vfs, planned) {
       Ok(id) => mounted.push(id),
       Err(error) => {

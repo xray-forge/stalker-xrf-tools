@@ -23,7 +23,7 @@ impl GamedataProject {
     let texture_paths: Vec<String> = self
       .entries_of_type(AssetType::Dds)
       .into_iter()
-      .map(|location| location.logical_path().to_string())
+      .map(|location| location.get_logical_path().to_string())
       .collect();
 
     let checked_textures_count: u32 = u32::try_from(texture_paths.len())
@@ -107,7 +107,7 @@ impl GamedataProject {
     let descriptor_paths: Vec<String> = self
       .entries_of_type(AssetType::Thm)
       .into_iter()
-      .map(|location| location.logical_path().to_string())
+      .map(|location| location.get_logical_path().to_string())
       .collect();
 
     let declarations: Vec<(String, String)> = descriptor_paths
