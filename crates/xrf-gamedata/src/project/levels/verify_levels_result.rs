@@ -27,11 +27,11 @@ impl GamedataLevelsVerificationResult {
 }
 
 impl GamedataCheckResult for GamedataLevelsVerificationResult {
-  fn duration(&self) -> Option<Duration> {
+  fn get_duration(&self) -> Option<Duration> {
     Some(self.duration)
   }
 
-  fn status(&self) -> GamedataVerificationStatus {
+  fn get_status(&self) -> GamedataVerificationStatus {
     if !self.has_roster {
       GamedataVerificationStatus::Skipped
     } else {
@@ -39,7 +39,7 @@ impl GamedataCheckResult for GamedataLevelsVerificationResult {
     }
   }
 
-  fn failure_message(&self) -> String {
+  fn get_failure_message(&self) -> String {
     if !self.has_roster {
       return String::from("No game graph found, level roster is unknown");
     }
@@ -53,7 +53,7 @@ impl GamedataCheckResult for GamedataLevelsVerificationResult {
     )
   }
 
-  fn findings(&self) -> &[Finding] {
+  fn get_findings(&self) -> &[Finding] {
     &self.findings
   }
 }
@@ -73,8 +73,11 @@ mod tests {
   fn skips_verification_without_a_game_graph() {
     let result: GamedataLevelsVerificationResult = GamedataLevelsVerificationResult::skipped(Duration::ZERO);
 
-    assert_eq!(result.status(), GamedataVerificationStatus::Skipped);
-    assert_eq!(result.failure_message(), "No game graph found, level roster is unknown");
+    assert_eq!(result.get_status(), GamedataVerificationStatus::Skipped);
+    assert_eq!(
+      result.get_failure_message(),
+      "No game graph found, level roster is unknown"
+    );
   }
 
   #[test]
@@ -87,9 +90,9 @@ mod tests {
       ..Default::default()
     };
 
-    assert_eq!(result.status(), GamedataVerificationStatus::Passed);
+    assert_eq!(result.get_status(), GamedataVerificationStatus::Passed);
     assert_eq!(
-      result.failure_message(),
+      result.get_failure_message(),
       "5/5 level bundles valid; 1204/1204 level shader references valid"
     );
   }
@@ -114,10 +117,10 @@ mod tests {
       }),
     );
 
-    assert_eq!(report.status(), GamedataVerificationStatus::Failed);
-    assert_eq!(report.checks()[0].findings(), [finding]);
+    assert_eq!(report.get_status(), GamedataVerificationStatus::Failed);
+    assert_eq!(report.get_checks()[0].get_findings(), [finding]);
     assert_eq!(
-      report.checks()[0].summary(),
+      report.get_checks()[0].get_summary(),
       "0/0 level bundles valid; 0/0 level shader references valid"
     );
   }

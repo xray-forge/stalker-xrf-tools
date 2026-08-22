@@ -40,7 +40,7 @@ fn verify(project: &GamedataProject) -> GamedataSoundsVerificationResult {
 #[test]
 fn resolves_a_sound_reference_declared_in_a_config() {
   let (root, project) = open_project("resolved", "[wpn_ak74]\nsnd_shoot = weapons\\ak74_shot\n");
-  let message: String = verify(&project).failure_message();
+  let message: String = verify(&project).get_failure_message();
 
   assert!(
     message.contains("1/1 sound references valid"),
@@ -53,7 +53,7 @@ fn resolves_a_sound_reference_declared_in_a_config() {
 #[test]
 fn reports_a_config_reference_with_no_sound_file() {
   let (root, project) = open_project("missing", "[wpn_ak74]\nsnd_shoot = weapons\\missing\n");
-  let message: String = verify(&project).failure_message();
+  let message: String = verify(&project).get_failure_message();
 
   assert!(
     message.contains("0/1 sound references valid"),

@@ -54,15 +54,15 @@ impl<'a> GamedataVerificationReportWriter<'a> {
   fn report_output(&self) -> CommandResult<GamedataVerificationReportOutput> {
     let checks: Vec<GamedataVerificationCheckReportOutput> = self
       .report
-      .checks()
+      .get_checks()
       .iter()
-      .map(|gamedata_check| self.check_report_output(gamedata_check, gamedata_check.report()))
+      .map(|gamedata_check| self.check_report_output(gamedata_check, gamedata_check.get_report()))
       .collect();
 
     Ok(GamedataVerificationReportOutput {
       checks,
-      duration_ms: xrf_utils::duration_to_millis(self.report.duration()),
-      status: self.report.status().to_string(),
+      duration_ms: xrf_utils::duration_to_millis(self.report.get_duration()),
+      status: self.report.get_status().to_string(),
     })
   }
 
@@ -81,7 +81,7 @@ impl<'a> GamedataVerificationReportWriter<'a> {
       duration_ms: report.duration().map(xrf_utils::duration_to_millis),
       findings,
       status: report.status().to_string(),
-      summary: gamedata_report.summary().to_string(),
+      summary: gamedata_report.get_summary().to_string(),
       verification_type: report.id().to_string(),
     }
   }
@@ -125,19 +125,19 @@ mod tests {
   }
 
   impl GamedataCheckResult for TestCheckResult {
-    fn duration(&self) -> Option<Duration> {
+    fn get_duration(&self) -> Option<Duration> {
       Some(self.duration)
     }
 
-    fn status(&self) -> GamedataVerificationStatus {
+    fn get_status(&self) -> GamedataVerificationStatus {
       GamedataVerificationStatus::Failed
     }
 
-    fn failure_message(&self) -> String {
+    fn get_failure_message(&self) -> String {
       String::from("2/2 textures are invalid")
     }
 
-    fn findings(&self) -> &[Finding] {
+    fn get_findings(&self) -> &[Finding] {
       &self.findings
     }
   }

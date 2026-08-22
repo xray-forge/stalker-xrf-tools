@@ -39,7 +39,7 @@ impl<'a> MeshesVerifier<'a> {
       self.options.output,
       "Verified gamedata meshes in {} sec, {}",
       result.duration.as_secs_f64(),
-      result.failure_message()
+      result.get_failure_message()
     );
 
     Ok(result)

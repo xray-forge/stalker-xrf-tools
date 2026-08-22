@@ -35,11 +35,11 @@ impl GamedataVerificationReport {
     }
   }
 
-  pub fn checks(&self) -> &[GamedataVerificationCheckReport] {
+  pub fn get_checks(&self) -> &[GamedataVerificationCheckReport] {
     &self.checks
   }
 
-  pub const fn duration(&self) -> Duration {
+  pub const fn get_duration(&self) -> Duration {
     self.duration
   }
 
@@ -61,12 +61,12 @@ impl GamedataVerificationReport {
     ));
   }
 
-  pub fn status(&self) -> GamedataVerificationStatus {
-    GamedataVerificationStatus::aggregate(self.checks.iter().map(|it| it.status()))
+  pub fn get_status(&self) -> GamedataVerificationStatus {
+    GamedataVerificationStatus::aggregate(self.checks.iter().map(|it| it.get_status()))
   }
 
   pub fn is_valid(&self) -> bool {
-    self.status() == GamedataVerificationStatus::Passed
+    self.get_status() == GamedataVerificationStatus::Passed
   }
 
   pub fn get_failure_messages(&self) -> Vec<String> {
@@ -76,7 +76,7 @@ impl GamedataVerificationReport {
   pub fn get_failure_reports(&self) -> impl Iterator<Item = &GamedataVerificationCheckReport> {
     self.checks.iter().filter(|it| {
       !matches!(
-        it.status(),
+        it.get_status(),
         GamedataVerificationStatus::Passed | GamedataVerificationStatus::Skipped
       )
     })
@@ -93,27 +93,27 @@ impl GamedataVerificationReport {
 }
 
 impl GamedataVerificationCheckReport {
-  pub fn duration(&self) -> Option<Duration> {
+  pub fn get_duration(&self) -> Option<Duration> {
     self.report.duration()
   }
 
-  pub fn findings(&self) -> &[Finding] {
+  pub fn get_findings(&self) -> &[Finding] {
     self.report.findings()
   }
 
-  pub const fn status(&self) -> GamedataVerificationStatus {
+  pub const fn get_status(&self) -> GamedataVerificationStatus {
     self.report.status()
   }
 
-  pub fn summary(&self) -> &str {
+  pub fn get_summary(&self) -> &str {
     &self.summary
   }
 
-  pub const fn verification_type(&self) -> GamedataVerificationType {
+  pub const fn get_verification_type(&self) -> GamedataVerificationType {
     self.verification_type
   }
 
-  pub fn report(&self) -> &CheckReport {
+  pub fn get_report(&self) -> &CheckReport {
     &self.report
   }
 
@@ -125,11 +125,11 @@ impl GamedataVerificationCheckReport {
       Ok(result) => Self {
         report: CheckReport::new(
           Self::check_id(verification_type),
-          result.status(),
-          result.duration(),
-          result.findings().to_vec(),
+          result.get_status(),
+          result.get_duration(),
+          result.get_findings().to_vec(),
         ),
-        summary: result.failure_message(),
+        summary: result.get_failure_message(),
         verification_type,
       },
       Err(error) => Self {
@@ -171,15 +171,15 @@ mod tests {
   }
 
   impl GamedataCheckResult for TestCheckResult {
-    fn status(&self) -> GamedataVerificationStatus {
+    fn get_status(&self) -> GamedataVerificationStatus {
       self.status
     }
 
-    fn failure_message(&self) -> String {
+    fn get_failure_message(&self) -> String {
       self.summary.clone()
     }
 
-    fn findings(&self) -> &[Finding] {
+    fn get_findings(&self) -> &[Finding] {
       &self.findings
     }
   }
@@ -188,7 +188,7 @@ mod tests {
   fn empty_verification_result_is_skipped_and_not_valid() {
     let result = GamedataVerificationReport::default();
 
-    assert_eq!(result.status(), GamedataVerificationStatus::Skipped);
+    assert_eq!(result.get_status(), GamedataVerificationStatus::Skipped);
     assert!(!result.is_valid());
   }
 
@@ -209,13 +209,13 @@ mod tests {
       }),
     );
 
-    assert_eq!(result.status(), GamedataVerificationStatus::Failed);
+    assert_eq!(result.get_status(), GamedataVerificationStatus::Failed);
     assert_eq!(
       result.get_failure_messages(),
       vec![String::from("1/1 scripts are invalid")]
     );
     assert_eq!(
-      result.checks()[0].findings(),
+      result.get_checks()[0].get_findings(),
       vec![GamedataFindingFactory::for_asset(
         GamedataVerificationRule::ScriptsSyntax,
         "scripts/invalid.script",
@@ -233,13 +233,13 @@ mod tests {
       Err(XrfError::new_unexpected_error("boom")),
     );
 
-    assert_eq!(result.status(), GamedataVerificationStatus::Error);
+    assert_eq!(result.get_status(), GamedataVerificationStatus::Error);
     assert_eq!(
       result.get_failure_messages(),
       vec![String::from("Check failed (animations): Unexpected error: boom")]
     );
     assert_eq!(
-      result.checks()[0].findings(),
+      result.get_checks()[0].get_findings(),
       vec![GamedataFindingFactory::without_asset(
         GamedataVerificationRule::CheckExecution,
         "Unexpected error: boom",

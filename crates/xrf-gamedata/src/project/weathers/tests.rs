@@ -152,8 +152,8 @@ fn weather_parse_failure_makes_the_check_fail() {
 
   assert_eq!(result.checked_weather_files_count, 2);
   assert_eq!(result.invalid_weather_files_count, 1);
-  assert_eq!(result.status(), GamedataVerificationStatus::Failed);
-  assert_eq!(result.failure_message(), "1/2 weather files valid");
+  assert_eq!(result.get_status(), GamedataVerificationStatus::Failed);
+  assert_eq!(result.get_failure_message(), "1/2 weather files valid");
 }
 
 #[test]
@@ -176,7 +176,7 @@ fn out_of_range_weather_time_makes_the_check_fail() {
 
   assert_eq!(result.checked_weather_files_count, 1);
   assert_eq!(result.invalid_weather_files_count, 1);
-  assert_eq!(result.status(), GamedataVerificationStatus::Failed);
+  assert_eq!(result.get_status(), GamedataVerificationStatus::Failed);
 }
 
 #[test]
@@ -198,7 +198,7 @@ fn noncanonical_weather_time_makes_the_check_fail() {
   fs::remove_dir_all(&root).unwrap();
 
   assert_eq!(result.invalid_weather_files_count, 1);
-  assert_eq!(result.status(), GamedataVerificationStatus::Failed);
+  assert_eq!(result.get_status(), GamedataVerificationStatus::Failed);
 }
 
 #[test]
@@ -216,7 +216,7 @@ fn weather_requires_at_least_two_time_sections() {
   fs::remove_dir_all(&root).unwrap();
 
   assert_eq!(result.invalid_weather_files_count, 1);
-  assert_eq!(result.status(), GamedataVerificationStatus::Failed);
+  assert_eq!(result.get_status(), GamedataVerificationStatus::Failed);
 }
 
 #[test]
@@ -238,7 +238,7 @@ fn missing_ambient_reference_makes_the_check_fail() {
   fs::remove_dir_all(&root).unwrap();
 
   assert_eq!(result.invalid_weather_files_count, 1);
-  assert_eq!(result.status(), GamedataVerificationStatus::Failed);
+  assert_eq!(result.get_status(), GamedataVerificationStatus::Failed);
 }
 
 #[test]
@@ -260,7 +260,7 @@ fn missing_sun_reference_makes_the_check_fail() {
   fs::remove_dir_all(&root).unwrap();
 
   assert_eq!(result.invalid_weather_files_count, 1);
-  assert_eq!(result.status(), GamedataVerificationStatus::Failed);
+  assert_eq!(result.get_status(), GamedataVerificationStatus::Failed);
 }
 
 #[test]
@@ -285,7 +285,7 @@ fn missing_thunderbolt_collection_makes_the_check_fail() {
   fs::remove_dir_all(&root).unwrap();
 
   assert_eq!(result.invalid_weather_files_count, 1);
-  assert_eq!(result.status(), GamedataVerificationStatus::Failed);
+  assert_eq!(result.get_status(), GamedataVerificationStatus::Failed);
 }
 
 #[test]
@@ -308,7 +308,7 @@ fn missing_small_sky_texture_makes_the_check_fail() {
   fs::remove_dir_all(&root).unwrap();
 
   assert_eq!(result.invalid_weather_files_count, 1);
-  assert_eq!(result.status(), GamedataVerificationStatus::Failed);
+  assert_eq!(result.get_status(), GamedataVerificationStatus::Failed);
 }
 
 #[test]
@@ -331,7 +331,7 @@ fn missing_cloud_texture_makes_the_check_fail() {
   fs::remove_dir_all(&root).unwrap();
 
   assert_eq!(result.invalid_weather_files_count, 1);
-  assert_eq!(result.status(), GamedataVerificationStatus::Failed);
+  assert_eq!(result.get_status(), GamedataVerificationStatus::Failed);
 }
 
 #[test]
@@ -353,7 +353,7 @@ fn missing_required_weather_field_makes_the_check_fail() {
   fs::remove_dir_all(&root).unwrap();
 
   assert_eq!(result.invalid_weather_files_count, 1);
-  assert_eq!(result.status(), GamedataVerificationStatus::Failed);
+  assert_eq!(result.get_status(), GamedataVerificationStatus::Failed);
   assert!(
     result
       .findings
@@ -385,7 +385,7 @@ fn malformed_weather_values_make_the_check_fail() {
     fs::remove_dir_all(&root).unwrap();
 
     assert_eq!(result.invalid_weather_files_count, 1);
-    assert_eq!(result.status(), GamedataVerificationStatus::Failed);
+    assert_eq!(result.get_status(), GamedataVerificationStatus::Failed);
   }
 }
 
@@ -408,7 +408,7 @@ fn incorrect_weather_scheme_marker_makes_the_check_fail() {
   fs::remove_dir_all(&root).unwrap();
 
   assert_eq!(result.invalid_weather_files_count, 1);
-  assert_eq!(result.status(), GamedataVerificationStatus::Failed);
+  assert_eq!(result.get_status(), GamedataVerificationStatus::Failed);
 }
 
 #[test]
@@ -430,7 +430,7 @@ fn negative_weather_distance_makes_the_check_fail() {
   fs::remove_dir_all(&root).unwrap();
 
   assert_eq!(result.invalid_weather_files_count, 1);
-  assert_eq!(result.status(), GamedataVerificationStatus::Failed);
+  assert_eq!(result.get_status(), GamedataVerificationStatus::Failed);
 }
 
 #[test]
@@ -453,7 +453,7 @@ fn thunderbolt_collection_with_missing_member_makes_the_check_fail() {
   fs::remove_dir_all(&root).unwrap();
 
   assert_eq!(result.invalid_weather_files_count, 1);
-  assert_eq!(result.status(), GamedataVerificationStatus::Failed);
+  assert_eq!(result.get_status(), GamedataVerificationStatus::Failed);
 }
 
 #[test]
@@ -476,7 +476,7 @@ fn valid_weather_cycle_passes() {
 
   assert_eq!(result.checked_weather_files_count, 1);
   assert_eq!(result.invalid_weather_files_count, 0);
-  assert_eq!(result.status(), GamedataVerificationStatus::Passed);
+  assert_eq!(result.get_status(), GamedataVerificationStatus::Passed);
 }
 
 #[test]
@@ -500,7 +500,7 @@ fn primary_weather_definitions_survive_unreadable_legacy_system_fallback() {
 
   assert_eq!(result.checked_weather_files_count, 1);
   assert_eq!(result.invalid_weather_files_count, 0);
-  assert_eq!(result.status(), GamedataVerificationStatus::Passed);
+  assert_eq!(result.get_status(), GamedataVerificationStatus::Passed);
 }
 
 #[test]
@@ -535,7 +535,7 @@ fn missing_primary_names_resolve_from_legacy_system_fallback() {
 
   assert_eq!(result.checked_weather_files_count, 1);
   assert_eq!(result.invalid_weather_files_count, 0);
-  assert_eq!(result.status(), GamedataVerificationStatus::Passed);
+  assert_eq!(result.get_status(), GamedataVerificationStatus::Passed);
 }
 
 #[test]
@@ -608,7 +608,7 @@ fn weather_cycle_allows_disabled_sun_and_thunderbolts() {
 
   assert_eq!(result.checked_weather_files_count, 1);
   assert_eq!(result.invalid_weather_files_count, 0);
-  assert_eq!(result.status(), GamedataVerificationStatus::Passed);
+  assert_eq!(result.get_status(), GamedataVerificationStatus::Passed);
 }
 
 #[test]
@@ -626,6 +626,6 @@ fn missing_weather_cycles_make_the_check_fail() {
 
   assert_eq!(result.checked_weather_files_count, 0);
   assert_eq!(result.invalid_weather_files_count, 0);
-  assert_eq!(result.status(), GamedataVerificationStatus::Failed);
-  assert_eq!(result.failure_message(), "No weather files found");
+  assert_eq!(result.get_status(), GamedataVerificationStatus::Failed);
+  assert_eq!(result.get_failure_message(), "No weather files found");
 }

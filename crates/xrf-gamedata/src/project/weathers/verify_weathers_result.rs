@@ -18,11 +18,11 @@ pub struct GamedataWeathersVerificationResult {
 }
 
 impl GamedataCheckResult for GamedataWeathersVerificationResult {
-  fn duration(&self) -> Option<Duration> {
+  fn get_duration(&self) -> Option<Duration> {
     Some(self.duration)
   }
 
-  fn status(&self) -> GamedataVerificationStatus {
+  fn get_status(&self) -> GamedataVerificationStatus {
     if self.checked_weather_files_count == 0 {
       GamedataVerificationStatus::Failed
     } else {
@@ -30,7 +30,7 @@ impl GamedataCheckResult for GamedataWeathersVerificationResult {
     }
   }
 
-  fn failure_message(&self) -> String {
+  fn get_failure_message(&self) -> String {
     if self.checked_weather_files_count == 0 {
       String::from("No weather files found")
     } else {
@@ -42,7 +42,7 @@ impl GamedataCheckResult for GamedataWeathersVerificationResult {
     }
   }
 
-  fn findings(&self) -> &[Finding] {
+  fn get_findings(&self) -> &[Finding] {
     &self.findings
   }
 }
@@ -63,15 +63,15 @@ mod tests {
       ..Default::default()
     };
 
-    assert_eq!(result.status(), GamedataVerificationStatus::Passed);
+    assert_eq!(result.get_status(), GamedataVerificationStatus::Passed);
   }
 
   #[test]
   fn missing_weather_files_fail() {
     let result: GamedataWeathersVerificationResult = GamedataWeathersVerificationResult::default();
 
-    assert_eq!(result.status(), GamedataVerificationStatus::Failed);
-    assert_eq!(result.failure_message(), "No weather files found");
+    assert_eq!(result.get_status(), GamedataVerificationStatus::Failed);
+    assert_eq!(result.get_failure_message(), "No weather files found");
   }
 
   #[test]
@@ -93,7 +93,7 @@ mod tests {
       }),
     );
 
-    assert_eq!(report.status(), GamedataVerificationStatus::Failed);
-    assert_eq!(report.checks()[0].findings(), [finding]);
+    assert_eq!(report.get_status(), GamedataVerificationStatus::Failed);
+    assert_eq!(report.get_checks()[0].get_findings(), [finding]);
   }
 }

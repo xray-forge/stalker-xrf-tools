@@ -11,15 +11,15 @@ pub struct GamedataWeaponVerificationResult {
 }
 
 impl GamedataCheckResult for GamedataWeaponVerificationResult {
-  fn duration(&self) -> Option<Duration> {
+  fn get_duration(&self) -> Option<Duration> {
     Some(self.duration)
   }
 
-  fn status(&self) -> GamedataVerificationStatus {
+  fn get_status(&self) -> GamedataVerificationStatus {
     GamedataVerificationStatus::from_is_valid(self.invalid_weapons_count == 0)
   }
 
-  fn failure_message(&self) -> String {
+  fn get_failure_message(&self) -> String {
     format!(
       "{}/{} weapons valid",
       self.checked_weapons_count - self.invalid_weapons_count,
@@ -27,7 +27,7 @@ impl GamedataCheckResult for GamedataWeaponVerificationResult {
     )
   }
 
-  fn findings(&self) -> &[Finding] {
+  fn get_findings(&self) -> &[Finding] {
     &self.findings
   }
 }
@@ -59,7 +59,7 @@ mod tests {
       }),
     );
 
-    assert_eq!(report.status(), GamedataVerificationStatus::Failed);
-    assert_eq!(report.checks()[0].findings(), [finding]);
+    assert_eq!(report.get_status(), GamedataVerificationStatus::Failed);
+    assert_eq!(report.get_checks()[0].get_findings(), [finding]);
   }
 }

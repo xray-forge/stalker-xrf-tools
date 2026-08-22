@@ -11,15 +11,15 @@ pub struct GamedataScriptsVerificationResult {
 }
 
 impl GamedataCheckResult for GamedataScriptsVerificationResult {
-  fn duration(&self) -> Option<Duration> {
+  fn get_duration(&self) -> Option<Duration> {
     Some(self.duration)
   }
 
-  fn status(&self) -> GamedataVerificationStatus {
+  fn get_status(&self) -> GamedataVerificationStatus {
     GamedataVerificationStatus::from_is_valid(self.invalid_scripts_count == 0)
   }
 
-  fn failure_message(&self) -> String {
+  fn get_failure_message(&self) -> String {
     format!(
       "{}/{} scripts valid",
       self.checked_scripts_count - self.invalid_scripts_count,
@@ -27,7 +27,7 @@ impl GamedataCheckResult for GamedataScriptsVerificationResult {
     )
   }
 
-  fn findings(&self) -> &[Finding] {
+  fn get_findings(&self) -> &[Finding] {
     &self.findings
   }
 }

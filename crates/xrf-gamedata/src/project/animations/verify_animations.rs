@@ -27,10 +27,10 @@ impl GamedataProject {
     let hud_motion_collisions: GamedataHudMotionCollisionsVerificationResult =
       HudMotionCollisionsVerifier::new(self, options).verify()?;
 
-    let mut findings: Vec<Finding> = player_hud_animations.findings().to_vec();
+    let mut findings: Vec<Finding> = player_hud_animations.get_findings().to_vec();
 
-    findings.extend(hud_item_animations.findings().to_vec());
-    findings.extend(hud_motion_collisions.findings().to_vec());
+    findings.extend(hud_item_animations.get_findings().to_vec());
+    findings.extend(hud_motion_collisions.get_findings().to_vec());
 
     let result: GamedataAnimationsVerificationResult = GamedataAnimationsVerificationResult {
       duration: started_at.elapsed(),
@@ -44,7 +44,7 @@ impl GamedataProject {
       options.output,
       "Verified gamedata animations in {} sec, {}",
       result.duration.as_secs_f64(),
-      result.failure_message()
+      result.get_failure_message()
     );
 
     Ok(result)

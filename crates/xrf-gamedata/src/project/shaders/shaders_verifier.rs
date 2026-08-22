@@ -51,7 +51,7 @@ impl<'a> ShadersVerifier<'a> {
       self.options.output,
       "Verified renderer shaders in {} sec, {}",
       result.duration.as_secs_f64(),
-      result.failure_message()
+      result.get_failure_message()
     );
 
     result
@@ -302,10 +302,10 @@ mod tests {
     let result = ShadersVerifier::new(&vfs, &scope, &options).verify();
 
     assert_eq!(
-      result.failure_message(),
+      result.get_failure_message(),
       "1 shader scripts and 2 shader sources checked, 0 problems"
     );
-    assert!(result.findings().is_empty());
+    assert!(result.get_findings().is_empty());
 
     fs::remove_dir_all(root)?;
 
@@ -329,9 +329,9 @@ mod tests {
     let (vfs, scope) = mount(&root)?;
     let result = ShadersVerifier::new(&vfs, &scope, &options).verify();
 
-    assert!(result.findings().is_empty());
+    assert!(result.get_findings().is_empty());
     assert_eq!(
-      result.failure_message(),
+      result.get_failure_message(),
       "1 shader scripts and 0 shader sources checked, 0 problems",
       "a renderer holding only scripts is still checked, not reported absent"
     );
@@ -359,7 +359,7 @@ mod tests {
     let (vfs, scope) = mount(&root)?;
     let result = ShadersVerifier::new(&vfs, &scope, &options).verify();
     let rule_ids: Vec<String> = result
-      .findings()
+      .get_findings()
       .iter()
       .map(|finding| finding.rule_id().to_string())
       .collect();

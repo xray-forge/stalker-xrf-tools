@@ -14,11 +14,11 @@ pub struct GamedataParticlesUsageVerificationResult {
 }
 
 impl GamedataCheckResult for GamedataParticlesUsageVerificationResult {
-  fn duration(&self) -> Option<Duration> {
+  fn get_duration(&self) -> Option<Duration> {
     Some(self.duration)
   }
 
-  fn status(&self) -> GamedataVerificationStatus {
+  fn get_status(&self) -> GamedataVerificationStatus {
     if self.invalid_references_count != 0 || self.unreadable_spawn_files_count != 0 {
       GamedataVerificationStatus::Failed
     } else if self.unparsed_custom_data_count != 0 {
@@ -28,7 +28,7 @@ impl GamedataCheckResult for GamedataParticlesUsageVerificationResult {
     }
   }
 
-  fn failure_message(&self) -> String {
+  fn get_failure_message(&self) -> String {
     format!(
       "{}/{} particle references valid; {}/{} spawn files readable; {} custom data sections unparsed",
       self.checked_references_count - self.invalid_references_count,
@@ -39,7 +39,7 @@ impl GamedataCheckResult for GamedataParticlesUsageVerificationResult {
     )
   }
 
-  fn findings(&self) -> &[Finding] {
+  fn get_findings(&self) -> &[Finding] {
     &self.findings
   }
 }
@@ -61,9 +61,9 @@ mod tests {
       ..Default::default()
     };
 
-    assert_eq!(result.status(), GamedataVerificationStatus::Failed);
+    assert_eq!(result.get_status(), GamedataVerificationStatus::Failed);
     assert_eq!(
-      result.failure_message(),
+      result.get_failure_message(),
       "0/0 particle references valid; 0/1 spawn files readable; 0 custom data sections unparsed"
     );
   }
@@ -75,9 +75,9 @@ mod tests {
       ..Default::default()
     };
 
-    assert_eq!(result.status(), GamedataVerificationStatus::Incomplete);
+    assert_eq!(result.get_status(), GamedataVerificationStatus::Incomplete);
     assert_eq!(
-      result.failure_message(),
+      result.get_failure_message(),
       "0/0 particle references valid; 0/0 spawn files readable; 1 custom data sections unparsed"
     );
   }
@@ -101,7 +101,7 @@ mod tests {
       }),
     );
 
-    assert_eq!(report.status(), GamedataVerificationStatus::Failed);
-    assert_eq!(report.checks()[0].findings(), [finding]);
+    assert_eq!(report.get_status(), GamedataVerificationStatus::Failed);
+    assert_eq!(report.get_checks()[0].get_findings(), [finding]);
   }
 }

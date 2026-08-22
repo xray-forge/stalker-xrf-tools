@@ -11,15 +11,15 @@ pub struct GamedataParticlesVerificationResult {
 }
 
 impl GamedataCheckResult for GamedataParticlesVerificationResult {
-  fn duration(&self) -> Option<Duration> {
+  fn get_duration(&self) -> Option<Duration> {
     Some(self.duration)
   }
 
-  fn status(&self) -> GamedataVerificationStatus {
+  fn get_status(&self) -> GamedataVerificationStatus {
     GamedataVerificationStatus::from_is_valid(self.invalid_particle_files_count == 0)
   }
 
-  fn failure_message(&self) -> String {
+  fn get_failure_message(&self) -> String {
     format!(
       "{}/{} particle library files valid",
       self.checked_particle_files_count - self.invalid_particle_files_count,
@@ -27,7 +27,7 @@ impl GamedataCheckResult for GamedataParticlesVerificationResult {
     )
   }
 
-  fn findings(&self) -> &[Finding] {
+  fn get_findings(&self) -> &[Finding] {
     &self.findings
   }
 }
@@ -45,6 +45,6 @@ mod tests {
       ..Default::default()
     };
 
-    assert_eq!(result.failure_message(), "0/1 particle library files valid");
+    assert_eq!(result.get_failure_message(), "0/1 particle library files valid");
   }
 }

@@ -16,11 +16,11 @@ fn passes_on_a_consistent_level_tree() {
   let result: GamedataLevelsVerificationResult = GamedataFixture::new().verify();
 
   assert_eq!(
-    result.status(),
+    result.get_status(),
     GamedataVerificationStatus::Passed,
     "findings: {:?}",
     result
-      .findings()
+      .get_findings()
       .iter()
       .map(|finding| format!("{}: {}", finding.rule_id(), finding.message()))
       .collect::<Vec<_>>()
@@ -28,7 +28,7 @@ fn passes_on_a_consistent_level_tree() {
   assert_eq!(result.roster_levels_count, 1);
   assert_eq!(result.checked_levels_count, 1);
   assert_eq!(
-    result.failure_message(),
+    result.get_failure_message(),
     "1/1 level bundles valid; 2/2 level shader references valid"
   );
 }
@@ -37,15 +37,15 @@ fn passes_on_a_consistent_level_tree() {
 fn skips_verification_without_any_graph_spawn_file() {
   let result: GamedataLevelsVerificationResult = GamedataFixture::new().with_spawn(None).verify();
 
-  assert_eq!(result.status(), GamedataVerificationStatus::Skipped);
-  assert!(result.findings().is_empty());
+  assert_eq!(result.get_status(), GamedataVerificationStatus::Skipped);
+  assert!(result.get_findings().is_empty());
 }
 
 #[test]
 fn reports_graph_level_without_a_bundle() {
   let result: GamedataLevelsVerificationResult = GamedataFixture::new().with_bundles(Vec::new()).verify();
 
-  assert_eq!(result.status(), GamedataVerificationStatus::Failed);
+  assert_eq!(result.get_status(), GamedataVerificationStatus::Failed);
   assert_only_rule(&result, "levels.missing-bundle");
 }
 
@@ -58,7 +58,7 @@ fn reports_bundle_unreachable_from_the_graph() {
     ])
     .verify();
 
-  assert_eq!(result.status(), GamedataVerificationStatus::Failed);
+  assert_eq!(result.get_status(), GamedataVerificationStatus::Failed);
   assert_only_rule(&result, "levels.orphan-bundle");
 }
 
@@ -66,7 +66,7 @@ fn reports_bundle_unreachable_from_the_graph() {
 fn reports_graph_level_without_a_declared_map() {
   let result: GamedataLevelsVerificationResult = GamedataFixture::new().with_declared_maps(Vec::new()).verify();
 
-  assert_eq!(result.status(), GamedataVerificationStatus::Failed);
+  assert_eq!(result.get_status(), GamedataVerificationStatus::Failed);
   assert_only_rule(&result, "levels.undeclared-map");
 }
 
@@ -76,7 +76,7 @@ fn accepts_declared_map_without_a_bundle() {
     .with_declared_maps(vec![String::from("zaton"), String::from("mp_pool")])
     .verify();
 
-  assert_eq!(result.status(), GamedataVerificationStatus::Passed);
+  assert_eq!(result.get_status(), GamedataVerificationStatus::Passed);
 }
 
 #[test]
@@ -91,7 +91,7 @@ fn reports_duplicate_level_in_a_single_graph() {
     )))
     .verify();
 
-  assert_eq!(result.status(), GamedataVerificationStatus::Failed);
+  assert_eq!(result.get_status(), GamedataVerificationStatus::Failed);
   assert_only_rule(&result, "levels.graph-duplicate");
 }
 
@@ -101,7 +101,7 @@ fn reports_missing_required_bundle_file() {
     .with_bundles(vec![LevelBundleFixture::valid("zaton").without("level.geom")])
     .verify();
 
-  assert_eq!(result.status(), GamedataVerificationStatus::Failed);
+  assert_eq!(result.get_status(), GamedataVerificationStatus::Failed);
   assert_only_rule(&result, "levels.missing-file");
 }
 
@@ -130,7 +130,7 @@ fn reports_empty_required_bundle_file() {
     .with_bundles(vec![LevelBundleFixture::valid("zaton").with("level.geom", Vec::new())])
     .verify();
 
-  assert_eq!(result.status(), GamedataVerificationStatus::Failed);
+  assert_eq!(result.get_status(), GamedataVerificationStatus::Failed);
   assert_only_rule(&result, "levels.file-empty");
 }
 
@@ -140,7 +140,7 @@ fn reports_detail_description_without_its_texture() {
     .with_bundles(vec![LevelBundleFixture::valid("zaton").with("level.details", vec![1])])
     .verify();
 
-  assert_eq!(result.status(), GamedataVerificationStatus::Failed);
+  assert_eq!(result.get_status(), GamedataVerificationStatus::Failed);
   assert_only_rule(&result, "levels.details-pair");
 }
 
@@ -154,7 +154,7 @@ fn accepts_detail_description_together_with_its_texture() {
     ])
     .verify();
 
-  assert_eq!(result.status(), GamedataVerificationStatus::Passed);
+  assert_eq!(result.get_status(), GamedataVerificationStatus::Passed);
 }
 
 #[test]
@@ -165,7 +165,7 @@ fn reports_unreadable_level_configuration() {
     ])
     .verify();
 
-  assert_eq!(result.status(), GamedataVerificationStatus::Failed);
+  assert_eq!(result.get_status(), GamedataVerificationStatus::Failed);
   assert_only_rule(&result, "levels.ltx-read");
 }
 
@@ -173,7 +173,7 @@ fn reports_unreadable_level_configuration() {
 fn reports_missing_level_map_texture() {
   let result: GamedataLevelsVerificationResult = GamedataFixture::new().without_texture("map\\map_zaton").verify();
 
-  assert_eq!(result.status(), GamedataVerificationStatus::Failed);
+  assert_eq!(result.get_status(), GamedataVerificationStatus::Failed);
   assert_only_rule(&result, "levels.map-texture");
 }
 
@@ -185,7 +185,7 @@ fn reports_incompatible_level_version() {
     ])
     .verify();
 
-  assert_eq!(result.status(), GamedataVerificationStatus::Failed);
+  assert_eq!(result.get_status(), GamedataVerificationStatus::Failed);
   assert_only_rule(&result, "levels.header-version");
 }
 
@@ -197,7 +197,7 @@ fn reports_level_without_a_shaders_chunk() {
     ])
     .verify();
 
-  assert_eq!(result.status(), GamedataVerificationStatus::Failed);
+  assert_eq!(result.get_status(), GamedataVerificationStatus::Failed);
   assert_only_rule(&result, "levels.shaders-chunk");
 }
 
@@ -207,7 +207,7 @@ fn reports_truncated_level_file() {
     .with_bundles(vec![LevelBundleFixture::valid("zaton").with("level", vec![1, 2, 3])])
     .verify();
 
-  assert_eq!(result.status(), GamedataVerificationStatus::Failed);
+  assert_eq!(result.get_status(), GamedataVerificationStatus::Failed);
   assert_only_rule(&result, "levels.file-truncated");
 }
 
@@ -219,7 +219,7 @@ fn reports_incompatible_collision_form_version() {
     ])
     .verify();
 
-  assert_eq!(result.status(), GamedataVerificationStatus::Failed);
+  assert_eq!(result.get_status(), GamedataVerificationStatus::Failed);
   assert_only_rule(&result, "levels.cform-version");
 }
 
@@ -231,7 +231,7 @@ fn reports_truncated_collision_form_header() {
     ])
     .verify();
 
-  assert_eq!(result.status(), GamedataVerificationStatus::Failed);
+  assert_eq!(result.get_status(), GamedataVerificationStatus::Failed);
   assert_only_rule(&result, "levels.file-truncated");
 }
 
@@ -243,7 +243,7 @@ fn reports_unsupported_ai_map_version() {
     ])
     .verify();
 
-  assert_eq!(result.status(), GamedataVerificationStatus::Failed);
+  assert_eq!(result.get_status(), GamedataVerificationStatus::Failed);
   assert_only_rule(&result, "levels.ai-version");
 }
 
@@ -255,7 +255,7 @@ fn reports_ai_map_that_does_not_match_the_graph_level() {
     ])
     .verify();
 
-  assert_eq!(result.status(), GamedataVerificationStatus::Failed);
+  assert_eq!(result.get_status(), GamedataVerificationStatus::Failed);
   assert_eq!(
     rule_ids(&result),
     BTreeSet::from([String::from("levels.ai-guid"), String::from("levels.level-guid"),])
@@ -271,7 +271,7 @@ fn reports_cross_table_that_does_not_match_the_game_graph() {
     )))
     .verify();
 
-  assert_eq!(result.status(), GamedataVerificationStatus::Failed);
+  assert_eq!(result.get_status(), GamedataVerificationStatus::Failed);
   assert_only_rule(&result, "levels.graph-guid");
 }
 
@@ -284,7 +284,7 @@ fn reports_ai_node_count_that_disagrees_with_the_cross_table() {
     )))
     .verify();
 
-  assert_eq!(result.status(), GamedataVerificationStatus::Failed);
+  assert_eq!(result.get_status(), GamedataVerificationStatus::Failed);
   assert_only_rule(&result, "levels.ai-node-count");
 }
 
@@ -309,11 +309,11 @@ fn addresses_cross_tables_by_ascending_level_id_rank() {
     .verify();
 
   assert_eq!(
-    result.status(),
+    result.get_status(),
     GamedataVerificationStatus::Passed,
     "findings: {:?}",
     result
-      .findings()
+      .get_findings()
       .iter()
       .map(|finding| format!("{}: {}", finding.rule_id(), finding.message()))
       .collect::<Vec<_>>()
@@ -329,7 +329,7 @@ fn reports_level_texture_reference_that_does_not_resolve() {
     )])
     .verify();
 
-  assert_eq!(result.status(), GamedataVerificationStatus::Failed);
+  assert_eq!(result.get_status(), GamedataVerificationStatus::Failed);
   assert_only_rule(&result, "levels.texture-reference");
 }
 
@@ -342,7 +342,7 @@ fn reports_shader_table_entry_without_a_delimiter() {
     )])
     .verify();
 
-  assert_eq!(result.status(), GamedataVerificationStatus::Failed);
+  assert_eq!(result.get_status(), GamedataVerificationStatus::Failed);
   assert_only_rule(&result, "levels.shader-reference");
 }
 
@@ -355,7 +355,7 @@ fn skips_empty_shader_table_entries_like_the_renderer() {
     )])
     .verify();
 
-  assert_eq!(result.status(), GamedataVerificationStatus::Passed);
+  assert_eq!(result.get_status(), GamedataVerificationStatus::Passed);
 }
 
 #[test]

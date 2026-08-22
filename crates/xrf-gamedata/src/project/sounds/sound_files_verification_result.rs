@@ -9,11 +9,11 @@ pub(crate) struct GamedataSoundFilesVerificationResult {
 }
 
 impl GamedataCheckResult for GamedataSoundFilesVerificationResult {
-  fn status(&self) -> GamedataVerificationStatus {
+  fn get_status(&self) -> GamedataVerificationStatus {
     GamedataVerificationStatus::from_is_valid(self.invalid_sounds_count == 0)
   }
 
-  fn failure_message(&self) -> String {
+  fn get_failure_message(&self) -> String {
     format!(
       "{}/{} sounds valid",
       self.checked_sounds_count - self.invalid_sounds_count,
@@ -21,7 +21,7 @@ impl GamedataCheckResult for GamedataSoundFilesVerificationResult {
     )
   }
 
-  fn findings(&self) -> &[Finding] {
+  fn get_findings(&self) -> &[Finding] {
     &self.findings
   }
 }

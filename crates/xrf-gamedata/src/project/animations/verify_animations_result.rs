@@ -14,28 +14,28 @@ pub struct GamedataAnimationsVerificationResult {
 }
 
 impl GamedataCheckResult for GamedataAnimationsVerificationResult {
-  fn duration(&self) -> Option<Duration> {
+  fn get_duration(&self) -> Option<Duration> {
     Some(self.duration)
   }
 
-  fn status(&self) -> GamedataVerificationStatus {
+  fn get_status(&self) -> GamedataVerificationStatus {
     GamedataVerificationStatus::aggregate([
-      self.player_hud_animations.status(),
-      self.hud_item_animations.status(),
-      self.hud_motion_collisions.status(),
+      self.player_hud_animations.get_status(),
+      self.hud_item_animations.get_status(),
+      self.hud_motion_collisions.get_status(),
     ])
   }
 
-  fn failure_message(&self) -> String {
+  fn get_failure_message(&self) -> String {
     format!(
       "{}, {}, {}",
-      self.player_hud_animations.failure_message(),
-      self.hud_item_animations.failure_message(),
-      self.hud_motion_collisions.failure_message()
+      self.player_hud_animations.get_failure_message(),
+      self.hud_item_animations.get_failure_message(),
+      self.hud_motion_collisions.get_failure_message()
     )
   }
 
-  fn findings(&self) -> &[Finding] {
+  fn get_findings(&self) -> &[Finding] {
     &self.findings
   }
 }
@@ -77,8 +77,8 @@ mod tests {
       }),
     );
 
-    assert_eq!(report.status(), GamedataVerificationStatus::Failed);
-    assert_eq!(report.checks()[0].findings(), [finding]);
+    assert_eq!(report.get_status(), GamedataVerificationStatus::Failed);
+    assert_eq!(report.get_checks()[0].get_findings(), [finding]);
   }
 
   #[test]
@@ -110,10 +110,10 @@ mod tests {
     );
 
     assert_eq!(
-      report.status(),
+      report.get_status(),
       GamedataVerificationStatus::Failed,
       "Expect invalid hud item animations alone to fail the animations check"
     );
-    assert_eq!(report.checks()[0].findings(), [finding]);
+    assert_eq!(report.get_checks()[0].get_findings(), [finding]);
   }
 }

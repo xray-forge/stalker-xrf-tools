@@ -8,11 +8,11 @@ pub(crate) struct GamedataPlayerHudAnimationsVerificationResult {
 }
 
 impl GamedataCheckResult for GamedataPlayerHudAnimationsVerificationResult {
-  fn status(&self) -> GamedataVerificationStatus {
+  fn get_status(&self) -> GamedataVerificationStatus {
     GamedataVerificationStatus::from_is_valid(self.invalid_huds_count == 0)
   }
 
-  fn failure_message(&self) -> String {
+  fn get_failure_message(&self) -> String {
     format!(
       "{}/{} HUD animations valid",
       self.checked_huds_count - self.invalid_huds_count,
@@ -20,7 +20,7 @@ impl GamedataCheckResult for GamedataPlayerHudAnimationsVerificationResult {
     )
   }
 
-  fn findings(&self) -> &[Finding] {
+  fn get_findings(&self) -> &[Finding] {
     &self.findings
   }
 }

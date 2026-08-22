@@ -19,9 +19,9 @@ impl GamedataSoundsVerificationResult {
     sound_references: GamedataSoundReferencesVerificationResult,
   ) -> Self {
     let mut findings: Vec<Finding> = sound_files
-      .findings()
+      .get_findings()
       .iter()
-      .chain(sound_references.findings())
+      .chain(sound_references.get_findings())
       .cloned()
       .collect();
 
@@ -37,23 +37,23 @@ impl GamedataSoundsVerificationResult {
 }
 
 impl GamedataCheckResult for GamedataSoundsVerificationResult {
-  fn duration(&self) -> Option<Duration> {
+  fn get_duration(&self) -> Option<Duration> {
     Some(self.duration)
   }
 
-  fn status(&self) -> GamedataVerificationStatus {
-    GamedataVerificationStatus::aggregate([self.sound_files.status(), self.sound_references.status()])
+  fn get_status(&self) -> GamedataVerificationStatus {
+    GamedataVerificationStatus::aggregate([self.sound_files.get_status(), self.sound_references.get_status()])
   }
 
-  fn failure_message(&self) -> String {
+  fn get_failure_message(&self) -> String {
     format!(
       "{}; {}",
-      self.sound_files.failure_message(),
-      self.sound_references.failure_message(),
+      self.sound_files.get_failure_message(),
+      self.sound_references.get_failure_message(),
     )
   }
 
-  fn findings(&self) -> &[Finding] {
+  fn get_findings(&self) -> &[Finding] {
     &self.findings
   }
 }
@@ -93,10 +93,10 @@ mod tests {
       )),
     );
 
-    assert_eq!(report.status(), GamedataVerificationStatus::Failed);
-    assert_eq!(report.checks()[0].findings(), [finding]);
+    assert_eq!(report.get_status(), GamedataVerificationStatus::Failed);
+    assert_eq!(report.get_checks()[0].get_findings(), [finding]);
     assert_eq!(
-      report.checks()[0].summary(),
+      report.get_checks()[0].get_summary(),
       "0/0 sounds valid; 0/1 sound references valid"
     );
   }
@@ -113,6 +113,6 @@ mod tests {
       },
     );
 
-    assert_eq!(result.status(), GamedataVerificationStatus::Failed);
+    assert_eq!(result.get_status(), GamedataVerificationStatus::Failed);
   }
 }

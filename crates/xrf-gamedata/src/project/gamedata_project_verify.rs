@@ -87,9 +87,12 @@ mod tests {
       .verify(&options)
       .expect("Expected level verification to complete");
 
-    assert_eq!(report.checks().len(), 1);
-    assert_eq!(report.checks()[0].verification_type(), GamedataVerificationType::Levels);
+    assert_eq!(report.get_checks().len(), 1);
+    assert_eq!(
+      report.get_checks()[0].get_verification_type(),
+      GamedataVerificationType::Levels
+    );
     // The test project ships no spawn file, so the level roster is unknown and nothing is checked.
-    assert_eq!(report.status(), GamedataVerificationStatus::Skipped);
+    assert_eq!(report.get_status(), GamedataVerificationStatus::Skipped);
   }
 }

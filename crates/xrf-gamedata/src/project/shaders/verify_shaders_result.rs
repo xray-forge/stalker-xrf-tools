@@ -32,15 +32,15 @@ impl GamedataShadersVerificationResult {
 }
 
 impl GamedataCheckResult for GamedataShadersVerificationResult {
-  fn duration(&self) -> Option<Duration> {
+  fn get_duration(&self) -> Option<Duration> {
     Some(self.duration)
   }
 
-  fn status(&self) -> GamedataVerificationStatus {
+  fn get_status(&self) -> GamedataVerificationStatus {
     GamedataVerificationStatus::from_is_valid(self.findings.is_empty())
   }
 
-  fn failure_message(&self) -> String {
+  fn get_failure_message(&self) -> String {
     format!(
       "{} shader scripts and {} shader sources checked, {} problems",
       self.checked_scripts_count,
@@ -49,7 +49,7 @@ impl GamedataCheckResult for GamedataShadersVerificationResult {
     )
   }
 
-  fn findings(&self) -> &[Finding] {
+  fn get_findings(&self) -> &[Finding] {
     &self.findings
   }
 }
@@ -81,8 +81,8 @@ mod tests {
       }),
     );
 
-    assert_eq!(report.status(), GamedataVerificationStatus::Failed);
-    assert_eq!(report.checks()[0].findings(), [finding]);
+    assert_eq!(report.get_status(), GamedataVerificationStatus::Failed);
+    assert_eq!(report.get_checks()[0].get_findings(), [finding]);
   }
 
   #[test]
@@ -94,7 +94,7 @@ mod tests {
     };
 
     assert_eq!(
-      result.failure_message(),
+      result.get_failure_message(),
       "2 shader scripts and 3 shader sources checked, 0 problems"
     );
   }

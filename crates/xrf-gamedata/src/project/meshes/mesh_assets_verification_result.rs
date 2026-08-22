@@ -9,7 +9,7 @@ pub(crate) struct GamedataMeshAssetsVerificationResult {
 }
 
 impl GamedataCheckResult for GamedataMeshAssetsVerificationResult {
-  fn status(&self) -> GamedataVerificationStatus {
+  fn get_status(&self) -> GamedataVerificationStatus {
     if self.is_skipped {
       GamedataVerificationStatus::Skipped
     } else {
@@ -17,7 +17,7 @@ impl GamedataCheckResult for GamedataMeshAssetsVerificationResult {
     }
   }
 
-  fn failure_message(&self) -> String {
+  fn get_failure_message(&self) -> String {
     if self.is_skipped {
       String::from("Mesh assets were not checked because shaders.xr is invalid")
     } else {
@@ -29,7 +29,7 @@ impl GamedataCheckResult for GamedataMeshAssetsVerificationResult {
     }
   }
 
-  fn findings(&self) -> &[Finding] {
+  fn get_findings(&self) -> &[Finding] {
     &self.findings
   }
 }

@@ -8,18 +8,18 @@ pub struct GamedataHudMotionCollisionsVerificationResult {
 }
 
 impl GamedataCheckResult for GamedataHudMotionCollisionsVerificationResult {
-  fn status(&self) -> GamedataVerificationStatus {
+  fn get_status(&self) -> GamedataVerificationStatus {
     GamedataVerificationStatus::from_is_valid(self.collisions_count == 0)
   }
 
-  fn failure_message(&self) -> String {
+  fn get_failure_message(&self) -> String {
     format!(
       "{} motion collisions across {} HUD namespaces",
       self.collisions_count, self.checked_huds_count
     )
   }
 
-  fn findings(&self) -> &[Finding] {
+  fn get_findings(&self) -> &[Finding] {
     &self.findings
   }
 }

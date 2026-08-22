@@ -9,11 +9,11 @@ pub(crate) struct GamedataSoundReferencesVerificationResult {
 }
 
 impl GamedataCheckResult for GamedataSoundReferencesVerificationResult {
-  fn status(&self) -> GamedataVerificationStatus {
+  fn get_status(&self) -> GamedataVerificationStatus {
     GamedataVerificationStatus::from_is_valid(self.invalid_references_count == 0)
   }
 
-  fn failure_message(&self) -> String {
+  fn get_failure_message(&self) -> String {
     format!(
       "{}/{} sound references valid",
       self.checked_references_count - self.invalid_references_count,
@@ -21,7 +21,7 @@ impl GamedataCheckResult for GamedataSoundReferencesVerificationResult {
     )
   }
 
-  fn findings(&self) -> &[Finding] {
+  fn get_findings(&self) -> &[Finding] {
     &self.findings
   }
 }

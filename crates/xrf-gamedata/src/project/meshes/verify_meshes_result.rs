@@ -17,9 +17,9 @@ impl GamedataMeshesVerificationResult {
     shader_library: GamedataShaderLibraryVerificationResult,
     mesh_assets: GamedataMeshAssetsVerificationResult,
   ) -> Self {
-    let mut findings = shader_library.findings().to_vec();
+    let mut findings = shader_library.get_findings().to_vec();
 
-    findings.extend_from_slice(mesh_assets.findings());
+    findings.extend_from_slice(mesh_assets.get_findings());
 
     Self {
       duration,
@@ -31,23 +31,23 @@ impl GamedataMeshesVerificationResult {
 }
 
 impl GamedataCheckResult for GamedataMeshesVerificationResult {
-  fn duration(&self) -> Option<Duration> {
+  fn get_duration(&self) -> Option<Duration> {
     Some(self.duration)
   }
 
-  fn status(&self) -> GamedataVerificationStatus {
-    GamedataVerificationStatus::aggregate([self.shader_library.status(), self.mesh_assets.status()])
+  fn get_status(&self) -> GamedataVerificationStatus {
+    GamedataVerificationStatus::aggregate([self.shader_library.get_status(), self.mesh_assets.get_status()])
   }
 
-  fn failure_message(&self) -> String {
+  fn get_failure_message(&self) -> String {
     format!(
       "{}; {}",
-      self.shader_library.failure_message(),
-      self.mesh_assets.failure_message()
+      self.shader_library.get_failure_message(),
+      self.mesh_assets.get_failure_message()
     )
   }
 
-  fn findings(&self) -> &[Finding] {
+  fn get_findings(&self) -> &[Finding] {
     &self.findings
   }
 }
@@ -87,7 +87,7 @@ mod tests {
       )),
     );
 
-    assert_eq!(report.status(), GamedataVerificationStatus::Failed);
-    assert_eq!(report.checks()[0].findings(), [finding]);
+    assert_eq!(report.get_status(), GamedataVerificationStatus::Failed);
+    assert_eq!(report.get_checks()[0].get_findings(), [finding]);
   }
 }

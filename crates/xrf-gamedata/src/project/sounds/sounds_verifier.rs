@@ -44,7 +44,7 @@ impl<'a> SoundsVerifier<'a> {
       self.options.output,
       "Verified gamedata sounds in {} sec, {}",
       result.duration.as_secs_f64(),
-      result.failure_message()
+      result.get_failure_message()
     );
 
     Ok(result)

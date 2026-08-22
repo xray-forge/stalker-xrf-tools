@@ -303,7 +303,7 @@ impl GamedataFixture {
 
 pub(crate) fn rule_ids(result: &GamedataLevelsVerificationResult) -> BTreeSet<String> {
   result
-    .findings()
+    .get_findings()
     .iter()
     .map(|finding| finding.rule_id().to_string())
     .collect()
@@ -315,7 +315,7 @@ pub(crate) fn assert_only_rule(result: &GamedataLevelsVerificationResult, rule: 
     BTreeSet::from([String::from(rule)]),
     "Expected only [{rule}], findings were: {:?}",
     result
-      .findings()
+      .get_findings()
       .iter()
       .map(|finding| format!("{}: {}", finding.rule_id(), finding.message()))
       .collect::<Vec<_>>()

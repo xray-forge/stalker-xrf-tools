@@ -139,7 +139,7 @@ impl GenericCommand for VerifyGamedataCommand {
 
     let project: Box<GamedataProject> = Box::new(GamedataProject::open(&open_options)?);
     let verify_result: GamedataVerificationResult = project.verify(&verify_options)?;
-    let status: GamedataVerificationStatus = verify_result.status();
+    let status: GamedataVerificationStatus = verify_result.get_status();
 
     if let Some(report_path) = report_path {
       GamedataVerificationReportWriter::new(&root, &verify_result).write(&report_path)?;
@@ -152,7 +152,7 @@ impl GenericCommand for VerifyGamedataCommand {
         xrf_output::info!(
           verify_options.output,
           "Gamedata project verified in {} sec",
-          verify_result.duration().as_secs_f64()
+          verify_result.get_duration().as_secs_f64()
         );
       }
       GamedataVerificationStatus::Failed
@@ -184,19 +184,19 @@ impl GenericCommand for VerifyGamedataCommand {
         }
 
         for report in verify_result.get_failure_reports() {
-          for finding in report.findings() {
+          for finding in report.get_findings() {
             match finding.subject() {
               Some(subject) => xrf_output::error!(
                 verify_options.output,
                 "  - [{}] {}: {}",
-                report.verification_type(),
+                report.get_verification_type(),
                 subject,
                 finding.message()
               ),
               None => xrf_output::error!(
                 verify_options.output,
                 "  - [{}] {}",
-                report.verification_type(),
+                report.get_verification_type(),
                 finding.message()
               ),
             }
@@ -206,7 +206,7 @@ impl GenericCommand for VerifyGamedataCommand {
         xrf_output::error!(
           verify_options.output,
           "Gamedata project checked in {} sec",
-          verify_result.duration().as_secs_f32()
+          verify_result.get_duration().as_secs_f32()
         );
       }
     }

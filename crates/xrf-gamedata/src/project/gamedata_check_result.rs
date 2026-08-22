@@ -3,15 +3,15 @@ use std::time::Duration;
 use crate::{Finding, GamedataVerificationStatus};
 
 pub trait GamedataCheckResult {
-  fn duration(&self) -> Option<Duration> {
+  fn get_duration(&self) -> Option<Duration> {
     None
   }
 
-  fn status(&self) -> GamedataVerificationStatus;
+  fn get_status(&self) -> GamedataVerificationStatus;
 
-  fn failure_message(&self) -> String;
+  fn get_failure_message(&self) -> String;
 
-  fn findings(&self) -> &[Finding] {
+  fn get_findings(&self) -> &[Finding] {
     &[]
   }
 }
