@@ -25,8 +25,8 @@ const BINARY_FILE = mockArchiveFileDescriptor({
 });
 
 const MESH_FILE = mockArchiveFileDescriptor({
-  extension: "ogf",
-  name: "actor.ogf",
+  extension: "omf",
+  name: "actor.omf",
   sizeReal: 4096,
   sizeCompressed: 4096,
 });
@@ -103,7 +103,7 @@ describe("opened archives editor", () => {
   it("selects genuinely unsupported files without asking the backend to read them", async () => {
     const { findByText, getByText } = renderEditor();
 
-    await userEvent.click(await findByText("actor.ogf"));
+    await userEvent.click(await findByText("actor.omf"));
 
     expect(getByText("Preview unavailable")).toBeInTheDocument();
     expect(getByText(/this file type does not have a text preview/)).toBeInTheDocument();

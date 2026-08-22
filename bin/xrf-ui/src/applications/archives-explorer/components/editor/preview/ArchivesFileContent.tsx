@@ -7,19 +7,24 @@ import { ArchiveCodePreview } from "@/applications/archives-explorer/components/
 import { ArchiveDirectoryContent } from "@/applications/archives-explorer/components/editor/preview/ArchiveDirectoryContent";
 import { ArchiveFileHeader } from "@/applications/archives-explorer/components/editor/preview/ArchiveFileHeader";
 import { ArchiveImagePreview } from "@/applications/archives-explorer/components/editor/preview/ArchiveImagePreview";
+import { ArchiveModelPreview } from "@/applications/archives-explorer/components/editor/preview/ArchiveModelPreview";
 import { ArchivePreviewError } from "@/applications/archives-explorer/components/editor/preview/ArchivePreviewError";
 import { ArchivesService } from "@/applications/archives-explorer/services/archives";
 import { ArchivePreviewSupport, getArchivePreviewSupport, TArchiveContent, TArchiveSelection } from "@/core/archive";
 import { ArchiveFileDescriptor, ArchiveProject } from "@/core/bindings/types/xrf-archive";
 import { DelayedProgress } from "@/core/ui/layout/DelayedProgress";
 import { EmptyState } from "@/core/ui/layout/EmptyState";
+import { inline } from "@/lib/callbacks/inline";
 import { BaseComponentProps } from "@/lib/dom/element-types";
 import { Loadable } from "@/lib/loadable";
 import { formatBytes } from "@/lib/memory/format";
 import { Nullable } from "@/lib/types/general";
 
 // Everything that renders its own preview leaves this union; what is left is a reason to explain.
-type TUnsupported = Exclude<ArchivePreviewSupport, { kind: "supported" } | { kind: "image" } | { kind: "audio" }>;
+type TUnsupported = Exclude<
+  ArchivePreviewSupport,
+  { kind: "supported" } | { kind: "image" } | { kind: "audio" } | { kind: "model" }
+>;
 
 export function ArchivesFileContent({
   "data-testid": dataTestId = "archives-file-content",
@@ -69,6 +74,29 @@ export function ArchivesFileContent({
 
   const support: ArchivePreviewSupport = getArchivePreviewSupport(descriptor, project.readPolicy);
 
+  const view = inline(() => {
+    switch (support.kind) {
+      case "image":
+        return <ArchiveImagePreview />;
+      case "audio":
+        return <ArchiveAudioPreview />;
+      case "model":
+        return <ArchiveModelPreview key={descriptor.name} name={descriptor.name} />;
+    }
+
+    if (support.kind !== "supported") {
+      return <EmptyState title={"Preview unavailable"} description={onGetUnsupportedDescription(support)} />;
+    } else if (content.isLoading) {
+      return <DelayedProgress />;
+    } else if (content.error) {
+      return <ArchivePreviewError error={content.error} onRetry={archivesService.retrySelectedFile} />;
+    } else if (content.value?.kind === "text") {
+      return <ArchiveCodePreview file={content.value.result} />;
+    }
+
+    return <EmptyState title={"Preview unavailable"} description={"The selected file did not return any content."} />;
+  });
+
   return (
     <Box
       data-testid={dataTestId}
@@ -87,21 +115,7 @@ export function ArchivesFileContent({
           overflow: "hidden",
         }}
       >
-        {support.kind === "image" ? (
-          <ArchiveImagePreview />
-        ) : support.kind === "audio" ? (
-          <ArchiveAudioPreview />
-        ) : support.kind !== "supported" ? (
-          <EmptyState title={"Preview unavailable"} description={onGetUnsupportedDescription(support)} />
-        ) : content.isLoading ? (
-          <DelayedProgress />
-        ) : content.error ? (
-          <ArchivePreviewError error={content.error} onRetry={archivesService.retrySelectedFile} />
-        ) : content.value?.kind === "text" ? (
-          <ArchiveCodePreview file={content.value.result} />
-        ) : (
-          <EmptyState title={"Preview unavailable"} description={"The selected file did not return any content."} />
-        )}
+        {view}
       </Box>
     </Box>
   );

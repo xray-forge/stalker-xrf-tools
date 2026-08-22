@@ -19,12 +19,27 @@ describe("archive preview support", () => {
     ).toEqual({ kind: "supported" });
   });
 
+  it("offers a model preview for a visual, which no policy limit gates", () => {
+    // A model is never read through the archive project: it is addressed logically and read through the asset world, so
+    // the size ceilings that bound a text or image read do not apply to it.
+    expect(
+      getArchivePreviewSupport(
+        mockArchiveFileDescriptor({
+          extension: "ogf",
+          name: "meshes\\actor.ogf",
+          sizeReal: READ_POLICY.maximumSize + 1,
+        }),
+        READ_POLICY
+      )
+    ).toEqual({ kind: "model" });
+  });
+
   it("identifies each unsupported reason before a backend read", () => {
     expect(
-      getArchivePreviewSupport(mockArchiveFileDescriptor({ extension: "ogf", name: "meshes\\actor.ogf" }), READ_POLICY)
+      getArchivePreviewSupport(mockArchiveFileDescriptor({ extension: "omf", name: "meshes\\actor.omf" }), READ_POLICY)
     ).toEqual({
       kind: "unsupported-extension",
-      extension: "ogf",
+      extension: "omf",
     });
     expect(
       getArchivePreviewSupport(mockArchiveFileDescriptor({ sizeReal: 2048, sizeCompressed: 1024 }), READ_POLICY)

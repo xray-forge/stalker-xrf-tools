@@ -20,6 +20,16 @@ import { DEFAULT_VISUAL_PREVIEW_SCENE_CONFIG, IVisualPreviewSceneConfig } from "
 import { createCheckerTexture, createSubmeshGeometry } from "@/core/visuals/scene/VisualPreviewScene.utils";
 import { Nullable } from "@/lib/types/general";
 
+/**
+ * How a preview looks before anyone touches a toggle.
+ */
+export const DEFAULT_VISUAL_PREVIEW_VIEW_OPTIONS: IVisualPreviewViewOptions = {
+  isWireframe: false,
+  isGridVisible: true,
+  isAxesVisible: true,
+  isCheckerVisible: false,
+};
+
 /** Radius assumed when a model reports no usable extent, so the camera and helpers still have a scale. */
 const FALLBACK_RADIUS: number = 1;
 

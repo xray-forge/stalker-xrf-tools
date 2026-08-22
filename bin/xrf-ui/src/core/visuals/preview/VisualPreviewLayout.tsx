@@ -9,20 +9,13 @@ import { useEditorStatus } from "@/core/shell/EditorStatusContext";
 import { IEditorPanel, useEditorPanels } from "@/core/shell/panel/context";
 import { DelayedProgress } from "@/core/ui/layout/DelayedProgress";
 import { EmptyState } from "@/core/ui/layout/EmptyState";
-import { IVisualPreviewViewOptions } from "@/core/visuals";
+import { DEFAULT_VISUAL_PREVIEW_VIEW_OPTIONS, IVisualPreviewViewOptions } from "@/core/visuals";
 import { IVisualModelViews } from "@/core/visuals/lib/visual-views";
 import { VisualPreviewAnimationBar } from "@/core/visuals/preview/VisualPreviewAnimationBar";
 import { VisualPreviewToolbar } from "@/core/visuals/preview/VisualPreviewToolbar";
 import { VisualPreviewViewport } from "@/core/visuals/preview/VisualPreviewViewport";
 import { BaseComponentProps } from "@/lib/dom/element-types";
 import { Nullable } from "@/lib/types/general";
-
-const DEFAULT_VIEW_OPTIONS: IVisualPreviewViewOptions = {
-  isWireframe: false,
-  isGridVisible: true,
-  isAxesVisible: true,
-  isCheckerVisible: false,
-};
 
 export interface IVisualPreviewLayoutProps extends BaseComponentProps {
   /** The model on screen, or null while nothing is open. */
@@ -73,7 +66,7 @@ export function VisualPreviewLayout({
   onOpen,
   onBrowse,
 }: IVisualPreviewLayoutProps): ReactElement {
-  const [options, setOptions] = useState<IVisualPreviewViewOptions>(DEFAULT_VIEW_OPTIONS);
+  const [options, setOptions] = useState<IVisualPreviewViewOptions>(DEFAULT_VISUAL_PREVIEW_VIEW_OPTIONS);
   const [cameraResetToken, setCameraResetToken] = useState(0);
 
   const onResetCamera = useCallback(() => setCameraResetToken((it) => it + 1), []);

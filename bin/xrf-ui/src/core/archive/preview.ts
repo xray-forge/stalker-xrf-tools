@@ -4,8 +4,19 @@ export type ArchivePreviewSupport =
   | { kind: "supported" }
   | { kind: "image" }
   | { kind: "audio" }
+  | { kind: "model" }
   | { kind: "unsupported-extension"; extension: string }
   | { kind: "too-large"; maximumSize: number };
+
+/**
+ * Checks whether an archive entry is a model the viewer can render.
+ *
+ * @param descriptor - Archive file metadata whose extension is checked.
+ * @returns Whether the descriptor names a model.
+ */
+export function isArchiveModel(descriptor: ArchiveFileDescriptor): boolean {
+  return descriptor.extension.toLowerCase() === "ogf";
+}
 
 /**
  * Checks whether the policy permits audio preview for an archive file.
@@ -47,6 +58,11 @@ export function getArchivePreviewSupport(
   descriptor: ArchiveFileDescriptor,
   policy: ArchiveProjectReadPolicy
 ): ArchivePreviewSupport {
+  // Models are read through the asset world rather than through this project, so no policy limit applies to them.
+  if (isArchiveModel(descriptor)) {
+    return { kind: "model" };
+  }
+
   // Images are decoded rather than read as text, so they answer to their own limit and - unlike text -
   // do not care whether the entry was stored compressed. Decompression happens on the way out anyway.
   if (isArchiveAudio(descriptor, policy)) {
