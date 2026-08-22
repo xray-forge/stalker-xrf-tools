@@ -1,91 +1,83 @@
 // Auto-generated rust bindings. Do not edit it manually.
 
-/** What extracting one archived directory produced. */
-export type ArchiveExtractDirectoryResult = {
-  prefix: string;
-  destination: string;
-  extractedCount: number;
-  size: number;
-};
-
-/** What extracting one archived file produced. */
-export type ArchiveExtractResult = {
-  name: string;
-  destination: string;
-  size: number;
-};
-
-/**
- * Everything needed to pack one archive volume set.
- *
- * Built from defaults, then optionally from an xrCompress LTX, then from explicit parameters, so a
- * command line and a form can layer over the same config file in the same order.
- *
- * Also the wire contract the desktop editor holds: it is read from a configuration file, edited in
- * place, packed, and written back, so all three surfaces speak one shape.
- */
-export type ArchivePackConfig = {
-  /** Root the archived names are relative to, normally a `gamedata` directory. */
-  source: string;
-  destination: string;
-  /** Base name of the volumes, which become `<name>.db0`, `<name>.db1` and so on. */
-  name: string;
-  includeFiles: Array<string>;
-  includeFolders: Array<ArchivePackFolder>;
-  excludeFolders: Array<ArchivePackFolder>;
-  /** Extension patterns from `[options] exclude_exts`, matched against the extension with its dot. */
-  excludeExtensions: Array<string>;
-  /** Apply the skip rules xrCompress hard-codes for editor and source leftovers. */
-  isWithSkipList: boolean;
-  /** Verbatim `[header]` text written as chunk 666. */
-  header: string | null;
-  mode: ArchivePackMode;
-  maxVolumeSize: number;
-  volumeExtension: ArchiveVolumeExtension;
-};
-
-/**
- * One `[include_folders]` or `[exclude_folders]` entry.
- *
- * The boolean has a different meaning on each side, which is an xrCompress quirk worth stating: an
- * included folder recurses into subfolders, while an excluded one matches by prefix rather than exactly.
- */
-export type ArchivePackFolder = {
+/** One volume's parsed header: its entry table and the gamedata-relative root its `[header] entry_point` declares. */
+export type ArchiveDescriptor = {
+  /** Volume file creation time in Unix milliseconds, when the filesystem reports one. */
+  createdAt: number | null;
+  /** Volume file modification time in Unix milliseconds, when the filesystem reports one. */
+  modifiedAt: number | null;
+  /** Entries keyed by their authored name, exactly as the name table records them. */
+  files: { [key in string]: ArchiveFileDescriptor };
+  /** Root the volume unpacks under, from `[header] entry_point` with its alias stripped. */
+  outputRootPath: string;
+  /** The volume file this descriptor was read from. */
   path: string;
-  isRecursive: boolean;
 };
 
-/** How file payloads are stored in the archive. */
-export type ArchivePackMode =
-  /** Compress what the engine expects to be compressed and store the rest. */
-  | "Compress"
-  /** Store everything, the `-store` flag of xrCompress. */
-  | "Store";
-
-/** What one packing run produced. */
-export type ArchivePackResult = {
-  /** Volumes written, in mount order. */
-  volumes: Array<string>;
-  filesTotal: number;
-  /** Files the include, exclude, and skip rules left out. */
-  filesSkipped: number;
-  filesStored: number;
-  filesCompressed: number;
-  /** Files that shared an identical earlier payload and cost only a descriptor row. */
-  filesAliased: number;
-  sizeSource: number;
-  sizeWritten: number;
-  duration: number;
-};
-
-export type ArchiveUnpackResult = {
-  archives: Array<string>;
-  duration: number;
+/**
+ * One entry of a volume's name table: where its payload sits and how to verify it.
+ *
+ * Equal `size_real` and `size_compressed` is how the format says "stored uncompressed".
+ */
+export type ArchiveFileDescriptor = {
+  /** CRC32 of the unpacked payload, recorded by the packer and verified on decompression. */
+  crc: number;
+  /** The volume file holding the payload. */
+  source: string;
+  /** Root the entry unpacks under, from its volume's header. */
   destination: string;
-  prepareDuration: number;
-  unpackedSize: number;
-  unpackDuration: number;
+  /** Lower-cased extension derived from [`Self::name`], empty when the name has none. */
+  extension: string;
+  /** Entry name as authored, which the engine registers verbatim. */
+  name: string;
+  /** Byte offset of the payload inside [`Self::source`]. */
+  offset: number;
+  /** Payload bytes as stored in the volume. */
+  sizeCompressed: number;
+  /** Payload bytes once unpacked. */
+  sizeReal: number;
 };
 
-/** Extension the produced volumes carry, which also decides how the engine treats a missing header. */
-export type ArchiveVolumeExtension = "Db" | "Xdb";
+/**
+ * One volume set at a path the caller names, merged into a single name table.
+ *
+ * Scoped to a path on purpose: which directories of an installation hold volumes is a question the mount planner in
+ * `xrf-vfs` answers (`XrayMountPlan::from_fsgame`), and answering it here too would put `fsgame.ltx` knowledge in the
+ * volume-format layer and give the same declaration two readers.
+ *
+ * Later volumes win the merge, so a patch volume shadows the entry it replaces.
+ */
+export type ArchiveProject = {
+  archives: Array<ArchiveDescriptor>;
+  files: { [key in string]: ArchiveFileDescriptor };
+  readPolicy: ArchiveProjectReadPolicy;
+  root: string;
+  sizeReal: number;
+};
+
+/**
+ * What an archive viewer may read out of a project, by extension and size.
+ *
+ * A gate for interactive consumers rather than a format rule: [`crate::ArchiveProject::read_file_bytes`] ignores it,
+ * while [`crate::ArchiveProject::read_file_as_string`] refuses what the policy does not cover.
+ */
+export type ArchiveProjectReadPolicy = {
+  extensions: Array<string>;
+  maximumSize: number;
+  /** Extensions decoded into a picture. Compression does not apply: it is undone before decoding. */
+  imageExtensions: Array<string>;
+  maximumImageSize: number;
+  /** Extensions played by the webview itself, so the backend only has to hand over the bytes. */
+  audioExtensions: Array<string>;
+  maximumAudioSize: number;
+};
+
+/** One archived text file read for display: its name, decoded content, and unpacked size. */
+export type ProjectReadResult = {
+  /** Entry name the content was read under. */
+  name: string;
+  /** Entry text decoded from Windows-1251, like every engine text format. */
+  content: string;
+  /** Entry bytes once unpacked, before decoding. */
+  size: number;
+};

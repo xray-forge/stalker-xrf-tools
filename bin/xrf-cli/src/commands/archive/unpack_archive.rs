@@ -3,9 +3,9 @@ use std::path::PathBuf;
 
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use tokio::runtime::Runtime;
-use xrf_archive::{ArchiveUnpackResult, ArchiveUnpacker};
+use xrf_archive::ArchiveProject;
 use xrf_output::OutputOptions;
-use xrf_volume::ArchiveProject;
+use xrf_pack::{ArchiveUnpackResult, ArchiveUnpacker};
 
 use crate::core::generic_command::{CommandResult, GenericCommand};
 use crate::core::output::TerminalOutput;

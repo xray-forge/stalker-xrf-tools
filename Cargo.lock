@@ -6817,34 +6817,31 @@ dependencies = [
  "xrf-export",
  "xrf-ltx",
  "xrf-output",
+ "xrf-pack",
  "xrf-sound",
  "xrf-texture",
  "xrf-translation",
  "xrf-utils",
  "xrf-vfs",
  "xrf-visual",
- "xrf-volume",
 ]
 
 [[package]]
 name = "xrf-archive"
 version = "0.1.0"
 dependencies = [
- "bounded_join_set",
  "byteorder",
  "crc32fast",
  "log",
  "lzokay",
+ "regex",
  "serde",
  "specta",
  "walkdir",
  "xrf-error",
- "xrf-ltx",
  "xrf-lzhuf",
  "xrf-test-utils",
  "xrf-utils",
- "xrf-vfs",
- "xrf-volume",
 ]
 
 [[package]]
@@ -6878,12 +6875,12 @@ dependencies = [
  "xrf-gamedata",
  "xrf-ltx",
  "xrf-output",
+ "xrf-pack",
  "xrf-report",
  "xrf-texture",
  "xrf-translation",
  "xrf-vfs",
  "xrf-visual",
- "xrf-volume",
 ]
 
 [[package]]
@@ -7014,6 +7011,27 @@ name = "xrf-output"
 version = "0.1.0"
 
 [[package]]
+name = "xrf-pack"
+version = "0.1.0"
+dependencies = [
+ "bounded_join_set",
+ "byteorder",
+ "crc32fast",
+ "log",
+ "lzokay",
+ "serde",
+ "specta",
+ "walkdir",
+ "xrf-archive",
+ "xrf-error",
+ "xrf-ltx",
+ "xrf-lzhuf",
+ "xrf-test-utils",
+ "xrf-utils",
+ "xrf-vfs",
+]
+
+[[package]]
 name = "xrf-report"
 version = "0.1.0"
 dependencies = [
@@ -7112,10 +7130,10 @@ dependencies = [
  "serde",
  "specta",
  "walkdir",
+ "xrf-archive",
  "xrf-error",
  "xrf-test-utils",
  "xrf-utils",
- "xrf-volume",
 ]
 
 [[package]]
@@ -7125,24 +7143,6 @@ dependencies = [
  "serde",
  "specta",
  "xrf-db",
-]
-
-[[package]]
-name = "xrf-volume"
-version = "0.1.0"
-dependencies = [
- "byteorder",
- "crc32fast",
- "log",
- "lzokay",
- "regex",
- "serde",
- "specta",
- "walkdir",
- "xrf-error",
- "xrf-lzhuf",
- "xrf-test-utils",
- "xrf-utils",
 ]
 
 [[package]]

@@ -3,7 +3,7 @@ import {
   ArchivePackFolder,
   ArchivePackMode,
   ArchiveVolumeExtension,
-} from "@/core/bindings/types/xrf-archive";
+} from "@/core/bindings/types/xrf-pack";
 import { BYTES_PER_MEGABYTE } from "@/lib/memory/size";
 import { Nullable } from "@/lib/types/general";
 

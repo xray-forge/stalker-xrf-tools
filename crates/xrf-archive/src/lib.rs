@@ -1,23 +1,16 @@
-//! Packing and unpacking X-Ray database archives.
-//!
-//! The volume format, the aggregated archive project and its VFS source live in `xrf-vfs`, because a
-//! directory and a `.db` volume set are the two sources the engine itself resolves from. This crate is
-//! the two directions between such a set and a directory on disk: [`ArchivePacker`] builds volumes from
-//! a directory and [`ArchiveUnpacker`] writes them back out to one.
-//!
-//! Both operations own no state and borrow the project, so neither is a method on it.
+#![doc = include_str!("../README.md")]
 
-#[cfg(test)]
-mod asset_source_tests;
-pub(crate) mod pack;
-pub(crate) mod types;
-pub(crate) mod unpack;
+mod archive_descriptor;
+mod archive_file_descriptor;
+mod archive_header;
+mod byte_order;
+mod constants;
+mod file_io;
+mod project;
+mod reader;
 
-pub use crate::pack::archive_pack_config::{
-  ArchivePackConfig, ArchivePackFolder, ArchivePackMode, ArchiveVolumeExtension, VOLUME_SIZE_MAX,
-};
-pub use crate::pack::archive_pack_result::ArchivePackResult;
-pub use crate::pack::archive_packer::ArchivePacker;
-pub use crate::unpack::archive_extract_result::{ArchiveExtractDirectoryResult, ArchiveExtractResult};
-pub use crate::unpack::archive_unpack_result::ArchiveUnpackResult;
-pub use crate::unpack::archive_unpacker::ArchiveUnpacker;
+pub use archive_descriptor::ArchiveDescriptor;
+pub use archive_file_descriptor::ArchiveFileDescriptor;
+pub use constants::CHUNK_ID_COMPRESSED_MASK;
+pub use file_io::write_descriptor_contents;
+pub use project::{ArchiveProject, ArchiveProjectReadPolicy, ProjectReadResult};

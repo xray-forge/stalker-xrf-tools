@@ -3,7 +3,7 @@ import { BoundAction, Computed, makeObservable, Observable, runInAction } from "
 
 import { FALLBACK_PACK_CONFIG } from "@/applications/archives-packer/lib/pack-config";
 import { archivesCommands } from "@/core/bindings/commands/archives";
-import { ArchivePackConfig, ArchivePackResult } from "@/core/bindings/types/xrf-archive";
+import { ArchivePackConfig, ArchivePackResult } from "@/core/bindings/types/xrf-pack";
 import { transformError } from "@/core/error/lib";
 import { emitNotification, ENotificationSeverity } from "@/core/notifications/lib";
 import { EApplicationId } from "@/core/routing/application";

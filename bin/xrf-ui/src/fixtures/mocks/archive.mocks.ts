@@ -3,7 +3,7 @@ import {
   ArchiveFileDescriptor,
   ArchiveProject,
   ArchiveProjectReadPolicy,
-} from "@/core/bindings/types/xrf-volume";
+} from "@/core/bindings/types/xrf-archive";
 
 /**
  * Creates an archive read policy fixture.

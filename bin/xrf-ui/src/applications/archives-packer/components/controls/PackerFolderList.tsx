@@ -4,7 +4,7 @@ import { Box, Button, FormControlLabel, IconButton, Stack, Switch, TextField, Ty
 import { ChangeEvent, ReactElement } from "react";
 
 import { withFolderAt, withoutAt } from "@/applications/archives-packer/lib/pack-config";
-import { ArchivePackFolder } from "@/core/bindings/types/xrf-archive";
+import { ArchivePackFolder } from "@/core/bindings/types/xrf-pack";
 
 interface IPackerFolderListProps {
   folders: Array<ArchivePackFolder>;

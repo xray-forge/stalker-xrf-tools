@@ -4,7 +4,7 @@ import { ReactElement } from "react";
 import { PackerFolderList } from "@/applications/archives-packer/components/controls/PackerFolderList";
 import { PackerStringList } from "@/applications/archives-packer/components/controls/PackerStringList";
 import { isWholeDirectory } from "@/applications/archives-packer/lib/pack-config";
-import { ArchivePackConfig } from "@/core/bindings/types/xrf-archive";
+import { ArchivePackConfig } from "@/core/bindings/types/xrf-pack";
 import { FormRow } from "@/core/ui/form/FormRow";
 
 interface IPackerSelectionSectionProps {

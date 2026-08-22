@@ -1,4 +1,4 @@
-import { ArchiveFileDescriptor } from "@/core/bindings/types/xrf-volume";
+import { ArchiveFileDescriptor } from "@/core/bindings/types/xrf-archive";
 import { Optional } from "@/lib/types/general";
 
 /**

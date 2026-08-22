@@ -27,7 +27,7 @@ xrf-export = { workspace = true }
 xrf-texture = { workspace = true }
 xrf-translation = { workspace = true }
 xrf-visual = { workspace = true }
-xrf-volume = { workspace = true }
+xrf-pack = { workspace = true }
 
 [lints]
 workspace = true

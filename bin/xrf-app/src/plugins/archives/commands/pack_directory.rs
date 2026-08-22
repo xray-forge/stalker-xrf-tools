@@ -1,4 +1,4 @@
-use xrf_archive::{ArchivePackConfig, ArchivePackResult, ArchivePacker};
+use xrf_pack::{ArchivePackConfig, ArchivePackResult, ArchivePacker};
 
 use crate::core::error::error_to_string;
 use crate::core::types::TauriResult;

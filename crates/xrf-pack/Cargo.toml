@@ -1,29 +1,36 @@
 [package]
-name = "xrf-volume"
+name = "xrf-pack"
 version = "0.1.0"
 publish = false
 edition = "2024"
 rust-version.workspace = true
 
+[lib]
+path = "src/lib.rs"
+
 [dependencies]
+bounded_join_set = "0.3.0"
 byteorder = { workspace = true }
 crc32fast = "1.5.0"
 log = { workspace = true }
 lzokay = { workspace = true }
-regex = { workspace = true }
 serde = { workspace = true }
 specta = { workspace = true, optional = true }
 walkdir = { workspace = true }
+xrf-archive = { workspace = true }
 xrf-error = { workspace = true }
+xrf-ltx = { workspace = true }
 xrf-lzhuf = { workspace = true }
 xrf-utils = { workspace = true }
 
+[dev-dependencies]
+# Only the pack-then-mount integration test reads volumes back through the VFS.
+xrf-test-utils = { workspace = true }
+xrf-vfs = { workspace = true }
+
 [features]
 # Emits TypeScript mirrors of the serialized types. Nothing in a normal build turns this on.
-typescript-bindings = ["specta"]
+typescript-bindings = ["specta", "xrf-archive/typescript-bindings"]
 
 [lints]
 workspace = true
-
-[dev-dependencies]
-xrf-test-utils = { workspace = true }

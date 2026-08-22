@@ -6,8 +6,8 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 
+use xrf_archive::{ArchiveFileDescriptor, ArchiveProject};
 use xrf_test_utils::utils::build_absolute_generated_test_resource_path;
-use xrf_volume::{ArchiveFileDescriptor, ArchiveProject};
 
 use crate::pack::archive_pack_config::{ArchivePackConfig, ArchivePackFolder, ArchivePackMode};
 use crate::pack::archive_pack_result::ArchivePackResult;

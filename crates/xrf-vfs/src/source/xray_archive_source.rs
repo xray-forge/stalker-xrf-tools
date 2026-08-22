@@ -3,8 +3,8 @@ use std::fmt;
 use std::fmt::{Debug, Formatter};
 use std::path::Path;
 
+use xrf_archive::ArchiveProject;
 use xrf_error::{XrfError, XrfResult};
-use xrf_volume::ArchiveProject;
 
 use crate::path::{is_component_prefix, normalize_logical};
 use crate::source::xray_asset_source::label_from_path;

@@ -2,9 +2,9 @@ use std::sync::MutexGuard;
 
 use serde::Serialize;
 use tauri::State;
+use xrf_archive::{ArchiveFileDescriptor, ArchiveProject};
 use xrf_sound::{SoundFile, SoundMetadata};
 use xrf_utils::encode_bytes_to_standard_base64;
-use xrf_volume::{ArchiveFileDescriptor, ArchiveProject};
 
 use crate::core::types::TauriResult;
 use crate::plugins::archives::state::ArchiveProjectState;

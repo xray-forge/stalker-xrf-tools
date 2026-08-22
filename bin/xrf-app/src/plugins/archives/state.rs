@@ -1,6 +1,6 @@
 use std::sync::{Arc, Mutex};
 
-use xrf_volume::ArchiveProject;
+use xrf_archive::ArchiveProject;
 
 pub struct ArchiveProjectState {
   pub project: Arc<Mutex<Option<ArchiveProject>>>,

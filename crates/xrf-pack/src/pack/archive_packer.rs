@@ -6,10 +6,10 @@ use std::path::PathBuf;
 use std::time::Instant;
 
 use lzokay::compress::Dict;
+use xrf_archive::CHUNK_ID_COMPRESSED_MASK;
 use xrf_error::{XrfError, XrfResult};
 use xrf_lzhuf::compress;
 use xrf_utils::encode_string_to_w1251_bytes;
-use xrf_volume::CHUNK_ID_COMPRESSED_MASK;
 
 use crate::pack::archive_pack_config::{ArchivePackConfig, ArchivePackMode};
 use crate::pack::archive_pack_result::ArchivePackResult;

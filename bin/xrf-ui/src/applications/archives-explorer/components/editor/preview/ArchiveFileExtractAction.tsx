@@ -5,7 +5,7 @@ import { useInjection } from "@wirestate/react";
 import { ReactElement, useCallback } from "react";
 
 import { ArchivesService } from "@/applications/archives-explorer/services/archives";
-import { ArchiveFileDescriptor } from "@/core/bindings/types/xrf-volume";
+import { ArchiveFileDescriptor } from "@/core/bindings/types/xrf-archive";
 import { Logger, useLogger } from "@/lib/logging";
 import { Nullable } from "@/lib/types/general";
 

@@ -1,9 +1,9 @@
-# xrf-volume
+# xrf-archive
 
 The X-Ray `.db`/`.xdb` archive volume format: headers, entry descriptors, and moving payloads in and out.
 
 This crate answers how a volume set is encoded, and nothing above that: `xrf-vfs` mounts one as an asset source, and
-`xrf-archive` packs and unpacks them. Neither could own the format without the other reaching into it, so it lives
+`xrf-pack` packs and unpacks them. Neither could own the format without the other reaching into it, so it lives
 below both. Prefer those crates unless you are working on the format itself — resolution, shadowing, and logical paths
 all live in `xrf-vfs`.
 
@@ -11,7 +11,7 @@ all live in `xrf-vfs`.
 matching how the engine registers archives, and volumes under a `patches` directory winning over everything.
 
 ```rust,no_run
-use xrf_volume::ArchiveProject;
+use xrf_archive::ArchiveProject;
 
 # fn main() -> xrf_error::XrfResult {
 // One volume, or every volume under a directory.
@@ -28,4 +28,4 @@ declared size is checked against the volume before it can reach an allocation, s
 reported mount rather than an abort.
 
 `write_descriptor_contents` streams one archived entry into an open file, decompressing and CRC-checking on the way —
-the primitive `xrf-archive`'s unpacker and single-file extraction share so they cannot drift.
+the primitive `xrf-pack`'s unpacker and single-file extraction share so they cannot drift.

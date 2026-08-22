@@ -4,19 +4,19 @@ import { invoke as __TAURI_INVOKE } from "@tauri-apps/api/core";
 
 import { ArchiveAudioPreview, ArchiveImagePreview } from "@/core/bindings/types/xrf-app";
 import {
-  ArchiveExtractDirectoryResult,
-  ArchiveExtractResult,
-  ArchivePackConfig,
-  ArchivePackResult,
-  ArchiveUnpackResult,
-} from "@/core/bindings/types/xrf-archive";
-import {
   ArchiveDescriptor,
   ArchiveFileDescriptor,
   ArchiveProject,
   ArchiveProjectReadPolicy,
   ProjectReadResult,
-} from "@/core/bindings/types/xrf-volume";
+} from "@/core/bindings/types/xrf-archive";
+import {
+  ArchiveExtractDirectoryResult,
+  ArchiveExtractResult,
+  ArchivePackConfig,
+  ArchivePackResult,
+  ArchiveUnpackResult,
+} from "@/core/bindings/types/xrf-pack";
 
 /** Commands */
 export const archivesCommands = {

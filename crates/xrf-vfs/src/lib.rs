@@ -11,7 +11,7 @@
 //! - [`vfs`] — resolving and reading through that order.
 //! - [`fsgame`] — the declaration file an installation describes its own layout with.
 //!
-//! The `.db` volume format the archive source reads lives below this crate, in `xrf-volume`.
+//! The `.db` volume format the archive source reads lives below this crate, in `xrf-archive`.
 
 pub mod asset;
 pub mod fsgame;

@@ -12,7 +12,7 @@ import {
   isWholeDirectory,
   readHeaderValue,
 } from "@/applications/archives-packer/lib/pack-config";
-import { ArchivePackConfig } from "@/core/bindings/types/xrf-archive";
+import { ArchivePackConfig } from "@/core/bindings/types/xrf-pack";
 import { bytesToWholeMegabytes } from "@/lib/memory/size";
 import { Nullable } from "@/lib/types/general";
 

@@ -2,7 +2,7 @@ import { describe, expect, it } from "@jest/globals";
 import { isComputedProp } from "@wirestate/mobx";
 
 import { ArchivesService } from "@/applications/archives-explorer/services/archives/index";
-import { ArchiveFileDescriptor, ProjectReadResult } from "@/core/bindings/types/xrf-volume";
+import { ArchiveFileDescriptor, ProjectReadResult } from "@/core/bindings/types/xrf-archive";
 import { mockArchiveFileDescriptor, mockArchivesProject } from "@/fixtures/mocks/archive.mocks";
 import { mockInvoke, setMockInvokeResponses } from "@/fixtures/mocks/tauri.mocks";
 import { mockInjectedService } from "@/fixtures/utils/container";

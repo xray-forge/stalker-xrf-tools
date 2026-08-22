@@ -178,7 +178,7 @@ without parsing messages.
 
 ## Related crates
 
-- `xrf-volume` — the `.db` volume format underneath this crate's archive source.
-- `xrf-archive` — pack and unpack tooling over both.
+- `xrf-archive` — the `.db` volume format underneath this crate's archive source.
+- `xrf-pack` — pack and unpack tooling over both.
 - `xrf-ltx`, `xrf-gamedata` — config and gamedata projects that read through this VFS, so archived installations verify
   as readily as loose trees.

@@ -6,10 +6,10 @@ use std::io::ErrorKind::AlreadyExists;
 use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant};
 
+use xrf_archive::ArchiveFileDescriptor;
+use xrf_archive::ArchiveProject;
+use xrf_archive::write_descriptor_contents;
 use xrf_error::{XrfError, XrfResult};
-use xrf_volume::ArchiveFileDescriptor;
-use xrf_volume::ArchiveProject;
-use xrf_volume::write_descriptor_contents;
 
 use crate::unpack::archive_extract_result::{ArchiveExtractDirectoryResult, ArchiveExtractResult};
 use crate::unpack::archive_unpack_result::ArchiveUnpackResult;

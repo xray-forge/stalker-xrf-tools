@@ -15,6 +15,7 @@ members = [
   "crates/xrf-lua",
   "crates/xrf-lzhuf",
   "crates/xrf-output",
+  "crates/xrf-pack",
   "crates/xrf-report",
   "crates/xrf-shaders",
   "crates/xrf-sound",
@@ -25,7 +26,6 @@ members = [
   "crates/xrf-utils",
   "crates/xrf-vfs",
   "crates/xrf-visual",
-  "crates/xrf-volume",
   "crates/xrf-xml",
 ]
 
@@ -66,6 +66,7 @@ xrf-ltx = { path = "crates/xrf-ltx" }
 xrf-lua = { path = "crates/xrf-lua" }
 xrf-lzhuf = { path = "crates/xrf-lzhuf" }
 xrf-output = { path = "crates/xrf-output" }
+xrf-pack = { path = "crates/xrf-pack" }
 xrf-report = { path = "crates/xrf-report" }
 xrf-shaders = { path = "crates/xrf-shaders" }
 xrf-sound = { path = "crates/xrf-sound" }
@@ -76,7 +77,6 @@ xrf-typescript = { path = "crates/xrf-typescript" }
 xrf-utils = { path = "crates/xrf-utils" }
 xrf-vfs = { path = "crates/xrf-vfs" }
 xrf-visual = { path = "crates/xrf-visual" }
-xrf-volume = { path = "crates/xrf-volume" }
 xrf-xml = { path = "crates/xrf-xml" }
 
 [profile.release]

@@ -3,8 +3,8 @@ use std::path::PathBuf;
 
 use clap::parser::ValueSource;
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
-use xrf_archive::{ArchivePackConfig, ArchivePackMode, ArchivePackResult, ArchivePacker, ArchiveVolumeExtension};
 use xrf_output::OutputOptions;
+use xrf_pack::{ArchivePackConfig, ArchivePackMode, ArchivePackResult, ArchivePacker, ArchiveVolumeExtension};
 
 use crate::core::generic_command::{CommandResult, GenericCommand};
 use crate::core::output::TerminalOutput;

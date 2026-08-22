@@ -1,6 +1,6 @@
 import { ExportDescriptor, ExportsProject } from "@/core/bindings/types/xrf-export";
 import { TranslationProjectDescriptor } from "@/core/bindings/types/xrf-translation";
-import { ArchiveDescriptor, ArchiveFileDescriptor, ArchiveProject } from "@/core/bindings/types/xrf-volume";
+import { ArchiveDescriptor, ArchiveFileDescriptor, ArchiveProject } from "@/core/bindings/types/xrf-archive";
 import { IEquipmentSectionDescriptor } from "@/core/equipment-icons";
 import { TCallableExportDescriptor } from "@/core/exports";
 
