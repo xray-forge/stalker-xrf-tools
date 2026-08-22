@@ -5,12 +5,12 @@ use std::{fs, io};
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use xrf_db::{ParticlesFile, XRayByteOrder};
 
-use crate::generic_command::{CommandResult, GenericCommand};
+use crate::core::generic_command::{CommandResult, GenericCommand};
 
 #[derive(Default)]
-pub struct PackParticlesFileCommand;
+pub struct PackParticlesCommand;
 
-impl GenericCommand for PackParticlesFileCommand {
+impl GenericCommand for PackParticlesCommand {
   fn name(&self) -> &'static str {
     "pack-particles"
   }

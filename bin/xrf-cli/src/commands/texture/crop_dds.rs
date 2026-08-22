@@ -5,8 +5,8 @@ use xrf_dds::{ImageFormat, Mipmaps};
 use xrf_output::OutputOptions;
 use xrf_texture::{CropTextureOptions, CropTextureProcessor, CropTextureResult};
 
-use crate::generic_command::{CommandResult, GenericCommand};
-use crate::output::TerminalOutput;
+use crate::core::generic_command::{CommandResult, GenericCommand};
+use crate::core::output::TerminalOutput;
 
 #[derive(Default)]
 pub struct CropDdsCommand;

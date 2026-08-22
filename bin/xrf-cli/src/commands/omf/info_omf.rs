@@ -4,8 +4,8 @@ use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use xrf_db::{OmfFile, XRayByteOrder};
 use xrf_output::OutputOptions;
 
-use crate::generic_command::{CommandResult, GenericCommand};
-use crate::output::TerminalOutput;
+use crate::core::generic_command::{CommandResult, GenericCommand};
+use crate::core::output::TerminalOutput;
 
 #[derive(Default)]
 pub struct InfoOmfCommand;

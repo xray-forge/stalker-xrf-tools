@@ -10,8 +10,8 @@ use xrf_export::{
 };
 use xrf_output::OutputOptions;
 
-use crate::generic_command::{CommandResult, GenericCommand};
-use crate::output::TerminalOutput;
+use crate::core::generic_command::{CommandResult, GenericCommand};
+use crate::core::output::TerminalOutput;
 
 /// Generate or verify a stable extern manifest from TypeScript declarations.
 #[derive(Default)]
@@ -213,7 +213,7 @@ mod tests {
   use xrf_export::ExternFormat;
 
   use super::ExportExternsCommand;
-  use crate::generic_command::GenericCommand;
+  use crate::core::generic_command::GenericCommand;
 
   #[test]
   fn infers_check_format_from_extension() {

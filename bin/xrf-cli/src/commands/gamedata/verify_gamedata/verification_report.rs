@@ -4,7 +4,7 @@ use serde::Serialize;
 use xrf_gamedata::{GamedataVerificationCheckReport, GamedataVerificationResult};
 use xrf_report::{CheckReport, Finding};
 
-use crate::generic_command::CommandResult;
+use crate::core::generic_command::CommandResult;
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]

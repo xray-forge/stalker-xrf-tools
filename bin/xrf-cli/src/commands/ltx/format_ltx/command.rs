@@ -6,8 +6,8 @@ use xrf_ltx::{LtxFilesFormatter, LtxFormatOptions, LtxProjectFormatResult};
 use xrf_output::OutputOptions;
 
 use crate::commands::ltx::format_ltx::ltx_format_selection::LtxFormatSelection;
-use crate::generic_command::{CommandResult, GenericCommand};
-use crate::output::TerminalOutput;
+use crate::core::generic_command::{CommandResult, GenericCommand};
+use crate::core::output::TerminalOutput;
 
 /// Names this many declined configs before reporting the remainder count.
 const DECLINED_LIMIT: usize = 20;

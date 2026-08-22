@@ -4,7 +4,7 @@ use std::time::{Duration, Instant};
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use xrf_db::{SpawnFile, XRayByteOrder};
 
-use crate::generic_command::{CommandResult, GenericCommand};
+use crate::core::generic_command::{CommandResult, GenericCommand};
 
 #[derive(Default)]
 pub struct RepackSpawnCommand;

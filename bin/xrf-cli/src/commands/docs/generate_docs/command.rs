@@ -6,8 +6,8 @@ use xrf_output::OutputOptions;
 
 use super::command_reference::GroupReference;
 use super::markdown_renderer::ReferenceMarkdownRenderer;
-use crate::generic_command::{CommandResult, GenericCommand};
-use crate::output::TerminalOutput;
+use crate::core::generic_command::{CommandResult, GenericCommand};
+use crate::core::output::TerminalOutput;
 
 #[derive(Default)]
 pub struct GenerateDocsCommand;
@@ -61,7 +61,7 @@ impl GenericCommand for GenerateDocsCommand {
 
     let output: OutputOptions = TerminalOutput::from_options(matches.get_flag("silent"), matches.get_flag("verbose"));
 
-    let groups: Vec<GroupReference> = crate::setup::setup_command_groups()
+    let groups: Vec<GroupReference> = crate::registry::setup_command_groups()
       .iter()
       .map(GroupReference::from_group)
       .collect();
@@ -155,7 +155,7 @@ mod tests {
   use clap::ArgMatches;
 
   use super::GenerateDocsCommand;
-  use crate::generic_command::GenericCommand;
+  use crate::core::generic_command::GenericCommand;
 
   fn parse_matches(extra: &[&str]) -> ArgMatches {
     let mut arguments = vec!["generate-docs", "--output", "docs"];

@@ -5,12 +5,12 @@ use std::{fs, io};
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use xrf_db::{SpawnFile, XRayByteOrder};
 
-use crate::generic_command::{CommandResult, GenericCommand};
+use crate::core::generic_command::{CommandResult, GenericCommand};
 
 #[derive(Default)]
-pub struct PackSpawnFileCommand;
+pub struct PackSpawnCommand;
 
-impl GenericCommand for PackSpawnFileCommand {
+impl GenericCommand for PackSpawnCommand {
   fn name(&self) -> &'static str {
     "pack-spawn"
   }

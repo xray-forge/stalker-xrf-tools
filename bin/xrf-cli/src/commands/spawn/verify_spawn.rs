@@ -4,12 +4,12 @@ use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use xrf_db::{SpawnFile, XRayByteOrder};
 use xrf_error::XrfError;
 
-use crate::generic_command::{CommandResult, GenericCommand};
+use crate::core::generic_command::{CommandResult, GenericCommand};
 
 #[derive(Default)]
-pub struct VerifySpawnFileCommand;
+pub struct VerifySpawnCommand;
 
-impl GenericCommand for VerifySpawnFileCommand {
+impl GenericCommand for VerifySpawnCommand {
   fn name(&self) -> &'static str {
     "verify-spawn"
   }

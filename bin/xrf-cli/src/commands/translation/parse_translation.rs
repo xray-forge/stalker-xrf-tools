@@ -2,12 +2,12 @@ use std::path::PathBuf;
 
 use clap::{Arg, ArgMatches, Command, value_parser};
 
-use crate::generic_command::{CommandResult, GenericCommand};
+use crate::core::generic_command::{CommandResult, GenericCommand};
 
 #[derive(Default)]
-pub struct ParseTranslationsCommand;
+pub struct ParseTranslationCommand;
 
-impl GenericCommand for ParseTranslationsCommand {
+impl GenericCommand for ParseTranslationCommand {
   fn name(&self) -> &'static str {
     "parse-translation"
   }

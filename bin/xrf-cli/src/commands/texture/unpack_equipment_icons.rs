@@ -8,8 +8,8 @@ use xrf_ltx::Ltx;
 use xrf_output::OutputOptions;
 use xrf_texture::{UnpackEquipmentOptions, UnpackEquipmentProcessor};
 
-use crate::generic_command::{CommandResult, GenericCommand};
-use crate::output::TerminalOutput;
+use crate::core::generic_command::{CommandResult, GenericCommand};
+use crate::core::output::TerminalOutput;
 
 #[derive(Default)]
 pub struct UnpackEquipmentIconsCommand;

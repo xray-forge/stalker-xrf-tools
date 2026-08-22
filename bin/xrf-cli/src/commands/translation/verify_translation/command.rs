@@ -7,13 +7,13 @@ use xrf_output::OutputOptions;
 use xrf_translation::{ProjectVerifyOptions, ProjectVerifyResult, TranslationLanguage, verify_dir, verify_file};
 
 use super::translation_verification_report::TranslationVerificationReportWriter;
-use crate::generic_command::{CommandResult, GenericCommand};
-use crate::output::TerminalOutput;
+use crate::core::generic_command::{CommandResult, GenericCommand};
+use crate::core::output::TerminalOutput;
 
 #[derive(Default)]
-pub struct VerifyTranslationsCommand;
+pub struct VerifyTranslationCommand;
 
-impl GenericCommand for VerifyTranslationsCommand {
+impl GenericCommand for VerifyTranslationCommand {
   fn name(&self) -> &'static str {
     "verify-translation"
   }

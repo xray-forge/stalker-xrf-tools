@@ -4,7 +4,7 @@ use serde::Serialize;
 use xrf_report::{CheckReport, Finding, Report};
 use xrf_translation::ProjectVerifyResult;
 
-use crate::generic_command::CommandResult;
+use crate::core::generic_command::CommandResult;
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]

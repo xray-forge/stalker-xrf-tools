@@ -6,13 +6,13 @@ use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use xrf_db::{SpawnFile, XRayByteOrder};
 use xrf_output::OutputOptions;
 
-use crate::generic_command::{CommandResult, GenericCommand};
-use crate::output::TerminalOutput;
+use crate::core::generic_command::{CommandResult, GenericCommand};
+use crate::core::output::TerminalOutput;
 
 #[derive(Default)]
-pub struct UnpackSpawnFileCommand;
+pub struct UnpackSpawnCommand;
 
-impl GenericCommand for UnpackSpawnFileCommand {
+impl GenericCommand for UnpackSpawnCommand {
   fn name(&self) -> &'static str {
     "unpack-spawn"
   }

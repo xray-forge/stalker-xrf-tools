@@ -6,8 +6,8 @@ use xrf_ltx::Ltx;
 use xrf_output::OutputOptions;
 use xrf_texture::{EquipmentGridOverlap, VerifyEquipmentGridProcessor};
 
-use crate::generic_command::{CommandResult, GenericCommand};
-use crate::output::TerminalOutput;
+use crate::core::generic_command::{CommandResult, GenericCommand};
+use crate::core::output::TerminalOutput;
 
 #[derive(Default)]
 pub struct VerifyEquipmentIconsCommand;

@@ -5,8 +5,8 @@ use xrf_output::OutputOptions;
 use xrf_vfs::XrayMountMode;
 
 use crate::commands::assets::list_assets::asset_lister::{AssetLister, AssetListing};
-use crate::generic_command::{CommandResult, GenericCommand};
-use crate::output::TerminalOutput;
+use crate::core::generic_command::{CommandResult, GenericCommand};
+use crate::core::output::TerminalOutput;
 
 /// Maximum entries printed per section before reporting the omitted count.
 const PRINT_LIMIT: usize = 40;

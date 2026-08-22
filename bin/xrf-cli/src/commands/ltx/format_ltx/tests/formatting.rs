@@ -6,7 +6,7 @@ use std::path::PathBuf;
 use xrf_error::XrfResult;
 
 use crate::commands::ltx::format_ltx::command::FormatLtxCommand;
-use crate::generic_command::{CommandResult, GenericCommand};
+use crate::core::generic_command::{CommandResult, GenericCommand};
 
 fn create_root(name: &str) -> XrfResult<PathBuf> {
   let root: PathBuf = std::env::temp_dir().join(format!("xrf-cli-format-ltx-{name}-{}", std::process::id()));

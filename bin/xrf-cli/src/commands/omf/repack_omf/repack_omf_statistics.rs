@@ -54,7 +54,7 @@ impl RepackOmfStatistics {
 
 #[cfg(test)]
 mod tests {
-  use crate::commands::omf::repack_omf_statistics::{RepackOmfOutcome, RepackOmfStatistics};
+  use crate::commands::omf::repack_omf::repack_omf_statistics::{RepackOmfOutcome, RepackOmfStatistics};
 
   #[test]
   fn test_empty_statistics_are_valid() {

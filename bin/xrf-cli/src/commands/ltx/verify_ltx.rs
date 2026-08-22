@@ -7,8 +7,8 @@ use xrf_output::OutputOptions;
 use xrf_vfs::XrayLookupScope;
 
 use crate::commands::ltx::ltx_installation::mount_installation;
-use crate::generic_command::{CommandResult, GenericCommand};
-use crate::output::TerminalOutput;
+use crate::core::generic_command::{CommandResult, GenericCommand};
+use crate::core::output::TerminalOutput;
 
 #[derive(Default)]
 pub struct VerifyLtxCommand;

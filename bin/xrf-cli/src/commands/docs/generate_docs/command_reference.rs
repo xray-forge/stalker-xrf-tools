@@ -1,6 +1,6 @@
 use clap::{Arg, ArgAction, Command};
 
-use crate::generic_command::CommandGroup;
+use crate::core::generic_command::CommandGroup;
 
 /// Documentation model extracted from one registered CLI command group.
 pub struct GroupReference {

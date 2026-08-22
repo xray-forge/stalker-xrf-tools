@@ -7,8 +7,8 @@ use xrf_output::OutputOptions;
 use xrf_report::Status;
 
 use crate::commands::ogf::verify_ogf::ogf_verifier::{OgfVerificationCensus, OgfVerificationResult, OgfVerifier};
-use crate::generic_command::{CommandResult, GenericCommand};
-use crate::output::TerminalOutput;
+use crate::core::generic_command::{CommandResult, GenericCommand};
+use crate::core::output::TerminalOutput;
 
 #[derive(Default)]
 pub struct VerifyOgfCommand;

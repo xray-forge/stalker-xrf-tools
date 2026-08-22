@@ -16,16 +16,16 @@ use crate::commands::omf::info_omf::InfoOmfCommand;
 use crate::commands::omf::rename_omf_motions::RenameOmfMotionsCommand;
 use crate::commands::omf::repack_omf::RepackOmfCommand;
 use crate::commands::particle::info_particles::InfoParticlesCommand;
-use crate::commands::particle::pack_particles::PackParticlesFileCommand;
+use crate::commands::particle::pack_particles::PackParticlesCommand;
+use crate::commands::particle::re_unpack_particles::ReUnpackParticlesCommand;
 use crate::commands::particle::repack_particles::RepackParticlesCommand;
-use crate::commands::particle::reunpack_particles::ReUnpackParticlesCommand;
 use crate::commands::particle::unpack_particles::UnpackParticlesCommand;
-use crate::commands::particle::verify_particles::VerifyParticlesFileCommand;
+use crate::commands::particle::verify_particles::VerifyParticlesCommand;
 use crate::commands::spawn::info_spawn::InfoSpawnCommand;
-use crate::commands::spawn::pack_spawn::PackSpawnFileCommand;
+use crate::commands::spawn::pack_spawn::PackSpawnCommand;
 use crate::commands::spawn::repack_spawn::RepackSpawnCommand;
-use crate::commands::spawn::unpack_spawn::UnpackSpawnFileCommand;
-use crate::commands::spawn::verify_spawn::VerifySpawnFileCommand;
+use crate::commands::spawn::unpack_spawn::UnpackSpawnCommand;
+use crate::commands::spawn::verify_spawn::VerifySpawnCommand;
 use crate::commands::texture::crop_dds::CropDdsCommand;
 use crate::commands::texture::info_dds::InfoDdsCommand;
 use crate::commands::texture::pack_equipment_icons::PackEquipmentIconsCommand;
@@ -34,11 +34,11 @@ use crate::commands::texture::unpack_equipment_icons::UnpackEquipmentIconsComman
 use crate::commands::texture::unpack_texture_description::UnpackTextureDescriptionCommand;
 use crate::commands::texture::verify_equipment_icons::VerifyEquipmentIconsCommand;
 use crate::commands::thm::patch_thm_bump::PatchThmBumpCommand;
-use crate::commands::translation::build_translations::BuildTranslationsCommand;
-use crate::commands::translation::initialize_translations::InitializeTranslationsCommand;
-use crate::commands::translation::parse_translations::ParseTranslationsCommand;
-use crate::commands::translation::verify_translations::VerifyTranslationsCommand;
-use crate::generic_command::{CommandGroup, GenericCommand};
+use crate::commands::translation::build_translation::BuildTranslationCommand;
+use crate::commands::translation::initialize_translation::InitializeTranslationCommand;
+use crate::commands::translation::parse_translation::ParseTranslationCommand;
+use crate::commands::translation::verify_translation::VerifyTranslationCommand;
+use crate::core::generic_command::{CommandGroup, GenericCommand};
 
 pub fn setup_command_groups() -> Vec<CommandGroup> {
   vec![
@@ -89,21 +89,21 @@ pub fn setup_command_groups() -> Vec<CommandGroup> {
       name: "Particles",
       commands: vec![
         InfoParticlesCommand::new_box(),
-        PackParticlesFileCommand::new_box(),
+        PackParticlesCommand::new_box(),
         RepackParticlesCommand::new_box(),
         ReUnpackParticlesCommand::new_box(),
         UnpackParticlesCommand::new_box(),
-        VerifyParticlesFileCommand::new_box(),
+        VerifyParticlesCommand::new_box(),
       ],
     },
     CommandGroup {
       name: "Spawn",
       commands: vec![
         InfoSpawnCommand::new_box(),
-        PackSpawnFileCommand::new_box(),
+        PackSpawnCommand::new_box(),
         RepackSpawnCommand::new_box(),
-        UnpackSpawnFileCommand::new_box(),
-        VerifySpawnFileCommand::new_box(),
+        UnpackSpawnCommand::new_box(),
+        VerifySpawnCommand::new_box(),
       ],
     },
     CommandGroup {
@@ -125,10 +125,10 @@ pub fn setup_command_groups() -> Vec<CommandGroup> {
     CommandGroup {
       name: "Translations",
       commands: vec![
-        BuildTranslationsCommand::new_box(),
-        InitializeTranslationsCommand::new_box(),
-        ParseTranslationsCommand::new_box(),
-        VerifyTranslationsCommand::new_box(),
+        BuildTranslationCommand::new_box(),
+        InitializeTranslationCommand::new_box(),
+        ParseTranslationCommand::new_box(),
+        VerifyTranslationCommand::new_box(),
       ],
     },
   ]

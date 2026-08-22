@@ -6,8 +6,8 @@ use xrf_dds::ImageFormat;
 use xrf_output::OutputOptions;
 use xrf_texture::{PackDescriptionOptions, UnpackDescriptionProcessor};
 
-use crate::generic_command::{CommandResult, GenericCommand};
-use crate::output::TerminalOutput;
+use crate::core::generic_command::{CommandResult, GenericCommand};
+use crate::core::output::TerminalOutput;
 
 #[derive(Default)]
 pub struct UnpackTextureDescriptionCommand;

@@ -5,13 +5,13 @@ use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use xrf_output::OutputOptions;
 use xrf_translation::{ProjectBuildOptions, ProjectBuildResult, TranslationLanguage, build_dir, build_file};
 
-use crate::generic_command::{CommandResult, GenericCommand};
-use crate::output::TerminalOutput;
+use crate::core::generic_command::{CommandResult, GenericCommand};
+use crate::core::output::TerminalOutput;
 
 #[derive(Default)]
-pub struct BuildTranslationsCommand;
+pub struct BuildTranslationCommand;
 
-impl GenericCommand for BuildTranslationsCommand {
+impl GenericCommand for BuildTranslationCommand {
   fn name(&self) -> &'static str {
     "build-translation"
   }
@@ -125,15 +125,15 @@ impl GenericCommand for BuildTranslationsCommand {
 mod tests {
   use clap::ArgMatches;
 
-  use super::BuildTranslationsCommand;
-  use crate::generic_command::GenericCommand;
+  use super::BuildTranslationCommand;
+  use crate::core::generic_command::GenericCommand;
 
   fn parse_matches(extra: &[&str]) -> ArgMatches {
     let mut arguments = vec!["build-translation", "--path", "translations", "--output", "output"];
 
     arguments.extend_from_slice(extra);
 
-    BuildTranslationsCommand.init().try_get_matches_from(arguments).unwrap()
+    BuildTranslationCommand.init().try_get_matches_from(arguments).unwrap()
   }
 
   #[test]

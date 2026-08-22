@@ -4,13 +4,13 @@ use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use xrf_output::OutputOptions;
 use xrf_translation::{ProjectInitializeOptions, ProjectInitializeResult, initialize_dir, initialize_file};
 
-use crate::generic_command::{CommandResult, GenericCommand};
-use crate::output::TerminalOutput;
+use crate::core::generic_command::{CommandResult, GenericCommand};
+use crate::core::output::TerminalOutput;
 
 #[derive(Default)]
-pub struct InitializeTranslationsCommand;
+pub struct InitializeTranslationCommand;
 
-impl GenericCommand for InitializeTranslationsCommand {
+impl GenericCommand for InitializeTranslationCommand {
   fn name(&self) -> &'static str {
     "initialize-translation"
   }

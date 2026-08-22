@@ -6,8 +6,8 @@ use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use xrf_archive::{ArchivePackConfig, ArchivePackMode, ArchivePackResult, ArchivePacker, ArchiveVolumeExtension};
 use xrf_output::OutputOptions;
 
-use crate::generic_command::{CommandResult, GenericCommand};
-use crate::output::TerminalOutput;
+use crate::core::generic_command::{CommandResult, GenericCommand};
+use crate::core::output::TerminalOutput;
 
 /// Bytes in the megabytes `--max-size` is given in, matching the `-max_size` unit of xrCompress.
 const BYTES_PER_MEGABYTE: u64 = 1024 * 1024;
