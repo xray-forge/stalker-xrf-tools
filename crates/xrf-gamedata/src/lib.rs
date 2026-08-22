@@ -1,4 +1,3 @@
-pub(crate) mod constants;
 pub(crate) mod project;
 
 pub use project::gamedata_check_result::*;

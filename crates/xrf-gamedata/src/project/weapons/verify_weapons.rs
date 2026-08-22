@@ -6,7 +6,7 @@ use xrf_ltx::{LTX_SYMBOL_SCHEME, Ltx, Section};
 use xrf_vfs::XrayAssetType;
 
 use crate::GamedataFindingFactory;
-use crate::constants::NO_SOUND;
+use crate::project::weapons::constants::NO_SOUND;
 use crate::project::weapons::verify_weapons_result::GamedataWeaponVerificationResult;
 use crate::project::weapons::weapon_sound_layer_issues::{WeaponSoundLayerIssue, weapon_sound_layer_issues};
 use crate::project::weapons::weapon_sound_source::WeaponSoundSource;
