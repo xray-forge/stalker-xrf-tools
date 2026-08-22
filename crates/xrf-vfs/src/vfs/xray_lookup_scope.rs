@@ -1,7 +1,7 @@
 use xrf_error::XrfResult;
 
 use crate::path::normalize;
-use crate::{XrayMount, XrayMountId, XrayMountKind};
+use crate::{XrayMount, XrayMountId, XraySourceKind};
 
 /// Which mounts a lookup scope admits.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
@@ -14,7 +14,7 @@ pub(crate) enum XrayMountSelection {
   /// Only mounts that can be written to, which excludes every archive.
   Writable,
   /// Only mounts of one kind.
-  OfKind(XrayMountKind),
+  OfKind(XraySourceKind),
 }
 
 /// Where one [`crate::XrayVfs`] operation is allowed to look: which mounts, and which logical subtree of them.
@@ -51,7 +51,7 @@ impl XrayLookupScope {
   }
 
   /// Selects mounts of one storage kind.
-  pub fn of_kind(kind: XrayMountKind) -> Self {
+  pub fn of_kind(kind: XraySourceKind) -> Self {
     Self {
       selection: XrayMountSelection::OfKind(kind),
       ..Self::default()
@@ -92,7 +92,7 @@ impl XrayLookupScope {
 #[cfg(test)]
 mod tests {
   use super::XrayMountSelection;
-  use crate::{XrayLookupScope, XrayMountKind};
+  use crate::{XrayLookupScope, XraySourceKind};
 
   #[test]
   fn defaults_to_everything() {
@@ -117,8 +117,8 @@ mod tests {
   #[test]
   fn selects_by_kind() {
     assert_eq!(
-      XrayLookupScope::of_kind(XrayMountKind::Archive).get_selection(),
-      &XrayMountSelection::OfKind(XrayMountKind::Archive)
+      XrayLookupScope::of_kind(XraySourceKind::Archive).get_selection(),
+      &XrayMountSelection::OfKind(XraySourceKind::Archive)
     );
   }
 }

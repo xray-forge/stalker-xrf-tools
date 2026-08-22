@@ -5,7 +5,7 @@ use std::path::{Path, PathBuf};
 use xrf_error::{XrfError, XrfResult};
 use xrf_test_utils::utils::build_absolute_generated_test_resource_path;
 
-use crate::{XrayAssetContainer, XrayAssetSource, XrayMountKind};
+use crate::{XrayAssetContainer, XrayAssetSource, XraySourceKind};
 
 /// In-memory archive stand-in that avoids large volume fixtures.
 #[derive(Debug)]
@@ -52,8 +52,8 @@ impl XrayAssetSource for FakeArchiveSource {
     &self.label
   }
 
-  fn get_kind(&self) -> XrayMountKind {
-    XrayMountKind::Archive
+  fn get_kind(&self) -> XraySourceKind {
+    XraySourceKind::Archive
   }
 
   fn is_writable(&self) -> bool {

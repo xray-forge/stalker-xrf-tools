@@ -48,7 +48,8 @@ impl LevelRoster {
 
     let sources: Vec<String> = project
       .vfs()
-      .list_entries_of_type(project.scope(), AssetType::Spawn)
+      .scoped(project.scope())
+      .list_entries_of_type(AssetType::Spawn)
       .into_iter()
       .filter(|location| location.get_logical_path().is_under(SPAWNS_DIRECTORY).unwrap_or(false))
       .map(|location| location.get_logical_path().to_string())

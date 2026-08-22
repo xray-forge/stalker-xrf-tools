@@ -6823,6 +6823,7 @@ dependencies = [
  "xrf-utils",
  "xrf-vfs",
  "xrf-visual",
+ "xrf-volume",
 ]
 
 [[package]]
@@ -6834,7 +6835,6 @@ dependencies = [
  "crc32fast",
  "log",
  "lzokay",
- "regex",
  "serde",
  "specta",
  "walkdir",
@@ -6844,6 +6844,7 @@ dependencies = [
  "xrf-test-utils",
  "xrf-utils",
  "xrf-vfs",
+ "xrf-volume",
 ]
 
 [[package]]
@@ -6882,6 +6883,7 @@ dependencies = [
  "xrf-translation",
  "xrf-vfs",
  "xrf-visual",
+ "xrf-volume",
 ]
 
 [[package]]
@@ -7106,6 +7108,29 @@ dependencies = [
 name = "xrf-vfs"
 version = "0.1.0"
 dependencies = [
+ "log",
+ "serde",
+ "specta",
+ "walkdir",
+ "xrf-error",
+ "xrf-test-utils",
+ "xrf-utils",
+ "xrf-volume",
+]
+
+[[package]]
+name = "xrf-visual"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "specta",
+ "xrf-db",
+]
+
+[[package]]
+name = "xrf-volume"
+version = "0.1.0"
+dependencies = [
  "byteorder",
  "crc32fast",
  "log",
@@ -7118,15 +7143,6 @@ dependencies = [
  "xrf-lzhuf",
  "xrf-test-utils",
  "xrf-utils",
-]
-
-[[package]]
-name = "xrf-visual"
-version = "0.1.0"
-dependencies = [
- "serde",
- "specta",
- "xrf-db",
 ]
 
 [[package]]

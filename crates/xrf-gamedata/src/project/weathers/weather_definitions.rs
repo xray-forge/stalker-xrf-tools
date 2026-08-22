@@ -1,7 +1,7 @@
 use std::collections::{HashMap, HashSet};
 
 use xrf_ltx::{Ltx, LtxProject};
-use xrf_vfs::XrayPath;
+use xrf_vfs::XrayLogicalPath;
 
 /// Definitions that weather sections may reference.
 ///
@@ -91,7 +91,7 @@ impl WeatherDefinitions {
   /// Failures name the path a person can act on, which for a loose config is its file and for an archived one its engine
   /// identity.
   fn read_ltx(project: &LtxProject, relative_path: &str) -> Result<Ltx, String> {
-    let logical_path: XrayPath = project
+    let logical_path: XrayLogicalPath = project
       .config_path(relative_path)
       .map_err(|error| format!("Could not address weather definitions at {relative_path}: {error}"))?;
 

@@ -4,9 +4,9 @@ use std::path::{Path, PathBuf};
 
 use xrf_error::XrfResult;
 
-use crate::mount::xray_root::implied_install_root;
+use crate::mount::xray_root::{find_implied_asset_root, implied_install_root};
 use crate::path::{normalize, normalize_base};
-use crate::{FsgameFile, XrayMountKind, find_implied_asset_root};
+use crate::{FsgameFile, XraySourceKind};
 
 /// One source to mount before it is opened or indexed.
 ///
@@ -18,7 +18,7 @@ pub struct XrayPlannedMount {
   /// Logical base the source mounts at, empty for a root.
   pub base: String,
   /// Source implementation to construct for this path.
-  pub kind: XrayMountKind,
+  pub kind: XraySourceKind,
   /// Caller-supplied diagnostic label, such as an `fsgame.ltx` alias.
   pub origin: String,
   /// Logical prefixes this source omits when indexed.
@@ -65,6 +65,16 @@ impl XrayMountPlan {
       Some(root) => Self::new().with(root, "", "implied"),
       None => Ok(Self::new()),
     }
+  }
+
+  /// The X-Ray root a physical asset path sits under, if any — what [`Self::implied`] plans from.
+  ///
+  /// Walks upward from the asset and answers with the nearest ancestor holding both a `meshes` and a `textures`
+  /// directory, so a gamedata tree nested inside another resolves against the one that contains the asset. Finding a
+  /// root does not promise a reference resolves inside it; callers that need a resolvable root must fall through on a
+  /// failed lookup rather than on a failed derivation.
+  pub fn implied_root(asset: &Path) -> Option<PathBuf> {
+    find_implied_asset_root(asset)
   }
 
   /// Plans the nearest installation containing an asset.
@@ -117,13 +127,13 @@ impl XrayMountPlan {
       // Always plan declared gamedata, even when empty: archive-only installations such as Anomaly still use it as the
       // writable override root.
       if Self::is_gamedata_root(fsgame, &path) {
-        plan = plan.with_kind(path, "", &declaration.alias, XrayMountKind::Directory)?;
+        plan = plan.with_kind(path, "", &declaration.alias, XraySourceKind::Directory)?;
 
         continue;
       }
 
       if Self::holds_volumes(&path) {
-        plan = plan.with_kind(path, "", &declaration.alias, XrayMountKind::Archive)?;
+        plan = plan.with_kind(path, "", &declaration.alias, XraySourceKind::Archive)?;
       }
     }
 
@@ -136,7 +146,7 @@ impl XrayMountPlan {
   ///
   /// Returns an error when `base` is not a valid X-Ray logical path.
   pub fn with(self, path: impl AsRef<Path>, base: &str, origin: &str) -> XrfResult<Self> {
-    self.with_kind(path, base, origin, XrayMountKind::Directory)
+    self.with_kind(path, base, origin, XraySourceKind::Directory)
   }
 
   /// Appends a mount of the requested source kind.
@@ -144,7 +154,13 @@ impl XrayMountPlan {
   /// # Errors
   ///
   /// Returns an error when `base` is not a valid X-Ray logical path.
-  pub fn with_kind(mut self, path: impl AsRef<Path>, base: &str, origin: &str, kind: XrayMountKind) -> XrfResult<Self> {
+  pub fn with_kind(
+    mut self,
+    path: impl AsRef<Path>,
+    base: &str,
+    origin: &str,
+    kind: XraySourceKind,
+  ) -> XrfResult<Self> {
     self.mounts.push(XrayPlannedMount {
       base: normalize_base(base)?,
       ignored: Vec::new(),
@@ -171,7 +187,7 @@ impl XrayMountPlan {
       .collect::<XrfResult<_>>()?;
 
     for mount in &mut self.mounts {
-      if mount.kind == XrayMountKind::Directory {
+      if mount.kind == XraySourceKind::Directory {
         mount.ignored = ignored.clone();
       }
     }

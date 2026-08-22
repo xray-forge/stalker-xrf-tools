@@ -2,7 +2,7 @@ use std::path::{Path, PathBuf};
 
 use xrf_error::XrfResult;
 use xrf_utils::{decode_bytes_to_string, new_windows1251_encoder};
-use xrf_vfs::{XrayLookupScope, XrayPath, XrayVfs, normalize_logical};
+use xrf_vfs::{XrayLogicalPath, XrayLookupScope, XrayVfs};
 
 use crate::Ltx;
 use crate::file::include::LtxIncludeConvertor;
@@ -25,10 +25,10 @@ impl<'a> LtxIncludeVfsSource<'a> {
 
   /// Reads and parses one logical path, with its logical location recorded so nested includes resolve against it.
   pub fn read_ltx(&self, logical_path: &str) -> XrfResult<Ltx> {
-    let bytes: Vec<u8> = self.vfs.read(self.scope, logical_path)?;
+    let bytes: Vec<u8> = self.vfs.scoped(self.scope).read(logical_path)?;
     let contents: String = decode_bytes_to_string(&bytes, new_windows1251_encoder())?;
     let mut ltx: Ltx = Ltx::read_from_str(&contents)?;
-    let path: XrayPath = XrayPath::new(logical_path)?;
+    let path: XrayLogicalPath = XrayLogicalPath::new(logical_path)?;
 
     // The logical parent, not `Path::parent`: on a host that does not separate on `\` the latter answers the path unsplit, and
     // every nested include then resolves against the mount root. An empty directory stands for a top-level config, which is
@@ -63,10 +63,10 @@ impl LtxIncludeSource for LtxIncludeVfsSource<'_> {
     };
 
     if !statement.contains('*') {
-      return Ok(vec![PathBuf::from(normalize_logical(&joined)?)]);
+      return Ok(vec![PathBuf::from(XrayLogicalPath::normalize(&joined)?)]);
     }
 
-    let normalized: String = normalize_logical(&joined)?;
+    let normalized: String = XrayLogicalPath::normalize(&joined)?;
     let (prefix, mask) = match normalized.rsplit_once('\\') {
       Some((prefix, mask)) => (prefix.to_string(), mask.to_string()),
       None => (String::new(), normalized.clone()),
@@ -75,7 +75,8 @@ impl LtxIncludeSource for LtxIncludeVfsSource<'_> {
     // `#include "sections\*.ltx"` means that one directory, so this asks for its children rather than everything below it.
     let mut resolved: Vec<PathBuf> = self
       .vfs
-      .list_children(self.scope, &prefix)?
+      .scoped(self.scope)
+      .list_children(&prefix)?
       .files
       .into_iter()
       .filter(|location| LtxIncludeConvertor::matches_wildcard_mask(location.get_logical_path().file_name(), &mask))
@@ -94,7 +95,7 @@ impl LtxIncludeSource for LtxIncludeVfsSource<'_> {
 
     // A wildcard include resolves only to names the VFS holds, and a named include that is absent is nothing to merge -
     // the same tolerance the filesystem source shows a config not yet generated from TypeScript.
-    if self.vfs.find(self.scope, &logical_path)?.is_none() {
+    if self.vfs.scoped(self.scope).find(&logical_path)?.is_none() {
       return Ok(None);
     }
 

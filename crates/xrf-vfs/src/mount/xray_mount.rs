@@ -4,7 +4,7 @@ use serde::Serialize;
 use xrf_error::XrfResult;
 
 use crate::path::{is_component_prefix, join, normalize, normalize_base};
-use crate::{XrayAssetSource, XrayMountKind};
+use crate::{XrayAssetSource, XraySourceKind};
 
 /// Stable identity of a mount within one VFS.
 ///
@@ -48,7 +48,7 @@ impl XrayMount {
   }
 
   /// Returns whether the mount stores loose files or archive entries.
-  pub fn get_kind(&self) -> XrayMountKind {
+  pub fn get_kind(&self) -> XraySourceKind {
     self.source.get_kind()
   }
 

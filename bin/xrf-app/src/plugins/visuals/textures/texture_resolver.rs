@@ -1,7 +1,6 @@
 use std::path::Path;
 
 use xrf_error::XrfResult;
-use xrf_vfs::mount_plan;
 use xrf_vfs::{XrayLookupScope, XrayMountPlan, XrayVfs};
 use xrf_visual::VisualSubmesh;
 
@@ -67,7 +66,8 @@ impl VisualTextureResolver {
   pub fn read(&self, scope: &XrayLookupScope, reference: &str) -> TauriResult<Vec<u8>> {
     let Some(asset) = self
       .vfs
-      .dds_texture(scope, reference)
+      .scoped(scope)
+      .dds_texture(reference)
       .map_err(|error| format!("Rejected texture reference '{reference}': {error}"))?
     else {
       return Err(format!("Failed to read texture '{reference}': it resolves to nothing"));
@@ -86,7 +86,7 @@ impl VisualTextureResolver {
   pub fn scope_for(&mut self, visual: Option<&Path>, fallback_root: Option<&Path>) -> XrayLookupScope {
     let plan: XrayMountPlan = self.plan_for(visual, fallback_root);
 
-    XrayLookupScope::only(mount_plan(&mut self.vfs, &plan).unwrap_or_default())
+    XrayLookupScope::only(self.vfs.mount_plan(&plan).unwrap_or_default())
   }
 
   /// Builds a priority-ordered plan from the visual root, containing installation, and fallback root.
@@ -114,14 +114,15 @@ impl VisualTextureResolver {
   fn lookup(&self, scope: &XrayLookupScope, reference: &str) -> Option<xrf_vfs::XrayAsset> {
     self
       .vfs
-      .dds_texture(scope, reference)
+      .scoped(scope)
+      .dds_texture(reference)
       .inspect_err(|error| log::warn!("Rejected texture reference '{reference}': {error}"))
       .ok()
       .flatten()
   }
 
   fn mounts_in(&self, scope: &XrayLookupScope) -> usize {
-    self.vfs.scoped(scope).count()
+    self.vfs.scoped(scope).list_mounts().count()
   }
 
   /// Describes every mount searched by a failed lookup.
@@ -129,6 +130,7 @@ impl VisualTextureResolver {
     self
       .vfs
       .scoped(scope)
+      .list_mounts()
       .map(|mount| mount.get_source().get_root_path().display().to_string())
       .collect()
   }

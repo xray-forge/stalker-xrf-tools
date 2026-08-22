@@ -86,7 +86,8 @@ impl<'a> PlayerHudAnimationsVerifier<'a> {
       self
         .project
         .vfs()
-        .ogf(self.project.scope(), it)
+        .scoped(self.project.scope())
+        .ogf(it)
         .ok()
         .flatten()
         .map(|location| location.get_logical_path().to_string())
@@ -241,7 +242,8 @@ impl<'a> PlayerHudAnimationsVerifier<'a> {
       for location in self
         .project
         .vfs()
-        .resolve_all(self.project.scope(), AssetType::Omf, motion_ref)?
+        .scoped(self.project.scope())
+        .resolve_all(AssetType::Omf, motion_ref)?
       {
         if location.is_type(AssetType::Omf) {
           assets.insert(location.get_logical_path().to_string());

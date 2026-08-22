@@ -2,7 +2,7 @@ use std::fs;
 use std::path::PathBuf;
 
 use crate::vfs::tests::fake_source::{FakeArchiveSource, directory};
-use crate::{XrayAsset, XrayLookupScope, XrayMountId, XrayMountPlan, XrayVfs, mount_plan};
+use crate::{XrayAsset, XrayLookupScope, XrayMountId, XrayMountPlan, XrayVfs};
 
 #[test]
 fn an_override_creates_a_loose_file_that_then_wins() {
@@ -36,12 +36,12 @@ fn an_override_creates_a_loose_file_that_then_wins() {
     "it lands in the writable mount"
   );
   assert_eq!(
-    vfs.read(&scope, "configs\\system.ltx").unwrap(),
+    vfs.scoped(&scope).read("configs\\system.ltx").unwrap(),
     b"overridden",
     "and wins immediately, without the caller remounting"
   );
   assert_eq!(
-    vfs.find_all(&scope, "configs\\system.ltx").unwrap().len(),
+    vfs.scoped(&scope).find_all("configs\\system.ltx").unwrap().len(),
     2,
     "the archived copy is still reportable behind it"
   );
@@ -108,21 +108,11 @@ fn remounting_a_directory_picks_up_a_file_written_behind_the_vfs() {
 
   fs::write(root.join("configs/weather.ltx"), b"weather").expect("file written outside the vfs");
 
-  assert!(
-    vfs
-      .find(&XrayLookupScope::all(), "configs\\weather.ltx")
-      .unwrap()
-      .is_none()
-  );
+  assert!(vfs.find("configs\\weather.ltx").unwrap().is_none());
 
   vfs.remount(id).expect("directory remounts");
 
-  assert!(
-    vfs
-      .find(&XrayLookupScope::all(), "configs\\weather.ltx")
-      .unwrap()
-      .is_some()
-  );
+  assert!(vfs.find("configs\\weather.ltx").unwrap().is_some());
 }
 
 #[test]
@@ -141,10 +131,7 @@ fn an_override_lands_in_the_highest_priority_writable_mount() {
     .expect("override is created");
 
   assert_eq!(location.get_root(), Some(front.as_path()));
-  assert_eq!(
-    vfs.read(&XrayLookupScope::all(), "configs\\system.ltx").unwrap(),
-    b"overridden"
-  );
+  assert_eq!(vfs.read("configs\\system.ltx").unwrap(), b"overridden");
 }
 
 #[test]
@@ -154,10 +141,7 @@ fn reads_an_asset_from_the_source_that_resolved_it() {
 
   vfs.mount_directory("", &root).expect("root mounts");
 
-  let asset: XrayAsset = vfs
-    .find(&XrayLookupScope::all(), "configs\\system.ltx")
-    .expect("lookup")
-    .expect("resolves");
+  let asset: XrayAsset = vfs.find("configs\\system.ltx").expect("lookup").expect("resolves");
 
   // The helper writes the tree's name as each file's contents, so this proves which source answered.
   assert_eq!(vfs.read_asset(&asset).expect("reads"), b"read_asset");
@@ -173,7 +157,7 @@ fn reading_an_asset_from_another_vfs_is_not_found_rather_than_wrong_bytes() {
   elsewhere.mount_directory("", &other).expect("root mounts");
 
   let asset: XrayAsset = elsewhere
-    .find(&XrayLookupScope::all(), "configs\\system.ltx")
+    .find("configs\\system.ltx")
     .expect("lookup")
     .expect("resolves");
 
@@ -188,8 +172,8 @@ fn planning_the_same_source_twice_reuses_its_mount() {
   let plan: XrayMountPlan = XrayMountPlan::root(&root).expect("plan");
   let mut vfs: XrayVfs = XrayVfs::new();
 
-  let first: Vec<XrayMountId> = mount_plan(&mut vfs, &plan).expect("first mount");
-  let second: Vec<XrayMountId> = mount_plan(&mut vfs, &plan).expect("second mount");
+  let first: Vec<XrayMountId> = vfs.mount_plan(&plan).expect("first mount");
+  let second: Vec<XrayMountId> = vfs.mount_plan(&plan).expect("second mount");
 
   assert_eq!(first, second, "the same mount answers both plans");
   assert_eq!(vfs.get_mounts().len(), 1, "planning twice does not append a duplicate");

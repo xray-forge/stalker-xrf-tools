@@ -3,7 +3,7 @@ use std::path::{Path, PathBuf};
 use serde::Serialize;
 
 use crate::XrayAssetType;
-use crate::path::XrayPath;
+use crate::path::XrayLogicalPath;
 
 /// The physical container of a located asset.
 ///
@@ -28,7 +28,7 @@ pub enum XrayAssetContainer {
 #[serde(rename_all = "camelCase")]
 pub struct XrayAsset {
   /// Lower-case, backslash-separated engine identity, including the mount's logical base.
-  logical_path: XrayPath,
+  logical_path: XrayLogicalPath,
   /// Physical container reported by the source that resolved the asset.
   container: XrayAssetContainer,
 }
@@ -39,7 +39,7 @@ impl XrayAsset {
   /// The caller is responsible for passing the normalized logical path returned by the VFS. A loose container's
   /// `relative_path` is joined to its `root` only when [`Self::to_physical_path`] is asked for; the logical path stays the
   /// engine identity used for lookups and IPC.
-  pub fn new(logical_path: XrayPath, container: XrayAssetContainer) -> Self {
+  pub fn new(logical_path: XrayLogicalPath, container: XrayAssetContainer) -> Self {
     Self {
       container,
       logical_path,
@@ -47,7 +47,7 @@ impl XrayAsset {
   }
 
   /// Returns the normalized X-Ray path, including any mount base.
-  pub fn get_logical_path(&self) -> &XrayPath {
+  pub fn get_logical_path(&self) -> &XrayLogicalPath {
     &self.logical_path
   }
 
@@ -100,7 +100,7 @@ impl XrayAsset {
 mod tests {
   use std::path::{Path, PathBuf};
 
-  use crate::{XrayAsset, XrayAssetContainer, XrayPath};
+  use crate::{XrayAsset, XrayAssetContainer, XrayLogicalPath};
 
   #[test]
   fn a_directory_asset_answers_a_physical_path() {
@@ -109,7 +109,7 @@ mod tests {
     let root: PathBuf = PathBuf::from("gamedata");
     let relative: PathBuf = Path::new("textures").join("wpn").join("wpn_ak74.dds");
     let asset: XrayAsset = XrayAsset::new(
-      XrayPath::new("textures\\wpn\\wpn_ak74.dds").expect("valid logical path"),
+      XrayLogicalPath::new("textures\\wpn\\wpn_ak74.dds").expect("valid logical path"),
       XrayAssetContainer::Directory {
         relative_path: relative.clone(),
         root: root.clone(),
@@ -132,7 +132,7 @@ mod tests {
   fn an_archived_asset_answers_no_physical_path_rather_than_a_plausible_one() {
     // Archive entries have no physical path; joining the volume directory to the logical path would invent one.
     let location: XrayAsset = XrayAsset::new(
-      XrayPath::new("textures\\wpn\\wpn_ak74.dds").expect("valid logical path"),
+      XrayLogicalPath::new("textures\\wpn\\wpn_ak74.dds").expect("valid logical path"),
       XrayAssetContainer::Archive {
         path: Path::new("anomaly").join("db").join("textures"),
       },

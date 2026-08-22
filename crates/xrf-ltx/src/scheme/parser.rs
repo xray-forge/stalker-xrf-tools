@@ -1,6 +1,6 @@
 use indexmap::map::Entry;
 use xrf_error::{XrfError, XrfResult};
-use xrf_vfs::{XrayLookupScope, XrayPath, XrayVfs};
+use xrf_vfs::{XrayLogicalPath, XrayLookupScope, XrayVfs};
 
 use crate::file::file_configuration::constants::{LTX_SCHEME_FIELD, LTX_SCHEME_STRICT_FIELD, LTX_SYMBOL_SCHEME};
 use crate::file::file_section::section::Section;
@@ -20,7 +20,11 @@ impl LtxSchemeParser {
   /// # Errors
   ///
   /// Returns an error when a scheme cannot be read or contains invalid, duplicate, or malformed declarations.
-  pub fn parse_from_vfs(vfs: &XrayVfs, scope: &XrayLookupScope, files: &[XrayPath]) -> XrfResult<LtxSectionSchemes> {
+  pub fn parse_from_vfs(
+    vfs: &XrayVfs,
+    scope: &XrayLookupScope,
+    files: &[XrayLogicalPath],
+  ) -> XrfResult<LtxSectionSchemes> {
     let mut schemes: LtxSectionSchemes = Default::default();
 
     for file in files {

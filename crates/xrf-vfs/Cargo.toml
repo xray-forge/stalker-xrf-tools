@@ -6,17 +6,13 @@ edition = "2024"
 rust-version.workspace = true
 
 [dependencies]
-byteorder = { workspace = true }
-crc32fast = "1.5.0"
 log = { workspace = true }
-lzokay = { workspace = true }
-regex = { workspace = true }
 serde = { workspace = true }
 specta = { workspace = true, optional = true }
 walkdir = { workspace = true }
 xrf-error = { workspace = true }
-xrf-lzhuf = { workspace = true }
 xrf-utils = { workspace = true }
+xrf-volume = { workspace = true }
 
 [features]
 # Emits TypeScript mirrors of the serialized types. Nothing in a normal build turns this on.

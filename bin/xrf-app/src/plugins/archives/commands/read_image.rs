@@ -4,7 +4,7 @@ use serde::Serialize;
 use tauri::State;
 use xrf_dds::{DdsFile, DdsPng};
 use xrf_utils::encode_bytes_to_standard_base64;
-use xrf_vfs::{ArchiveFileDescriptor, ArchiveProject};
+use xrf_volume::{ArchiveFileDescriptor, ArchiveProject};
 
 use crate::core::types::TauriResult;
 use crate::plugins::archives::state::ArchiveProjectState;

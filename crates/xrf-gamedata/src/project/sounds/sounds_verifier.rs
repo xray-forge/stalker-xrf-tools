@@ -28,7 +28,8 @@ impl<'a> SoundsVerifier<'a> {
     let sound_paths: Vec<String> = self
       .project
       .vfs()
-      .list_entries_of_type(&self.project.scope, AssetType::Ogg)
+      .scoped(&self.project.scope)
+      .list_entries_of_type(AssetType::Ogg)
       .into_iter()
       .map(|location| location.get_logical_path().to_string())
       .collect();

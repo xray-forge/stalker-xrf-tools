@@ -4,8 +4,8 @@ use std::time::{Duration, Instant};
 
 use xrf_error::XrfResult;
 use xrf_vfs::{
-  XrayAsset, XrayAssetContainer, XrayLookupScope, XrayMountKind, XrayMountMode, XrayPath, XrayPathCollision,
-  XraySkippedMount, XrayVfs, open_plan,
+  XrayAsset, XrayAssetContainer, XrayLogicalPath, XrayLookupScope, XrayMountMode, XrayPathCollision, XraySkippedMount,
+  XraySourceKind, XrayVfs,
 };
 
 /// Resolved assets and source metadata for one listing.
@@ -95,9 +95,9 @@ impl AssetLister {
   /// a valid X-Ray logical path.
   pub fn run(&self) -> XrfResult<AssetListing> {
     let started: Instant = Instant::now();
-    let vfs: XrayVfs = open_plan(&self.mode.plan(&self.path)?.ignoring(&self.ignored)?)?;
+    let vfs: XrayVfs = XrayVfs::from_plan(&self.mode.plan(&self.path)?.ignoring(&self.ignored)?)?;
     let scope: XrayLookupScope = self.scope()?;
-    let entries: Vec<XrayAsset> = vfs.list_entries(&scope);
+    let entries: Vec<XrayAsset> = vfs.scoped(&scope).list_entries();
     let shadowed: Vec<XrayAsset> = if self.is_shadowed_included {
       Self::shadowed(&vfs, &scope, &entries)
     } else {
@@ -105,11 +105,12 @@ impl AssetLister {
     };
 
     Ok(AssetListing {
-      collisions: vfs.list_collisions(&scope),
+      collisions: vfs.scoped(&scope).list_collisions(),
       duration: started.elapsed(),
       entries,
       mounts: vfs
         .scoped(&scope)
+        .list_mounts()
         .map(|mount| {
           format!(
             "{:<9} {} ({})",
@@ -127,7 +128,7 @@ impl AssetLister {
 
   fn scope(&self) -> XrfResult<XrayLookupScope> {
     let scope: XrayLookupScope = if self.is_loose_only {
-      XrayLookupScope::of_kind(XrayMountKind::Directory)
+      XrayLookupScope::of_kind(XraySourceKind::Directory)
     } else {
       XrayLookupScope::all()
     };
@@ -143,9 +144,9 @@ impl AssetLister {
   /// The result removes winning path and container pairs from the complete enumeration. Indexed rather than scanned: an
   /// installation enumerates ~48,000 entries, and a linear search per entry made this quadratic.
   fn shadowed(vfs: &XrayVfs, scope: &XrayLookupScope, winners: &[XrayAsset]) -> Vec<XrayAsset> {
-    let mut shadowed: Vec<XrayAsset> = vfs.list_entries_all(scope);
+    let mut shadowed: Vec<XrayAsset> = vfs.scoped(scope).list_entries_all();
 
-    let winning: HashSet<(&XrayPath, &XrayAssetContainer)> = winners
+    let winning: HashSet<(&XrayLogicalPath, &XrayAssetContainer)> = winners
       .iter()
       .map(|winner| (winner.get_logical_path(), winner.get_container()))
       .collect();

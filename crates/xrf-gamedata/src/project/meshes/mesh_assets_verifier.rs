@@ -35,7 +35,8 @@ impl<'a> MeshAssetsVerifier<'a> {
     let mesh_paths: Vec<String> = self
       .project
       .vfs()
-      .list_entries_of_type(&self.project.scope, AssetType::Ogf)
+      .scoped(&self.project.scope)
+      .list_entries_of_type(AssetType::Ogf)
       .into_iter()
       .map(|location| location.get_logical_path().to_string())
       .collect();
@@ -134,7 +135,8 @@ impl<'a> MeshAssetsVerifier<'a> {
         let motion_paths: Vec<String> = self
           .project
           .vfs()
-          .resolve_all(&self.project.scope, AssetType::Omf, motion_ref)?
+          .scoped(&self.project.scope)
+          .resolve_all(AssetType::Omf, motion_ref)?
           .into_iter()
           .map(|location| location.get_logical_path().to_string())
           .collect();
@@ -208,7 +210,8 @@ impl<'a> MeshAssetsVerifier<'a> {
       && self
         .project
         .vfs()
-        .dds_texture(&self.project.scope, &texture.texture_name)
+        .scoped(&self.project.scope)
+        .dds_texture(&texture.texture_name)
         .ok()
         .flatten()
         .is_none()

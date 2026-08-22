@@ -7,8 +7,8 @@ use std::fs;
 use std::path::PathBuf;
 
 use xrf_test_utils::utils::build_absolute_generated_test_resource_path;
-use xrf_vfs::ArchiveAssetSource;
-use xrf_vfs::{XrayAssetContainer, XrayAssetSource, XrayLookupScope, XrayMountKind, XrayVfs};
+use xrf_vfs::XrayArchiveSource;
+use xrf_vfs::{XrayAssetContainer, XrayAssetSource, XrayLookupScope, XraySourceKind, XrayVfs};
 
 use crate::pack::archive_pack_config::{ArchivePackConfig, ArchivePackFolder};
 use crate::pack::archive_packer::ArchivePacker;
@@ -17,7 +17,7 @@ const TEXTURE: &[u8] = &[0x44, 0x44, 0x53, 0x20, 0x01, 0x02, 0x03, 0xfe];
 const CONFIG: &[u8] = b"[section]\nvalue = 1\n";
 
 /// Packs a source tree into volumes and mounts the result.
-fn mount(scope: &str, files: &[(&str, &[u8])]) -> ArchiveAssetSource {
+fn mount(scope: &str, files: &[(&str, &[u8])]) -> XrayArchiveSource {
   let source: PathBuf = build_absolute_generated_test_resource_path(&format!("archive_asset_source/{scope}/gamedata"));
   let destination: PathBuf = build_absolute_generated_test_resource_path(&format!("archive_asset_source/{scope}/db"));
 
@@ -40,21 +40,21 @@ fn mount(scope: &str, files: &[(&str, &[u8])]) -> ArchiveAssetSource {
 
   ArchivePacker::pack(&config).expect("archive packs");
 
-  ArchiveAssetSource::read(&destination).expect("volume set mounts")
+  XrayArchiveSource::read(&destination).expect("volume set mounts")
 }
 
 #[test]
 fn reports_itself_as_a_read_only_archive() {
-  let source: ArchiveAssetSource = mount("read_only", &[("textures\\wpn\\wpn_ak74.dds", TEXTURE)]);
+  let source: XrayArchiveSource = mount("read_only", &[("textures\\wpn\\wpn_ak74.dds", TEXTURE)]);
 
-  assert_eq!(source.get_kind(), XrayMountKind::Archive);
+  assert_eq!(source.get_kind(), XraySourceKind::Archive);
   assert!(!source.is_writable());
   assert!(source.write("textures\\wpn\\wpn_ak74.dds", TEXTURE).is_err());
 }
 
 #[test]
 fn contains_and_reads_a_packed_entry_by_logical_path() {
-  let source: ArchiveAssetSource = mount("reads", &[("textures\\wpn\\wpn_ak74.dds", TEXTURE)]);
+  let source: XrayArchiveSource = mount("reads", &[("textures\\wpn\\wpn_ak74.dds", TEXTURE)]);
 
   assert!(source.contains("textures\\wpn\\wpn_ak74.dds"));
   assert!(!source.contains("textures\\wpn\\wpn_val.dds"));
@@ -64,7 +64,7 @@ fn contains_and_reads_a_packed_entry_by_logical_path() {
 #[test]
 fn locates_an_entry_in_its_volume_set_rather_than_on_disk() {
   // The container is the whole reason an archived asset cannot be handed to `fs::read`.
-  let source: ArchiveAssetSource = mount("locates", &[("textures\\wpn\\wpn_ak74.dds", TEXTURE)]);
+  let source: XrayArchiveSource = mount("locates", &[("textures\\wpn\\wpn_ak74.dds", TEXTURE)]);
 
   assert!(matches!(
     source.locate("textures\\wpn\\wpn_ak74.dds"),
@@ -75,7 +75,7 @@ fn locates_an_entry_in_its_volume_set_rather_than_on_disk() {
 
 #[test]
 fn enumerates_entries_and_narrows_by_prefix() {
-  let source: ArchiveAssetSource = mount(
+  let source: XrayArchiveSource = mount(
     "enumerates",
     &[
       ("textures\\wpn\\wpn_ak74.dds", TEXTURE),
@@ -95,7 +95,7 @@ fn enumerates_entries_and_narrows_by_prefix() {
 fn resolves_a_texture_reference_once_mounted_in_a_vfs() {
   // What the visuals viewer will do against a real install: the reference completes to a logical path and the archive
   // answers it, with no filesystem path anywhere in the chain.
-  let source: ArchiveAssetSource = mount("vfs", &[("textures\\wpn\\wpn_ak74.dds", TEXTURE)]);
+  let source: XrayArchiveSource = mount("vfs", &[("textures\\wpn\\wpn_ak74.dds", TEXTURE)]);
 
   let mut vfs: XrayVfs = XrayVfs::new();
 
@@ -103,19 +103,20 @@ fn resolves_a_texture_reference_once_mounted_in_a_vfs() {
 
   let scope: XrayLookupScope = XrayLookupScope::all();
   let location = vfs
-    .dds_texture(&scope, "wpn\\wpn_ak74")
+    .scoped(&scope)
+    .dds_texture("wpn\\wpn_ak74")
     .expect("lookup succeeds")
     .expect("texture resolves");
 
   assert_eq!(location.get_logical_path().as_str(), "textures\\wpn\\wpn_ak74.dds");
   assert_eq!(location.to_physical_path(), None);
-  assert_eq!(vfs.read(&scope, "textures\\wpn\\wpn_ak74.dds").unwrap(), TEXTURE);
+  assert_eq!(vfs.scoped(&scope).read("textures\\wpn\\wpn_ak74.dds").unwrap(), TEXTURE);
 }
 
 #[test]
 fn a_loose_file_wins_over_the_same_name_in_an_archive() {
   // The rule fsgame declares by listing db before gamedata. Mount order carries it.
-  let archived: ArchiveAssetSource = mount("override", &[("textures\\wpn\\wpn_ak74.dds", TEXTURE)]);
+  let archived: XrayArchiveSource = mount("override", &[("textures\\wpn\\wpn_ak74.dds", TEXTURE)]);
 
   let loose: PathBuf = build_absolute_generated_test_resource_path("archive_asset_source/override/loose");
 
@@ -131,9 +132,16 @@ fn a_loose_file_wins_over_the_same_name_in_an_archive() {
 
   let scope: XrayLookupScope = XrayLookupScope::all();
 
-  assert_eq!(vfs.read(&scope, "textures\\wpn\\wpn_ak74.dds").unwrap(), b"loose");
   assert_eq!(
-    vfs.find_all(&scope, "textures\\wpn\\wpn_ak74.dds").unwrap().len(),
+    vfs.scoped(&scope).read("textures\\wpn\\wpn_ak74.dds").unwrap(),
+    b"loose"
+  );
+  assert_eq!(
+    vfs
+      .scoped(&scope)
+      .find_all("textures\\wpn\\wpn_ak74.dds")
+      .unwrap()
+      .len(),
     2,
     "the archived copy stays reportable behind the override"
   );

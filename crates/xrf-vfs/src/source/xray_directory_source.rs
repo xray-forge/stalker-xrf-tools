@@ -6,7 +6,7 @@ use xrf_error::{XrfError, XrfResult};
 use crate::path::{is_component_prefix, to_host_relative};
 use crate::source::xray_asset_source::label_from_path;
 use crate::source::{DirectoryAssetIndex, XrayAssetIndex};
-use crate::{XrayAssetContainer, XrayAssetSource, XrayMountKind, XrayPathCollision};
+use crate::{XrayAssetContainer, XrayAssetSource, XrayPathCollision, XraySourceKind};
 
 /// A directory of loose files, indexed once at mount time.
 ///
@@ -51,8 +51,8 @@ impl XrayAssetSource for XrayDirectorySource {
     &self.label
   }
 
-  fn get_kind(&self) -> XrayMountKind {
-    XrayMountKind::Directory
+  fn get_kind(&self) -> XraySourceKind {
+    XraySourceKind::Directory
   }
 
   fn is_writable(&self) -> bool {
@@ -168,7 +168,7 @@ mod tests {
   use xrf_test_utils::utils::build_absolute_generated_test_resource_path;
 
   use crate::XrayAssetSource;
-  use crate::source::{XrayDirectorySource, XrayMountKind};
+  use crate::source::{XrayDirectorySource, XraySourceKind};
 
   fn source(name: &str, files: &[&str]) -> XrayDirectorySource {
     let root: PathBuf = build_absolute_generated_test_resource_path(&format!("xray_directory_source/{name}"));
@@ -189,7 +189,7 @@ mod tests {
   fn reports_itself_as_a_writable_directory() {
     let source: XrayDirectorySource = source("writable", &["textures/wpn/wpn_ak74.dds"]);
 
-    assert_eq!(source.get_kind(), XrayMountKind::Directory);
+    assert_eq!(source.get_kind(), XraySourceKind::Directory);
     assert!(source.is_writable());
   }
 

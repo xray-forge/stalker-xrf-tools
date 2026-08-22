@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::path::PathBuf;
 
-use crate::archive::archive_file_descriptor::ArchiveFileDescriptor;
+use crate::archive_file_descriptor::ArchiveFileDescriptor;
 
 pub struct ArchiveHeader {
   pub archive_path: PathBuf,

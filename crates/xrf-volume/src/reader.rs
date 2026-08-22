@@ -12,14 +12,14 @@ use xrf_error::{XrfError, XrfResult};
 use xrf_lzhuf::decompress;
 use xrf_utils::{XRayEncoding, assert, decode_bytes_to_string_without_bom_handling, new_windows1251_encoder};
 
-use crate::archive::archive_descriptor::ArchiveDescriptor;
-use crate::archive::archive_file_descriptor::ArchiveFileDescriptor;
-use crate::archive::archive_header::ArchiveHeader;
-use crate::archive::byte_order::XRayByteOrder;
-use crate::archive::constants::{
+use crate::archive_descriptor::ArchiveDescriptor;
+use crate::archive_file_descriptor::ArchiveFileDescriptor;
+use crate::archive_header::ArchiveHeader;
+use crate::byte_order::XRayByteOrder;
+use crate::constants::{
   CHUNK_ID_COMPRESSED_MASK, CHUNK_ID_FILE_DESCRIPTORS, CHUNK_ID_MASK, CHUNK_ID_METADATA, MAXIMUM_ENTRY_NAME_SIZE,
 };
-use crate::archive::file_io::allocate_declared;
+use crate::file_io::allocate_declared;
 
 /// Patterns of the `[header]` metadata chunk, compiled once.
 ///

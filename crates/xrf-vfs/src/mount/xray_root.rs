@@ -17,8 +17,8 @@ pub(crate) const TEXTURES_DIRECTORY: &str = "textures";
 /// textures one directory per texture under names that do not match their reference. Callers that need a resolvable root
 /// must therefore fall through on a failed lookup rather than on a failed derivation.
 ///
-/// Returns the nearest implied root, or `None` when no ancestor looks like one.
-pub fn find_implied_asset_root(path: &Path) -> Option<PathBuf> {
+/// Returns the nearest implied root, or `None` when no ancestor looks like one. Behind [`crate::XrayMountPlan::implied_root`].
+pub(crate) fn find_implied_asset_root(path: &Path) -> Option<PathBuf> {
   path
     .ancestors()
     .skip(1)
@@ -34,7 +34,7 @@ pub(crate) fn implied_install_root(path: &Path) -> Option<PathBuf> {
   path
     .ancestors()
     .skip(1)
-    .find(|candidate| candidate.join(crate::FSGAME_FILE_NAME).is_file())
+    .find(|candidate| candidate.join(crate::FsgameFile::FILE_NAME).is_file())
     .map(Path::to_path_buf)
 }
 

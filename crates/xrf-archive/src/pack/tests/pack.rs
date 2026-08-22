@@ -7,11 +7,11 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 use xrf_test_utils::utils::build_absolute_generated_test_resource_path;
+use xrf_volume::{ArchiveFileDescriptor, ArchiveProject};
 
 use crate::pack::archive_pack_config::{ArchivePackConfig, ArchivePackFolder, ArchivePackMode};
 use crate::pack::archive_pack_result::ArchivePackResult;
 use crate::pack::archive_packer::ArchivePacker;
-use xrf_vfs::{ArchiveFileDescriptor, ArchiveProject};
 
 /// A configuration fragment large enough that compressing it actually pays off.
 const CONFIG: &[u8] = b"[section]\nvalue = 1\nvalue = 1\nvalue = 1\nvalue = 1\nvalue = 1\nvalue = 1\nvalue = 1\n";

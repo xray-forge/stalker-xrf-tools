@@ -50,6 +50,22 @@ pub struct XrayAssetRules {
 }
 
 impl XrayAssetType {
+  /// The X-Ray shader library's fixed gamedata-relative logical path.
+  ///
+  /// A constant rather than a [`XrayAssetRules`] row, because [`Self::Shader`] has no directory-plus-extension home —
+  /// the library is one fixed file beside the trees the rules describe.
+  pub const SHADER_LIBRARY_PATH: &'static str = super::shader::SHADER_LIBRARY_LOGICAL_PATH;
+
+  /// Converts a sound reference into the name the engine registers it under.
+  ///
+  /// Both the `sounds` root and the `.ogg` extension are implied, and a config may spell either out. Case and separators
+  /// are normalized too, so a reference matches a registered name whichever way it was written. Sounds get a dedicated
+  /// conversion where other kinds go through [`Self::get_rules`], because the registered name strips the extension
+  /// instead of gaining one.
+  pub fn sound_reference_name(reference: &str) -> String {
+    super::sound::sound_reference_name(reference)
+  }
+
   /// Where this kind lives, for the kinds with one canonical home.
   ///
   /// `None` covers two different cases, and both are deliberate rather than gaps to fill in speculatively: a kind whose

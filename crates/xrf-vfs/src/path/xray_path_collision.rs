@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use crate::path::XrayPath;
+use crate::path::XrayLogicalPath;
 
 /// Two files in one source claiming the same engine identity.
 ///
@@ -13,7 +13,7 @@ use crate::path::XrayPath;
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct XrayPathCollision {
   /// Engine identity both files normalize to.
-  pub logical_path: XrayPath,
+  pub logical_path: XrayLogicalPath,
   /// File the source resolves, being the first one indexed.
   pub kept: PathBuf,
   /// File no lookup can reach, because `kept` already claims its identity.

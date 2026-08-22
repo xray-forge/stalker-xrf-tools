@@ -3,7 +3,7 @@ use std::path::{Path, PathBuf};
 
 use serde::Serialize;
 
-use crate::archive::archive_file_descriptor::ArchiveFileDescriptor;
+use crate::archive_file_descriptor::ArchiveFileDescriptor;
 
 #[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
 #[derive(Clone, Debug, Serialize)]

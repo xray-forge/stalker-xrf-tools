@@ -4,7 +4,7 @@ use std::collections::BTreeSet;
 use std::time::Instant;
 
 use xrf_error::{XrfError, XrfResult};
-use xrf_vfs::XrayPath;
+use xrf_vfs::XrayLogicalPath;
 
 use super::verify_weathers_result::GamedataWeathersVerificationResult;
 use super::weather_definitions::WeatherDefinitions;
@@ -31,7 +31,7 @@ impl GamedataProject {
 
     let started_at: Instant = Instant::now();
 
-    let weather_configs: Vec<&XrayPath> = self
+    let weather_configs: Vec<&XrayLogicalPath> = self
       .ltx_project
       .ltx_files
       .iter()

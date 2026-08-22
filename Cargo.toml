@@ -25,6 +25,7 @@ members = [
   "crates/xrf-utils",
   "crates/xrf-vfs",
   "crates/xrf-visual",
+  "crates/xrf-volume",
   "crates/xrf-xml",
 ]
 
@@ -75,6 +76,7 @@ xrf-typescript = { path = "crates/xrf-typescript" }
 xrf-utils = { path = "crates/xrf-utils" }
 xrf-vfs = { path = "crates/xrf-vfs" }
 xrf-visual = { path = "crates/xrf-visual" }
+xrf-volume = { path = "crates/xrf-volume" }
 xrf-xml = { path = "crates/xrf-xml" }
 
 [profile.release]

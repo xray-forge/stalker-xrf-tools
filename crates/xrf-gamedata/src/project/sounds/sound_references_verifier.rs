@@ -3,8 +3,8 @@ use std::path::{Path, PathBuf};
 
 use xrf_error::XrfResult;
 use xrf_ltx::{Ltx, LtxProject};
-use xrf_vfs::XrayPath;
-use xrf_vfs::sound_reference_name;
+use xrf_vfs::XrayAssetType;
+use xrf_vfs::XrayLogicalPath;
 use xrf_xml::{XmlDocument, XmlParseOptions};
 
 use crate::GamedataFindingFactory;
@@ -45,7 +45,7 @@ impl<'a> SoundReferencesVerifier<'a> {
   fn read_sound_names(sound_paths: &[String]) -> HashSet<String> {
     sound_paths
       .iter()
-      .filter_map(|path| path.strip_prefix("sounds\\").map(sound_reference_name))
+      .filter_map(|path| path.strip_prefix("sounds\\").map(XrayAssetType::sound_reference_name))
       .collect()
   }
 
@@ -91,7 +91,7 @@ impl<'a> SoundReferencesVerifier<'a> {
     // Enumerated and read through the VFS, so an installation's archived UI XML is inspected too. Reported by the path a
     // person can act on, which for an archived entry is its logical path.
     for location in self.project.entries() {
-      let logical_path: &XrayPath = location.get_logical_path();
+      let logical_path: &XrayLogicalPath = location.get_logical_path();
 
       if !logical_path.is_under(CONFIGS_DIRECTORY).unwrap_or(false) || !logical_path.has_extension(".xml") {
         continue;
@@ -175,7 +175,7 @@ impl<'a> SoundReferencesVerifier<'a> {
     location: &str,
     result: &mut GamedataSoundReferencesVerificationResult,
   ) {
-    let sound_name: String = sound_reference_name(reference);
+    let sound_name: String = XrayAssetType::sound_reference_name(reference);
     result.checked_references_count += 1;
 
     if Self::sound_reference_exists(sound_names, &sound_name) {
@@ -195,7 +195,7 @@ impl<'a> SoundReferencesVerifier<'a> {
   }
 
   fn is_direct_sound_reference(sound_roots: &HashSet<String>, reference: &str) -> bool {
-    sound_reference_name(reference)
+    XrayAssetType::sound_reference_name(reference)
       .split_once('\\')
       .is_some_and(|(root, _)| sound_roots.contains(root))
   }
@@ -210,7 +210,8 @@ impl<'a> SoundReferencesVerifier<'a> {
 mod tests {
   use std::collections::HashSet;
 
-  use super::{SoundReferencesVerifier, sound_reference_name};
+  use super::SoundReferencesVerifier;
+  use xrf_vfs::XrayAssetType;
 
   #[test]
   fn resolves_exact_and_randomized_sound_references() {
@@ -223,15 +224,15 @@ mod tests {
 
     assert!(SoundReferencesVerifier::sound_reference_exists(
       &names,
-      &sound_reference_name("sounds/weapons/ak74_shot.ogg")
+      &XrayAssetType::sound_reference_name("sounds/weapons/ak74_shot.ogg")
     ));
     assert!(SoundReferencesVerifier::sound_reference_exists(
       &names,
-      &sound_reference_name("monsters\\boar\\boar_idle_")
+      &XrayAssetType::sound_reference_name("monsters\\boar\\boar_idle_")
     ));
     assert!(!SoundReferencesVerifier::sound_reference_exists(
       &names,
-      &sound_reference_name("weapons\\missing")
+      &XrayAssetType::sound_reference_name("weapons\\missing")
     ));
   }
 

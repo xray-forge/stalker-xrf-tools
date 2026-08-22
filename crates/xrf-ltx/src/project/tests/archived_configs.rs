@@ -8,7 +8,7 @@ use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
 use xrf_error::{XrfError, XrfResult};
-use xrf_vfs::{XrayAssetContainer, XrayAssetSource, XrayLookupScope, XrayMountKind, XrayVfs};
+use xrf_vfs::{XrayAssetContainer, XrayAssetSource, XrayLookupScope, XraySourceKind, XrayVfs};
 
 use crate::{LtxProject, LtxProjectFormatResult};
 
@@ -39,8 +39,8 @@ impl XrayAssetSource for ArchivedConfigs {
     "configs"
   }
 
-  fn get_kind(&self) -> XrayMountKind {
-    XrayMountKind::Archive
+  fn get_kind(&self) -> XraySourceKind {
+    XraySourceKind::Archive
   }
 
   fn is_writable(&self) -> bool {

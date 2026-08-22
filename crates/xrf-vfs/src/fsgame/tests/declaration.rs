@@ -1,4 +1,5 @@
-use crate::fsgame::declaration::{FS_ROOT_ALIAS, FsgameDeclaration};
+use crate::FsgameFile;
+use crate::fsgame::declaration::FsgameDeclaration;
 
 #[test]
 fn parses_a_declaration_with_every_field() {
@@ -31,7 +32,7 @@ fn treats_the_installation_root_as_an_alias_like_any_other() {
   let declaration: FsgameDeclaration =
     FsgameDeclaration::parse("$arch_dir$ = false | false | $fs_root$ | db\\").expect("line parses");
 
-  assert_eq!(declaration.root_alias, FS_ROOT_ALIAS);
+  assert_eq!(declaration.root_alias, FsgameFile::ROOT_ALIAS);
   assert_eq!(declaration.get_addition_segment(), Some("db"));
 }
 

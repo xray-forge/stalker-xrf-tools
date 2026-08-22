@@ -4,10 +4,7 @@ use std::path::{Path, PathBuf};
 use xrf_error::{XrfError, XrfResult};
 use xrf_utils::{decode_bytes_to_string, new_windows1251_encoder};
 
-use crate::fsgame::declaration::{FS_ROOT_ALIAS, FsgameDeclaration};
-
-/// Standard filename for an installation's declared layout.
-pub const FSGAME_FILE_NAME: &str = "fsgame.ltx";
+use crate::fsgame::declaration::FsgameDeclaration;
 
 /// One installation's declared directory layout, in declaration order.
 ///
@@ -20,6 +17,12 @@ pub struct FsgameFile {
 }
 
 impl FsgameFile {
+  /// Standard filename for an installation's declared layout.
+  pub const FILE_NAME: &'static str = "fsgame.ltx";
+
+  /// Alias for the installation directory that anchors resolved paths.
+  pub const ROOT_ALIAS: &'static str = "$fs_root$";
+
   /// Reads and parses the `fsgame.ltx` of an installation directory.
   ///
   /// The file is decoded as Windows-1251 so Cyrillic descriptions are preserved.
@@ -29,7 +32,7 @@ impl FsgameFile {
   /// Returns an error when the file cannot be read or decoded, or contains no valid declarations.
   pub fn read(root: impl AsRef<Path>) -> XrfResult<Self> {
     let root: &Path = root.as_ref();
-    let path: PathBuf = root.join(FSGAME_FILE_NAME);
+    let path: PathBuf = root.join(Self::FILE_NAME);
     let bytes: Vec<u8> = fs::read(&path)
       .map_err(|error| XrfError::new_read_error(format!("failed to read {}: {error}", path.display())))?;
 
@@ -86,7 +89,7 @@ impl FsgameFile {
     let mut current: &str = alias;
 
     for _ in 0..=self.declarations.len() {
-      if current == FS_ROOT_ALIAS {
+      if current == Self::ROOT_ALIAS {
         let mut path: PathBuf = self.root.clone();
 
         for segment in segments.iter().rev() {

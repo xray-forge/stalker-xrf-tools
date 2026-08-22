@@ -5,7 +5,7 @@ use std::str::FromStr;
 use xrf_error::XrfResult;
 
 use crate::mount::xray_root::implied_install_root;
-use crate::{FSGAME_FILE_NAME, XrayMountPlan};
+use crate::{FsgameFile, XrayMountPlan};
 
 /// How a caller's path is turned into mounts.
 ///
@@ -65,7 +65,7 @@ impl XrayMountMode {
 
   /// Whether a path itself declares an installation.
   pub fn declares_installation(path: impl AsRef<Path>) -> bool {
-    path.as_ref().join(FSGAME_FILE_NAME).is_file()
+    path.as_ref().join(FsgameFile::FILE_NAME).is_file()
   }
 }
 

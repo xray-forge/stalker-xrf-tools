@@ -1,8 +1,6 @@
-/// Converts a sound reference into the name the engine registers it under.
-///
-/// Both the `sounds` root and the `.ogg` extension are implied, and a config may spell either out. Case and separators are
-/// normalized too, so a reference matches a registered name whichever way it was written.
-pub fn sound_reference_name(reference: &str) -> String {
+/// Converts a sound reference into the name the engine registers it under. Behind
+/// [`crate::XrayAssetType::sound_reference_name`].
+pub(crate) fn sound_reference_name(reference: &str) -> String {
   let reference: String = reference.trim().replace('/', "\\").to_ascii_lowercase();
   let reference: &str = reference.strip_prefix("sounds\\").unwrap_or(&reference);
 

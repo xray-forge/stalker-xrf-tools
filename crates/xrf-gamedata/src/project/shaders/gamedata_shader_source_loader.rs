@@ -24,10 +24,10 @@ impl XRayShaderSourceLoader for GamedataShaderSourceLoader<'_> {
 
     // Absence is not an error here: a missing include is reported by the caller as a finding against the shader that names
     // it, which is more useful than a read failure with no context.
-    if self.vfs.find(self.scope, logical_path)?.is_none() {
+    if self.vfs.scoped(self.scope).find(logical_path)?.is_none() {
       return Ok(None);
     }
 
-    self.vfs.read(self.scope, logical_path).map(Some)
+    self.vfs.scoped(self.scope).read(logical_path).map(Some)
   }
 }

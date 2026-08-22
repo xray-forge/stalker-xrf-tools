@@ -3,7 +3,7 @@ use std::path::{Path, PathBuf};
 
 use xrf_test_utils::utils::build_absolute_generated_test_resource_path;
 
-use crate::{FsgameFile, XrayMountKind, XrayMountPlan};
+use crate::{FsgameFile, XrayMountPlan, XraySourceKind};
 
 /// The alias order a real `fsgame.ltx` uses: archives declared before gamedata, which is what makes loose files win.
 const FSGAME: &str = "\
@@ -54,8 +54,8 @@ fn plans_gamedata_ahead_of_archives() {
   let origins: Vec<&str> = plan.get_mounts().iter().map(|it| it.origin.as_str()).collect();
 
   assert_eq!(origins, vec!["$game_data$", "$arch_dir_textures$"]);
-  assert_eq!(plan.get_mounts()[0].kind, XrayMountKind::Directory);
-  assert_eq!(plan.get_mounts()[1].kind, XrayMountKind::Archive);
+  assert_eq!(plan.get_mounts()[0].kind, XraySourceKind::Directory);
+  assert_eq!(plan.get_mounts()[1].kind, XraySourceKind::Archive);
 }
 
 #[test]
@@ -63,7 +63,7 @@ fn plans_a_directory_of_volumes_as_an_archive() {
   let plan: XrayMountPlan = plan("volumes", &["db\\textures\\textures.db0", "db\\textures\\textures.db1"]);
 
   assert_eq!(plan.len(), 1);
-  assert_eq!(plan.get_mounts()[0].kind, XrayMountKind::Archive);
+  assert_eq!(plan.get_mounts()[0].kind, XraySourceKind::Archive);
   assert!(plan.get_mounts()[0].path.ends_with("textures"));
 }
 
@@ -103,7 +103,7 @@ fn plans_an_empty_gamedata_because_it_is_still_where_an_override_would_go() {
   let origins: Vec<&str> = plan.get_mounts().iter().map(|it| it.origin.as_str()).collect();
 
   assert_eq!(origins, vec!["$game_data$", "$arch_dir_textures$"]);
-  assert_eq!(plan.get_mounts()[0].kind, XrayMountKind::Directory);
+  assert_eq!(plan.get_mounts()[0].kind, XraySourceKind::Directory);
 }
 
 #[test]
@@ -119,7 +119,7 @@ fn plans_a_bare_root_without_any_fsgame() {
 
   assert_eq!(plan.len(), 1);
   assert_eq!(plan.get_mounts()[0].base, "");
-  assert_eq!(plan.get_mounts()[0].kind, XrayMountKind::Directory);
+  assert_eq!(plan.get_mounts()[0].kind, XraySourceKind::Directory);
   assert_eq!(plan.get_mounts()[0].origin, "root");
 }
 

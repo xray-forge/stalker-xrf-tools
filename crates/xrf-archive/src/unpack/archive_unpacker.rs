@@ -7,9 +7,9 @@ use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant};
 
 use xrf_error::{XrfError, XrfResult};
-use xrf_vfs::ArchiveFileDescriptor;
-use xrf_vfs::ArchiveProject;
-use xrf_vfs::write_descriptor_contents;
+use xrf_volume::ArchiveFileDescriptor;
+use xrf_volume::ArchiveProject;
+use xrf_volume::write_descriptor_contents;
 
 use crate::unpack::archive_extract_result::{ArchiveExtractDirectoryResult, ArchiveExtractResult};
 use crate::unpack::archive_unpack_result::ArchiveUnpackResult;

@@ -1,8 +1,5 @@
 use xrf_error::{XrfError, XrfResult};
 
-/// Alias for the installation directory that anchors resolved paths.
-pub const FS_ROOT_ALIAS: &str = "$fs_root$";
-
 /// One `fsgame.ltx` line: an alias and where it points.
 ///
 /// Despite the extension, the file has no LTX sections. Each value has three required and three optional fields:

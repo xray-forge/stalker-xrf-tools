@@ -7,7 +7,7 @@ use std::fs;
 use std::path::PathBuf;
 
 use xrf_error::XrfResult;
-use xrf_vfs::{XrayLookupScope, XrayPath, XrayVfs};
+use xrf_vfs::{XrayLogicalPath, XrayLookupScope, XrayVfs};
 
 use crate::project::ltx_project::LtxProject;
 
@@ -35,7 +35,7 @@ fn does_not_treat_wildcard_included_files_as_entries() -> XrfResult {
 
   let project: LtxProject = LtxProject::open_at_path(&root)?;
 
-  assert_eq!(project.ltx_file_entries, vec![XrayPath::new("root.ltx")?]);
+  assert_eq!(project.ltx_file_entries, vec![XrayLogicalPath::new("root.ltx")?]);
   assert_eq!(project.ltx_files.len(), 3, "every config is still listed");
 
   fs::remove_dir_all(root)?;
@@ -52,7 +52,7 @@ fn does_not_treat_a_named_included_file_as_an_entry() -> XrfResult {
 
   let project: LtxProject = LtxProject::open_at_path(&root)?;
 
-  assert_eq!(project.ltx_file_entries, vec![XrayPath::new("root.ltx")?]);
+  assert_eq!(project.ltx_file_entries, vec![XrayLogicalPath::new("root.ltx")?]);
 
   fs::remove_dir_all(root)?;
 
@@ -70,7 +70,7 @@ fn does_not_treat_a_file_included_after_a_section_as_an_entry() -> XrfResult {
 
   let project: LtxProject = LtxProject::open_at_path(&root)?;
 
-  assert_eq!(project.ltx_file_entries, vec![XrayPath::new("root.ltx")?]);
+  assert_eq!(project.ltx_file_entries, vec![XrayLogicalPath::new("root.ltx")?]);
 
   fs::remove_dir_all(root)?;
 
@@ -86,9 +86,9 @@ fn renders_a_loose_path_for_a_person_and_reads_it_through_the_project() -> XrfRe
   fs::write(root.join("root.ltx"), "[section]\nvalue = 1\n")?;
 
   let project: LtxProject = LtxProject::open_at_path(&root)?;
-  let entry: &XrayPath = project.ltx_file_entries.first().expect("one entry");
+  let entry: &XrayLogicalPath = project.ltx_file_entries.first().expect("one entry");
 
-  assert_eq!(entry, &XrayPath::new("root.ltx")?);
+  assert_eq!(entry, &XrayLogicalPath::new("root.ltx")?);
   assert_eq!(project.path_of(entry), root.join("root.ltx"));
   assert_eq!(project.physical_path_of(entry), Some(root.join("root.ltx")));
   assert_eq!(
@@ -114,10 +114,10 @@ fn places_config_names_in_whichever_scope_the_project_has() -> XrfResult {
 
   let at_configs: LtxProject = LtxProject::open_at_path(&configs)?;
 
-  assert_eq!(at_configs.system_ltx_path()?, XrayPath::new("system.ltx")?);
+  assert_eq!(at_configs.system_ltx_path()?, XrayLogicalPath::new("system.ltx")?);
   assert_eq!(
     at_configs.config_path("environment\\suns.ltx")?,
-    XrayPath::new("environment\\suns.ltx")?
+    XrayLogicalPath::new("environment\\suns.ltx")?
   );
 
   let mut vfs: XrayVfs = XrayVfs::new();
@@ -131,10 +131,13 @@ fn places_config_names_in_whichever_scope_the_project_has() -> XrfResult {
     Default::default(),
   )?;
 
-  assert_eq!(at_game_root.system_ltx_path()?, XrayPath::new("configs\\system.ltx")?);
+  assert_eq!(
+    at_game_root.system_ltx_path()?,
+    XrayLogicalPath::new("configs\\system.ltx")?
+  );
   assert_eq!(
     at_game_root.config_path("environment\\suns.ltx")?,
-    XrayPath::new("configs\\environment\\suns.ltx")?
+    XrayLogicalPath::new("configs\\environment\\suns.ltx")?
   );
   assert_eq!(
     at_game_root.system_ltx()?.get_from("section", "value"),
@@ -154,7 +157,7 @@ fn an_empty_project_holds_nothing_and_still_answers() -> XrfResult {
   assert!(project.ltx_files.is_empty());
   assert!(project.ltx_file_entries.is_empty());
   assert!(
-    project.physical_path_of(&XrayPath::new("system.ltx")?).is_none(),
+    project.physical_path_of(&XrayLogicalPath::new("system.ltx")?).is_none(),
     "nothing is mounted, so nothing resolves"
   );
 

@@ -12,7 +12,7 @@ use crate::{XrayAssetContainer, XrayPathCollision};
 #[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub enum XrayMountKind {
+pub enum XraySourceKind {
   /// Loose files under a directory.
   Directory,
   /// Entries inside a set of `.db` archive volumes.
@@ -38,7 +38,7 @@ pub trait XrayAssetSource: Debug + Send + Sync {
   fn get_label(&self) -> &str;
 
   /// Classifies the source's physical storage.
-  fn get_kind(&self) -> XrayMountKind;
+  fn get_kind(&self) -> XraySourceKind;
 
   /// Whether existing entries can be overwritten through [`Self::write`].
   fn is_writable(&self) -> bool;

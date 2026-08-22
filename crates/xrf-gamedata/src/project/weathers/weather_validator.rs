@@ -3,7 +3,7 @@ use std::path::{Path, PathBuf};
 
 use xrf_error::XrfResult;
 use xrf_ltx::{Ltx, Section};
-use xrf_vfs::XrayPath;
+use xrf_vfs::XrayLogicalPath;
 
 use super::weather_definitions::WeatherDefinitions;
 use super::weather_field_rules::{WEATHER_REQUIRED_FIELDS, is_valid_weather_field_value, parse_weather_time};
@@ -18,7 +18,7 @@ use crate::{Finding, GamedataProject, GamedataProjectVerifyOptions, GamedataVeri
 pub fn verify_weather_with_definitions(
   project: &GamedataProject,
   options: &GamedataProjectVerifyOptions,
-  config_path: &XrayPath,
+  config_path: &XrayLogicalPath,
   definitions: &WeatherDefinitions,
   definition_load_errors: &mut BTreeSet<String>,
 ) -> XrfResult<bool> {
@@ -32,7 +32,7 @@ pub fn verify_weather_with_definitions(
 pub fn verify_weather_findings_with_definitions(
   project: &GamedataProject,
   options: &GamedataProjectVerifyOptions,
-  config_path: &XrayPath,
+  config_path: &XrayLogicalPath,
   definitions: &WeatherDefinitions,
   definition_load_errors: &mut BTreeSet<String>,
 ) -> XrfResult<Vec<Finding>> {
@@ -199,7 +199,8 @@ pub fn verify_weather_findings_with_definitions(
       for texture_reference in [sky_texture.to_string(), format!("{sky_texture}#small")] {
         if project
           .vfs()
-          .dds_texture(project.scope(), &texture_reference)
+          .scoped(project.scope())
+          .dds_texture(&texture_reference)
           .ok()
           .flatten()
           .is_none()
@@ -216,7 +217,8 @@ pub fn verify_weather_findings_with_definitions(
     if let Some(clouds_texture) = section.get("clouds_texture")
       && project
         .vfs()
-        .dds_texture(project.scope(), clouds_texture)
+        .scoped(project.scope())
+        .dds_texture(clouds_texture)
         .ok()
         .flatten()
         .is_none()

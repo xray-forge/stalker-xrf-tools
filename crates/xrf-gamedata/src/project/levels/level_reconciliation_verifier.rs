@@ -33,7 +33,8 @@ impl<'a> LevelReconciliationVerifier<'a> {
       self
         .project
         .vfs()
-        .list_children(self.project.scope(), LEVELS_DIRECTORY)?
+        .scoped(self.project.scope())
+        .list_children(LEVELS_DIRECTORY)?
         .directories
         .into_iter()
         .collect(),

@@ -2,9 +2,9 @@ use xrf_error::{XrfError, XrfResult};
 use xrf_utils::encode_w1251_bytes_to_string;
 
 use crate::ArchiveProject;
-use crate::archive::archive_file_descriptor::ArchiveFileDescriptor;
-use crate::archive::file_io::read_descriptor_bytes;
-use crate::archive::project::archive_project_read_result::ProjectReadResult;
+use crate::archive_file_descriptor::ArchiveFileDescriptor;
+use crate::file_io::read_descriptor_bytes;
+use crate::project::archive_project_read_result::ProjectReadResult;
 
 impl ArchiveProject {
   /// Read one archived file into memory, decompressing it when it is stored compressed.

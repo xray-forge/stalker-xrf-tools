@@ -5,7 +5,7 @@ use std::io::{Read, Seek, SeekFrom, Write};
 use xrf_error::{XrfError, XrfResult};
 use xrf_utils::{assert, assert_equal, assert_not_equal};
 
-use crate::archive::archive_file_descriptor::ArchiveFileDescriptor;
+use crate::archive_file_descriptor::ArchiveFileDescriptor;
 
 /// Bytes held in memory at a time while copying a stored entry out.
 const COPY_BUFFER_SIZE: usize = 256 * 1024;

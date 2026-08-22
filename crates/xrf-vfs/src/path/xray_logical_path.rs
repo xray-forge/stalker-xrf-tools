@@ -21,9 +21,9 @@ use xrf_error::{XrfError, XrfResult};
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 #[serde(transparent)]
 #[cfg_attr(feature = "typescript-bindings", specta(transparent))]
-pub struct XrayPath(String);
+pub struct XrayLogicalPath(String);
 
-impl XrayPath {
+impl XrayLogicalPath {
   /// Normalizes a reference into an engine identity.
   ///
   /// # Errors
@@ -86,35 +86,50 @@ impl XrayPath {
   pub fn is_under(&self, prefix: &str) -> XrfResult<bool> {
     Ok(is_component_prefix(&self.0, &normalize(prefix)?))
   }
+
+  /// Normalizes a path into the canonical X-Ray logical form: lower case, backslash separated, no leading or trailing
+  /// separator.
+  ///
+  /// Exposed because an out-of-crate [`crate::XrayAssetSource`] cannot key its entries correctly without the same rule.
+  /// Paths handed to a source are already normalized; a source normalizes only its own keys. A source keys a map of many
+  /// thousands of names, which is why this answers a `String` rather than an [`XrayLogicalPath`].
+  ///
+  /// # Errors
+  ///
+  /// Returns an error when the path contains an empty, `.` or `..` component.
+  pub fn normalize(path: &str) -> XrfResult<String> {
+    normalize_logical(path)
+  }
+
+  /// Whether a logical path sits under a prefix, matching on component boundaries so `configs_backup` does not match
+  /// `configs`.
+  ///
+  /// Exposed for the same reason as [`Self::normalize`]: an out-of-crate source must scope its enumeration by the same
+  /// rule, and two copies that drift would make scoping depend on which kind of source answered. Both arguments are
+  /// expected to be normalized already.
+  pub fn is_component_prefix(path: &str, prefix: &str) -> bool {
+    is_component_prefix(path, prefix)
+  }
 }
 
-impl Display for XrayPath {
+impl Display for XrayLogicalPath {
   fn fmt(&self, formatter: &mut Formatter<'_>) -> FormatResult {
     formatter.write_str(&self.0)
   }
 }
 
-/// Normalizes a path into the canonical X-Ray logical form: lower case, backslash separated, no leading or trailing
-/// separator.
-///
-/// Public because an out-of-crate [`crate::XrayAssetSource`] cannot key its entries correctly without the same rule.
-/// Paths handed to a source are already normalized; a source normalizes only its own keys. A source keys a map of many
-/// thousands of names, which is why this answers a `String` rather than an [`XrayPath`].
+/// Normalizes a path into the canonical X-Ray logical form, behind [`XrayLogicalPath::normalize`].
 ///
 /// # Errors
 ///
 /// Returns an error when the path contains an empty, `.` or `..` component.
-pub fn normalize_logical(path: &str) -> XrfResult<String> {
+pub(crate) fn normalize_logical(path: &str) -> XrfResult<String> {
   Ok(normalize(path)?.into_owned())
 }
 
 /// Whether a logical path sits under a prefix, matching on component boundaries so `configs_backup` does not match
-/// `configs`.
-///
-/// Public for the same reason as [`normalize_logical`]: an out-of-crate source must scope its enumeration by the same rule,
-/// and two copies that drift would make scoping depend on which kind of source answered. Both arguments are expected to be
-/// normalized already.
-pub fn is_component_prefix(path: &str, prefix: &str) -> bool {
+/// `configs`. Behind [`XrayLogicalPath::is_component_prefix`]. Both arguments are expected to be normalized already.
+pub(crate) fn is_component_prefix(path: &str, prefix: &str) -> bool {
   path == prefix || path.strip_prefix(prefix).is_some_and(|rest| rest.starts_with('\\'))
 }
 
@@ -228,7 +243,7 @@ pub(crate) fn has_extension(path: &str, extension: &str) -> bool {
 mod tests {
   use std::path::{Path, PathBuf};
 
-  use super::{XrayPath, has_extension, join, normalize, normalize_host_relative, to_host_relative};
+  use super::{XrayLogicalPath, has_extension, join, normalize, normalize_host_relative, to_host_relative};
 
   #[test]
   fn does_not_treat_a_bare_extension_as_a_named_asset() {
@@ -281,16 +296,16 @@ mod tests {
 
   #[test]
   fn normalizes_a_typed_path_on_construction() {
-    let path: XrayPath = XrayPath::new("Configs/System.LTX").expect("valid");
+    let path: XrayLogicalPath = XrayLogicalPath::new("Configs/System.LTX").expect("valid");
 
     assert_eq!(path.as_str(), "configs\\system.ltx");
     assert_eq!(path.to_string(), "configs\\system.ltx");
-    assert!(XrayPath::new("configs\\..\\system.ltx").is_err());
+    assert!(XrayLogicalPath::new("configs\\..\\system.ltx").is_err());
   }
 
   #[test]
   fn answers_its_parent_and_name() {
-    let nested: XrayPath = XrayPath::new("configs\\weapons\\w_ak74.ltx").expect("valid");
+    let nested: XrayLogicalPath = XrayLogicalPath::new("configs\\weapons\\w_ak74.ltx").expect("valid");
 
     assert_eq!(nested.file_name(), "w_ak74.ltx");
     assert_eq!(
@@ -298,7 +313,7 @@ mod tests {
       Some(String::from("configs\\weapons"))
     );
 
-    let top_level: XrayPath = XrayPath::new("system.ltx").expect("valid");
+    let top_level: XrayLogicalPath = XrayLogicalPath::new("system.ltx").expect("valid");
 
     assert_eq!(top_level.file_name(), "system.ltx");
     assert_eq!(top_level.parent(), None);
@@ -306,7 +321,7 @@ mod tests {
 
   #[test]
   fn matches_an_extension_without_case_and_a_prefix_by_component() {
-    let path: XrayPath = XrayPath::new("configs\\system.ltx").expect("valid");
+    let path: XrayLogicalPath = XrayLogicalPath::new("configs\\system.ltx").expect("valid");
 
     assert!(path.has_extension(".LTX"));
     assert!(path.is_under("configs").expect("valid prefix"));
@@ -315,7 +330,7 @@ mod tests {
 
   #[test]
   fn joins_below_itself() {
-    let directory: XrayPath = XrayPath::new("configs\\weapons").expect("valid");
+    let directory: XrayLogicalPath = XrayLogicalPath::new("configs\\weapons").expect("valid");
 
     assert_eq!(
       directory.join("w_ak74.ltx").expect("valid").as_str(),
@@ -326,7 +341,7 @@ mod tests {
   #[test]
   fn answers_the_same_on_every_platform_where_std_path_would_not() {
     // The portability contract. On Linux `std::path` treats `configs\weapons\w_ak74.ltx` as one component.
-    let path: XrayPath = XrayPath::new("configs\\weapons\\w_ak74.ltx").expect("valid");
+    let path: XrayLogicalPath = XrayLogicalPath::new("configs\\weapons\\w_ak74.ltx").expect("valid");
     let as_host_path: &Path = Path::new(path.as_str());
 
     assert_eq!(path.file_name(), "w_ak74.ltx");
@@ -338,7 +353,7 @@ mod tests {
 
     // Separators come in either way and leave as `\`, so a host path built with `/` addresses the same asset.
     assert_eq!(
-      XrayPath::new("configs/weapons/w_ak74.ltx").expect("valid"),
+      XrayLogicalPath::new("configs/weapons/w_ak74.ltx").expect("valid"),
       path,
       "a forward-slash reference names the same engine asset"
     );

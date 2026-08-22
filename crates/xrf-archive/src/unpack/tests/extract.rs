@@ -4,9 +4,9 @@ use std::io::Write;
 use std::path::{Path, PathBuf};
 
 use crc32fast::hash;
-use xrf_vfs::ArchiveFileDescriptor;
-use xrf_vfs::ArchiveProject;
-use xrf_vfs::ArchiveProjectReadPolicy;
+use xrf_volume::ArchiveFileDescriptor;
+use xrf_volume::ArchiveProject;
+use xrf_volume::ArchiveProjectReadPolicy;
 
 use crate::{ArchiveExtractDirectoryResult, ArchiveUnpacker};
 

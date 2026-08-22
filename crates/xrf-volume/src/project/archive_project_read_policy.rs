@@ -2,7 +2,7 @@ use std::path::Path;
 
 use serde::Serialize;
 
-use crate::archive::project::constants::{
+use crate::project::constants::{
   ALLOWED_PROJECT_AUDIO_EXTENSIONS, ALLOWED_PROJECT_AUDIO_SIZE, ALLOWED_PROJECT_IMAGE_EXTENSIONS,
   ALLOWED_PROJECT_IMAGE_SIZE, ALLOWED_PROJECT_READ_EXTENSIONS, ALLOWED_PROJECT_READ_SIZE,
 };

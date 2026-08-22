@@ -129,7 +129,8 @@ impl<'a> ShadersVerifier<'a> {
     let scope: XrayLookupScope = self.scope.clone().with_prefix(renderer_prefix)?;
     let mut entries: Vec<String> = self
       .vfs
-      .list_entries(&scope)
+      .scoped(&scope)
+      .list_entries()
       .into_iter()
       .map(|location| location.get_logical_path().to_string())
       .collect();
@@ -146,7 +147,7 @@ impl<'a> ShadersVerifier<'a> {
     result: &mut GamedataShadersVerificationResult,
   ) {
     // Scripts sit directly in the renderer root, so this is a directory listing rather than a walk.
-    let listing = match self.vfs.list_children(self.scope, renderer_prefix) {
+    let listing = match self.vfs.scoped(self.scope).list_children(renderer_prefix) {
       Ok(listing) => listing,
       Err(error) => {
         result.add_finding(GamedataFindingFactory::for_asset(
@@ -193,7 +194,7 @@ impl<'a> ShadersVerifier<'a> {
 
   /// Reads one shader script as text, through the same mounts its sources come from.
   fn read_script(&self, logical_path: &str) -> Result<String, XrfError> {
-    let bytes: Vec<u8> = self.vfs.read(self.scope, logical_path)?;
+    let bytes: Vec<u8> = self.vfs.scoped(self.scope).read(logical_path)?;
 
     String::from_utf8(bytes).map_err(|error| XrfError::new_read_error(format!("not valid utf-8: {error}")))
   }

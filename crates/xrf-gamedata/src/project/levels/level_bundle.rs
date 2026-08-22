@@ -47,7 +47,8 @@ impl<'a> LevelBundle<'a> {
     self
       .project
       .vfs()
-      .find(self.project.scope(), &logical)
+      .scoped(self.project.scope())
+      .find(&logical)
       .ok()
       .flatten()
       .map(|_| logical)
@@ -76,7 +77,8 @@ impl<'a> LevelBundle<'a> {
     let in_bundle: bool = self
       .project
       .vfs()
-      .find(self.project.scope(), &format!("{}\\{logical}", self.path()))
+      .scoped(self.project.scope())
+      .find(&format!("{}\\{logical}", self.path()))
       .ok()
       .flatten()
       .is_some();
@@ -85,7 +87,8 @@ impl<'a> LevelBundle<'a> {
       || self
         .project
         .vfs()
-        .dds_texture(self.project.scope(), reference)
+        .scoped(self.project.scope())
+        .dds_texture(reference)
         .ok()
         .flatten()
         .is_some()

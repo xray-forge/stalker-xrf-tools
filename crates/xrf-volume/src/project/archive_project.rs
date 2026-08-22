@@ -6,15 +6,15 @@ use serde::Serialize;
 use walkdir::WalkDir;
 use xrf_error::{XrfError, XrfResult};
 
-use crate::archive::archive_descriptor::ArchiveDescriptor;
-use crate::archive::archive_file_descriptor::ArchiveFileDescriptor;
-use crate::archive::project::archive_project_read_policy::ArchiveProjectReadPolicy;
-use crate::archive::reader::ArchiveReader;
+use crate::archive_descriptor::ArchiveDescriptor;
+use crate::archive_file_descriptor::ArchiveFileDescriptor;
+use crate::project::archive_project_read_policy::ArchiveProjectReadPolicy;
+use crate::reader::ArchiveReader;
 
 /// One volume set at a path the caller names, merged into a single name table.
 ///
-/// Scoped to a path on purpose: which directories of an installation hold volumes is a question
-/// [`crate::XrayMountPlan::from_fsgame`] answers, and answering it here too would put `fsgame.ltx` knowledge in the
+/// Scoped to a path on purpose: which directories of an installation hold volumes is a question the mount planner in
+/// `xrf-vfs` answers (`XrayMountPlan::from_fsgame`), and answering it here too would put `fsgame.ltx` knowledge in the
 /// volume-format layer and give the same declaration two readers.
 ///
 /// Later volumes win the merge, so a patch volume shadows the entry it replaces.
@@ -171,7 +171,7 @@ mod tests {
   use std::collections::HashMap;
   use std::path::Path;
 
-  use crate::archive::archive_descriptor::ArchiveDescriptor;
+  use crate::archive_descriptor::ArchiveDescriptor;
 
   use super::ArchiveProject;
 
