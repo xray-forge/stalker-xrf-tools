@@ -34,6 +34,26 @@ pub struct XrayPlannedMount {
 ///
 /// Order is priority. [`Self::from_fsgame`] reverses declaration order, because the engine registers roots as declared and
 /// later registrations overwrite earlier ones.
+///
+/// A plan is plain data, so it can be inspected or chained before anything is opened — which is how a mod tree layers
+/// over an installation:
+///
+/// ```rust,no_run
+/// use xrf_vfs::{XrayMountMode, XrayMountPlan, XrayVfs};
+///
+/// # fn main() -> xrf_error::XrfResult {
+/// let plan: XrayMountPlan = XrayMountPlan::root("C:\\work\\my_mod")? // the mod wins every collision
+///   .behind(XrayMountMode::Installation.plan("C:\\Games\\Anomaly")?) // the game answers the rest
+///   .ignoring(&[String::from("textures\\wip")])?;
+///
+/// for planned in plan.get_mounts() {
+///   println!("{} <- {} ({:?})", planned.base, planned.path.display(), planned.kind);
+/// }
+///
+/// let vfs: XrayVfs = XrayVfs::from_plan(&plan)?;
+/// # Ok(())
+/// # }
+/// ```
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct XrayMountPlan {
   mounts: Vec<XrayPlannedMount>,

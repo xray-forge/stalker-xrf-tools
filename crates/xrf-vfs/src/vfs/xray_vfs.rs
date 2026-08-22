@@ -473,7 +473,22 @@ impl XrayVfs {
   /// Creates a loose override in the highest-priority writable mount in scope.
   ///
   /// Unlike [`Self::write`], this creates a new entry instead of modifying the current winner. The mount is rebuilt so the
-  /// override resolves immediately.
+  /// override resolves immediately. This is how an archived asset is changed: a volume never takes a write, so the
+  /// override shadows it from a loose mount in front.
+  ///
+  /// ```rust,no_run
+  /// use xrf_vfs::{XrayLookupScope, XrayMountMode, XrayVfs};
+  ///
+  /// # fn main() -> xrf_error::XrfResult {
+  /// let mut vfs: XrayVfs = XrayVfs::open(XrayMountMode::Installation, "C:\\Games\\Anomaly")?;
+  ///
+  /// // write() refuses an archive winner; the override lands in gamedata and shadows it.
+  /// let overridden = vfs.write_override(&XrayLookupScope::all(), "configs\\my_tweak.ltx", b"[tweak]")?;
+  ///
+  /// assert!(overridden.to_physical_path().is_some(), "an override is always a loose file");
+  /// # Ok(())
+  /// # }
+  /// ```
   ///
   /// # Errors
   ///

@@ -5,14 +5,20 @@ use serde::Serialize;
 
 use crate::archive_file_descriptor::ArchiveFileDescriptor;
 
+/// One volume's parsed header: its entry table and the gamedata-relative root its `[header] entry_point` declares.
 #[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
 #[derive(Clone, Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ArchiveDescriptor {
+  /// Volume file creation time in Unix milliseconds, when the filesystem reports one.
   pub created_at: Option<u64>,
+  /// Volume file modification time in Unix milliseconds, when the filesystem reports one.
   pub modified_at: Option<u64>,
+  /// Entries keyed by their authored name, exactly as the name table records them.
   pub files: HashMap<String, ArchiveFileDescriptor>,
+  /// Root the volume unpacks under, from `[header] entry_point` with its alias stripped.
   pub output_root_path: PathBuf,
+  /// The volume file this descriptor was read from.
   pub path: PathBuf,
 }
 

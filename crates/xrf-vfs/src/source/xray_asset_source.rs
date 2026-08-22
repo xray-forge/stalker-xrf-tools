@@ -33,6 +33,11 @@ pub(crate) fn label_from_path(path: &Path) -> String {
 ///
 /// [`crate::XrayMount`] strips its logical base before calling the source, allowing the same source type to back a root or
 /// a subtree. Sources are `Send + Sync` because the mounted VFS is shared across application commands.
+///
+/// This is the extension seam: a source for a format this crate does not own belongs beside that format and implements
+/// this trait, then mounts with [`crate::XrayVfs::mount`]. Key entries with [`crate::XrayLogicalPath::normalize`] and
+/// scope enumeration with [`crate::XrayLogicalPath::is_component_prefix`], so lookups behave the same whichever kind of
+/// source answers; [`XrayArchiveSource`](crate::XrayArchiveSource) is the in-crate exemplar.
 pub trait XrayAssetSource: Debug + Send + Sync {
   /// Short name for reporting, such as a directory or volume-set name.
   fn get_label(&self) -> &str;

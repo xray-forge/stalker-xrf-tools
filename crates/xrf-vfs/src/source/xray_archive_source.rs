@@ -53,6 +53,7 @@ impl XrayArchiveSource {
     })
   }
 
+  /// The merged volume set behind this source, for consumers that need descriptor-level detail.
   pub fn get_project(&self) -> &ArchiveProject {
     &self.project
   }

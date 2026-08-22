@@ -1,12 +1,4 @@
-//! The X-Ray `.db`/`.xdb` archive volume format: headers, entry descriptors, and moving payloads in and out.
-//!
-//! This crate answers how a volume set is encoded — [`xrf-vfs`] mounts one as an asset source, and `xrf-archive`
-//! packs and unpacks them. Neither could own the format without the other reaching into it, so it lives below both.
-//!
-//! [`ArchiveProject`] is the entry point: it merges a volume set into one name table with the later volume winning,
-//! matching how the engine registers archives.
-//!
-//! [`xrf-vfs`]: https://github.com/xray-forge/stalker-xrf-tools
+#![doc = include_str!("../README.md")]
 
 mod archive_descriptor;
 mod archive_file_descriptor;

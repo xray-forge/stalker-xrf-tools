@@ -2,21 +2,34 @@ use std::path::{Path, PathBuf};
 
 use serde::Serialize;
 
+/// One entry of a volume's name table: where its payload sits and how to verify it.
+///
+/// Equal `size_real` and `size_compressed` is how the format says "stored uncompressed".
 #[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
 #[derive(Clone, Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ArchiveFileDescriptor {
+  /// CRC32 of the unpacked payload, recorded by the packer and verified on decompression.
   pub crc: u32,
+  /// The volume file holding the payload.
   pub source: PathBuf,
+  /// Root the entry unpacks under, from its volume's header.
   pub destination: PathBuf,
+  /// Lower-cased extension derived from [`Self::name`], empty when the name has none.
   pub extension: String,
+  /// Entry name as authored, which the engine registers verbatim.
   pub name: String,
+  /// Byte offset of the payload inside [`Self::source`].
   pub offset: u32,
+  /// Payload bytes as stored in the volume.
   pub size_compressed: u32,
+  /// Payload bytes once unpacked.
   pub size_real: u32,
 }
 
 impl ArchiveFileDescriptor {
+  /// Creates a descriptor from name-table fields, deriving the extension; volume paths attach separately through
+  /// [`Self::with_archive_paths`], because the table does not record them.
   pub fn new(crc: u32, name: String, offset: u32, size_compressed: u32, size_real: u32) -> Self {
     Self {
       crc,
@@ -30,6 +43,7 @@ impl ArchiveFileDescriptor {
     }
   }
 
+  /// Attaches the volume the entry was read from and the root it unpacks under.
   pub fn with_archive_paths(mut self, source: &Path, destination: &Path) -> Self {
     self.source = source.into();
     self.destination = destination.into();

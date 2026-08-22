@@ -38,6 +38,7 @@ impl XrayMount {
     })
   }
 
+  /// Stable identity of this mount within its VFS, for scoping and remounting.
   pub fn get_id(&self) -> XrayMountId {
     self.id
   }

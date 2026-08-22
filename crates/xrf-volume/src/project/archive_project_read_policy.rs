@@ -7,6 +7,10 @@ use crate::project::constants::{
   ALLOWED_PROJECT_IMAGE_SIZE, ALLOWED_PROJECT_READ_EXTENSIONS, ALLOWED_PROJECT_READ_SIZE,
 };
 
+/// What an archive viewer may read out of a project, by extension and size.
+///
+/// A gate for interactive consumers rather than a format rule: [`crate::ArchiveProject::read_file_bytes`] ignores it,
+/// while [`crate::ArchiveProject::read_file_as_string`] refuses what the policy does not cover.
 #[cfg_attr(feature = "typescript-bindings", derive(specta::Type))]
 #[derive(Clone, Copy, Debug, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -32,6 +36,7 @@ impl ArchiveProjectReadPolicy {
     Self::has_extension(filename, self.audio_extensions)
   }
 
+  /// Whether this file is one the policy reads as text.
   pub fn supports_file(&self, filename: &str) -> bool {
     Self::has_extension(filename, self.extensions)
   }
