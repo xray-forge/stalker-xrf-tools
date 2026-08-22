@@ -30,7 +30,7 @@ export function ApplicationRail({ panels, activePanelId, onTogglePanel }: IAppli
   const isLightMode: boolean = resolvedMode === "light";
 
   const onOpenGithubLink = useCallback(() => {
-    open("https://github.com/xray-forge/stalker-xrf-tools").catch(console.error);
+    open("https://github.com/xray-forge/xrf-tools").catch(console.error);
   }, []);
 
   const onToggleTheme = useCallback(() => {

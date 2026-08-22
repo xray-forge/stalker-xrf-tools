@@ -3,7 +3,7 @@
                  factoryName="Cargo Command" folderName="cli">
     <option name="buildProfileId" value="dev"/>
     <option name="command"
-            value="run --package xrf-cli --bin xrf-cli -- info-spawn -p C:\Projects\stalker\stalker-xrf-engine\src\resources\spawns\all.spawn"/>
+            value="run --package xrf-cli --bin xrf-cli -- info-spawn -p C:\Projects\stalker\xrf-engine\src\resources\spawns\all.spawn"/>
     <option name="workingDirectory" value="file://$PROJECT_DIR$"/>
     <envs>
       <env name="RUST_LOG" value="warn"/>

@@ -2,7 +2,7 @@
   <configuration default="false" name="run: verify particles" type="CargoCommandRunConfiguration"
                  factoryName="Cargo Command" folderName="cli">
     <option name="command"
-            value="run --package xrf-cli --bin xrf-cli -- verify-particles -p C:\Projects\stalker\stalker-xrf-engine\src\resources\particles.xr"/>
+            value="run --package xrf-cli --bin xrf-cli -- verify-particles -p C:\Projects\stalker\xrf-engine\src\resources\particles.xr"/>
     <option name="workingDirectory" value="file://$PROJECT_DIR$"/>
     <envs>
       <env name="RUST_LOG" value="warn"/>
