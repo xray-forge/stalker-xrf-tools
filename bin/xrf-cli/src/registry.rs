@@ -86,7 +86,7 @@ pub fn setup_command_groups() -> Vec<CommandGroup> {
       ],
     },
     CommandGroup {
-      name: "Particles",
+      name: "Particle",
       commands: vec![
         InfoParticlesCommand::new_box(),
         PackParticlesCommand::new_box(),
@@ -107,7 +107,7 @@ pub fn setup_command_groups() -> Vec<CommandGroup> {
       ],
     },
     CommandGroup {
-      name: "Textures",
+      name: "Texture",
       commands: vec![
         CropDdsCommand::new_box(),
         InfoDdsCommand::new_box(),
@@ -123,7 +123,7 @@ pub fn setup_command_groups() -> Vec<CommandGroup> {
       commands: vec![PatchThmBumpCommand::new_box()],
     },
     CommandGroup {
-      name: "Translations",
+      name: "Translation",
       commands: vec![
         BuildTranslationCommand::new_box(),
         InitializeTranslationCommand::new_box(),
