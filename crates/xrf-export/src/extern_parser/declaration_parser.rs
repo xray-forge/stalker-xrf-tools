@@ -14,7 +14,7 @@ use crate::extern_manifest::{ExternDocumentation, ExternSourceLocation, ParsedEx
 
 const EXTERN_EXPRESSION: &str = "extern";
 
-/// Extracts canonical extern declarations from one parsed TypeScript module.
+/// Extracts canonical extern declarations from one parsed TypeScript program.
 pub struct ExternDeclarationParser<'a> {
   source_map: &'a SourceMap,
   jsdoc_parser: JsDocParser<'a>,
@@ -41,62 +41,77 @@ impl<'a> ExternDeclarationParser<'a> {
 
   /// Extract all supported top-level extern declarations from `program`.
   pub fn parse(&self, program: &Program) -> XrfResult<Vec<ParsedExtern>> {
-    let Program::Module(module) = program else {
-      return Ok(Vec::new());
-    };
     let mut declarations: Vec<ParsedExtern> = Vec::new();
 
-    for item in &module.body {
-      let ModuleItem::Stmt(Stmt::Expr(statement)) = item else {
-        continue;
-      };
-      let Expr::Call(call) = statement.expr.as_ref() else {
-        continue;
-      };
-      if expression_callee_name(&call.callee).as_deref() != Some(EXTERN_EXPRESSION) {
-        continue;
+    match program {
+      Program::Module(module) => {
+        for item in &module.body {
+          let ModuleItem::Stmt(statement) = item else {
+            continue;
+          };
+          self.parse_statement(program, statement, &mut declarations)?;
+        }
       }
-
-      if call.args.len() != 2 {
-        return Err(invalid_at(
-          self.source_map,
-          statement.span.lo,
-          self.source_path,
-          "expected a literal name and exactly one exported value",
-        ));
-      }
-      let name: String = expression_string_argument(&call.args[0]).ok_or_else(|| {
-        invalid_at(
-          self.source_map,
-          call.args[0].expr.span().lo,
-          self.source_path,
-          "extern names must be string literals",
-        )
-      })?;
-      let documentation: Option<ExternDocumentation> = self.jsdoc_parser.parse(statement.span.lo);
-      let parameter_docs: BTreeMap<String, String> = self.jsdoc_parser.parameter_docs(statement.span.lo);
-      let location: ExternSourceLocation = source_span_location(self.source_map, statement.span, self.source_path);
-
-      match call.args[1].expr.as_ref() {
-        Expr::Object(object) => self.parse_object(
-          program,
-          &name,
-          object,
-          documentation,
-          &parameter_docs,
-          &mut declarations,
-        )?,
-        value => declarations.push(ParsedExtern {
-          export: self
-            .value_parser
-            .parse(program, value, &name, documentation, &parameter_docs)?,
-          location,
-          name,
-        }),
+      Program::Script(script) => {
+        for statement in &script.body {
+          self.parse_statement(program, statement, &mut declarations)?;
+        }
       }
     }
 
     Ok(declarations)
+  }
+
+  fn parse_statement(
+    &self,
+    program: &Program,
+    statement: &Stmt,
+    declarations: &mut Vec<ParsedExtern>,
+  ) -> XrfResult<()> {
+    let Stmt::Expr(statement) = statement else {
+      return Ok(());
+    };
+    let Expr::Call(call) = statement.expr.as_ref() else {
+      return Ok(());
+    };
+    if expression_callee_name(&call.callee).as_deref() != Some(EXTERN_EXPRESSION) {
+      return Ok(());
+    }
+
+    if call.args.len() != 2 {
+      return Err(invalid_at(
+        self.source_map,
+        statement.span.lo,
+        self.source_path,
+        "expected a literal name and exactly one exported value",
+      ));
+    }
+    let name: String = expression_string_argument(&call.args[0]).ok_or_else(|| {
+      invalid_at(
+        self.source_map,
+        call.args[0].expr.span().lo,
+        self.source_path,
+        "extern names must be string literals",
+      )
+    })?;
+    let documentation: Option<ExternDocumentation> = self.jsdoc_parser.parse(statement.span.lo);
+    let parameter_docs: BTreeMap<String, String> = self.jsdoc_parser.parameter_docs(statement.span.lo);
+    let location: ExternSourceLocation = source_span_location(self.source_map, statement.span, self.source_path);
+
+    match call.args[1].expr.as_ref() {
+      Expr::Object(object) => {
+        self.parse_object(program, &name, object, documentation, &parameter_docs, declarations)?
+      }
+      value => declarations.push(ParsedExtern {
+        export: self
+          .value_parser
+          .parse(program, value, &name, documentation, &parameter_docs)?,
+        location,
+        name,
+      }),
+    }
+
+    Ok(())
   }
 
   /// Parse each named property in an object-form extern declaration.

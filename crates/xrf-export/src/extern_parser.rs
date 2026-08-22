@@ -147,12 +147,13 @@ mod tests {
   use std::fs;
   use std::path::{Path, PathBuf};
 
+  use xrf_test_utils::utils::build_absolute_generated_test_resource_path;
+
   use super::ExternManifestParser;
   use crate::ExternExport;
 
   fn create_test_root(name: &str) -> PathBuf {
-    let root: PathBuf = std::env::temp_dir().join(format!("xrf-export-{name}-{}", std::process::id()));
-    let _ = fs::remove_dir_all(&root);
+    let root: PathBuf = build_absolute_generated_test_resource_path(&format!("extern-parser/{name}"));
     fs::create_dir_all(&root).unwrap();
     root
   }
@@ -220,8 +221,26 @@ mod tests {
     };
 
     assert_eq!(checkers.type_name, "Record<EAchievement, () => boolean>");
+  }
 
-    fs::remove_dir_all(root).unwrap();
+  #[test]
+  fn parses_externs_from_a_script_without_module_syntax() {
+    let root: PathBuf = create_test_root("script-extern");
+
+    write_source(
+      &root,
+      "effects.ts",
+      "extern(\"xr_effects.give_item\", (section: string): void => {});",
+    );
+
+    let parsed = ExternManifestParser::new().parse_directory(&root).unwrap();
+    let ExternExport::Callable(callable) = parsed.manifest.exports.get("xr_effects.give_item").unwrap() else {
+      panic!("Expected callable extern");
+    };
+
+    assert_eq!(callable.params[0].name, "section");
+    assert_eq!(callable.params[0].type_name, "string");
+    assert_eq!(callable.returns, "void");
   }
 
   #[test]
@@ -252,8 +271,6 @@ mod tests {
         .to_string()
         .contains("Duplicate extern")
     );
-
-    fs::remove_dir_all(root).unwrap();
   }
 
   #[test]
@@ -271,8 +288,6 @@ mod tests {
       "{error}"
     );
     assert!(error.contains("`run as (arg: Type) => ReturnType`"), "{error}");
-
-    fs::remove_dir_all(root).unwrap();
   }
 
   #[test]
@@ -341,8 +356,6 @@ mod tests {
       panic!("Expected value extern");
     };
     assert_eq!(nested_conditions.type_name, "{ enabled: () => boolean; }");
-
-    fs::remove_dir_all(root).unwrap();
   }
 
   #[test]
@@ -368,8 +381,6 @@ mod tests {
     assert_eq!(callback.params[0].name, "value");
     assert_eq!(callback.params[0].type_name, "string");
     assert_eq!(callback.returns, "boolean");
-
-    fs::remove_dir_all(root).unwrap();
   }
 
   #[test]
@@ -390,8 +401,7 @@ mod tests {
 
   #[test]
   fn rejects_a_missing_source_root() {
-    let root: PathBuf = std::env::temp_dir().join(format!("xrf-export-missing-{}", std::process::id()));
-    let _ = fs::remove_dir_all(&root);
+    let root: PathBuf = build_absolute_generated_test_resource_path("extern-parser/missing");
 
     let error = ExternManifestParser::new()
       .parse_directory(&root)

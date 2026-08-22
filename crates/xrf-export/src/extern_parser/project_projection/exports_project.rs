@@ -72,6 +72,8 @@ impl ExportsProject {
 mod tests {
   use std::fs;
 
+  use xrf_test_utils::utils::build_absolute_generated_test_resource_path;
+
   use super::*;
   use crate::extern_parser::project_projection::{ExportContractDescriptor, ExportReturnDescriptor};
 
@@ -100,9 +102,7 @@ mod tests {
   }
 
   fn write_sample(name: &str, contents: &str) -> PathBuf {
-    let root: PathBuf = std::env::temp_dir().join(format!("xrf-export-source-{name}"));
-
-    let _ = fs::remove_dir_all(&root);
+    let root: PathBuf = build_absolute_generated_test_resource_path(&format!("project-source/{name}"));
 
     fs::create_dir_all(&root).expect("temporary directory");
     fs::write(root.join("declaration.ts"), contents).expect("temporary declaration");

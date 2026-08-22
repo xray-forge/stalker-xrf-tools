@@ -2,12 +2,12 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 use serde_json::{Value, json};
+use xrf_test_utils::utils::build_absolute_generated_test_resource_path;
 
 use super::{ExportContractDescriptor, ExportsProjectParser};
 
 fn create_test_root(name: &str) -> PathBuf {
-  let root: PathBuf = std::env::temp_dir().join(format!("xrf-export-project-{name}-{}", std::process::id()));
-  let _ = fs::remove_dir_all(&root);
+  let root: PathBuf = build_absolute_generated_test_resource_path(&format!("project-projection/{name}"));
   fs::create_dir_all(&root).unwrap();
   root
 }
@@ -86,8 +86,6 @@ fn parses_all_project_exports_from_the_project_root() {
   assert_eq!(project.declarations[2].name, "start");
   assert_eq!(project.declarations[3].name, "xr_conditions.check");
   assert_eq!(project.declarations[4].name, "xr_effects.run");
-
-  fs::remove_dir_all(root).unwrap();
 }
 
 #[test]
@@ -134,8 +132,6 @@ fn projects_complete_callable_and_value_contracts() {
   assert_eq!(json["declarations"][1]["source"]["path"], "declarations.ts");
   assert!(json["declarations"][1]["source"]["line"].as_u64().unwrap() > 0);
   assert!(json["declarations"][1]["source"]["column"].as_u64().unwrap() > 0);
-
-  fs::remove_dir_all(root).unwrap();
 }
 
 #[test]
@@ -146,8 +142,6 @@ fn keeps_an_empty_project_open() {
 
   assert_eq!(project.root, root);
   assert!(project.declarations.is_empty());
-
-  fs::remove_dir_all(root).unwrap();
 }
 
 #[test]
@@ -179,8 +173,6 @@ fn records_the_last_line_of_a_declaration_and_reads_it_back() {
     "extern(\"xr_effects.run\", (): void => {\n  const first: number = 1;\n\n  log(first);\n});"
   );
   assert_eq!(source.path, "declarations.ts");
-
-  fs::remove_dir_all(root).unwrap();
 }
 
 #[test]
@@ -199,6 +191,4 @@ fn records_the_span_of_one_property_inside_an_object_extern() {
   let source = project.read_declaration_source("xr_effects.first").unwrap();
 
   assert_eq!(source.content, "  first: (): void => {\n    log(1);\n  },");
-
-  fs::remove_dir_all(root).unwrap();
 }
